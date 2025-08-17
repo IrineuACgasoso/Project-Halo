@@ -58,6 +58,7 @@ class Arma_Loop(Arma):
         #conexão com jogador e grupos
         self.all_sprites = grupos[0]
         self.grupo_projeteis = grupos[1]
+        self.grupo_inimigos = grupos[2]
 
         #específicos da arma
         self.nivel = 1
@@ -67,35 +68,35 @@ class Arma_Loop(Arma):
         self.rebatidas = 2
         self.nome = "Bola Calderânica"
         self.descricao = """Capaz de rebater nas paredes!"""
+        
 
     def disparar(self):
-        # Use self.game.inimigos_grupo para acessar o grupo de inimigos
-        # Se não houver inimigos, não atira
-        if not self.game.inimigos_grupo:
+        
+        #detecta o inimigo mais próximo
+        #se não houver inimigos, não atira
+        if not self.grupo_inimigos:
             return
         
-        # O resto do código
-        inimigo_mais_proximo = self.game.inimigos_grupo.sprites()[0]
+        inimigo_mais_proximo = self.grupo_inimigos.sprites()[0]
         menor_distancia = self.jogador.posicao.distance_to(inimigo_mais_proximo.posicao)
 
-        for inimigo in self.game.inimigos_grupo:
+        for inimigo in self.grupo_inimigos:
             distancia_atual = self.jogador.posicao.distance_to(inimigo.posicao)
             if distancia_atual < menor_distancia:
                 inimigo_mais_proximo = inimigo
                 menor_distancia = distancia_atual
         
-        # pega um vetor que aponta para o inimigo mais próximo, normalizado
+        #pega um vetor que aponta para o inimigo mais próximo, normalizado
         direcao_tiro = (inimigo_mais_proximo.posicao - self.jogador.posicao).normalize()
 
         Projetil_PingPong(
-            surface=self.surface_pinpong, 
-            jogador=self.jogador,
-            velocidade=self.velocidade,
-            direcao=direcao_tiro,
-            dano=self.dano,
-            grupos=(self.all_sprites, self.grupo_projeteis),
-            game = self.game,
-            rebatidas=self.rebatidas
+                surface=self.surface_pinpong, 
+                jogador=self.jogador,
+                velocidade=self.velocidade,
+                direcao=direcao_tiro,
+                dano=self.dano,
+                grupos=(self.all_sprites,self.grupo_projeteis),
+                rebatidas=self.rebatidas
         )
 
     def upgrade(self):
@@ -219,7 +220,7 @@ class Projetil(pygame.sprite.Sprite):
 
         #logica de armas
         self.dano = dano
-        self.inimigos_atingidos = []
+        self.inimigos_atingidos = set()
     def update(self, delta_time):
         #faz se mover na direção do vetor dado na velocidade correta
         self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual se movendo para a direção
@@ -229,17 +230,11 @@ class Projetil(pygame.sprite.Sprite):
 
 
 class Projetil_PingPong(Projetil):
-    def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, game, rebatidas):
-        super().__init__(surface, jogador, velocidade, direcao, dano, grupos[0])
+    def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, rebatidas):
+        super().__init__(surface, jogador, velocidade, direcao, dano, grupos)
         self.rebatidas = rebatidas
         self.jogador = jogador
         self.posicao_inicial = jogador.posicao
-        self.inimigos_grupo = game.inimigos_grupo
-
-        self.inimigos_atingidos = [] # A lista para rastrear os inimigos
-        self.verificar_colisao()
-
-        
 
     def update(self, delta_time):
         super().update(delta_time)
@@ -275,20 +270,17 @@ class Projetil_PingPong(Projetil):
         #so conta uma rebatidade nas bordas
         if rebateu:
             self.rebatidas -= 1
-        self.verificar_colisao()
+
         if self.rebatidas <= 0:
             self.kill()
+
     
-    def verificar_colisao(self):
-        colisoes = pygame.sprite.spritecollide(self, self.inimigos_grupo, False)
-        for inimigo in colisoes:
-            if inimigo not in self.inimigos_atingidos:
-                inimigo.vida -= self.dano
-                self.inimigos_atingidos.append(inimigo)
 
 class Projetil_Lista(Projetil):
     def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, angulo_inicial, distancia_orbita, velocidade_rotacao, duracao):
-        super().__init__(surface, jogador, velocidade, direcao, dano, grupos)
+        super().__init__(surface, jogador, velocidade, direcao, dano, grupos[0])
+        self.projeteis_grupo = grupos[1]
+        self.projeteis_grupo.add(self)
         #atributos
         self.jogador = jogador
         self.angulo = angulo_inicial  #posição angular inicial no círculo

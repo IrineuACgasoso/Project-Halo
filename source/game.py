@@ -49,6 +49,10 @@ class Game:
         self.intervalo_minimo = 0.5
         self.fator_dificuldade = 0.01
         self.hordas_contagem = 0
+        self.gravemind_spawnado = False
+
+        #habilidades dos bosses
+        self.gravemind_reborns = 3
 
     def iniciar_novo_jogo(self):
         self.all_sprites.empty()
@@ -63,6 +67,9 @@ class Game:
         self.player = Player(self, 400, 300)
         self.hud = HUD(self)
         self.estado_do_jogo = "jogando"
+
+        #habilidades dos bosses
+        self.gravemind_reborns = 3
 
     def spawnar_inimigo(self, tipo='normal'):
         camera_center_x = self.player.posicao.x
@@ -81,8 +88,8 @@ class Game:
         else:
             self.pos = (borda_direita + 50, random.uniform(borda_topo, borda_baixo))
 
-        if tipo == 'boss':
-            FloodWarning(posicao=self.pos, grupos=self.all_sprites, game=self)
+        if tipo == 'gravemind':
+            FloodWarning(posicao=self.player.posicao, grupos=self.all_sprites, game=self)
         else:
             tipos_de_inimigos = [Infection, InimigoListaIP, InimigoBug]
             inimigo = random.choice(tipos_de_inimigos)
@@ -176,6 +183,12 @@ class Game:
             if self.player:
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
+            
+            # Lógica para spawnar o boss
+            if self.player.contador_niveis == 2 and not self.gravemind_spawnado:
+                self.spawnar_inimigo(tipo='gravemind')
+                self.gravemind_spawnado = True
+                self.intervalo_spawn_atual = 2.0
 
             if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
                 self.tempo_proximo_spawn = 0
@@ -184,7 +197,7 @@ class Game:
                 for _ in range(4):
                     self.spawnar_inimigo()
 
-                if self.hordas_contagem % 5 == 0:
+                if self.hordas_contagem % 100 == 0:
                     self.spawnar_inimigo(tipo='boss')
                 if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
                 # Spawna o inimigo especial que aparece a cada 100 hordas
@@ -278,7 +291,7 @@ class Game:
         #arma inicial
         arma_Loop = Arma_Loop(
             jogador=self.player,
-            grupos=(self.all_sprites, self.projeteis_grupo),
+            grupos=(self.all_sprites, self.projeteis_grupo, self.inimigos_grupo),
             game=self
         )
 
@@ -302,52 +315,53 @@ class Game:
         self.estado_do_jogo = 'jogando'
 
     def colisao(self, delta_time):
-    # Coleta de itens
+        # Coleta de itens
         itens_coletados = pygame.sprite.spritecollide(self.player, self.item_group, dokill=True)
         for item in itens_coletados:
             self.player.coletar_item(item)
 
-        # Colisão com inimigos (Jogador vs. Inimigos)
         for inimigo in self.inimigos_grupo:
-            if isinstance(inimigo, Gravemind):
-                if self.player.rect.colliderect(inimigo.hitbox):
-                    self.player.tomar_dano(inimigo)
-            else:
-                if self.player.rect.colliderect(inimigo.rect):
-                    self.player.tomar_dano(inimigo)
-        
-        # Lógica para Projéteis do Jogador (Ping Pong, etc.)
-        for projetil in list(self.projeteis_grupo):
-            # Apenas projéteis que não são auras ou do boss.
-            if isinstance(projetil, Projetil_PingPong) or isinstance(projetil, Projetil_Lista):
-                # Encontra todas as colisões para o projétil
-                colisoes = pygame.sprite.spritecollide(
-                    projetil, 
-                    self.inimigos_grupo, 
-                    False # Não remove o projétil ainda
-                )
-                
-                # Aplica dano aos inimigos que foram atingidos
-                for inimigo in colisoes:
-                    # Agora, verifica se o inimigo não está na lista
-                    if inimigo not in projetil.inimigos_atingidos:
+            # A função .collision_rect() vai retornar o rect ou a hitbox
+            if self.player.rect.colliderect(inimigo.collision_rect):
+                self.player.tomar_dano(inimigo)
+
+        # Colisão com projéteis do chefe (AcidBreath)
+        for projetil_boss in list(self.projeteis_grupo):
+            if isinstance(projetil_boss, AcidBreath):
+                if self.player.rect.colliderect(projetil_boss.rect):
+                    self.player.tomar_dano_direto(projetil_boss.dano)
+                    projetil_boss.kill()
+
+        # Colisão projéteis x inimigos
+        colisao_projetil = pygame.sprite.groupcollide(self.projeteis_grupo, self.inimigos_grupo, False, False)
+        for projetil, inimigos in colisao_projetil.items():
+            for projetil, inimigos in colisao_projetil.items():
+            # Verificação para garantir que o projétil é do jogador
+                if hasattr(projetil, 'inimigos_atingidos'):
+                    novos_acertos = set(inimigos) - projetil.inimigos_atingidos
+                    for inimigo in novos_acertos:
                         inimigo.vida -= projetil.dano
-                        # Adiciona o inimigo à lista para não dar dano novamente
-                        projetil.inimigos_atingidos.append(inimigo)
-            
-            # Lógica para projéteis de Aura (Dicionário Divino)
-            elif isinstance(projetil, Projetil_Area):
-                inimigos_na_aura = pygame.sprite.spritecollide(projetil, self.inimigos_grupo, False)
-                for inimigo in inimigos_na_aura:
-                    # Dano por segundo
-                    dano_por_frame = projetil.dano_por_segundo * delta_time
-                    inimigo.vida -= dano_por_frame
-            
-            # Lógica para projéteis do Boss (AcidBreath)
-            elif isinstance(projetil, AcidBreath):
-                if self.player.rect.colliderect(projetil.rect):
-                    self.player.tomar_dano_direto(projetil.dano)
-                    projetil.kill()
+                    projetil.inimigos_atingidos = set(inimigos)
+            # colisao com dot
+            if self.auras_grupo:
+                colisoes_aura = pygame.sprite.groupcollide(
+                    self.inimigos_grupo, 
+                    self.auras_grupo, 
+                    False, 
+                    False, 
+                    pygame.sprite.collide_circle
+                )
+                for inimigo, auras in colisoes_aura.items():
+                    for aura in auras: 
+                        dano_neste_frame = aura.dano_por_segundo * delta_time
+                        inimigo.vida -= dano_neste_frame
+
+
+        # Morte de inimigos
+        for inimigo in list(self.inimigos_grupo):
+            if inimigo.vida <= 0:
+                inimigo.morrer((self.all_sprites, self.item_group))
+
 
     def run(self):
         while self.running:

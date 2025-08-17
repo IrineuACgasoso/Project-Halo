@@ -74,6 +74,16 @@ class Player(pygame.sprite.Sprite):
             self.vida_atual -= inimigo.dano
             self.invencivel = True
             self.tempo_ultimo_dano = pygame.time.get_ticks()
+
+    def tomar_dano_direto(self, dano):
+        """
+        Aplica dano direto ao jogador sem a lógica de invencibilidade.
+        Usado para ataques especiais, como do boss.
+        """
+        self.vida_atual -= dano
+        if self.vida_atual < 0:
+            self.vida_atual = 0
+            
     def curar(self, quantidade):
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
     def coletar_item(self, item):

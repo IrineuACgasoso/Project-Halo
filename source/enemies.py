@@ -62,6 +62,11 @@ class InimigoBase(pygame.sprite.Sprite):
         self.posicao += direcao * self.velocidade * delta_time
         self.rect.center = self.posicao
 
+    @property
+    def collision_rect(self):
+        """Retorna o retângulo de colisão para este inimigo."""
+        return self.rect
+
 
 class InimigoBug(InimigoBase):
     def __init__(self, posicao, grupos, jogador):
