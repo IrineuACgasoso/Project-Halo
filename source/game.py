@@ -5,7 +5,7 @@ from settings import *
 from player import Player 
 from menu import *
 from hud import *
-from enemies import InimigoBug, InimigoListaIP, Infection, InimigoLadrao, InimigoPython
+from enemies import InimigoBug, Grunt, Infection, InimigoLadrao, InimigoPython
 from weapon import *
 from grupos import AllSprites
 from colaboradores import TelaColaboradores
@@ -91,12 +91,9 @@ class Game:
         if tipo == 'gravemind':
             FloodWarning(posicao=self.player.posicao, grupos=self.all_sprites, game=self)
         else:
-            tipos_de_inimigos = [Infection, InimigoListaIP, InimigoBug]
+            tipos_de_inimigos = [Infection, Grunt, InimigoBug]
             inimigo = random.choice(tipos_de_inimigos)
-            inimigo(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player)
-    
-    def spawnar_gravemind(self, posicao):
-        Gravemind(posicao=posicao,grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
+            inimigo(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
 
     def eventos(self):
         for evento in pygame.event.get():
@@ -262,6 +259,8 @@ class Game:
         self.projeteis_grupo.empty()
         self.inimigos_grupo.empty()
 
+        self.gravemind_spawnado = False
+
         self.tempo_proximo_spawn = 0
         self.intervalo_spawn_inicial = 2.0
         self.intervalo_spawn_atual = self.intervalo_spawn_inicial
@@ -282,7 +281,7 @@ class Game:
 
         pygame.mixer.music.stop()
         pygame.mixer.music.load(join('assets', 'sounds', 'musica_tema.wav'))
-        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.set_volume(0.0)
         pygame.mixer.music.play(-1)
 
         if not hasattr(self.player, 'armas'):
@@ -327,7 +326,7 @@ class Game:
 
         # Colisão com projéteis do chefe (AcidBreath)
         for projetil_boss in list(self.projeteis_grupo):
-            if isinstance(projetil_boss, AcidBreath):
+            if isinstance(projetil_boss, ProjetilInimigoBase):
                 if self.player.rect.colliderect(projetil_boss.rect):
                     self.player.tomar_dano_direto(projetil_boss.dano)
                     projetil_boss.kill()

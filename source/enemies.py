@@ -7,8 +7,9 @@ from settings import *
 
 
 class InimigoBase(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, jogador, vida_base, dano_base, velocidade_base):
+    def __init__(self, posicao, grupos, jogador, game, vida_base, dano_base, velocidade_base):
         super().__init__(grupos)
+        self.game = game
         self.jogador = jogador
         self.vida_base = vida_base
         self.dano_base = dano_base
@@ -66,11 +67,45 @@ class InimigoBase(pygame.sprite.Sprite):
     def collision_rect(self):
         """Retorna o retângulo de colisão para este inimigo."""
         return self.rect
+    
+class ProjetilInimigoBase(pygame.sprite.Sprite):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
+        super().__init__(grupos)
+        self.jogador = jogador
+        self.game = game
+        self.posicao = pygame.math.Vector2(posicao_inicial)
+        
+        #status
+        self.dano = dano
+        self.velocidade = velocidade
+        self.duracao = duracao
+
+        # Aparência
+        self.image = pygame.Surface((20,20))
+        self.rect = self.image.get_rect(center=self.posicao)
+
+        # Calcula a direção para o jogador
+        direcao_para_jogador = self.jogador.posicao - self.posicao
+        if direcao_para_jogador.length() > 0:
+            self.direcao = direcao_para_jogador.normalize()
+        else:
+            self.direcao = pygame.math.Vector2(0, 0)
+        
+        self.tempo_criacao = pygame.time.get_ticks()
+
+    def update(self, delta_time):
+        self.posicao += self.direcao * self.velocidade * delta_time
+        self.rect.center = self.posicao
+        
+        # Mata o projétil se o tempo de vida se esgotar
+        if pygame.time.get_ticks() - self.tempo_criacao >= self.duracao:
+            self.kill()
+
 
 
 class InimigoBug(InimigoBase):
-    def __init__(self, posicao, grupos, jogador):
-        super().__init__(posicao, grupos, jogador, vida_base=1, dano_base=10, velocidade_base=110)
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base=1, dano_base=10, velocidade_base=110)
         spritesheet = pygame.image.load(join('assets', 'img', 'bug.png'))
         self.animacoes = self.fatiar_spritesheet(spritesheet)
         self.estado_animacao = 'down'
@@ -112,20 +147,86 @@ class InimigoBug(InimigoBase):
         self.animar()
 
 
-class InimigoListaIP(InimigoBase):
-    def __init__(self, posicao, grupos, jogador):
-        super().__init__(posicao, grupos, jogador, vida_base=2, dano_base=15, velocidade_base=90)
-        self.image = pygame.image.load(join('assets', 'img', 'inimigo_listaIP.png')).convert_alpha()
+class Grunt(InimigoBase):
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base=2, dano_base=15, velocidade_base=90)
+        self.image = pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 80))
         self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade = 90
+        self.velocidade = 70
         self.vida = 2
         self.dano = 15
+        #arma
+        self.plasma_cooldown = 4000
+        self.ultimo_tiro = pygame.time.get_ticks()
+        #pre animacao
+        self.sprites = {}
+        sprites_right = [
+            pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha(),
+            pygame.image.load(join('assets', 'img', 'grunt', 'grunt2.png')).convert_alpha(),
+            #pygame.image.load(join('assets', 'img', 'grunt', 'grunt3.png')).convert_alpha()
+        ]
+        #add esquerda no dict
+        self.sprites['right'] = [pygame.transform.scale(sprite, (128, 128)) for sprite in sprites_right]
+        #Carrega direita
+        sprites_left = [
+            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
+        ]
+        #add direita no dict
+        self.sprites['left'] = sprites_left
+        #framagem da sprite
+        self.frame_atual = 0  
+        self.estado_animacao = 'right'
+        self.indice_animacao = 0
+        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
+        self.rect = self.image.get_rect(center=self.posicao)
+        self.velocidade_animacao = 200
+        self.ultimo_update_animacao = pygame.time.get_ticks()
+
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
+            self.image = self.sprites[self.estado_animacao][self.frame_atual]
+            self.rect = self.image.get_rect(center=self.posicao)
+
+    def update(self, delta_time):
+        direcao = (self.jogador.posicao - self.posicao)
+        if direcao.length() > 0:
+            direcao.normalize_ip()
+            self.posicao += direcao * self.velocidade * delta_time
+            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_tiro >= self.plasma_cooldown:
+            self.atacar_com_projetil()
+            self.ultimo_tiro = agora
+        if direcao.x < 0:
+            self.estado_animacao = 'left'
+        elif direcao.x > 0:
+            self.estado_animacao = 'right'
+        self.animar()
+
+    def atacar_com_projetil(self):
+        # Cria uma instância do PlasmaGun
+        PlasmaGun(
+            posicao_inicial=self.posicao,
+            grupos=(self.game.all_sprites, self.game.projeteis_grupo),
+            jogador=self.jogador,
+            game=self.game
+        )    
+
+class PlasmaGun(ProjetilInimigoBase):
+    def __init__(self, posicao_inicial, grupos, jogador, game):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=5, velocidade=250, duracao=5000)
+        self.image = pygame.image.load(join('assets', 'img', 'plasmagun.png'))
+        self.image = pygame.transform.scale(self.image, (36,36))
+        self.rect = self.image.get_rect(center=self.posicao)
 
 
 class Infection(InimigoBase):
-    def __init__(self, posicao, grupos, jogador):
-        super().__init__(posicao, grupos, jogador, vida_base=1, dano_base=5, velocidade_base=80)
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base=1, dano_base=5, velocidade_base=80)
         #sprites
         self.sprites = {}
 
@@ -158,6 +259,7 @@ class Infection(InimigoBase):
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
             self.rect = self.image.get_rect(center=self.posicao) # Mantém o centro na mesma posição
+
     def update(self, delta_time):
         direcao = (self.jogador.posicao - self.posicao)
         if direcao.length() > 0:
@@ -171,8 +273,8 @@ class Infection(InimigoBase):
         self.animar()
             
 class InimigoPython(InimigoBase):
-    def __init__(self, posicao, grupos, jogador):
-        super().__init__(posicao, grupos, jogador, vida_base=1,dano_base=10, velocidade_base=75)
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base=1,dano_base=10, velocidade_base=75)
         spritesheet = pygame.image.load(join('assets', 'img', 'python.png'))
         self.image = pygame.transform.scale(spritesheet, (600, 600))
         self.animacoes = self.fatiar_spritesheet(self.image)
@@ -215,8 +317,8 @@ class InimigoPython(InimigoBase):
         self.animar()
 
 class InimigoLadrao(InimigoBase):
-    def __init__(self, posicao, grupos, jogador):
-        super().__init__(posicao, grupos, jogador, vida_base= 25, dano_base=1, velocidade_base=300)
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base= 25, dano_base=1, velocidade_base=300)
         spritesheet = pygame.image.load(join('assets', 'img', 'ladrao.png'))
         self.image = pygame.transform.scale(spritesheet, (600, 600))
         self.animacoes = self.fatiar_spritesheet(self.image)

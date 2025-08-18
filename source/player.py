@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.armas = {}
 
         #status
-        self.vida_maxima = 200
+        self.vida_maxima = 100
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
         self.buff_cooldown_ativo = False 

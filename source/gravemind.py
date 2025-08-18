@@ -6,9 +6,9 @@ from enemies import *
 
 class Gravemind(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, vida_base=50, dano_base=20, velocidade_base=35)
+        super().__init__(posicao, grupos, jogador, game, vida_base=250, dano_base=20, velocidade_base=35)
         self.game = game
-        self.image = pygame.image.load(join('assets', 'img', 'gravemind.png')).convert_alpha()
+        self.image = pygame.image.load(join('assets', 'img', 'gravemind', 'gravemind.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (450, 450))
         self.rect = self.image.get_rect(center=posicao)
         self.posicao = pygame.math.Vector2(self.rect.center)
@@ -16,21 +16,42 @@ class Gravemind(InimigoBase):
         #respawns
         self.vida_limite = self.vida_base / 4
 
+        #animacao
+        self.animacao_gravemind_original = [
+            pygame.image.load(join('assets', 'img', 'gravemind', 'gravemind.png')).convert_alpha(),
+            pygame.image.load(join('assets', 'img', 'gravemind', 'grave2.png')).convert_alpha(),
+        ]
+        self.ataque_sprite = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'gravemind', 'grave3.png')).convert_alpha(), (450, 450))
+        self.animacao_gravemind = []
+        for img in self.animacao_gravemind_original:
+            scaled_img = pygame.transform.scale(img, (450, 450))
+            self.animacao_gravemind.append(scaled_img)
+        
+        self.frame_atual = 0
+        self.image = self.animacao_gravemind[self.frame_atual]
+        self.rect = self.image.get_rect(center=posicao)
+        self.posicao = pygame.math.Vector2(self.rect.center)
+        
+        self.velocidade_animacao = 400
+        self.ultimo_update_animacao = pygame.time.get_ticks()
+
+        # Variável para controlar o estado da animação
+        self.estado_animacao = 'normal'
+
         #invocar infections
         self.tempo_invocacao = 0
         self.ultimo_spawn = 0
         self.numero_de_infeccao = 20
-        self.intervalo_spawn_infeccao = 400
-        self.cooldown_invocacao = 10000
+        self.intervalo_spawn_infeccao = 250
+        self.cooldown_invocacao = 8000
         self.infecoes_restantes = 0
-
 
         #acid breath
         self.tempo_acido = 0
         self.numero_de_tiros = 20
         self.tempo_burst = 0
-        self.intervalo_burst = 300
-        self.cooldown_acid_breath = 10000
+        self.intervalo_burst = 250
+        self.cooldown_acid_breath = 8000
         self.tiros_restantes = 0
 
         #hitbox
@@ -45,7 +66,16 @@ class Gravemind(InimigoBase):
         return self.hitbox
 
     def invocar_infecao(self):
-        Infection(posicao=self.posicao, grupos=(self.game.all_sprites, self.game.inimigos_grupo), jogador=self.jogador)
+        deslocamento_x = randint(-100, 100)
+        deslocamento_y = randint(-100, 100)
+        posicao_spawn_aleatoria = self.posicao + pygame.math.Vector2(deslocamento_x, deslocamento_y)
+
+        Infection(
+        posicao=posicao_spawn_aleatoria, 
+        grupos=(self.game.all_sprites, self.game.inimigos_grupo), 
+        jogador=self.jogador,
+        game= self.game
+        )
 
     def acid_breath(self):
         # Cria uma instância do novo projétil
@@ -85,7 +115,19 @@ class Gravemind(InimigoBase):
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         self.kill()
 
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        # Verifica se já passou tempo suficiente para mudar de frame
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            # Avança para o próximo frame
+            self.frame_atual = (self.frame_atual + 1) % len(self.animacao_gravemind)
+            self.image = self.animacao_gravemind[self.frame_atual]
+            # O rect precisa ser atualizado para a nova imagem, mas a posição não muda
+            self.rect = self.image.get_rect(center=self.rect.center)
+
     def update(self, delta_time):
+        self.animar()
         self.tempo_invocacao += delta_time * 1000
         self.tempo_acido += delta_time * 1000
 
@@ -121,23 +163,23 @@ class Gravemind(InimigoBase):
             if self.tempo_burst >= self.intervalo_burst:
                 self.tempo_burst = 0
                 self.tiros_restantes -= 1
+                self.estado_animacao = 'atacando' # NOVO: Define o estado para ataque
+                self.image = self.ataque_sprite
                 self.acid_breath()
+        if self.tiros_restantes == 0:
+            self.estado_animacao = 'normal'
             
 
-class AcidBreath(pygame.sprite.Sprite):
+class AcidBreath(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game):
-        super().__init__(grupos)
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=15,velocidade=300, duracao=4000)
         self.jogador = jogador
         self.game = game
         self.posicao = pygame.math.Vector2(posicao_inicial)
-        
-        # Atributos do projétil
-        self.velocidade = 300  # Velocidade do projétil em pixels/segundo
-        self.dano = 15         # Dano que o projétil causa no jogador
-        
+
         # Aparência do projétil (imagem temporária)
-        self.image = pygame.Surface((30, 30), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, 'red', (30, 30), 7)
+        self.image = pygame.image.load(join('assets', 'img', 'acid_breath.png')).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (48, 48))
         self.rect = self.image.get_rect(center=self.posicao)
         # Calcula a direção para o jogador no momento da criação
         direcao_para_jogador = self.jogador.posicao - self.posicao
@@ -145,10 +187,7 @@ class AcidBreath(pygame.sprite.Sprite):
             self.direcao = direcao_para_jogador.normalize()
         else:
             self.direcao = pygame.math.Vector2(0, 0)
-        
-        # Define um tempo de vida para o projétil para ele não ficar para sempre
-        self.tempo_criacao = pygame.time.get_ticks()
-        self.duracao = 4000  # 4 segundos
+
 
     def update(self, delta_time):
         # Move o projétil na direção calculada
@@ -164,13 +203,13 @@ class FloodWarning(pygame.sprite.Sprite):
         super().__init__(grupos)
         self.game = game
         self.posicao = pygame.math.Vector2(posicao)
-        self.duracao = 2000  # Duração do aviso em milissegundos (3 segundos)
-        self.raio = 600     # Raio do círculo de aviso
-        self.dano = 50       # Dano que o jogador receberá se estiver dentro do círculo
+        self.duracao = 3000  # Duração do aviso em milissegundos (3 segundos)
+        self.raio = 500     # Raio do círculo de aviso
+        self.dano = 10000      # Dano que o jogador receberá se estiver dentro do círculo
         # Cria a sprite visual do círculo
         self.image = pygame.Surface((self.raio * 2, self.raio * 2), pygame.SRCALPHA)
         self.image.set_colorkey((0,0,0)) # Torna a superfície preta transparente
-        pygame.draw.circle(self.image, (100, 255, 0, 100), (self.raio, self.raio), self.raio)
+        pygame.draw.circle(self.image, (255, 100, 0, 100), (self.raio, self.raio), self.raio)
         
         self.rect = self.image.get_rect(center=self.posicao)
         self.tempo_criacao = pygame.time.get_ticks()
@@ -183,6 +222,11 @@ class FloodWarning(pygame.sprite.Sprite):
             distancia_do_player = self.game.player.posicao.distance_to(self.posicao)
             if distancia_do_player <= self.raio:
                 self.game.player.vida_atual -= self.dano
-            self.game.spawnar_gravemind(self.posicao)        
+            Gravemind(
+                posicao=self.posicao, 
+                grupos=(self.game.all_sprites, self.game.inimigos_grupo),
+                jogador=self.game.player,
+                game=self.game
+            )        
             # Remove o círculo de aviso
             self.kill()
