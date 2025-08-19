@@ -2,7 +2,7 @@ import pygame
 from settings import *
 from levelup import TelaDeUpgrade
 class Player(pygame.sprite.Sprite):
-    def __init__(self, posicao_inicial, sheet_player, grupos, game):
+    def __init__(self, posicao_inicial, grupos, game):
         """
         Inicia o jogador.
         sheet_player: Imagem.
@@ -13,19 +13,39 @@ class Player(pygame.sprite.Sprite):
         #envolve movimentação
         self.direcao = pygame.math.Vector2()
         self.velocidade = 500
-        self.frame = pygame.image.load(sheet_player).convert_alpha()
-        self.frame = pygame.transform.scale(self.frame, (100, 100))
+        self.image = pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha()
 
-        #imagem e posicao
-        self.image = self.frame
+        #animacao
+        self.sprites = {}
+        sprite_right = [pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(),
+                        pygame.image.load(join('assets', 'img', 'player', 'player2.png')).convert_alpha(),
+                        pygame.image.load(join('assets', 'img', 'player', 'player3.png')).convert_alpha(),
+                        pygame.image.load(join('assets', 'img', 'player', 'player2.png')).convert_alpha()
+        ]
+        #sprites direita
+        self.sprites['right'] = [pygame.transform.scale(sprite, (128, 128)) for sprite in sprite_right]
+
+        sprites_left = [
+            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
+        ]
+        #sprite esquerda
+        self.sprites['left'] = sprites_left
+
+        #variaveis de animacao
+        self.frame_atual = 0  
+        self.estado_animacao = 'right'
+        self.indice_animacao = 0
+        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
         self.rect = self.image.get_rect(center = (posicao_inicial[0]/2, posicao_inicial[1]/2))
         self.posicao = pygame.math.Vector2(self.rect.center)
+        self.velocidade_animacao = 150
+        self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #armas do player
         self.armas = {}
 
         #status
-        self.vida_maxima = 100
+        self.vida_maxima = 1000
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
         self.buff_cooldown_ativo = False 
@@ -68,6 +88,14 @@ class Player(pygame.sprite.Sprite):
         self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual
         self.rect.centerx = self.posicao.x
         self.rect.centery = self.posicao.y
+
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
+            self.image = self.sprites[self.estado_animacao][self.frame_atual]
+            self.rect = self.image.get_rect(center=self.posicao)
 
     def tomar_dano(self, inimigo):
         if not self.invencivel:
@@ -167,6 +195,12 @@ class Player(pygame.sprite.Sprite):
             self.image.set_alpha(alpha)
         else:
             self.image.set_alpha(255)
+        
+        if self.direcao.x < 0:
+            self.estado_animacao = 'left'
+        elif self.direcao.x > 0:
+            self.estado_animacao = 'right'
+        self.animar()
         
 
         if self.experiencia_atual >= self.experiencia_level_up:

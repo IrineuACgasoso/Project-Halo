@@ -49,10 +49,12 @@ class Game:
         self.intervalo_minimo = 0.5
         self.fator_dificuldade = 0.01
         self.hordas_contagem = 0
-        self.gravemind_spawnado = False
 
         #habilidades dos bosses
         self.gravemind_reborns = 3
+
+        #painel control boss
+        self.invocacao_protogravemind = 0
 
     def iniciar_novo_jogo(self):
         self.all_sprites.empty()
@@ -182,10 +184,10 @@ class Game:
                     arma.update(delta_time)
             
             # Lógica para spawnar o boss
-            if self.player.contador_niveis == 2 and not self.gravemind_spawnado:
-                self.spawnar_inimigo(tipo='gravemind')
-                self.gravemind_spawnado = True
-                self.intervalo_spawn_atual = 2.0
+            #if self.player.contador_niveis == 1:
+                #self.spawnar_inimigo(tipo='gravemind')
+                #self.intervalo_spawn_atual = 2.0
+                #self.gravemind_spawnado = True
 
             if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
                 self.tempo_proximo_spawn = 0
@@ -194,8 +196,9 @@ class Game:
                 for _ in range(4):
                     self.spawnar_inimigo()
 
-                if self.hordas_contagem % 100 == 0:
-                    self.spawnar_inimigo(tipo='boss')
+                if self.player.contador_niveis == 1 and self.gravemind_spawnado == False:
+                    self.gravemind_spawnado = True
+                    self.spawnar_inimigo(tipo='gravemind')
                 if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
                 # Spawna o inimigo especial que aparece a cada 100 hordas
                     self.spawnar_inimigo(tipo='inimigo_horda_100')
@@ -270,7 +273,6 @@ class Game:
         self.mapa = Mapa(all_sprites=self.all_sprites)
         self.player = Player(
             posicao_inicial=(self.mapa.largura_mapa_pixels / 2, self.mapa.altura_mapa_pixels),
-            sheet_player=join('assets', 'img', 'player.png'),
             grupos=self.all_sprites,
             game=self
         )
