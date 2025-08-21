@@ -200,10 +200,17 @@ class Player(pygame.sprite.Sprite):
             self.estado_animacao = 'left'
         elif self.direcao.x > 0:
             self.estado_animacao = 'right'
-        self.animar()
+        if self.direcao.x == 0 and self.direcao.y == 0:
+            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(), (128,128))
+
+        if self.direcao.x != 0 or self.direcao.y != 0:
+            self.animar()
         
 
         if self.experiencia_atual >= self.experiencia_level_up:
+            self.level_up()
+        hack = pygame.key.get_pressed()
+        if hack[pygame.K_l]:
             self.level_up()
 
 

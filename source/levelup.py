@@ -1,14 +1,14 @@
 import pygame
 import random
 from settings import *
-from weapon import Arma, Arma_Loop, ArmaLista, Dicionario_Divino, ArmaByte
+from weapon import Arma, Arma_Loop, ArmaLista, Dicionario_Divino, ArmaArbitro
 
 MAX_ARMAS = 6
 TODAS_AS_ARMAS = {
     "Bola Calderânica": Arma_Loop,
     "Ciclo de Lâminas": ArmaLista,
     "Dicionário Divino": Dicionario_Divino,
-    "Cão Byte": ArmaByte,
+    "Árbitro": ArmaArbitro,
 }
 
 class TelaDeUpgrade:
@@ -56,7 +56,7 @@ class TelaDeUpgrade:
                 elif classe_arma == Dicionario_Divino:
                     grupos = (self.game.all_sprites, self.game.auras_grupo)
                 
-                elif classe_arma == ArmaByte:
+                elif classe_arma == ArmaArbitro:
                     grupos = (self.game.all_sprites, self.game.inimigos_grupo, self.game.item_group)
 
 
@@ -71,23 +71,39 @@ class TelaDeUpgrade:
             self.opcoes.append(OpcaoDeUpgrade(arma_para_exibir, retangulo_opcao))
 
     def gerar_opcoes_aleatorias(self):
-        pool_de_nomes = []
-        armas_do_jogador = list(self.jogador.armas.values())
+        opcoes_de_upgrade = []
+        opcoes_de_armas_novas = []
 
-        for arma in armas_do_jogador:
-            pool_de_nomes.append(arma.nome)
+        # 1. Popula as opções de upgrade com as armas que o jogador já possui
+        for arma_obj in self.jogador.armas.values():
+            opcoes_de_upgrade.append(arma_obj.nome)
 
-        #armas novas
+        # 2. Popula as opções de novas armas com as que o jogador AINDA NÃO possui
         if len(self.jogador.armas) < MAX_ARMAS:
-            nomes_armas_possuidas = {arma.nome for arma in armas_do_jogador}
-            for nome_arma in TODAS_AS_ARMAS.keys():
-                if nome_arma not in nomes_armas_possuidas:
-                    pool_de_nomes.append(nome_arma)
-                    
+            nomes_armas_possuidas = {arma.nome for arma in self.jogador.armas.values()}
+            for nome_arma_total in TODAS_AS_ARMAS.keys():
+                if nome_arma_total not in nomes_armas_possuidas:
+                    opcoes_de_armas_novas.append(nome_arma_total)
 
-        num_opcoes = min(3, len(pool_de_nomes))
-        return random.sample(pool_de_nomes, num_opcoes) if num_opcoes > 0 else []
-
+        # 3. Combina e seleciona as 3 opções finais
+        pool_de_nomes = []
+        
+        # Adiciona aleatoriamente opções de upgrade primeiro (se houver)
+        num_upgrades = min(2, len(opcoes_de_upgrade)) # Prioriza 2 upgrades
+        if len(opcoes_de_armas_novas) > 0: # Se houver novas armas, deixa uma vaga
+            num_upgrades = min(3, len(opcoes_de_upgrade))
+        
+        # Pega um subconjunto de upgrades aleatórios
+        nomes_para_upgrade = random.sample(opcoes_de_upgrade, num_upgrades)
+        pool_de_nomes.extend(nomes_para_upgrade)
+        
+        # Preenche o resto com novas armas, se houver
+        while len(pool_de_nomes) < 3 and len(opcoes_de_armas_novas) > 0:
+            nova_arma_escolhida = random.choice(opcoes_de_armas_novas)
+            pool_de_nomes.append(nova_arma_escolhida)
+            opcoes_de_armas_novas.remove(nova_arma_escolhida) # Remove para não pegar duas vezes
+            
+        return pool_de_nomes
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:

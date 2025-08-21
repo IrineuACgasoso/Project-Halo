@@ -13,6 +13,7 @@ from ranking import Ranking
 from levelup import *
 from mapa import Mapa
 from gravemind import *
+from didact import *
 
 
 class Game:
@@ -55,6 +56,7 @@ class Game:
 
         #painel control boss
         self.invocacao_protogravemind = 0
+        self.didact_invocado = False
 
     def iniciar_novo_jogo(self):
         self.all_sprites.empty()
@@ -92,6 +94,8 @@ class Game:
 
         if tipo == 'gravemind':
             FloodWarning(posicao=self.player.posicao, grupos=self.all_sprites, game=self)
+        if tipo == 'didact':
+            Didact(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
         else:
             tipos_de_inimigos = [Infection, Grunt, InimigoBug]
             inimigo = random.choice(tipos_de_inimigos)
@@ -196,7 +200,10 @@ class Game:
                 for _ in range(4):
                     self.spawnar_inimigo()
 
-                if self.player.contador_niveis == 1 and self.gravemind_spawnado == False:
+                if self.player.contador_niveis == 1 and self.didact_invocado == False:
+                    self.didact_invocado = True
+                    self.spawnar_inimigo(tipo='didact')
+                if self.player.contador_niveis == 100 and self.gravemind_spawnado == False:
                     self.gravemind_spawnado = True
                     self.spawnar_inimigo(tipo='gravemind')
                 if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
@@ -263,6 +270,8 @@ class Game:
         self.inimigos_grupo.empty()
 
         self.gravemind_spawnado = False
+        self.invocacao_protogravemind = 0
+        self.didact_invocado = False
 
         self.tempo_proximo_spawn = 0
         self.intervalo_spawn_inicial = 2.0
@@ -303,15 +312,15 @@ class Game:
         #arma_dicionario = Dicionario_Divino(jogador=self.player,
                      #grupos=(self.all_sprites, self.auras_grupo),
                      #game=self)
-        #arma_byte = ArmaByte(
-    #jogador=self.player,
-    #grupos=(self.all_sprites, self.inimigos_grupo, self.item_group),
-    #game=self)
+        #arma_arbitro = ArmaArbitro(
+            #jogador=self.player,
+            #grupos=(self.all_sprites, self.inimigos_grupo, self.item_group),
+            #game=self)
 
         self.player.armas[arma_Loop.nome] = arma_Loop
         #self.player.armas['Listas'] = arma_listas
         #self.player.armas['Nova'] = arma_dicionario
-        #self.player.armas['Byte'] = arma_byte
+        #self.player.armas['Arbitro'] = arma_arbitro
 
         self.estado_do_jogo = 'jogando'
 
