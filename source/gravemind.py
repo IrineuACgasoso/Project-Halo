@@ -2,6 +2,7 @@ import pygame
 from game import *
 from items import *
 from enemies import *
+import random
 
 
 class Gravemind(InimigoBase):
@@ -126,6 +127,8 @@ class Gravemind(InimigoBase):
         self.kill()
 
     def invocar_infecao(self):
+        novo_cooldown = [7500, 8000, 9000, 10000]
+        self.cooldown_invocacao = random.choice(novo_cooldown)
         deslocamento_x = randint(-150, 150)
         deslocamento_y = randint(-150, 150)
         posicao_spawn_aleatoria = self.posicao + pygame.math.Vector2(deslocamento_x, deslocamento_y)
@@ -221,6 +224,8 @@ class Gravemind(InimigoBase):
         
         #ativa acid breath
         if self.tempo_acido >= self.cooldown_acid_breath:
+            novo_cooldown = [6000, 8000, 10000, 12000]
+            self.cooldown_acid_breath = random.choice(novo_cooldown)
             self.tiros_restantes = self.numero_de_tiros
             self.tempo_acido = 0
             self.tempo_burst = 0
@@ -239,6 +244,8 @@ class Gravemind(InimigoBase):
         if self.is_final_form:
             #inicia o spawn de cabecas
             if self.tempo_cabecas >= self.cooldown_cabecas and self.cabecas_restantes==0:
+                novo_cooldown_ultimate = [10000, 12000, 15000, 18000]
+                self.cooldown_cabecas = random.choice(novo_cooldown_ultimate)
                 self.cabecas_restantes = self.numero_cabeças
                 self.tempo_cabecas = 0
             if self.cabecas_restantes > 0:

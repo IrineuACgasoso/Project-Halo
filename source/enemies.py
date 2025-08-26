@@ -2,7 +2,7 @@ import pygame
 from os.path import join
 from random import randint
 from items import *
-from player import Player
+from player import *
 from settings import *
 
 

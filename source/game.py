@@ -12,6 +12,7 @@ from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapa import Mapa
+from hunter import *
 from gravemind import *
 from didact import *
 
@@ -44,6 +45,11 @@ class Game:
         self.tela_de_upgrade_ativa = None
         self.buff = False
 
+        #mapa 
+        self.mapa = None # Inicialize o mapa como None
+        self.largura_mapa_pixels = 0
+        self.altura_mapa_pixels = 0
+
         # Controle de spawn
         self.tempo_proximo_spawn = 0
         self.intervalo_spawn_atual = 2.0
@@ -57,6 +63,7 @@ class Game:
         #painel control boss
         self.invocacao_protogravemind = 0
         self.didact_invocado = False
+        self.hunter_1_invocado = False
 
     def iniciar_novo_jogo(self):
         self.all_sprites.empty()
@@ -91,7 +98,8 @@ class Game:
             self.pos = (borda_esquerda - 50, random.uniform(borda_topo, borda_baixo))
         else:
             self.pos = (borda_direita + 50, random.uniform(borda_topo, borda_baixo))
-
+        if tipo == 'hunter':
+            Hunter(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
         if tipo == 'gravemind':
             FloodWarning(posicao=self.player.posicao, grupos=self.all_sprites, game=self)
         if tipo == 'didact':
@@ -200,12 +208,15 @@ class Game:
                 for _ in range(4):
                     self.spawnar_inimigo()
 
-                if self.player.contador_niveis == 1 and self.didact_invocado == False:
-                    self.didact_invocado = True
-                    self.spawnar_inimigo(tipo='didact')
+                if self.player.contador_niveis == 1 and self.hunter_1_invocado == False:
+                    self.hunter_1_invocado = True
+                    self.spawnar_inimigo(tipo='hunter')
                 if self.player.contador_niveis == 100 and self.gravemind_spawnado == False:
                     self.gravemind_spawnado = True
                     self.spawnar_inimigo(tipo='gravemind')
+                if self.player.contador_niveis == 100 and self.didact_invocado == False:
+                    self.didact_invocado = True
+                    self.spawnar_inimigo(tipo='didact')
                 if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
                 # Spawna o inimigo especial que aparece a cada 100 hordas
                     self.spawnar_inimigo(tipo='inimigo_horda_100')
@@ -236,10 +247,16 @@ class Game:
             self.menu_principal.draw(self.tela)
 
         elif self.estado_do_jogo == 'jogando':
-            #desenha mapa
             deslocamento = self.mapa.get_camera_offset(self.player.posicao, (largura_tela, altura_tela))
             self.mapa.draw(self.tela, deslocamento)
-            self.all_sprites.draw(self.player.posicao)
+            # Itera por todos os sprites e desenha cada um
+            for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
+                # Se for um LaserWarning, use o método de desenho personalizado
+                if isinstance(sprite, LaserWarning):
+                    sprite.draw(self.tela, deslocamento)
+                else:
+                    # Para todos os outros sprites, desenha normalmente
+                    self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
             self.hud.draw(self.tela)
 
         elif self.estado_do_jogo == 'pausa':
@@ -280,6 +297,8 @@ class Game:
         self.fator_dificuldade = 0.04
 
         self.mapa = Mapa(all_sprites=self.all_sprites)
+        self.largura_mapa_pixels = self.mapa.largura_mapa_pixels
+        self.altura_mapa_pixels = self.mapa.altura_mapa_pixels
         self.player = Player(
             posicao_inicial=(self.mapa.largura_mapa_pixels / 2, self.mapa.altura_mapa_pixels),
             grupos=self.all_sprites,
@@ -332,13 +351,13 @@ class Game:
 
         for inimigo in self.inimigos_grupo:
             # A função .collision_rect() vai retornar o rect ou a hitbox
-            if self.player.rect.colliderect(inimigo.collision_rect):
+            if self.player.hitbox.colliderect(inimigo.collision_rect):
                 self.player.tomar_dano(inimigo)
 
         # Colisão com projéteis do chefe (AcidBreath)
         for projetil_boss in list(self.projeteis_grupo):
             if isinstance(projetil_boss, ProjetilInimigoBase):
-                if self.player.rect.colliderect(projetil_boss.rect):
+                if self.player.hitbox.colliderect(projetil_boss.rect):
                     self.player.tomar_dano_direto(projetil_boss.dano)
                     projetil_boss.kill()
 

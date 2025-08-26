@@ -47,8 +47,8 @@ class HUD:
         jogador = self.game.player
         deslocamento = self.game.all_sprites.deslocamento
 
-        posicao_x = jogador.rect.left + deslocamento.x
-        posicao_y = jogador.rect.bottom + deslocamento.y + 5
+        posicao_x = largura_tela / 2.22
+        posicao_y = altura_tela / 1.7
 
         largura_barra = jogador.rect.width
         altura_barra = 10

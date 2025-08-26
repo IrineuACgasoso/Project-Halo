@@ -35,11 +35,15 @@ class Player(pygame.sprite.Sprite):
         self.frame_atual = 0  
         self.estado_animacao = 'right'
         self.indice_animacao = 0
+
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]
         self.rect = self.image.get_rect(center = (posicao_inicial[0]/2, posicao_inicial[1]/2))
         self.posicao = pygame.math.Vector2(self.rect.center)
         self.velocidade_animacao = 150
         self.ultimo_update_animacao = pygame.time.get_ticks()
+
+        #hitbox
+        self.hitbox = self.rect.inflate(-self.rect.width * 0.5, -self.rect.height * 0)
 
         #armas do player
         self.armas = {}
@@ -49,6 +53,7 @@ class Player(pygame.sprite.Sprite):
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
         self.buff_cooldown_ativo = False 
+        self.tamanho_hitbox = self.rect.width / 1.5
         #exp
         self.contador_niveis = 1
         self.experiencia_level_up_base = 100 
@@ -86,8 +91,7 @@ class Player(pygame.sprite.Sprite):
     def movimentacao(self, delta_time):
         #delta_time serve pra o jogador sempre se mover na mesma velocidade independente do fps
         self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual
-        self.rect.centerx = self.posicao.x
-        self.rect.centery = self.posicao.y
+        self.hitbox.center = self.posicao
 
     def animar(self):
         agora = pygame.time.get_ticks()
@@ -95,7 +99,8 @@ class Player(pygame.sprite.Sprite):
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.posicao)
+        self.rect.center = self.posicao
+        self.hitbox.center = self.posicao
 
     def tomar_dano(self, inimigo):
         if not self.invencivel:
