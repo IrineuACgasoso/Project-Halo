@@ -24,6 +24,10 @@ class InimigoBase(pygame.sprite.Sprite):
         self.velocidade = self.velocidade_base
         #dificulta baseado no nivel do player
         self.aplicar_dificuldade()
+        #garantia de spawn
+        self.invencivel = False
+        self.tempo_criacao = pygame.time.get_ticks() # Adicionado para uso futuro, se necessário
+        self.tempo_invencibilidade = 0
 
         
     def aplicar_dificuldade(self):
@@ -211,17 +215,29 @@ class Grunt(InimigoBase):
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_grupo),
+            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
             jogador=self.jogador,
-            game=self.game
+            game=self.game,
+            tamanho=(12,12),
+            dano=5,
+            velocidade=250
         )    
 
 class PlasmaGun(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=5, velocidade=250, duracao=5000)
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=5000)
         self.image = pygame.image.load(join('assets', 'img', 'plasmagun.png'))
-        self.image = pygame.transform.scale(self.image, (36,36))
+        self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
+        self.mask = pygame.mask.from_surface(self.image)
+
+class Carabin(ProjetilInimigoBase):
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao =4000):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
+        self.image = pygame.image.load(join('assets', 'img', 'carabin.png'))
+        self.image = pygame.transform.scale(self.image, tamanho)
+        self.rect = self.image.get_rect(center=self.posicao)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class Infection(InimigoBase):

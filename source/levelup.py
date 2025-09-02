@@ -48,10 +48,10 @@ class TelaDeUpgrade:
                 grupos = ()
 
                 if classe_arma == Arma_Loop:
-                    grupos = (self.game.all_sprites, self.game.projeteis_grupo, self.game.inimigos_grupo)
+                    grupos = (self.game.all_sprites, self.game.projeteis_jogador_grupo, self.game.inimigos_grupo)
                 
                 elif classe_arma == ArmaLista:
-                    grupos = (self.game.all_sprites, self.game.projeteis_grupo)
+                    grupos = (self.game.all_sprites, self.game.projeteis_jogador_grupo)
                 
                 elif classe_arma == Dicionario_Divino:
                     grupos = (self.game.all_sprites, self.game.auras_grupo)

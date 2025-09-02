@@ -45,10 +45,8 @@ class Gravemind(InimigoBase):
         self.rect = self.image.get_rect(centerx=posicao[0], bottom=posicao[1])
         self.posicao = pygame.math.Vector2(self.rect.center)
         #hitbox
-        largura_hitbox = self.rect.width / 3
-        self.hitbox = pygame.Rect(0, 0, largura_hitbox, self.rect.height)
-        self.hitbox.midbottom = self.rect.midbottom
-        
+        self.mask = pygame.mask.from_surface(self.image)
+
         self.frame_atual = 0
         self.velocidade_animacao = 400
         self.ultimo_update_animacao = pygame.time.get_ticks()
@@ -94,7 +92,7 @@ class Gravemind(InimigoBase):
     @property
     def collision_rect(self):
         """Retorna a hitbox específica do Gravemind."""
-        return self.hitbox
+        return self.mask
     
     def atualizar_sprite_respawn(self, delta_time):
         if self.estado_respawn == 'reaparecendo':
@@ -144,7 +142,7 @@ class Gravemind(InimigoBase):
         # Cria uma instância do novo projétil
         AcidBreath(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_grupo), 
+            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo), 
             jogador=self.jogador,
             game=self.game
             )

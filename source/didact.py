@@ -33,6 +33,9 @@ class Didact(InimigoBase):
         self.velocidade_animacao = 500
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
+        #hitbox
+        self.mask = pygame.mask.from_surface(self.image)
+
         #pull ability
         self.estado_habilidade = 'parado' # 'parado', 'ataque_pull', 'ataque_laser'
         self.cooldown_pull = 10000 # 5 segundos de recarga
@@ -50,6 +53,11 @@ class Didact(InimigoBase):
         self.duracao_disparo_laser = 500 # 0.5 segundos de disparo
         self.tempo_inicio_laser = 0
         self.posicao_alvo_laser = pygame.math.Vector2()
+
+    @property
+    def collision_rect(self):
+        "Retorna a hitbox de Didact."
+        return self.mask
 
     def ativar_laser(self):
         agora = pygame.time.get_ticks()
@@ -76,7 +84,7 @@ class Didact(InimigoBase):
         Laser(
             posicao_inicial=self.posicao.copy(), # Posição atual do Didact
             posicao_final=self.posicao_alvo_laser.copy(), # Posição travada do jogador
-            grupos=(self.game.all_sprites, self.game.projeteis_grupo),
+            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
             game=self.game,
             player=self.game.player
         )
@@ -115,6 +123,30 @@ class Didact(InimigoBase):
                 self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
                 self.image = self.sprites[self.estado_animacao][self.frame_atual]
                 self.rect = self.image.get_rect(center=self.posicao)
+    
+    def morrer(self, grupos):
+        chance= randint(1,1000)
+        if chance >= 950:
+            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
+            for _ in range(5):
+                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+        elif 800 <= chance < 950:
+            chance2 = randint(1,4)
+            if chance2 == 4:
+                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
+            for _ in range(4):
+                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+        elif 500 <= chance < 800:
+            for _ in range(3):
+                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+        else:
+            for _ in range(2):
+                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+        self.kill()
         
     def update(self, delta_time):
         agora = pygame.time.get_ticks()
