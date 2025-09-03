@@ -64,12 +64,12 @@ class Game:
         #habilidades dos bosses
         self.gravemind_reborns = 3
         self.contagem_clones = 0
-        self.eternal_spawnado = False
 
         #painel control boss
         self.hunter_1_invocado = False
         self.guilty_invocado = False
         self.arbiter_invocado = False
+        self.gravemind_spawnado = False
         self.invocacao_protogravemind = 0
         self.didact_invocado = False
         self.warden_invocado = False
@@ -119,9 +119,7 @@ class Game:
         if tipo == 'didact':
             Didact(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
         if tipo == 'warden':
-            WardenEternal(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self, is_eternal=False)
-        if tipo == 'eternal':
-            WardenEternal(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self, is_eternal=True)
+            WardenEternal(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
 
             
         else:
@@ -225,30 +223,26 @@ class Game:
                 self.tempo_proximo_spawn = 0
                 self.hordas_contagem += 1
                 
-                for _ in range(0):
+                for _ in range(2):
                     self.spawnar_inimigo()
-                if self.player.contador_niveis == 100 and self.guilty_invocado == False:
-                    self.guilty_invocado = True
-                    self.spawnar_inimigo(tipo='guilty')
-                if self.player.contador_niveis == 1 and self.arbiter_invocado == False:
-                    self.arbiter_invocado = True
-                    self.spawnar_inimigo(tipo='arbiter')
                 if self.player.contador_niveis == 100 and self.hunter_1_invocado == False:
                     self.hunter_1_invocado = True
                     self.spawnar_inimigo(tipo='hunter')
+                if self.player.contador_niveis == 100 and self.guilty_invocado == False:
+                    self.guilty_invocado = True
+                    self.spawnar_inimigo(tipo='guilty')
+                if self.player.contador_niveis == 100 and self.arbiter_invocado == False:
+                    self.arbiter_invocado = True
+                    self.spawnar_inimigo(tipo='arbiter')
                 if self.player.contador_niveis == 100 and self.gravemind_spawnado == False:
                     self.gravemind_spawnado = True
                     self.spawnar_inimigo(tipo='gravemind')
                 if self.player.contador_niveis == 100 and self.didact_invocado == False:
                     self.didact_invocado = True
                     self.spawnar_inimigo(tipo='didact')
-                if self.player.contador_niveis == 100 and self.warden_invocado == False:
+                if self.player.contador_niveis == 1 and self.warden_invocado == False:
                     self.warden_invocado = True
                     self.spawnar_inimigo(tipo='warden')
-                # Spawna o Warden Eternal quando 10 clones morrem
-                if self.contagem_clones >= 10 and not self.eternal_spawnado:
-                    self.eternal_spawnado = True
-                    self.spawnar_inimigo(tipo='eternal')
                     
                 if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
                 # Spawna o inimigo especial que aparece a cada 100 hordas
@@ -320,8 +314,6 @@ class Game:
         self.inimigos_grupo.empty()
 
         self.gravemind_reborns = 3
-        self.contagem_clones = 0
-        self.eternal_spawnado = False
 
         self.invocacao_protogravemind = 0
         self.invocacao_protogravemind = 0
@@ -330,6 +322,8 @@ class Game:
         self.arbiter_invocado = False
         self.guilty_invocado = False
         self.warden_invocado = False
+        self.gravemind_spawnado = False
+
 
 
         self.tempo_proximo_spawn = 0
@@ -360,11 +354,14 @@ class Game:
             self.player.armas = {}
 
         #arma inicial
-        arma_Loop = Arma_Loop(
-            jogador=self.player,
+        rifle = RifleAssalto(jogador=self.player,
             grupos=(self.all_sprites, self.projeteis_jogador_grupo, self.inimigos_grupo),
             game=self
-        )
+            )
+        #arma_Loop = Arma_Loop(
+            #jogador=self.player,
+            #grupos=(self.all_sprites, self.projeteis_jogador_grupo, self.inimigos_grupo),
+            #game=self)
 
         #arma_listas = ArmaLista(jogador=self.player,
                                 #grupos=(self.all_sprites, self.projeteis_jogador_grupo),
@@ -378,7 +375,8 @@ class Game:
             #grupos=(self.all_sprites, self.inimigos_grupo, self.item_group),
             #game=self)
 
-        self.player.armas[arma_Loop.nome] = arma_Loop
+        self.player.armas['Rifle de Assalto'] = rifle
+        #self.player.armas[arma_Loop.nome] = arma_Loop
         #self.player.armas['Listas'] = arma_listas
         #self.player.armas['Nova'] = arma_dicionario
         #self.player.armas['Arbitro'] = arma_arbitro
@@ -387,67 +385,64 @@ class Game:
 
     def colisao(self, delta_time):
         # Colisão de Projéteis do Jogador com Inimigos
-        # Separa projéteis que não ricocheteiam
-        projeteis_sem_ricochete = pygame.sprite.Group([p for p in self.projeteis_jogador_grupo if not p.ricochete])
+        # Cria uma cópia do grupo de inimigos para evitar problemas de iteração
+        inimigos_vivos = list(self.inimigos_grupo)
+        
+        for projetil in list(self.projeteis_jogador_grupo):
+            # Encontra todos os inimigos que colidiram com este projétil
+            inimigos_atingidos = pygame.sprite.spritecollide(
+                projetil, 
+                pygame.sprite.Group(inimigos_vivos), 
+                False, # dokill=False: não remove inimigos
+                pygame.sprite.collide_mask
+            )
+            
+            # Se o projétil atingiu algum inimigo
+            if inimigos_atingidos:
+                # Se o projétil for da Arma_Loop
+                if isinstance(projetil, Arma_Loop):
+                    # Adiciona os inimigos atingidos a um conjunto para evitar dano repetido no mesmo frame
+                    if not hasattr(projetil, 'atingidos_neste_frame'):
+                        projetil.atingidos_neste_frame = set()
 
-        # Colisão para projéteis que não ricocheteiam (mata o projétil na colisão)
-        colisoes_normais = pygame.sprite.groupcollide(
-            projeteis_sem_ricochete,
-            self.inimigos_grupo,
-            True,  # dokill=True: remove o projétil na colisão
-            False, # dokill=False: não remove o inimigo
-            pygame.sprite.collide_mask
-        )
+                    for inimigo in inimigos_atingidos:
+                        # Se o inimigo já foi atingido neste frame, não faz nada
+                        if inimigo not in projetil.atingidos_neste_frame:
+                            inimigo.vida -= projetil.dano
+                            projetil.atingidos_neste_frame.add(inimigo)
+                
+                # Se for qualquer outro tipo de projétil, ele é destruído ao atingir
+                else:
+                    for inimigo in inimigos_atingidos:
+                        inimigo.vida -= projetil.dano
+                    projetil.kill()
 
-        # Aplica dano aos inimigos atingidos por projéteis que não ricocheteiam
-        for inimigo_atingido in colisoes_normais.values():
-            for inimigo in inimigo_atingido:
-                # Pega o primeiro projétil que colidiu para obter o dano
-                dano_do_primeiro_projetil = list(colisoes_normais.keys())[0].dano
-                if not (isinstance(inimigo, WardenEternal) and inimigo.invencivel):
-                    inimigo.vida -= dano_do_primeiro_projetil
-
-
-        # Agora, lida com projéteis que ricocheteiam
-        projeteis_com_ricochete = pygame.sprite.Group([p for p in self.projeteis_jogador_grupo if p.ricochete])
-
-        # Colisão para projéteis que ricocheteiam (não mata o projétil na colisão)
-        colisoes_ricochete = pygame.sprite.groupcollide(
-            projeteis_com_ricochete,
-            self.inimigos_grupo,
-            False, # dokill=False: não remove o projétil
-            False, # dokill=False: não remove o inimigo
-            pygame.sprite.collide_mask
-        )
-
-        # Aplica dano a todos os inimigos que um projétil de ricochete atingiu
-        for projetil, inimigos_atingidos in colisoes_ricochete.items():
-            for inimigo in inimigos_atingidos:
-                if not (isinstance(inimigo, WardenEternal) and inimigo.invencivel):
-                    inimigo.vida -= projetil.dano
+        # Adiciona a lógica para resetar os inimigos atingidos pela Arma_Loop para o próximo frame
+        for projetil in list(self.projeteis_jogador_grupo):
+            if isinstance(projetil, Arma_Loop) and hasattr(projetil, 'atingidos_neste_frame'):
+                projetil.atingidos_neste_frame.clear()
 
         # Colisão de Projéteis dos Inimigos com o Jogador
-        # Remove os projéteis inimigos quando eles atingem o jogador.
         projeteis_filtrados = [
             p for p in self.projeteis_inimigos_grupo if not isinstance(p, GuiltyLaser)
-            ]
+        ]
         colisoes_projeteis_inimigos = pygame.sprite.groupcollide(
             pygame.sprite.Group(projeteis_filtrados),
             pygame.sprite.Group(self.player),  # Cria um grupo temporário apenas com o jogador
             True,  # 'dokill' True: remove o projetil
             False, # 'dokill' False: não remove o jogador
-            pygame.sprite.collide_mask # Use collide_rect para o jogador ou collide_mask se ele tiver
+            pygame.sprite.collide_rect
         )
         # Aplica o dano do projétil ao jogador
         for projetil, _ in colisoes_projeteis_inimigos.items():
             self.player.tomar_dano_direto(projetil.dano)
-        
+
         # Colisão do Jogador com Inimigos
         for inimigo in self.inimigos_grupo:
             if pygame.sprite.collide_mask(self.player, inimigo):
                 self.player.tomar_dano(inimigo)
 
-        # Coleta de itens (não precisa de mudanças)
+        # Coleta de itens
         itens_coletados = pygame.sprite.spritecollide(self.player, self.item_group, dokill=True)
         for item in itens_coletados:
             self.player.coletar_item(item)
@@ -455,18 +450,18 @@ class Game:
         # Colisão com Dot (dano ao longo do tempo)
         if self.auras_grupo:
             colisoes_aura = pygame.sprite.groupcollide(
-                self.inimigos_grupo, 
-                self.auras_grupo, 
-                False, 
-                False, 
+                self.inimigos_grupo,
+                self.auras_grupo,
+                False,
+                False,
                 pygame.sprite.collide_circle
             )
             for inimigo, auras in colisoes_aura.items():
-                for aura in auras: 
+                for aura in auras:
                     dano_neste_frame = aura.dano_por_segundo * delta_time
                     inimigo.vida -= dano_neste_frame
 
-        # Lógica de morte de inimigos (não precisa de mudanças)
+        # Lógica de morte de inimigos
         for inimigo in list(self.inimigos_grupo):
             if inimigo.vida <= 0:
                 inimigo.morrer((self.all_sprites, self.item_group))

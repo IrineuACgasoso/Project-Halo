@@ -119,7 +119,7 @@ class GuiltySpark(InimigoBase):
                 self.laser_attack() # Dispara o laser
                 self.estado_ataque = 'movendo' # Volta para o estado de movimento
                 self.velocidade = 100 # Restaura a velocidade
-                novo_cooldown = [2000, 4000, 6000, 8000]
+                novo_cooldown = [2000, 3000, 4000, 5000]
                 self.cooldown_laser = random.choice(novo_cooldown)
         if self.estado_ataque == 'preparando':
             self.image = self.sprites[self.estado_animacao][1]

@@ -43,7 +43,9 @@ class Player(pygame.sprite.Sprite):
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
-        self.mask = pygame.mask.from_surface(self.image)
+        self.tamanho_hitbox = self.rect.width / 1.5
+        self.hitbox = pygame.Rect(0, 0, self.tamanho_hitbox, self.rect.height)
+        self.hitbox.center = self.rect.center
         #armas do player
         self.armas = {}
 
@@ -52,7 +54,6 @@ class Player(pygame.sprite.Sprite):
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
         self.buff_cooldown_ativo = False 
-        self.tamanho_hitbox = self.rect.width / 1.5
         #exp
         self.contador_niveis = 1
         self.experiencia_level_up_base = 100 
@@ -98,6 +99,8 @@ class Player(pygame.sprite.Sprite):
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
         self.rect.center = self.posicao
+        self.hitbox.center = self.rect.center
+
 
     def tomar_dano(self, inimigo):
         if not self.invencivel:
@@ -162,8 +165,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.aumento_xp += 4
         
-        self.experiencia_level_up = 100 * self.aumento_xp
-
+        self.experiencia_level_up = 100 + 10 * self.contador_niveis
     def adicionar_tempo_buff(self, segundos):
         self.buff_timer += segundos
 

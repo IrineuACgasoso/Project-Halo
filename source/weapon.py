@@ -44,6 +44,113 @@ class Arma(ABC):
     def get_estatisticas_para_exibir(self):
         pass
 
+class RifleAssalto(Arma):
+    def __init__(self, jogador, grupos, game):
+        super().__init__(jogador=jogador)
+        self.game = game
+        self.nome = 'Rifle de Assalto'
+        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
+        
+        # Carregue a imagem do seu projétil aqui
+        self.surface_projetil = pygame.image.load(join('assets', 'img', 'player', 'ra.png')).convert_alpha()
+
+        
+        # Status Iniciais
+        self.nivel = 1
+        self.dano_base = 1
+        self.cooldown_base = 250 # tempo em milissegundos para disparos rápidos
+        self.projeteis_por_disparo = 1
+        self.velocidade_projetil = 2000
+        
+        # Atributos atuais (herdados da classe pai Arma)
+        self.dano = self.dano_base
+        self.cooldown = self.cooldown_base
+        self.ultimo_tiro = 0
+        
+    def encontrar_inimigo_mais_proximo(self):
+        if not self.inimigos_grupo:
+            return None
+        
+        inimigo_mais_proximo = None
+        menor_distancia = float('inf')
+        
+        for inimigo in self.inimigos_grupo:
+            distancia = self.jogador.posicao.distance_to(inimigo.posicao)
+            if distancia < menor_distancia:
+                menor_distancia = distancia
+                inimigo_mais_proximo = inimigo
+                
+        return inimigo_mais_proximo
+
+    def disparar(self):
+        inimigo_alvo = self.encontrar_inimigo_mais_proximo()
+        if inimigo_alvo and inimigo_alvo.alive():
+            # Calcula a direção para o inimigo mais próximo
+            direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
+            
+            # Dispara projéteis múltiplos, se o nível permitir
+            for _ in range(self.projeteis_por_disparo):
+                Projetil(
+                    surface=self.surface_projetil, 
+                    jogador=self.jogador,
+                    velocidade=self.velocidade_projetil,
+                    direcao=direcao_vetor,
+                    dano=self.dano,
+                    grupo_sprites=(self.all_sprites, self.projeteis_grupo)
+                )
+
+    def update(self, jogador=None):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_tiro > self.cooldown:
+            self.disparar()
+            self.ultimo_tiro = agora
+
+    def upgrade(self):
+        super().upgrade() # Aumenta self.nivel
+        
+        # Aumenta o dano a cada nível
+        self.dano += 1
+        
+        # Reduz o cooldown a cada 2 níveis (disparos mais rápidos)
+        if self.nivel % 2 == 0:
+            self.cooldown = max(50, self.cooldown - 20)
+        
+        # Adiciona projéteis extras em níveis específicos
+        if self.nivel == 3:
+            self.projeteis_por_disparo = 2
+        elif self.nivel == 5:
+            self.projeteis_por_disparo = 3
+
+    def ver_proximo_upgrade(self):
+        prox_nivel = self.nivel + 1
+        prox_dano = self.dano + 1
+        prox_cooldown = max(50, self.cooldown - 10)
+        
+        # Lógica para exibir múltiplos projéteis
+        if prox_nivel == 3:
+            prox_projeteis = self.projeteis_por_disparo + 1
+        elif prox_nivel == 5:
+            prox_projeteis = self.projeteis_por_disparo + 1
+        else:
+            prox_projeteis = self.projeteis_por_disparo
+        
+        return {
+            'nivel': prox_nivel,
+            'dano': prox_dano,
+            'cooldown': prox_cooldown,
+            'projeteis': prox_projeteis
+        }
+
+    def get_estatisticas_para_exibir(self):
+        stats_futuros = self.ver_proximo_upgrade()
+        
+        stats_formatados = [
+            f"Dano: {self.dano} -> {stats_futuros['dano']}",
+            f"Cadência de Tiro: {self.cooldown}ms -> {stats_futuros['cooldown']}ms",
+            f"Projéteis: {self.projeteis_por_disparo} -> {stats_futuros['projeteis']}"
+        ]
+        return stats_formatados
+    
 class Arma_Loop(Arma):
     def __init__(self, jogador, grupos, game):
         #grupos index: 0 = all_sprites, 1= grupo_projeteis 2= grupo_inimigos
@@ -69,7 +176,6 @@ class Arma_Loop(Arma):
         self.nome = "Bola Calderânica"
         self.descricao = """Capaz de rebater nas paredes!"""
         
-
     def disparar(self):
         
         #detecta o inimigo mais próximo
@@ -209,6 +315,7 @@ class Projetil(pygame.sprite.Sprite):
     def __init__(self, surface, jogador, velocidade, direcao, dano, grupo_sprites):
         #classe projétil multipropósito, capaz de receber velocidade e imagem diferente dependendo do tipo de arma
         super().__init__(grupo_sprites) 
+        self.jogador = jogador 
         #imagem e rect
         self.image = surface
         self.rect = self.image.get_rect(center=jogador.posicao)
@@ -227,6 +334,10 @@ class Projetil(pygame.sprite.Sprite):
         #move o rect do projétil
         self.rect.centerx = round(self.posicao.x)
         self.rect.centery = round(self.posicao.y)
+
+        #Remove o projétil se ele estiver a mais de 1500 pixels do jogador
+        if self.posicao.distance_to(self.jogador.posicao) > 1500:
+            self.kill()
 
 
 class Projetil_PingPong(Projetil):
@@ -379,26 +490,31 @@ class Projetil_Area(pygame.sprite.Sprite):
         self.dano_por_segundo = 0
         self.image = pygame.Surface((1,1))
         self.rect = self.image.get_rect(center=self.jogador.posicao)
-        
         self.inimigos_atingidos = set()
-
         self.atualizar_stats(raio, dano_por_segundo)
 
     def atualizar_stats(self, novo_raio, novo_dano):
+        # Apenas atualiza se os stats mudaram
+        if self.raio == novo_raio and self.dano_por_segundo == novo_dano:
+            return
+
         self.raio = novo_raio
         self.dano_por_segundo = novo_dano
         
+        # Recria a superfície apenas quando o raio muda
         self.image = pygame.Surface((self.raio * 2, self.raio * 2), pygame.SRCALPHA)
+        
+        # Redimensiona a imagem dos parênteses e a 'blita'
+        imagem_redimensionada = pygame.transform.scale(self.imagem_parenteses_original, (self.raio * 2, self.raio * 2))
+        self.image.blit(imagem_redimensionada, (0,0))
+        
+        # Desenha o círculo
         pygame.draw.circle(self.image, (255, 255, 0, 25), (self.raio, self.raio), self.raio)
-
-        self.imagem_parenteses_red = pygame.transform.scale(self.imagem_parenteses_original, (self.raio * 2, self.raio * 2))
-            
-
-        self.image.blit(self.imagem_parenteses_red, (0,0))
+        
         self.rect = self.image.get_rect(center=self.jogador.posicao)
 
-    def update(self, delta_time):
-        self.rect.center = self.jogador.posicao
+        def update(self, delta_time):
+            self.rect.center = self.jogador.posicao
 
 class ArmaArbitro(Arma):
     def __init__(self, jogador, grupos, game):

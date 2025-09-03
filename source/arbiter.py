@@ -28,8 +28,9 @@ class BossArbiter(InimigoBase):
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
-        self.mask = pygame.mask.from_surface(self.image)
-
+        nova_largura = self.rect.width / 2
+        self.hitbox = pygame.Rect(0, 0, nova_largura, self.rect.height)
+        self.hitbox.center = self.rect.center
 
         #invisibilidade 
         self.cooldown_invisibilidade = 8000
@@ -49,8 +50,8 @@ class BossArbiter(InimigoBase):
 
     @property
     def collision_rect(self):
-        "Retorna a hitbox de Didact."
-        return self.mask
+        "Retorna a hitbox de Arbiter."
+        return self.hitbox
     
     def carabin(self):
         Carabin(
@@ -104,6 +105,8 @@ class BossArbiter(InimigoBase):
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+            self.hitbox.center = self.rect.center
+
         if not self.invisivel:
             if agora - self.ultima_invisibi >= self.cooldown_invisibilidade:
                 novo_cooldown = [10000, 11000, 12000, 13000]
@@ -121,7 +124,7 @@ class BossArbiter(InimigoBase):
                 self.image.set_alpha(255) # Torna a sprite completamente visível novamente
             else:
                 #Falha na invisibilidade
-                if self.mask.colliderect(self.jogador.hitbox):
+                if self.hitbox.colliderect(self.jogador.hitbox):
                     self.tempo_desde_falha = pygame.time.get_ticks()
                     self.image.set_alpha(100)
                 if agora - self.tempo_desde_falha >= self.duracao_falha:

@@ -32,15 +32,15 @@ class InimigoBase(pygame.sprite.Sprite):
         
     def aplicar_dificuldade(self):
         if 13 >= self.jogador.contador_niveis > 8:
-            self.vida *= self.jogador.contador_niveis / 5
-            self.dano *= self.jogador.contador_niveis / 5
+            self.vida *= self.jogador.contador_niveis / 8
+            self.dano *= self.jogador.contador_niveis / 8
         elif 18 >= self.jogador.contador_niveis > 13:
-            self.vida *= self.jogador.contador_niveis / 2
-            self.dano *= self.jogador.contador_niveis / 2
+            self.vida *= self.jogador.contador_niveis / 7
+            self.dano *= self.jogador.contador_niveis / 7
             self.velocidade *= self.jogador.contador_niveis / 10
         elif 30 >= self.jogador.contador_niveis > 18:
-            self.vida *= self.jogador.contador_niveis
-            self.dano *= self.jogador.contador_niveis
+            self.vida *= self.jogador.contador_niveis / 6
+            self.dano *= self.jogador.contador_niveis / 6
             self.velocidade *= self.jogador.contador_niveis / 15
         elif self.jogador.contador_niveis > 30:
             self.constante_lategame = self.jogador.contador_niveis - 15
@@ -153,7 +153,7 @@ class InimigoBug(InimigoBase):
 
 class Grunt(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=2, dano_base=15, velocidade_base=90)
+        super().__init__(posicao, grupos, jogador, game, vida_base=4, dano_base=15, velocidade_base=90)
         self.image = pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 80))
         self.rect = self.image.get_rect(center=self.posicao)
@@ -229,7 +229,6 @@ class PlasmaGun(ProjetilInimigoBase):
         self.image = pygame.image.load(join('assets', 'img', 'plasmagun.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
 
 class Carabin(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao =4000):
@@ -237,7 +236,6 @@ class Carabin(ProjetilInimigoBase):
         self.image = pygame.image.load(join('assets', 'img', 'carabin.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
 
 
 class Infection(InimigoBase):

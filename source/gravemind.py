@@ -45,7 +45,9 @@ class Gravemind(InimigoBase):
         self.rect = self.image.get_rect(centerx=posicao[0], bottom=posicao[1])
         self.posicao = pygame.math.Vector2(self.rect.center)
         #hitbox
-        self.mask = pygame.mask.from_surface(self.image)
+        nova_largura = self.rect.width / 3
+        self.hitbox = pygame.Rect(0, 0, nova_largura, self.rect.height)
+        self.hitbox.center = self.rect.center
 
         self.frame_atual = 0
         self.velocidade_animacao = 400
@@ -60,25 +62,25 @@ class Gravemind(InimigoBase):
         #invocar infections
         self.tempo_invocacao = 0
         self.ultimo_spawn = 0
-        self.numero_de_infeccao = 20
+        self.numero_de_infeccao = 5
         self.intervalo_spawn_infeccao = 250
         self.cooldown_invocacao = 8000
         self.infecoes_restantes = 0
         if self.is_final_form:
-            self.numero_de_infeccao = 50
+            self.numero_de_infeccao = 20
             self.intervalo_spawn_infeccao = 100
             self.cooldown_invocacao = 5000
             
 
         #acid breath
         self.tempo_acido = 0
-        self.numero_de_tiros = 20
+        self.numero_de_tiros = 10
         self.tempo_burst = 0
         self.intervalo_burst = 250
         self.cooldown_acid_breath = 8000
         self.tiros_restantes = 0
         if self.is_final_form:
-            self.numero_de_tiros = 30
+            self.numero_de_tiros = 20
             self.intervalo_burst = 100
             self. cooldown_acid_breath = 6000
 
@@ -92,7 +94,7 @@ class Gravemind(InimigoBase):
     @property
     def collision_rect(self):
         """Retorna a hitbox específica do Gravemind."""
-        return self.mask
+        return self.hitbox
     
     def atualizar_sprite_respawn(self, delta_time):
         if self.estado_respawn == 'reaparecendo':
@@ -257,13 +259,13 @@ class Gravemind(InimigoBase):
 
 class AcidBreath(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=25,velocidade=300, duracao=3000)
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=25,velocidade=400, duracao=2700)
         self.jogador = jogador
         self.game = game
         self.posicao = pygame.math.Vector2(posicao_inicial)
 
         # Aparência do projétil (imagem temporária)
-        self.image = pygame.image.load(join('assets', 'img', 'acid_breath.png')).convert_alpha()
+        self.image = pygame.image.load(join('assets', 'img', 'gravemind', 'acid_breath.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (48, 48))
         self.rect = self.image.get_rect(center=self.posicao)
         # Calcula a direção para o jogador no momento da criação

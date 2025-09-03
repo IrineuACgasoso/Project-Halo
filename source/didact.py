@@ -34,22 +34,24 @@ class Didact(InimigoBase):
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
-        self.mask = pygame.mask.from_surface(self.image)
+        nova_largura = self.rect.width / 2
+        self.hitbox = pygame.Rect(0, 0, nova_largura, self.rect.height)
+        self.hitbox.center = self.rect.center
 
         #pull ability
         self.estado_habilidade = 'parado' # 'parado', 'ataque_pull', 'ataque_laser'
-        self.cooldown_pull = 10000 # 5 segundos de recarga
+        self.cooldown_pull = 1000 # 5 segundos de recarga
         self.tempo_ultimo_pull = pygame.time.get_ticks()
         self.duracao_pull = 5000 # 5 segundos de duração
         self.tempo_inicio_pull = 0
-        self.dano_pull = self.jogador.vida_maxima / 100 # Dano a ser aplicado a cada tick
+        self.dano_pull = self.jogador.vida_maxima / 100
         self.intervalo_dano_pull = 1000  # Intervalo de 250 milissegundos
         self.tempo_ultimo_dano_pull = 0 
 
         #laser ability
-        self.cooldown_laser = 5000
+        self.cooldown_laser = 2000
         self.tempo_ultimo_laser = pygame.time.get_ticks()
-        self.duracao_aviso_laser = 1500 # 1.5 segundos de aviso
+        self.duracao_aviso_laser = 1000 # 1.5 segundos de aviso
         self.duracao_disparo_laser = 500 # 0.5 segundos de disparo
         self.tempo_inicio_laser = 0
         self.posicao_alvo_laser = pygame.math.Vector2()
@@ -57,13 +59,13 @@ class Didact(InimigoBase):
     @property
     def collision_rect(self):
         "Retorna a hitbox de Didact."
-        return self.mask
+        return self.hitbox
 
     def ativar_laser(self):
         agora = pygame.time.get_ticks()
         if agora - self.tempo_ultimo_laser >= self.cooldown_laser:
             # Define os possíveis valores de cooldown (em milissegundos)
-            possiveis_cooldowns = [7000, 8000, 9000, 10000] 
+            possiveis_cooldowns = [5000, 6000, 7000, 8000] 
             self.cooldown_laser = random.choice(possiveis_cooldowns)
             self.estado_habilidade = 'aviso_laser'
             self.tempo_inicio_laser = agora
@@ -100,7 +102,7 @@ class Didact(InimigoBase):
 
     def aplicar_efeito_pull(self, delta_time):
         # A velocidade com que o jogador é puxado
-        velocidade_puxao = 350
+        velocidade_puxao = 525
         # Calcula a direção do jogador para o Didact
         direcao_puxao = self.posicao - self.jogador.posicao
         if direcao_puxao.length() > 0:
@@ -161,6 +163,8 @@ class Didact(InimigoBase):
                 self.estado_habilidade = 'parado'
                 self.image = self.sprites[self.estado_animacao][self.frame_atual] # Retorna para o sprite de animação
                 self.rect.center = self.posicao
+                self.hitbox.center = self.rect.center
+
             else:
                 # Continue aplicando o efeito de puxar
                 self.aplicar_efeito_pull(delta_time)
@@ -184,7 +188,7 @@ class Didact(InimigoBase):
                 direcao.normalize_ip()
                 self.posicao += direcao * self.velocidade * delta_time
                 self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-            if (self.jogador.posicao - self.posicao).length() < 900:
+            if (self.jogador.posicao - self.posicao).length() > 500:
                 self.puxar_jogador()
             if agora - self.tempo_ultimo_laser >= self.cooldown_laser:
                 self.ativar_laser()
@@ -210,7 +214,7 @@ class LaserWarning(pygame.sprite.Sprite):
         
         self.end_pos = self.start_pos + direcao * 2000
 
-        self.duracao = 1500  # 1.5 segundos de aviso
+        self.duracao = 1000  # 1.5 segundos de aviso
         self.largura = 400
         self.tempo_criacao = pygame.time.get_ticks()
 
