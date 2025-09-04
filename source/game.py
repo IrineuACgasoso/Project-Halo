@@ -5,7 +5,7 @@ from settings import *
 from player import Player 
 from menu import *
 from hud import *
-from enemies import InimigoBug, Grunt, Infection, InimigoLadrao, InimigoPython
+from enemies import InimigoBug, Grunt, Infection, Brute
 from weapon import *
 from grupos import AllSprites
 from colaboradores import TelaColaboradores
@@ -74,24 +74,6 @@ class Game:
         self.didact_invocado = False
         self.warden_invocado = False
 
-
-    def iniciar_novo_jogo(self):
-        self.all_sprites.empty()
-        self.item_group.empty()
-        self.projeteis_jogador_grupo.empty()
-        self.inimigos_grupo.empty()
-        self.tempo_proximo_spawn = 0
-        self.intervalo_spawn_atual = 2.0
-        self.hordas_contagem = 0
-
-        # Inicializa player
-        self.player = Player(self, 400, 300)
-        self.hud = HUD(self)
-        self.estado_do_jogo = "jogando"
-
-        #habilidades dos bosses
-        self.gravemind_reborns = 3
-
     def spawnar_inimigo(self, tipo='normal'):
         camera_center_x = self.player.posicao.x
         camera_center_y = self.player.posicao.y
@@ -123,8 +105,15 @@ class Game:
 
             
         else:
-            tipos_de_inimigos = [Infection, Grunt, InimigoBug]
-            inimigo = random.choice(tipos_de_inimigos)
+            chance_inimigo = randint(1, 1000)
+            if 1 <= chance_inimigo < 450:
+                inimigo = Infection
+            elif 450 <= chance_inimigo < 900:
+                inimigo = Grunt
+            elif 900 <= chance_inimigo < 950:
+                inimigo = Brute
+            elif 950 <= chance_inimigo:
+                inimigo = Elite
             inimigo(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
 
     def eventos(self):
@@ -240,7 +229,7 @@ class Game:
                 if self.player.contador_niveis == 100 and self.didact_invocado == False:
                     self.didact_invocado = True
                     self.spawnar_inimigo(tipo='didact')
-                if self.player.contador_niveis == 1 and self.warden_invocado == False:
+                if self.player.contador_niveis == 100 and self.warden_invocado == False:
                     self.warden_invocado = True
                     self.spawnar_inimigo(tipo='warden')
                     
@@ -345,10 +334,10 @@ class Game:
         if not pygame.mixer.get_init():
             pygame.mixer.init()
 
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load(join('assets', 'sounds', 'musica_tema.wav'))
-        pygame.mixer.music.set_volume(0.0)
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.stop()
+        #pygame.mixer.music.load(join('assets', 'sounds', 'musica_tema.wav'))
+        #pygame.mixer.music.set_volume(0.0)
+        #pygame.mixer.music.play(-1)
 
         if not hasattr(self.player, 'armas'):
             self.player.armas = {}

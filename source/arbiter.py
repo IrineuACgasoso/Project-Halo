@@ -142,8 +142,6 @@ class BossArbiter(InimigoBase):
                 self.cronometro_carabina = 0
                 self.carabina_restante -= 1
                 self.carabin()
-
-                    
         if direcao.x < 0:
                 self.estado_animacao = 'left'
         elif direcao.x > 0:

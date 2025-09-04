@@ -15,10 +15,10 @@ class MenuPrincipal:
         self.selecionada = 0
 
         # Música de fundo
-        self.musica = join('assets', 'sounds', 'musica_menu.ogg')
-        pygame.mixer.music.load(self.musica)
-        pygame.mixer.music.set_volume(0.0)
-        pygame.mixer.music.play(-1)
+        #self.musica = join('assets', 'sounds', 'musica_menu.ogg')
+        #pygame.mixer.music.load(self.musica)
+        #pygame.mixer.music.set_volume(0.0)
+        #pygame.mixer.music.play(-1)
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
