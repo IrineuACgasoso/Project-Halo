@@ -44,6 +44,34 @@ class Arma(ABC):
     def get_estatisticas_para_exibir(self):
         pass
 
+class Projetil(pygame.sprite.Sprite):
+    def __init__(self, surface, jogador, velocidade, direcao, dano, grupo_sprites):
+        #classe projétil multipropósito, capaz de receber velocidade e imagem diferente dependendo do tipo de arma
+        super().__init__(grupo_sprites) 
+        self.jogador = jogador 
+        #imagem e rect
+        self.image = surface
+        self.rect = self.image.get_rect(center=jogador.posicao)
+        
+        #posicao e movimento
+        self.posicao = pygame.math.Vector2(jogador.posicao)
+        self.direcao = pygame.math.Vector2(direcao)
+        self.velocidade = velocidade
+
+        #logica de armas
+        self.dano = dano
+        self.inimigos_atingidos = set()
+    def update(self, delta_time):
+        #faz se mover na direção do vetor dado na velocidade correta
+        self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual se movendo para a direção
+        #move o rect do projétil
+        self.rect.centerx = round(self.posicao.x)
+        self.rect.centery = round(self.posicao.y)
+
+        #Remove o projétil se ele estiver a mais de 1500 pixels do jogador
+        if self.posicao.distance_to(self.jogador.posicao) > 1500:
+            self.kill()
+
 class RifleAssalto(Arma):
     def __init__(self, jogador, grupos, game):
         super().__init__(jogador=jogador)
@@ -120,16 +148,25 @@ class RifleAssalto(Arma):
             self.projeteis_por_disparo = 2
         elif self.nivel == 5:
             self.projeteis_por_disparo = 3
+        elif self.nivel == 7:
+            self.projeteis_por_disparo = 4
+        elif self.nivel == 9:
+            self.projeteis_por_disparo = 5
+
 
     def ver_proximo_upgrade(self):
         prox_nivel = self.nivel + 1
         prox_dano = self.dano + 1
-        prox_cooldown = max(50, self.cooldown - 10)
+        prox_cooldown = max(50, self.cooldown - 20)
         
         # Lógica para exibir múltiplos projéteis
         if prox_nivel == 3:
             prox_projeteis = self.projeteis_por_disparo + 1
         elif prox_nivel == 5:
+            prox_projeteis = self.projeteis_por_disparo + 1
+        elif prox_nivel == 7:
+            prox_projeteis = self.projeteis_por_disparo + 1
+        elif prox_nivel == 9:
             prox_projeteis = self.projeteis_por_disparo + 1
         else:
             prox_projeteis = self.projeteis_por_disparo
@@ -170,8 +207,8 @@ class Arma_Loop(Arma):
         #específicos da arma
         self.nivel = 1
         self.dano = 5
-        self.velocidade = 1500
-        self.cooldown = 1500
+        self.velocidade = 2000
+        self.cooldown = 1000
         self.rebatidas = 2
         self.nome = "Bola Calderânica"
         self.descricao = """Capaz de rebater nas paredes!"""
@@ -210,11 +247,11 @@ class Arma_Loop(Arma):
         #a cada 3 niveis fica mais rapido
 
         self.rebatidas += 1
-        self.dano += 5
+        self.dano += 2
 
     def ver_proximo_upgrade(self):
         prox_nivel = self.nivel + 1
-        prox_dano = self.dano + 1
+        prox_dano = self.dano + 2
         prox_rebatidas = self.rebatidas + 1
 
         return {
@@ -233,6 +270,52 @@ class Arma_Loop(Arma):
 
         return stats_formatados
     
+class Projetil_PingPong(Projetil):
+    def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, rebatidas):
+        super().__init__(surface, jogador, velocidade, direcao, dano, grupos)
+        self.rebatidas = rebatidas
+        self.jogador = jogador
+        self.posicao_inicial = jogador.posicao
+        self.inimigos_ja_atingidos = set()
+
+    def update(self, delta_time):
+        super().update(delta_time)
+
+        #lógica para quicar nas extremidades da tela
+        rebateu = False
+
+        camera_borda_esquerda = self.jogador.posicao.x - (largura_tela / 2)
+        camera_borda_direita = self.jogador.posicao.x + (largura_tela / 2)
+        camera_borda_topo = self.jogador.posicao.y - (altura_tela / 2)
+        camera_borda_baixo = self.jogador.posicao.y + (altura_tela / 2)
+
+        #checa paredes horizontais
+        if self.posicao.x <= camera_borda_esquerda:
+            self.posicao.x = camera_borda_esquerda
+            self.direcao.x *= -1
+            rebateu = True
+        elif self.posicao.x >= camera_borda_direita:
+            self.posicao.x = camera_borda_direita
+            self.direcao.x *= -1
+            rebateu = True
+
+        #checa paredes verticais
+        if self.posicao.y <= camera_borda_topo:
+            self.posicao.y = camera_borda_topo #
+            self.direcao.y *= -1
+            rebateu = True
+        elif self.posicao.y >= camera_borda_baixo:
+            self.posicao.y = camera_borda_baixo 
+            self.direcao.y *= -1
+            rebateu = True
+        
+        #so conta uma rebatidade nas bordas
+        if rebateu:
+            self.rebatidas -= 1
+
+        if self.rebatidas <= 0:
+            self.kill()
+
 class ArmaLista(Arma):
     def __init__(self, jogador, grupos, game):
         super().__init__(jogador=jogador)
@@ -308,84 +391,7 @@ class ArmaLista(Arma):
             f"Num. Listas: {stats_futuros['num_listas']} -> {stats_futuros['num_listas']}"
         ]
 
-        return stats_formatados
-
-
-class Projetil(pygame.sprite.Sprite):
-    def __init__(self, surface, jogador, velocidade, direcao, dano, grupo_sprites):
-        #classe projétil multipropósito, capaz de receber velocidade e imagem diferente dependendo do tipo de arma
-        super().__init__(grupo_sprites) 
-        self.jogador = jogador 
-        #imagem e rect
-        self.image = surface
-        self.rect = self.image.get_rect(center=jogador.posicao)
-        
-        #posicao e movimento
-        self.posicao = pygame.math.Vector2(jogador.posicao)
-        self.direcao = pygame.math.Vector2(direcao)
-        self.velocidade = velocidade
-
-        #logica de armas
-        self.dano = dano
-        self.inimigos_atingidos = set()
-    def update(self, delta_time):
-        #faz se mover na direção do vetor dado na velocidade correta
-        self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual se movendo para a direção
-        #move o rect do projétil
-        self.rect.centerx = round(self.posicao.x)
-        self.rect.centery = round(self.posicao.y)
-
-        #Remove o projétil se ele estiver a mais de 1500 pixels do jogador
-        if self.posicao.distance_to(self.jogador.posicao) > 1500:
-            self.kill()
-
-
-class Projetil_PingPong(Projetil):
-    def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, rebatidas):
-        super().__init__(surface, jogador, velocidade, direcao, dano, grupos)
-        self.rebatidas = rebatidas
-        self.jogador = jogador
-        self.posicao_inicial = jogador.posicao
-
-    def update(self, delta_time):
-        super().update(delta_time)
-
-        #lógica para quicar nas extremidades da tela
-        rebateu = False
-
-        camera_borda_esquerda = self.jogador.posicao.x - (largura_tela / 2)
-        camera_borda_direita = self.jogador.posicao.x + (largura_tela / 2)
-        camera_borda_topo = self.jogador.posicao.y - (altura_tela / 2)
-        camera_borda_baixo = self.jogador.posicao.y + (altura_tela / 2)
-
-        #checa paredes horizontais
-        if self.posicao.x <= camera_borda_esquerda:
-            self.posicao.x = camera_borda_esquerda
-            self.direcao.x *= -1
-            rebateu = True
-        elif self.posicao.x >= camera_borda_direita:
-            self.posicao.x = camera_borda_direita
-            self.direcao.x *= -1
-            rebateu = True
-
-        #checa paredes verticais
-        if self.posicao.y <= camera_borda_topo:
-            self.posicao.y = camera_borda_topo #
-            self.direcao.y *= -1
-            rebateu = True
-        elif self.posicao.y >= camera_borda_baixo:
-            self.posicao.y = camera_borda_baixo 
-            self.direcao.y *= -1
-            rebateu = True
-        
-        #so conta uma rebatidade nas bordas
-        if rebateu:
-            self.rebatidas -= 1
-
-        if self.rebatidas <= 0:
-            self.kill()
-
-    
+        return stats_formatados    
 
 class Projetil_Lista(Projetil):
     def __init__(self, surface, jogador, velocidade, direcao, dano, grupos, angulo_inicial, distancia_orbita, velocidade_rotacao, duracao):
@@ -555,11 +561,11 @@ class ArmaArbitro(Arma):
 
     def upgrade(self):
         super().upgrade()
-        self.dano += 1
+        self.dano += 2
         self.sprite_arbiter.dano = self.dano 
-        self.sprite_arbiter.velocidade_correr += 20
-        self.sprite_arbiter.raio_deteccao_inimigo += 20
-        self.sprite_arbiter.raio_deteccao_item += 20
+        self.sprite_arbiter.velocidade_correr += 25
+        self.sprite_arbiter.raio_deteccao_inimigo += 30
+        self.sprite_arbiter.raio_deteccao_item += 30
     
     def ver_proximo_upgrade(self):
 
@@ -572,12 +578,11 @@ class ArmaArbitro(Arma):
             raio_ini_atual = 300   
             raio_item_atual = 200  
 
-
         prox_nivel = self.nivel + 1
-        prox_dano = self.dano + 1
-        prox_velocidade = velocidade_atual + 20
-        prox_raio_ini = raio_ini_atual + 20
-        prox_raio_item = raio_item_atual + 20
+        prox_dano = self.dano + 2
+        prox_velocidade = velocidade_atual + 25
+        prox_raio_ini = raio_ini_atual + 30
+        prox_raio_item = raio_item_atual + 30
 
         return {
             'nivel': prox_nivel,

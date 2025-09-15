@@ -50,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.armas = {}
 
         #status
-        self.vida_maxima = 1000
+        self.vida_maxima = 500
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
         self.buff_cooldown_ativo = False 
@@ -148,24 +148,15 @@ class Player(pygame.sprite.Sprite):
         self.experiencia_atual -= self.experiencia_level_up
         self.contador_niveis += 1
         self.vida_maxima += 25
+        self.velocidade += 10
         self.pontuacao += 100
         self.curar(self.vida_maxima)
 
         self.game.estado_do_jogo = 'level_up'
         self.game.tela_de_upgrade_ativa = TelaDeUpgrade(self.game.tela, self, self.game)
-
-        if 1 <= self.contador_niveis <= 5:
-            self.aumento_xp += 1
-        elif 5 < self.contador_niveis <= 10:
-            self.aumento_xp += 2
-        elif 10 < self.contador_niveis <= 15:
-            self.aumento_xp += 2.5
-        elif 15 < self.contador_niveis <= 20:
-            self.aumento_xp += 3
-        else:
-            self.aumento_xp += 4
         
-        self.experiencia_level_up = 100 + 10 * self.contador_niveis
+        self.experiencia_level_up = self.experiencia_level_up_base + 10 * self.contador_niveis
+
     def adicionar_tempo_buff(self, segundos):
         self.buff_timer += segundos
 

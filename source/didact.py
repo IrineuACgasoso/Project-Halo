@@ -8,7 +8,7 @@ import math
 
 class Didact(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=1000, dano_base=40, velocidade_base=50)
+        super().__init__(posicao, grupos, jogador, game, vida_base=7500, dano_base=40, velocidade_base=50)
         self.game = game
         #sprites
         self.sprites = {}
@@ -130,22 +130,22 @@ class Didact(InimigoBase):
         chance= randint(1,1000)
         if chance >= 950:
             Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
+            for _ in range(8):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         elif 800 <= chance < 950:
             chance2 = randint(1,4)
             if chance2 == 4:
                 Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
+            for _ in range(7):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         elif 500 <= chance < 800:
-            for _ in range(3):
+            for _ in range(6):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         else:
-            for _ in range(2):
+            for _ in range(4):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         self.kill()
@@ -235,40 +235,5 @@ class LaserWarning(pygame.sprite.Sprite):
         if agora - self.tempo_criacao >= self.duracao:
             self.kill() # Remove o aviso depois que o tempo de vida termina
 
-class Laser(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, posicao_final, grupos, game, player):
-        super().__init__(
-            posicao_inicial=posicao_inicial,
-            grupos=grupos,
-            jogador=player, # O jogador já está definido como alvo na classe base
-            game=game,
-            dano=player.vida_maxima/2,
-            velocidade=5000, # Velocidade do projétil, ajustada para o laser
-            duracao=1500 # A duração em milissegundos
-        )
-
-        self.posicao_alvo_laser = pygame.math.Vector2(posicao_final)
-        self.direcao = self.posicao_alvo_laser - self.posicao
-        if self.direcao.length() > 0:
-            self.direcao.normalize_ip()
-        else:
-            self.direcao = pygame.math.Vector2(1, 0)
-
-        #sprite
-        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'didact', 'laser.gif')).convert_alpha(), (150, 150))
-        self.image = laser_img_original        
-        # Calcula o ângulo em graus a partir da direção
-        angulo = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
-        self.image = pygame.transform.rotate(laser_img_original, angulo)        
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
-
-        #colisao
-        self.ja_colidiu = False
-
-    def update(self, delta_time):
-        super().update(delta_time)
-        self.rect.center = self.posicao
-        
 
      

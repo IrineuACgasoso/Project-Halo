@@ -4,7 +4,8 @@ from os.path import join
 from items import *
 from player import *
 from settings import *
-from projectiles import *
+from projetil import PlasmaGun, Dizimator, Carabin
+from items import *
 
 
 class InimigoBase(pygame.sprite.Sprite):
@@ -32,22 +33,10 @@ class InimigoBase(pygame.sprite.Sprite):
 
         
     def aplicar_dificuldade(self):
-        if 13 >= self.jogador.contador_niveis > 8:
-            self.vida *= self.jogador.contador_niveis / 8
-            self.dano *= self.jogador.contador_niveis / 8
-        elif 18 >= self.jogador.contador_niveis > 13:
-            self.vida *= self.jogador.contador_niveis / 7
-            self.dano *= self.jogador.contador_niveis / 7
-            self.velocidade *= self.jogador.contador_niveis / 10
-        elif 30 >= self.jogador.contador_niveis > 18:
-            self.vida *= self.jogador.contador_niveis / 6
-            self.dano *= self.jogador.contador_niveis / 6
-            self.velocidade *= self.jogador.contador_niveis / 15
-        elif self.jogador.contador_niveis > 30:
-            self.constante_lategame = self.jogador.contador_niveis - 15
-            self.vida *= self.constante_lategame * (self.jogador.contador_niveis)
-            self.dano *= self.constante_lategame * (self.jogador.contador_niveis)
-            self.velocidade *= self.jogador.contador_niveis / 10
+        self.vida *= 1 + self.jogador.contador_niveis / 10
+        self.dano *= 1 + self.jogador.contador_niveis / 10
+        self.velocidade *= 1 + self.jogador.contador_niveis / 100
+
 
     def morrer(self, grupos):
         dado = randint(0, 1000)
@@ -73,50 +62,6 @@ class InimigoBase(pygame.sprite.Sprite):
         """Retorna o retângulo de colisão para este inimigo."""
         return self.rect
 
-class InimigoBug(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=1, dano_base=10, velocidade_base=110)
-        spritesheet = pygame.image.load(join('assets', 'img', 'bug.png'))
-        self.animacoes = self.fatiar_spritesheet(spritesheet)
-        self.estado_animacao = 'down'
-        self.frame_atual = 0
-        self.velocidade_animacao = 150
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-        self.image = self.animacoes[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=posicao)
-        
-    def fatiar_spritesheet(self, sheet):
-        largura_frame = 32
-        altura_frame = 32
-        animacoes = {'up': [], 'left': [], 'right': [], 'down': []}
-        for linha, nome_animacao in enumerate(['down', 'left', 'right', 'up']):
-            for coluna in range(4):
-                x = coluna * largura_frame
-                y = linha * altura_frame
-                frame = sheet.subsurface(pygame.Rect(x, y, largura_frame, altura_frame))
-                frame_escalado = pygame.transform.scale(frame, (100, 100))
-                animacoes[nome_animacao].append(frame_escalado)
-        return animacoes
-
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.animacoes[self.estado_animacao])
-            self.image = self.animacoes[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.rect.center)
-
-    def update(self, delta_time):
-        direcao = (self.jogador.posicao - self.posicao).normalize() if (self.jogador.posicao - self.posicao).length() > 0 else pygame.math.Vector2()
-        self.posicao += direcao * self.velocidade * delta_time
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-        if abs(direcao.y) > abs(direcao.x):
-            self.estado_animacao = 'up' if direcao.y < 0 else 'down'
-        elif abs(direcao.x) > 0:
-            self.estado_animacao = 'left' if direcao.x < 0 else 'right'
-        self.animar()
-
-
 class Grunt(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
         super().__init__(posicao, grupos, jogador, game, vida_base=4, dano_base=15, velocidade_base=90)
@@ -127,7 +72,7 @@ class Grunt(InimigoBase):
         self.vida = 2
         self.dano = 15
         #arma
-        self.plasma_cooldown = 4000
+        self.plasma_cooldown = 8000
         self.ultimo_tiro = pygame.time.get_ticks()
         #pre animacao
         self.sprites = {}
@@ -169,7 +114,9 @@ class Grunt(InimigoBase):
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
-            self.atacar_com_projetil()
+            novo_cooldown = [8000, 9000, 10000, 11000]
+            self.plasma_cooldown = random.choice(novo_cooldown)
+            self.plasma()
             self.ultimo_tiro = agora
         if direcao.x < 0:
             self.estado_animacao = 'left'
@@ -177,7 +124,7 @@ class Grunt(InimigoBase):
             self.estado_animacao = 'right'
         self.animar()
 
-    def atacar_com_projetil(self):
+    def plasma(self):
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
@@ -188,6 +135,61 @@ class Grunt(InimigoBase):
             dano=5,
             velocidade=250
         )    
+
+class Jackal(InimigoBase):
+    def __init__(self, posicao, grupos, jogador, game):
+        super().__init__(posicao, grupos, jogador, game, vida_base=2000, dano_base=10, velocidade_base=50)
+        #sprites
+        #red
+        self.sprites_red = {}
+        self.sprites_red['right'] = [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jackal', 'jackred.png')).convert_alpha(), (130,130)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jackal', 'jackred2.png')).convert_alpha(), (130,130)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jackal', 'jackred3.png')).convert_alpha(), (130,130))
+            ]
+        self.sprites_red['left'] = [
+            pygame.transform.flip(sprite, True, False) for sprite in self.sprites_red['right']
+        ]
+        #blue
+        self.sprites_blue = {}
+        self.sprites_blue['left'] = [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jackal', 'jackblue.png')).convert_alpha(), (150,150)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jackal', 'jackblue2.png')).convert_alpha(), (150,150)),
+            ]
+        self.sprites_blue['right'] = [
+            pygame.transform.flip(sprite, True, False) for sprite in self.sprites_blue['left']
+        ]
+        #Animação
+        self.estado_animacao = 'right'
+        self.frame_atual = 0
+        self.velocidade_animacao = 400
+        self.ultimo_update_animacao = pygame.time.get_ticks()
+        cores = [self.sprites_red, self.sprites_blue]
+        self.sprites_escolhidas = random.choice(cores)
+        self.image = self.sprites_escolhidas[self.estado_animacao][self.frame_atual]
+        self.rect = self.image.get_rect(center=posicao)
+
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.sprites_escolhidas[self.estado_animacao])
+            self.image = self.sprites_escolhidas[self.estado_animacao][self.frame_atual]
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+    def update(self, delta_time):
+        direcao = (self.jogador.posicao - self.posicao)
+        agora = pygame.time.get_ticks()
+        if direcao.length() > 0:
+            direcao.normalize_ip()
+            self.posicao += direcao * self.velocidade * delta_time
+            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        if direcao.x < 0:
+            self.estado_animacao = 'left'
+        elif direcao.x > 0:
+            self.estado_animacao = 'right'
+    
+        self.animar()
 
 class Infection(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
@@ -279,6 +281,12 @@ class Brute(InimigoBase):
             tamanho=(48,48),
             dano=15,
             velocidade=800)
+    
+    def morrer(self, grupos):
+        for _ in range(3):
+            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=grupos)
+        self.kill()
 
     def animar(self):
         agora = pygame.time.get_ticks()
@@ -312,7 +320,7 @@ class Brute(InimigoBase):
 
 class Elite(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=20,dano_base=25, velocidade_base=90)
+        super().__init__(posicao, grupos, jogador, game, vida_base=20,dano_base=20, velocidade_base=90)
         self.game
 
         #sprites
@@ -358,6 +366,12 @@ class Elite(InimigoBase):
             tamanho=(12, 12)
         )
 
+    def morrer(self, grupos):
+        for _ in range(3):
+            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=grupos)
+        self.kill()
+
     def animar(self):
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
@@ -392,10 +406,6 @@ class Elite(InimigoBase):
         else:
             if self.vida_critica:
                 self.image.set_alpha(0)
-
-                
-            
-
         if direcao.length() < 500:
             self.velocidade = 0
         else:

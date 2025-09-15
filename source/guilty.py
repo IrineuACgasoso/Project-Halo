@@ -5,10 +5,11 @@ from enemies import *
 from game import *
 from items import *
 from player import *
+from projetil import *
 
 class GuiltySpark(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=200, dano_base=40, velocidade_base= 100)
+        super().__init__(posicao, grupos, jogador, game, vida_base=5000, dano_base=80, velocidade_base= 280)
         self.game= game
         #sprites
         self.sprites = {}
@@ -32,15 +33,17 @@ class GuiltySpark(InimigoBase):
         self.mask = pygame.mask.from_surface(self.image)
 
         #laserbeam
-        self.cooldown_laser = 5000
+        self.cooldown_laser = 3000
         self.ultimo_laser = pygame.time.get_ticks()
         self.estado_ataque = 'movendo'
+
+        self.velocidade_anterior = self.velocidade_base
 
     def laser_attack(self):
         # Calcula a direção para o jogador
         direcao = (self.jogador.posicao - self.posicao).normalize()
         """Cria uma instância do laser."""
-        GuiltyLaser(
+        LaserBeam(
             posicao_inimigo=self.posicao,
             grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
             jogador=self.jogador,
@@ -62,6 +65,7 @@ class GuiltySpark(InimigoBase):
         self.posicao.y = nova_posicao_y
         # Atualiza a posição do retângulo
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        self.velocidade *= 1.1
 
     def morrer(self, grupos):
         chance= randint(1,1000)
@@ -111,6 +115,7 @@ class GuiltySpark(InimigoBase):
                 self.ultimo_laser = agora
                 self.estado_ataque = 'preparando'
                 self.tempo_preparacao_ataque = agora
+                self.velocidade_anterior = self.velocidade
                 self.velocidade = 0 # Para o movimento
 
         elif self.estado_ataque == 'preparando':
@@ -118,8 +123,9 @@ class GuiltySpark(InimigoBase):
             if agora - self.tempo_preparacao_ataque >= 1250: 
                 self.laser_attack() # Dispara o laser
                 self.estado_ataque = 'movendo' # Volta para o estado de movimento
-                self.velocidade = 100 # Restaura a velocidade
-                novo_cooldown = [2000, 3000, 4000, 5000]
+                self.velocidade = self.velocidade_anterior
+                self.velocidade_anterior = self # Restaura a velocidade
+                novo_cooldown = [2000, 3000, 3500, 4000]
                 self.cooldown_laser = random.choice(novo_cooldown)
         if self.estado_ataque == 'preparando':
             self.image = self.sprites[self.estado_animacao][1]
@@ -131,7 +137,7 @@ class GuiltySpark(InimigoBase):
                 self.estado_animacao = 'right'
             self.animar()
 
-class GuiltyLaser(ProjetilInimigoBase):
+class LaserBeam(ProjetilInimigoBase):
     def __init__(self, posicao_inimigo, grupos, jogador, game, dano, velocidade, duracao):
         super().__init__(posicao_inimigo, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
 

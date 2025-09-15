@@ -6,7 +6,7 @@ from player import *
 from items import *
 class BossArbiter(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=500, dano_base=70, velocidade_base = 90)
+        super().__init__(posicao, grupos, jogador, game, vida_base=9000, dano_base=80, velocidade_base = 90)
         self.game=game
         self.velocidade = self.velocidade_base
         #sprites
@@ -41,7 +41,7 @@ class BossArbiter(InimigoBase):
         self.tempo_desde_falha = 0
 
         #burst carabin
-        self.cooldown_carabin = 4000
+        self.cooldown_carabin = 3000
         self.intervalo_carabina = 75
         self.cronometro_carabina = 0
         self.ultima_carabina = 0
@@ -59,7 +59,7 @@ class BossArbiter(InimigoBase):
             grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
-            dano=15,
+            dano=40,
             velocidade=600,
             tamanho=(16, 16)
         )
@@ -109,11 +109,11 @@ class BossArbiter(InimigoBase):
 
         if not self.invisivel:
             if agora - self.ultima_invisibi >= self.cooldown_invisibilidade:
-                novo_cooldown = [10000, 11000, 12000, 13000]
+                novo_cooldown = [8000, 10000, 11000, 12000]
                 self.cooldown_invisibilidade = random.choice(novo_cooldown)
                 self.invisivel = True
                 self.ultima_invisibi = agora
-                self.velocidade *= 2.5
+                self.velocidade *= 4
                 self.image.set_alpha(0)
         else:
             # Lógica para quando o boss está invisível
@@ -132,7 +132,7 @@ class BossArbiter(InimigoBase):
         #Ativa carabina
         if agora - self.ultima_carabina >= self.cooldown_carabin:
             self.carabina_restante = self.contagem_carabina
-            novo_cooldown_carabina = [5000, 7000, 9000, 10000]
+            novo_cooldown_carabina = [4000, 5000, 6000, 7000]
             self.cooldown_carabin = random.choice(novo_cooldown_carabina)
             self.ultima_carabina = agora
         #Atira carabina

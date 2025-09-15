@@ -5,19 +5,19 @@ from settings import *
 from player import Player 
 from menu import *
 from hud import *
-from enemies import InimigoBug, Grunt, Infection, Brute
+from enemies import Grunt, Infection, Jackal, Brute, Elite
 from weapon import *
 from grupos import AllSprites
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapa import Mapa
-from hunter import *
 from guilty import *
 from arbiter import *
 from gravemind import *
 from didact import *
 from warden import *
+from minibosses import *
 
 
 class Game:
@@ -57,8 +57,8 @@ class Game:
         # Controle de spawn
         self.tempo_proximo_spawn = 0
         self.intervalo_spawn_atual = 2.5
-        self.intervalo_minimo = 0.8
-        self.fator_dificuldade = 0.01
+        self.intervalo_minimo = 1.8
+        self.fator_dificuldade = 0.0001
         self.hordas_contagem = 0
 
         #habilidades dos bosses
@@ -102,18 +102,32 @@ class Game:
             Didact(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
         if tipo == 'warden':
             WardenEternal(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-
             
         else:
+            inimigos_fase_1 = [Infection, Infection, Grunt, Grunt, Jackal, Elite]
+            inimigos_fase_2 = [Grunt, Infection, Infection, Jackal, Elite, Brute]
+            inimigos_fase_3 = [Infection, Grunt, Jackal, Brute, Brute, Elite]
+
+            if 1 <= self.player.contador_niveis <= 10:
+                inimigos_possiveis = inimigos_fase_1
+            elif 10 < self.player.contador_niveis <= 20:
+                inimigos_possiveis = inimigos_fase_2
+            else:
+                inimigos_possiveis = inimigos_fase_3
+
             chance_inimigo = randint(1, 1000)
-            if 1 <= chance_inimigo < 450:
-                inimigo = Infection
-            elif 450 <= chance_inimigo < 900:
-                inimigo = Grunt
-            elif 900 <= chance_inimigo < 950:
-                inimigo = Brute
-            elif 950 <= chance_inimigo:
-                inimigo = Elite
+            if 1 <= chance_inimigo < 225:
+                inimigo = inimigos_possiveis[0]
+            elif 225 <= chance_inimigo < 450:
+                inimigo = inimigos_possiveis[1]
+            elif 450 <= chance_inimigo < 675:
+                inimigo = inimigos_possiveis[2]
+            elif 675 <= chance_inimigo < 900:
+                inimigo = inimigos_possiveis[3]
+            elif 900 <= chance_inimigo <= 950:
+                inimigo = inimigos_possiveis[4]
+            elif 950 < chance_inimigo <= 1000:
+                inimigo = inimigos_possiveis[5]
             inimigo(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
 
     def eventos(self):
@@ -214,22 +228,22 @@ class Game:
                 
                 for _ in range(2):
                     self.spawnar_inimigo()
-                if self.player.contador_niveis == 100 and self.hunter_1_invocado == False:
+                if self.player.contador_niveis >= 50 and self.hunter_1_invocado == False:
                     self.hunter_1_invocado = True
                     self.spawnar_inimigo(tipo='hunter')
-                if self.player.contador_niveis == 100 and self.guilty_invocado == False:
+                if self.player.contador_niveis >= 100 and self.guilty_invocado == False:
                     self.guilty_invocado = True
                     self.spawnar_inimigo(tipo='guilty')
-                if self.player.contador_niveis == 100 and self.arbiter_invocado == False:
+                if self.player.contador_niveis >= 20 and self.arbiter_invocado == False:
                     self.arbiter_invocado = True
                     self.spawnar_inimigo(tipo='arbiter')
-                if self.player.contador_niveis == 100 and self.gravemind_spawnado == False:
+                if self.player.contador_niveis >= 30 and self.gravemind_spawnado == False:
                     self.gravemind_spawnado = True
                     self.spawnar_inimigo(tipo='gravemind')
-                if self.player.contador_niveis == 100 and self.didact_invocado == False:
+                if self.player.contador_niveis >= 40 and self.didact_invocado == False:
                     self.didact_invocado = True
                     self.spawnar_inimigo(tipo='didact')
-                if self.player.contador_niveis == 100 and self.warden_invocado == False:
+                if self.player.contador_niveis >= 50 and self.warden_invocado == False:
                     self.warden_invocado = True
                     self.spawnar_inimigo(tipo='warden')
                     
@@ -318,8 +332,8 @@ class Game:
         self.tempo_proximo_spawn = 0
         self.intervalo_spawn_inicial = 2.0
         self.intervalo_spawn_atual = self.intervalo_spawn_inicial
-        self.intervalo_minimo = 0.3
-        self.fator_dificuldade = 0.04
+        self.intervalo_minimo = 1.8
+        self.fator_dificuldade = 0.0001
 
         self.mapa = Mapa(all_sprites=self.all_sprites)
         self.largura_mapa_pixels = self.mapa.largura_mapa_pixels
@@ -374,7 +388,6 @@ class Game:
 
     def colisao(self, delta_time):
         # Colisão de Projéteis do Jogador com Inimigos
-        # Cria uma cópia do grupo de inimigos para evitar problemas de iteração
         inimigos_vivos = list(self.inimigos_grupo)
         
         for projetil in list(self.projeteis_jogador_grupo):
@@ -382,23 +395,21 @@ class Game:
             inimigos_atingidos = pygame.sprite.spritecollide(
                 projetil, 
                 pygame.sprite.Group(inimigos_vivos), 
-                False, # dokill=False: não remove inimigos
+                False,
                 pygame.sprite.collide_mask
             )
             
             # Se o projétil atingiu algum inimigo
             if inimigos_atingidos:
-                # Se o projétil for da Arma_Loop
-                if isinstance(projetil, Arma_Loop):
-                    # Adiciona os inimigos atingidos a um conjunto para evitar dano repetido no mesmo frame
-                    if not hasattr(projetil, 'atingidos_neste_frame'):
-                        projetil.atingidos_neste_frame = set()
-
+                # Se o projétil for da classe Projetil_PingPong (que pertence à Arma_Loop)
+                if isinstance(projetil, Projetil_PingPong):
                     for inimigo in inimigos_atingidos:
-                        # Se o inimigo já foi atingido neste frame, não faz nada
-                        if inimigo not in projetil.atingidos_neste_frame:
+                        # O projétil tem seu próprio controle de inimigos já atingidos
+                        # para evitar dano repetido. Verificamos se o inimigo ainda não foi atingido por este projétil
+                        if inimigo not in projetil.inimigos_ja_atingidos:
                             inimigo.vida -= projetil.dano
-                            projetil.atingidos_neste_frame.add(inimigo)
+                            # Adiciona o inimigo ao conjunto do projétil
+                            projetil.inimigos_ja_atingidos.add(inimigo)
                 
                 # Se for qualquer outro tipo de projétil, ele é destruído ao atingir
                 else:
@@ -406,14 +417,9 @@ class Game:
                         inimigo.vida -= projetil.dano
                     projetil.kill()
 
-        # Adiciona a lógica para resetar os inimigos atingidos pela Arma_Loop para o próximo frame
-        for projetil in list(self.projeteis_jogador_grupo):
-            if isinstance(projetil, Arma_Loop) and hasattr(projetil, 'atingidos_neste_frame'):
-                projetil.atingidos_neste_frame.clear()
-
         # Colisão de Projéteis dos Inimigos com o Jogador
         projeteis_filtrados = [
-            p for p in self.projeteis_inimigos_grupo if not isinstance(p, GuiltyLaser)
+            p for p in self.projeteis_inimigos_grupo if not isinstance(p, LaserBeam)
         ]
         colisoes_projeteis_inimigos = pygame.sprite.groupcollide(
             pygame.sprite.Group(projeteis_filtrados),

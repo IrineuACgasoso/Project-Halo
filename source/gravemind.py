@@ -7,7 +7,7 @@ import random
 
 class Gravemind(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game, is_final_form = False):
-        super().__init__(posicao, grupos, jogador, game, vida_base=40, dano_base=20, velocidade_base=35)
+        super().__init__(posicao, grupos, jogador, game, vida_base=3000, dano_base=50, velocidade_base=35)
         self.game = game
         self.is_final_form = is_final_form
 
@@ -17,8 +17,8 @@ class Gravemind(InimigoBase):
             self.animacao_padrao = [self.sprite_principal, pygame.image.load(join('assets', 'img', 'gravemind', 'proto2.png')).convert_alpha()]
             self.ataque_sprite = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'gravemind', 'proto3.png')).convert_alpha(), (600,600))
             self.tamanho_sprite = (600, 600)
-            self.vida = 1000
-            self.dano = 50
+            self.vida = 8000
+            self.dano = 100
 
         else:
             #Carrega o grave padrão
@@ -26,8 +26,8 @@ class Gravemind(InimigoBase):
             self.animacao_padrao = [self.sprite_principal, pygame.image.load(join('assets', 'img', 'gravemind', 'grave2.png')).convert_alpha()]
             self.ataque_sprite = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'gravemind', 'grave3.png')).convert_alpha(), (450, 450))
             self.tamanho_sprite = (450, 450)
-            self.vida = 50
-            self.dano = 20
+            self.vida = 500
+            self.dano = 50
 
         # Redimensiona as sprites de acordo com a forma
         self.animacao_gravemind = []
@@ -162,22 +162,22 @@ class Gravemind(InimigoBase):
         chance= randint(1,1000)
         if chance >= 950:
             Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
+            for _ in range(8):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         elif 800 <= chance < 950:
             chance2 = randint(1,4)
             if chance2 == 4:
                 Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
+            for _ in range(6):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         elif 500 <= chance < 800:
-            for _ in range(3):
+            for _ in range(6):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         else:
-            for _ in range(2):
+            for _ in range(4):
                 posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         self.kill()
@@ -255,35 +255,6 @@ class Gravemind(InimigoBase):
         
         if not self.is_animating_respawn:
             self.animar()
-            
-
-class AcidBreath(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=25,velocidade=400, duracao=2700)
-        self.jogador = jogador
-        self.game = game
-        self.posicao = pygame.math.Vector2(posicao_inicial)
-
-        # Aparência do projétil (imagem temporária)
-        self.image = pygame.image.load(join('assets', 'img', 'gravemind', 'acid_breath.png')).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (48, 48))
-        self.rect = self.image.get_rect(center=self.posicao)
-        # Calcula a direção para o jogador no momento da criação
-        direcao_para_jogador = self.jogador.posicao - self.posicao
-        if direcao_para_jogador.length() > 0:
-            self.direcao = direcao_para_jogador.normalize()
-        else:
-            self.direcao = pygame.math.Vector2(0, 0)
-
-
-    def update(self, delta_time):
-        # Move o projétil na direção calculada
-        self.posicao += self.direcao * self.velocidade * delta_time
-        self.rect.center = self.posicao
-        
-        # Mata o projétil se o tempo de vida se esgotar
-        if pygame.time.get_ticks() - self.tempo_criacao >= self.duracao:
-            self.kill()
 
 class FloodWarning(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos, game):
