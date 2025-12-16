@@ -1,9 +1,9 @@
 import pygame
 from game import *
-from items import *
-from enemies import *
+from feats.items import *
+from enemies.enemies import *
 from player import *
-from minibosses import *
+from enemies.minibosses.knight import Knight
 import random
 import math
 
@@ -109,7 +109,7 @@ class WardenEternal(InimigoBase):
         self.clones_restantes = 0
 
     def knight(self):
-        RoyalKnight(
+        Knight(
             posicao=self.posicao,
             grupos=self.grupos,
             jogador=self.jogador,

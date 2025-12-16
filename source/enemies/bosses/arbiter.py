@@ -1,9 +1,11 @@
 import pygame
 import random
-from enemies import *
+from enemies.enemies import *
 from game import *
 from player import *
-from items import *
+from feats.items import *
+
+
 class BossArbiter(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
         super().__init__(posicao, grupos, jogador, game, vida_base=9000, dano_base=80, velocidade_base = 90)

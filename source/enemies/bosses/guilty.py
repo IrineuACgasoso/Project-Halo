@@ -1,11 +1,12 @@
 import pygame
 import random
 import math
-from enemies import *
+from enemies.enemies import *
+from feats.projetil import *
 from game import *
-from items import *
+from feats.items import *
 from player import *
-from projetil import *
+from feats.projetil import LaserBeam
 
 class GuiltySpark(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
@@ -137,42 +138,6 @@ class GuiltySpark(InimigoBase):
                 self.estado_animacao = 'right'
             self.animar()
 
-class LaserBeam(ProjetilInimigoBase):
-    def __init__(self, posicao_inimigo, grupos, jogador, game, dano, velocidade, duracao):
-        super().__init__(posicao_inimigo, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-
-        self.dano_aplicado = False
-
-        #sprite do laser
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'laser.png')).convert_alpha(), (150, 15))
-        
-        # Calcula a direção do GuiltySpark para o jogador
-        self.direcao = (self.jogador.posicao - self.posicao).normalize()
-
-        # Rotaciona a sprite do laser na direção do tiro
-        angulo = self.direcao.as_polar()[1]
-        self.image = pygame.transform.rotate(self.image, -angulo)
-        self.image.set_alpha(255)
-        
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
-
-    def update(self, delta_time):
-        agora = pygame.time.get_ticks()
-        tempo_decorrido = agora - self.tempo_criacao
-        
-        # Move o projétil a cada frame
-        self.posicao += self.direcao * self.velocidade * delta_time
-        self.rect.center = self.posicao
-        
-        # Lógica de colisão
-        if not self.dano_aplicado and pygame.sprite.collide_mask(self, self.jogador):
-            self.jogador.tomar_dano_direto(self.dano)
-            self.dano_aplicado = True
-        
-        # Destrói o projétil após a duração
-        if tempo_decorrido >= self.duracao:
-            self.kill()
 
 class Teleport(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos, game):

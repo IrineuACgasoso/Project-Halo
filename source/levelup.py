@@ -1,7 +1,7 @@
 import pygame
 import random
 from settings import *
-from weapon import Arma, Arma_Loop, ArmaLista, Dicionario_Divino, ArmaArbitro
+from feats.weapon import Arma, Arma_Loop, ArmaLista, Dicionario_Divino, ArmaArbitro
 
 MAX_ARMAS = 6
 TODAS_AS_ARMAS = {

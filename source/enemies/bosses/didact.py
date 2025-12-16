@@ -1,7 +1,8 @@
 import pygame
 from game import *
-from items import *
-from enemies import *
+from feats.items import *
+from enemies.enemies import *
+from feats.projetil import Laser
 from player import *
 import random
 import math

@@ -1,6 +1,8 @@
 import pygame
 from settings import *
 from levelup import TelaDeUpgrade
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, posicao_inicial, grupos, game):
         """

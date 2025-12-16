@@ -1,31 +1,45 @@
 import pygame
 import random
 from os.path import join
-from items import *
+from feats.items import *
 from player import *
 from settings import *
-from projetil import PlasmaGun, Dizimator, Carabin
-from items import *
+from feats.projetil import PlasmaGun, Dizimator, Carabin
+from feats.items import *
+from entitymanager import entity_manager
+
+
 
 
 class InimigoBase(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, jogador, game, vida_base, dano_base, velocidade_base):
-        super().__init__(grupos)
+    def __init__(self, posicao, vida_base, dano_base, velocidade_base, game):
+        super().__init__(entity_manager.all_sprites, entity_manager.inimigos_grupo)
+
+        # Reference to player
+        self.jogador = entity_manager.player
+
+        # Reference to game
         self.game = game
-        self.jogador = jogador
+
+        #stats base
         self.vida_base = vida_base
         self.dano_base = dano_base
         self.velocidade_base = velocidade_base
+
+        #setting true stats
+        self.vida = self.vida_base
+        self.dano = self.dano_base
+        self.velocidade = self.velocidade_base
+
+        #sprite
         self.image = pygame.Surface((40, 40))
         self.image.fill('white')
         self.rect = self.image.get_rect(center=posicao)
         self.posicao = pygame.math.Vector2(self.rect.center)
-        #settando os status
-        self.vida = self.vida_base
-        self.dano = self.dano_base
-        self.velocidade = self.velocidade_base
-        #dificulta baseado no nivel do player
+        
+        #based on player level
         self.aplicar_dificuldade()
+
         #garantia de spawn
         self.invencivel = False
         self.tempo_criacao = pygame.time.get_ticks() # Adicionado para uso futuro, se necessário
@@ -38,16 +52,17 @@ class InimigoBase(pygame.sprite.Sprite):
         self.velocidade *= 1 + self.jogador.contador_niveis / 100
 
 
-    def morrer(self, grupos):
+    def morrer(self, grupos = None):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         dado = randint(0, 1000)
         if dado == 1000:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
+            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=alvo_grupos)
         elif dado >= 990:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         elif dado >= 970:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'lifeOrb.png'), tipo='life_orb', grupos=grupos)
+            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'lifeOrb.png'), tipo='life_orb', grupos=alvo_grupos)
         else:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=grupos)
+            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
         self.kill()
 
     def update(self, delta_time):
@@ -63,8 +78,8 @@ class InimigoBase(pygame.sprite.Sprite):
         return self.rect
 
 class Grunt(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=4, dano_base=15, velocidade_base=90)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=4, dano_base=15, velocidade_base=90, game=game)
         self.image = pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 80))
         self.rect = self.image.get_rect(center=self.posicao)
@@ -128,7 +143,7 @@ class Grunt(InimigoBase):
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             tamanho=(12,12),
@@ -137,8 +152,8 @@ class Grunt(InimigoBase):
         )    
 
 class Jackal(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=2000, dano_base=10, velocidade_base=50)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=2000, dano_base=10, velocidade_base=50, game=game)
         #sprites
         #red
         self.sprites_red = {}
@@ -192,8 +207,8 @@ class Jackal(InimigoBase):
         self.animar()
 
 class Infection(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=1, dano_base=5, velocidade_base=80)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=80, game=game)
         #sprites
         self.sprites = {}
 
@@ -240,8 +255,8 @@ class Infection(InimigoBase):
         self.animar()
             
 class Brute(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=30,dano_base=20, velocidade_base=75)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=75, game=game)
         self.game
 
         #sprites
@@ -275,7 +290,7 @@ class Brute(InimigoBase):
     def dizim(self):
         Dizimator(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             tamanho=(48,48),
@@ -283,9 +298,10 @@ class Brute(InimigoBase):
             velocidade=800)
     
     def morrer(self, grupos):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         for _ in range(3):
             posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=grupos)
+            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
         self.kill()
 
     def animar(self):
@@ -319,8 +335,8 @@ class Brute(InimigoBase):
 
 
 class Elite(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=20,dano_base=20, velocidade_base=90)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=20,dano_base=20, velocidade_base=90, game=game)
         self.game
 
         #sprites
@@ -358,7 +374,7 @@ class Elite(InimigoBase):
     def carabin(self):
         Carabin(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=10,
@@ -367,9 +383,10 @@ class Elite(InimigoBase):
         )
 
     def morrer(self, grupos):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         for _ in range(3):
             posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=grupos)
+            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
         self.kill()
 
     def animar(self):

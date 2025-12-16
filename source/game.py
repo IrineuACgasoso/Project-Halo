@@ -5,19 +5,15 @@ from settings import *
 from player import Player 
 from menu import *
 from hud import *
-from enemies import Grunt, Infection, Jackal, Brute, Elite
-from weapon import *
+from spawner import Spawner
+from entitymanager import entity_manager
+from feats.weapon import *
 from grupos import AllSprites
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapa import Mapa
-from guilty import *
-from arbiter import *
-from gravemind import *
-from didact import *
-from warden import *
-from minibosses import *
+
 
 
 class Game:
@@ -28,12 +24,13 @@ class Game:
         self.estado_do_jogo = "menu_principal"
 
         # Sprites e grupos
-        self.all_sprites = AllSprites()
-        self.item_group = pygame.sprite.Group()
-        self.auras_grupo = pygame.sprite.Group()
-        self.inimigos_grupo = pygame.sprite.Group()
-        self.projeteis_jogador_grupo = pygame.sprite.Group()
-        self.projeteis_inimigos_grupo = pygame.sprite.Group()
+        self.all_sprites = entity_manager.all_sprites
+        self.inimigos_grupo = entity_manager.inimigos_grupo
+        self.auras_grupo = entity_manager.auras_grupo
+        self.inimigos_grupo = entity_manager.inimigos_grupo
+        self.projeteis_jogador_grupo = entity_manager.projeteis_jogador_grupo
+        self.projeteis_inimigos_grupo = entity_manager.projeteis_inimigos_grupo
+        self.item_group = entity_manager.item_group
 
         # Menus
         self.menu_principal = MenuPrincipal(self)
@@ -55,81 +52,9 @@ class Game:
         self.altura_mapa_pixels = 0
 
         # Controle de spawn
-        self.tempo_proximo_spawn = 0
-        self.intervalo_spawn_atual = 2.5
-        self.intervalo_minimo = 1.8
-        self.fator_dificuldade = 0.0001
-        self.hordas_contagem = 0
+        self.spawner = Spawner(self) # Inicializa o spawner
 
-        #habilidades dos bosses
-        self.gravemind_reborns = 3
-        self.contagem_clones = 0
-
-        #painel control boss
-        self.hunter_1_invocado = False
-        self.guilty_invocado = False
-        self.arbiter_invocado = False
-        self.gravemind_spawnado = False
-        self.invocacao_protogravemind = 0
-        self.didact_invocado = False
-        self.warden_invocado = False
-
-    def spawnar_inimigo(self, tipo='normal'):
-        camera_center_x = self.player.posicao.x
-        camera_center_y = self.player.posicao.y
-        borda_esquerda = camera_center_x - largura_tela / 2
-        borda_direita = camera_center_x + largura_tela / 2
-        borda_topo = camera_center_y - altura_tela / 2
-        borda_baixo = camera_center_y + altura_tela / 2
-        lado = random.choice(['top', 'bottom', 'left', 'right'])
-        if lado == 'top':
-            self.pos = (random.uniform(borda_esquerda, borda_direita), borda_topo - 50)
-        elif lado == 'bottom':
-            self.pos = (random.uniform(borda_esquerda, borda_direita), borda_baixo + 50)
-        elif lado == 'left':
-            self.pos = (borda_esquerda - 50, random.uniform(borda_topo, borda_baixo))
-        else:
-            self.pos = (borda_direita + 50, random.uniform(borda_topo, borda_baixo))
-        if tipo == 'hunter':
-            Hunter(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-        if tipo == 'guilty':
-            GuiltySpark(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-        if tipo == 'arbiter':
-            BossArbiter(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-        if tipo == 'gravemind':
-            FloodWarning(posicao=self.player.posicao, grupos=self.all_sprites, game=self)
-        if tipo == 'didact':
-            Didact(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-        if tipo == 'warden':
-            WardenEternal(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-            
-        else:
-            inimigos_fase_1 = [Infection, Infection, Grunt, Grunt, Jackal, Elite]
-            inimigos_fase_2 = [Grunt, Infection, Infection, Jackal, Elite, Brute]
-            inimigos_fase_3 = [Infection, Grunt, Jackal, Brute, Brute, Elite]
-
-            if 1 <= self.player.contador_niveis <= 10:
-                inimigos_possiveis = inimigos_fase_1
-            elif 10 < self.player.contador_niveis <= 20:
-                inimigos_possiveis = inimigos_fase_2
-            else:
-                inimigos_possiveis = inimigos_fase_3
-
-            chance_inimigo = randint(1, 1000)
-            if 1 <= chance_inimigo < 225:
-                inimigo = inimigos_possiveis[0]
-            elif 225 <= chance_inimigo < 450:
-                inimigo = inimigos_possiveis[1]
-            elif 450 <= chance_inimigo < 675:
-                inimigo = inimigos_possiveis[2]
-            elif 675 <= chance_inimigo < 900:
-                inimigo = inimigos_possiveis[3]
-            elif 900 <= chance_inimigo <= 950:
-                inimigo = inimigos_possiveis[4]
-            elif 950 < chance_inimigo <= 1000:
-                inimigo = inimigos_possiveis[5]
-            inimigo(posicao=self.pos, grupos=(self.all_sprites, self.inimigos_grupo), jogador=self.player, game=self)
-
+    
     def eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -210,49 +135,13 @@ class Game:
 
     def update(self, delta_time):
         if self.estado_do_jogo == "jogando":
-            self.all_sprites.update(delta_time)
-            self.tempo_proximo_spawn += delta_time
             if self.player:
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
             
-            # Lógica para spawnar o boss
-            #if self.player.contador_niveis == 1:
-                #self.spawnar_inimigo(tipo='gravemind')
-                #self.intervalo_spawn_atual = 2.0
-                #self.gravemind_spawnado = True
+            entity_manager.all_sprites.update(delta_time)
 
-            if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
-                self.tempo_proximo_spawn = 0
-                self.hordas_contagem += 1
-                
-                for _ in range(2):
-                    self.spawnar_inimigo()
-                if self.player.contador_niveis >= 50 and self.hunter_1_invocado == False:
-                    self.hunter_1_invocado = True
-                    self.spawnar_inimigo(tipo='hunter')
-                if self.player.contador_niveis >= 100 and self.guilty_invocado == False:
-                    self.guilty_invocado = True
-                    self.spawnar_inimigo(tipo='guilty')
-                if self.player.contador_niveis >= 20 and self.arbiter_invocado == False:
-                    self.arbiter_invocado = True
-                    self.spawnar_inimigo(tipo='arbiter')
-                if self.player.contador_niveis >= 30 and self.gravemind_spawnado == False:
-                    self.gravemind_spawnado = True
-                    self.spawnar_inimigo(tipo='gravemind')
-                if self.player.contador_niveis >= 40 and self.didact_invocado == False:
-                    self.didact_invocado = True
-                    self.spawnar_inimigo(tipo='didact')
-                if self.player.contador_niveis >= 50 and self.warden_invocado == False:
-                    self.warden_invocado = True
-                    self.spawnar_inimigo(tipo='warden')
-                    
-                if self.hordas_contagem > 0 and self.hordas_contagem % 100 == 0:
-                # Spawna o inimigo especial que aparece a cada 100 hordas
-                    self.spawnar_inimigo(tipo='inimigo_horda_100')
-
-            if self.intervalo_spawn_atual > self.intervalo_minimo:
-                self.intervalo_spawn_atual -= self.fator_dificuldade * delta_time
+            self.spawner.update(delta_time)
 
             self.colisao(delta_time)
 
@@ -281,17 +170,13 @@ class Game:
             self.mapa.draw(self.tela, deslocamento)
             # Itera por todos os sprites e desenha cada um
             for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
-                # Se for um LaserWarning, use o método de desenho personalizado
-                if isinstance(sprite, LaserWarning):
-                    sprite.draw(self.tela, deslocamento)
-                else:
-                    # Para todos os outros sprites, desenha normalmente
-                    self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
+                self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
+
             self.hud.draw(self.tela)
 
         elif self.estado_do_jogo == 'pausa':
             
-            self.all_sprites.draw(self.player.posicao)
+            self.all_sprites.draw(self.tela)
             self.menu_pausa.draw(self.tela)
 
         elif self.estado_do_jogo == 'colaboradores':
@@ -304,45 +189,34 @@ class Game:
             self.tela_game_over.draw(self.tela)
 
         elif self.estado_do_jogo == "level_up":
-            self.all_sprites.draw(self.player.posicao)
+            self.all_sprites.draw(self.tela)
             self.hud.draw(self.tela)
             self.tela_de_upgrade_ativa.draw(self.tela)
 
         pygame.display.update()
     
     def iniciar_novo_jogo(self):
-        self.all_sprites.empty()
-        self.item_group.empty()
-        self.projeteis_jogador_grupo.empty()
-        self.inimigos_grupo.empty()
 
-        self.gravemind_reborns = 3
+        # Limpa tudo
+        entity_manager.all_sprites.empty()
+        entity_manager.inimigos_grupo.empty()
+        entity_manager.item_group.empty()
+        entity_manager.projeteis_jogador_grupo.empty()
+        entity_manager.projeteis_inimigos_grupo.empty()
 
-        self.invocacao_protogravemind = 0
-        self.invocacao_protogravemind = 0
-        self.didact_invocado = False
-        self.hunter_1_invocado = False
-        self.arbiter_invocado = False
-        self.guilty_invocado = False
-        self.warden_invocado = False
-        self.gravemind_spawnado = False
-
-
-
-        self.tempo_proximo_spawn = 0
-        self.intervalo_spawn_inicial = 2.0
-        self.intervalo_spawn_atual = self.intervalo_spawn_inicial
-        self.intervalo_minimo = 1.8
-        self.fator_dificuldade = 0.0001
+        # Reseta o spawner para zerar os timers e flags de bosses
+        self.spawner = Spawner(self)
 
         self.mapa = Mapa(all_sprites=self.all_sprites)
         self.largura_mapa_pixels = self.mapa.largura_mapa_pixels
         self.altura_mapa_pixels = self.mapa.altura_mapa_pixels
+        # Cria o player
         self.player = Player(
             posicao_inicial=(self.mapa.largura_mapa_pixels / 2, self.mapa.altura_mapa_pixels),
             grupos=self.all_sprites,
             game=self
         )
+        entity_manager.player = self.player
 
         # Certifique que o mixer está inicializado (melhor garantir)
         if not pygame.mixer.get_init():
@@ -418,11 +292,9 @@ class Game:
                     projetil.kill()
 
         # Colisão de Projéteis dos Inimigos com o Jogador
-        projeteis_filtrados = [
-            p for p in self.projeteis_inimigos_grupo if not isinstance(p, LaserBeam)
-        ]
+        
         colisoes_projeteis_inimigos = pygame.sprite.groupcollide(
-            pygame.sprite.Group(projeteis_filtrados),
+            pygame.sprite.Group(self.projeteis_inimigos_grupo),
             pygame.sprite.Group(self.player),  # Cria um grupo temporário apenas com o jogador
             True,  # 'dokill' True: remove o projetil
             False, # 'dokill' False: não remove o jogador

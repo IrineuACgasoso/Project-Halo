@@ -1,4 +1,5 @@
 import pygame
+from os.path import join
 from settings import *
 from player import *
 
@@ -26,7 +27,6 @@ class HUD:
 
     def draw_barra_exp(self, tela):
         jogador = self.game.player
-        deslocamento = self.game.all_sprites.deslocamento
         #caracteristicas
         posicao_x = 10
         posicao_y = 5 
@@ -45,10 +45,12 @@ class HUD:
 
     def draw_barra_vida(self, tela):
         jogador = self.game.player
-        deslocamento = self.game.all_sprites.deslocamento
 
-        posicao_x = largura_tela / 2.22
-        posicao_y = altura_tela / 1.7
+        # Obtém o deslocamento da câmera através do mapa
+        deslocamento = self.game.mapa.get_camera_offset(jogador.posicao, (largura_tela, altura_tela))
+
+        posicao_x = jogador.rect.centerx - (jogador.rect.width / 2) - deslocamento[0]
+        posicao_y = jogador.rect.bottom + 10 - deslocamento[1]
 
         largura_barra = jogador.rect.width
         altura_barra = 10
