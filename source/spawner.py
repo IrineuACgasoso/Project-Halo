@@ -10,7 +10,9 @@ from enemies.bosses.arbiter import BossArbiter
 from enemies.bosses.gravemind import FloodWarning
 from enemies.bosses.didact import Didact
 from enemies.bosses.warden import WardenEternal
+from enemies.bosses.harbinger import Harbinger
 from enemies.minibosses.hunter import Hunter
+from enemies.minibosses.knight import Knight
 
 class Spawner:
     def __init__(self, game):
@@ -28,7 +30,8 @@ class Spawner:
             'arbiter': False,
             'gravemind': False,
             'didact': False,
-            'warden': False
+            'warden': False,
+            'harbinger': False
         }
 
     def calcular_posicao_spawn(self):
@@ -56,11 +59,13 @@ class Spawner:
         
         # Lógica de Bosses/Minibosses
         if tipo == 'hunter': Hunter(posicao=pos, game=self.game)
+        elif tipo == 'knight': Knight(posicao=pos, game=self.game)
         elif tipo == 'guilty': GuiltySpark(posicao=pos, game=self.game)
         elif tipo == 'arbiter': BossArbiter(posicao=pos, game=self.game)
         elif tipo == 'gravemind': FloodWarning(posicao=entity_manager.player.posicao, game=self.game)
         elif tipo == 'didact': Didact(posicao=pos, game=self.game)
         elif tipo == 'warden': WardenEternal(posicao=pos, game=self.game)
+        elif tipo == 'harbinger': Harbinger(posicao=pos, game=self.game)
         
         # Lógica de Inimigos Normais
         else:
@@ -97,6 +102,10 @@ class Spawner:
 
             # Gatilhos de Progressão (Bosses)
             lvl = player.contador_niveis
+            if lvl >= 10 and not self.boss_flags['harbinger']:
+                self.boss_flags['harbinger'] = True
+                self.spawnar('harbinger')
+
             if lvl >= 20 and not self.boss_flags['arbiter']:
                 self.boss_flags['arbiter'] = True
                 self.spawnar('arbiter')

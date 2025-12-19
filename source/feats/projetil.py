@@ -51,6 +51,13 @@ class Carabin(ProjetilInimigoBase):
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
 
+class M50(ProjetilInimigoBase):
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=2500)
+        self.image = pygame.image.load(join('assets', 'img', 'm50.png'))
+        self.image = pygame.transform.scale(self.image, tamanho)
+        self.rect = self.image.get_rect(center=self.posicao)
+
 class Dizimator(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao = 1500):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)

@@ -58,10 +58,10 @@ class HUD:
 
         #barra total
         fundo_rect = pygame.Rect(posicao_x, posicao_y, largura_barra, altura_barra)
-        pygame.draw.rect(tela, 'black', fundo_rect)
+        pygame.draw.rect(tela, 'dark red', fundo_rect)
         #vida
         frente_rect = pygame.Rect(posicao_x, posicao_y, largura_barra * porcentagem_vida, altura_barra)
-        pygame.draw.rect(tela, 'red', frente_rect)
+        pygame.draw.rect(tela, 'dark blue', frente_rect)
         #borda
         pygame.draw.rect(tela, 'white', fundo_rect, 2)
 
