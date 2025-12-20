@@ -3,14 +3,23 @@ import random
 from random import randint
 from settings import *
 from entitymanager import entity_manager
-# Importe seus inimigos aqui
-from enemies.enemies import Grunt, Infection, Jackal, Brute, Elite
+# Inimigos base
+from enemies.standard.grunt import Grunt
+from enemies.standard.jackal import Jackal
+from enemies.standard.elite import Elite
+from enemies.standard.brute import Brute
+from enemies.standard.infection import Infection
+
+
+# Bosses
 from enemies.bosses.guilty import GuiltySpark
 from enemies.bosses.arbiter import BossArbiter
 from enemies.bosses.gravemind import FloodWarning
 from enemies.bosses.didact import Didact
 from enemies.bosses.warden import WardenEternal
 from enemies.bosses.harbinger import Harbinger
+
+# Minibosses
 from enemies.minibosses.hunter import Hunter
 from enemies.minibosses.knight import Knight
 
@@ -102,7 +111,7 @@ class Spawner:
 
             # Gatilhos de Progressão (Bosses)
             lvl = player.contador_niveis
-            if lvl >= 10 and not self.boss_flags['harbinger']:
+            if lvl >= 1 and not self.boss_flags['harbinger']:
                 self.boss_flags['harbinger'] = True
                 self.spawnar('harbinger')
 

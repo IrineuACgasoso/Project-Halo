@@ -8,7 +8,6 @@ from hud import *
 from spawner import Spawner
 from entitymanager import entity_manager
 from feats.weapon import *
-from grupos import AllSprites
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *

@@ -3,14 +3,15 @@ import random
 import math
 from enemies.enemies import *
 from feats.projetil import *
-from game import *
 from feats.items import *
 from player import *
 from feats.projetil import LaserBeam
+from entitymanager import entity_manager
+
 
 class GuiltySpark(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=5000, dano_base=80, velocidade_base= 280)
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=5000, dano_base=80, velocidade_base= 280, game=game)
         self.game= game
         #sprites
         self.sprites = {}
@@ -46,13 +47,14 @@ class GuiltySpark(InimigoBase):
         """Cria uma instância do laser."""
         LaserBeam(
             posicao_inimigo=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=self.dano_base * 5,
             velocidade= 1500,  # Ajuste o dano do laser
             duracao=1500,  # Ajusta a duração em milissegundos
         )
+
     def teleporte(self):
         # Gera um ângulo aleatório (em radianos)
         angulo = random.uniform(0, 2 * math.pi)
@@ -61,35 +63,25 @@ class GuiltySpark(InimigoBase):
         # Calcula a nova posição
         nova_posicao_x = self.jogador.posicao.x + distancia_teleporte * math.cos(angulo)
         nova_posicao_y = self.jogador.posicao.y + distancia_teleporte * math.sin(angulo)
-        Teleport((round(nova_posicao_x), round(nova_posicao_y)), self.game.all_sprites, self.game)
+        Teleport((round(nova_posicao_x), round(nova_posicao_y)))
         self.posicao.x = nova_posicao_x
         self.posicao.y = nova_posicao_y
         # Atualiza a posição do retângulo
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         self.velocidade *= 1.1
 
-    def morrer(self, grupos):
+    def morrer(self, grupos = None):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 500 <= chance < 800:
-            for _ in range(3):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(2):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+
+        # Drop garantido de Shards grandes por ser Boss
+        qtd_shards = 2
+        if chance > 800: qtd_shards = 4
+        elif chance > 600: qtd_shards = 3
+
+        for _ in range(qtd_shards):
+            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
 
     def animar(self):
@@ -140,10 +132,8 @@ class GuiltySpark(InimigoBase):
 
 
 class Teleport(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, game):
-        super().__init__(grupos)
-        self.game = game
-
+    def __init__(self, posicao):
+        super().__init__(entity_manager.all_sprites)
         self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'tp.png')).convert_alpha(), (200,200))
         self.rect = self.image.get_rect(center=posicao)
         self.tempo_criacao = pygame.time.get_ticks()
