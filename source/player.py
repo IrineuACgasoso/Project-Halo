@@ -15,7 +15,6 @@ class Player(pygame.sprite.Sprite):
         #envolve movimentação
         self.direcao = pygame.math.Vector2()
         self.velocidade = 500
-        self.image = pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha()
 
         #animacao
         self.sprites = {}
@@ -25,7 +24,7 @@ class Player(pygame.sprite.Sprite):
                         pygame.image.load(join('assets', 'img', 'player', 'player2.png')).convert_alpha()
         ]
         #sprites direita
-        self.sprites['right'] = [pygame.transform.scale(sprite, (128, 128)) for sprite in sprite_right]
+        self.sprites['right'] = [pygame.transform.scale(sprite, (144, 144)) for sprite in sprite_right]
 
         sprites_left = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
@@ -198,7 +197,7 @@ class Player(pygame.sprite.Sprite):
         elif self.direcao.x > 0:
             self.estado_animacao = 'right'
         if self.direcao.x == 0 and self.direcao.y == 0:
-            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(), (128,128))
+            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(), (144,144))
 
         if self.direcao.x != 0 or self.direcao.y != 0:
             self.animar()

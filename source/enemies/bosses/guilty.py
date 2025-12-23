@@ -11,7 +11,7 @@ from entitymanager import entity_manager
 
 class GuiltySpark(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=5000, dano_base=80, velocidade_base= 280, game=game)
+        super().__init__(posicao, vida_base=5000, dano_base=80, velocidade_base= 200, game=game)
         self.game= game
         #sprites
         self.sprites = {}
@@ -50,7 +50,7 @@ class GuiltySpark(InimigoBase):
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
-            dano=self.dano_base * 5,
+            dano=self.dano_base * 2,
             velocidade= 1500,  # Ajuste o dano do laser
             duracao=1500,  # Ajusta a duração em milissegundos
         )
@@ -68,7 +68,8 @@ class GuiltySpark(InimigoBase):
         self.posicao.y = nova_posicao_y
         # Atualiza a posição do retângulo
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-        self.velocidade *= 1.1
+        # Recebe um buff de velocidade a cada teleporte
+        self.velocidade *= 1.05
 
     def morrer(self, grupos = None):
         alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
@@ -134,12 +135,41 @@ class GuiltySpark(InimigoBase):
 class Teleport(pygame.sprite.Sprite):
     def __init__(self, posicao):
         super().__init__(entity_manager.all_sprites)
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'tp.png')).convert_alpha(), (200,200))
-        self.rect = self.image.get_rect(center=posicao)
+        self.posicao = pygame.math.Vector2(posicao) 
+        self.sprites = [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp1.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp2.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp3.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp4.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp5.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp6.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp7.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp8.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp9.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp10.png')).convert_alpha(), (128, 160)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'teleport', 'tp11.png')).convert_alpha(), (128, 160)),
+        ]
+
+        # Animação
+        self.frame_atual = 0
+        self.image = self.sprites[self.frame_atual]
+        self.rect = self.image.get_rect(center=self.posicao)
+        
         self.tempo_criacao = pygame.time.get_ticks()
-        self.duracao_aviso = 250  # Duração do aviso em milissegundos
+        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.velocidade_animacao = 30
+        self.duracao_aviso = 330
     
     def update(self, delta_time):
         agora = pygame.time.get_ticks()
         if agora - self.tempo_criacao >= self.duracao_aviso:
             self.kill()
+        self.animar()
+
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.sprites)
+            self.image = self.sprites[self.frame_atual]
+            self.rect = self.image.get_rect(center=self.posicao)  

@@ -2,6 +2,7 @@ import pygame
 from game import *
 from feats.items import *
 from enemies.enemies import *
+from enemies.standard.infection import Infection
 from feats.projetil import AcidBreath
 import random
 

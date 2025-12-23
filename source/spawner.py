@@ -18,6 +18,7 @@ from enemies.bosses.gravemind import FloodWarning
 from enemies.bosses.didact import Didact
 from enemies.bosses.warden import WardenEternal
 from enemies.bosses.harbinger import Harbinger
+from enemies.bosses.jega import Jega
 
 # Minibosses
 from enemies.minibosses.hunter import Hunter
@@ -40,7 +41,8 @@ class Spawner:
             'gravemind': False,
             'didact': False,
             'warden': False,
-            'harbinger': False
+            'harbinger': False,
+            'jega': False
         }
 
     def calcular_posicao_spawn(self):
@@ -75,6 +77,8 @@ class Spawner:
         elif tipo == 'didact': Didact(posicao=pos, game=self.game)
         elif tipo == 'warden': WardenEternal(posicao=pos, game=self.game)
         elif tipo == 'harbinger': Harbinger(posicao=pos, game=self.game)
+        elif tipo == 'jega': Jega(posicao=pos, game=self.game)
+
         
         # Lógica de Inimigos Normais
         else:
@@ -111,9 +115,13 @@ class Spawner:
 
             # Gatilhos de Progressão (Bosses)
             lvl = player.contador_niveis
-            if lvl >= 1 and not self.boss_flags['harbinger']:
-                self.boss_flags['harbinger'] = True
-                self.spawnar('harbinger')
+            if lvl >= 1 and not self.boss_flags['jega']:
+                self.boss_flags['jega'] = True
+                self.spawnar('jega')
+
+            if lvl >= 10 and not self.boss_flags['guilty']:
+                self.boss_flags['guilty'] = True
+                self.spawnar('guilty')
 
             if lvl >= 20 and not self.boss_flags['arbiter']:
                 self.boss_flags['arbiter'] = True
@@ -130,6 +138,14 @@ class Spawner:
             if lvl >= 50 and not self.boss_flags['hunter']:
                 self.boss_flags['hunter'] = True
                 self.spawnar('hunter')
+            
+            if lvl >= 100 and not self.boss_flags['harbinger']:
+                self.boss_flags['harbinger'] = True
+                self.spawnar('harbinger')
+
+            if lvl >= 100 and not self.boss_flags['warden']:
+                self.boss_flags['warden'] = True
+                self.spawnar('warden')
             
             # ... continue para os outros bosses
 

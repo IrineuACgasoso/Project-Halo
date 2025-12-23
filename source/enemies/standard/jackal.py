@@ -143,7 +143,7 @@ class Jackal(InimigoBase):
         elif direcao.x > 0:
             self.estado_animacao = 'right'
         
-        if self.vida < 0.999 * self.vida_base:
+        if self.vida < 0.3 * self.vida_base:
             if self.is_Blue:
                 self.sprites_escolhidas = self.sprites_blue_broken
             elif self.is_Red:
