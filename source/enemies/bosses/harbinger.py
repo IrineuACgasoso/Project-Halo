@@ -13,8 +13,11 @@ from entitymanager import entity_manager
 
 class Harbinger(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=7500, dano_base=40, velocidade_base=50, game=game)
-
+        valor_vida = 7500
+        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game)
+        self.titulo = "HARBINGER, A Rainha Endless"
+        self.vida = valor_vida
+        self.vida_base = valor_vida
         #sprites
         self.sprites = {}
         self.sprites['left'] = [

@@ -65,6 +65,55 @@ class HUD:
         #borda
         pygame.draw.rect(tela, 'white', fundo_rect, 2)
 
+    def desenhar_timer(self, tela):
+        tempo_total = self.game.timer_jogo
+        minutos = int(tempo_total // 60)
+        segundos = int(tempo_total % 60)
+        texto_tempo = f"{minutos:02d}:{segundos:02d}"
+        
+        fonte = pygame.font.SysFont("Arial", 36, bold=True)
+        superficie_texto = fonte.render(texto_tempo, True, (255, 255, 255))
+        rect_texto = superficie_texto.get_rect(center=(largura_tela // 2, 45))
+        tela.blit(superficie_texto, rect_texto)
+
+    
+    def draw_boss_hud(self, tela):
+        boss = self.game.boss_atual
+        if boss and hasattr(boss, 'vida'):
+            # Configurações de Dimensões
+            largura_barra = largura_tela * 0.6
+            altura_barra = 12 
+            x = (largura_tela - largura_barra) // 2
+            y = altura_tela - 80 
+
+            # Cálculo de vida (Garante que não passe de 1 ou seja menor que 0)
+            porcentagem = max(0, min(1, boss.vida / boss.vida_base))
+            
+            # --- DESENHO DO NOME ---
+            nome_texto = boss.titulo
+            fonte_boss = pygame.font.SysFont("Cinzel", 25)
+            surf_nome = fonte_boss.render(nome_texto, True, (215, 175, 65)) # Tom levemente dourado
+            
+            # Centraliza o texto corretamente usando o rect
+            rect_nome = surf_nome.get_rect(center=(largura_tela // 2, y - 15))
+            tela.blit(surf_nome, rect_nome)
+
+            # --- DESENHO DAS BARRAS ---
+            # Retângulo de Fundo (Sombra/Preto)
+            fundo_rect = pygame.Rect(x, y, largura_barra, altura_barra)
+            pygame.draw.rect(tela, (15, 15, 15), fundo_rect)
+            
+            # Retângulo de Vida (Vermelho escuro)
+            vida_largura = largura_barra * porcentagem
+            vida_rect = pygame.Rect(x, y, vida_largura, altura_barra)
+            pygame.draw.rect(tela, (130, 0, 0), vida_rect)
+            
+            # --- MOLDURA ---
+            moldura_rect = fundo_rect.inflate(4, 4) # Aumenta 2px de cada lado
+            
+            pygame.draw.rect(tela, (215, 175, 60), moldura_rect, 2)
+
+
     def draw(self, tela):
         #pega quantidade de cada coletavel
         contagem_exp = self.game.player.coletaveis['exp_shard']
@@ -100,6 +149,8 @@ class HUD:
         tela.blit(self.icone_cafe, (20, 175))
         tela.blit(cafe_surf, cafe_rect)
 
-        #desenha barra de vida
+        # Desenha a base do HUD
         self.draw_barra_vida(tela)
         self.draw_barra_exp(tela)
+        self.desenhar_timer(tela)
+        self.draw_boss_hud(tela)

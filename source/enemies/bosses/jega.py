@@ -10,8 +10,13 @@ from entitymanager import entity_manager
 
 class Jega(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=5000, dano_base=100, velocidade_base= 50, game=game)
+        valor_vida = 5000
+        super().__init__(posicao, vida_base=valor_vida, dano_base=100, velocidade_base= 50, game=game)
+
+        self.titulo = "JEGA 'RDOMNAI, O Matador de Spartans"
         self.game= game
+        self.vida = valor_vida     
+        self.vida_base = valor_vida
         #sprites
         self.sprites = {}
         #left
@@ -105,7 +110,7 @@ class Jega(InimigoBase):
         elif self.estado == 'orbitando':
             self.hitbox.center = (-1000, -1000) # invulnerável enquanto orbita
             if self.alpha_atual > 0:
-                self.alpha_atual -= 10
+                self.alpha_atual -= 20
                 if self.alpha_atual < 0: self.alpha_atual = 0
             # Atualiza o ângulo da órbita
             self.angulo_orbita += self.sentido_orbita * self.velocidade_orbita * delta_time
@@ -123,6 +128,7 @@ class Jega(InimigoBase):
         elif self.estado == 'bote':
             if self.alpha_atual < 255:
                 self.alpha_atual += 25
+            self.velocidade_animacao = 100
             self.hitbox.center = self.rect.center
             
             # Corre em linha reta na direção que o jogador estava no início do bote
@@ -130,6 +136,7 @@ class Jega(InimigoBase):
                 self.posicao += direcao_ao_jogador.normalize() * self.velocidade_bote * delta_time
             
             if agora - self.tempo_inicio_estado > self.duracao_bote:
+                self.velocidade_animacao = 180
                 self.estado = 'perseguindo'
                 self.ultima_habilidade = agora 
                 self.cooldown_habilidade = random.choice([8000, 9000, 10000])

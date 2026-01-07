@@ -10,14 +10,16 @@ import math
 class WardenEternal(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game, clone = False):
         if clone:
-            vida_base = 10000
+            valor_vida = 10000
             velocidade_base = 100
         else:
-            vida_base = 7000
+            valor_vida = 7000
             velocidade_base = 80
-        super().__init__(posicao, grupos, jogador, game, vida_base=vida_base, dano_base=90, velocidade_base=velocidade_base)
+        super().__init__(posicao, grupos, jogador, game, vida_base=valor_vida, dano_base=90, velocidade_base=velocidade_base)
+        self.titulo = "WARDEN ETERNAL, O Guardião do Domínio"
         self.game = game
-        self.grupos = grupos
+        self.vida = valor_vida
+        self.vida_base = valor_vida
         #sprites
         #original
         if clone == False:

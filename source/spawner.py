@@ -33,17 +33,19 @@ class Spawner:
         self.fator_dificuldade = 0.0001
         self.hordas_contagem = 0
 
-        # Flags de controle de Bosses (Movidos do Game para cá)
-        self.boss_flags = {
-            'hunter': False,
-            'guilty': False,
-            'arbiter': False,
-            'gravemind': False,
-            'didact': False,
-            'warden': False,
-            'harbinger': False,
-            'jega': False
+        # Flags de controle de Bosses
+        self.cronograma_bosses = {
+            'hunter': 60,        # 1 minuto
+            'guilty': 180,     # 3 minutos
+            'arbiter': 300,    # 5 minutos (Início Fase 2)
+            'gravemind': 1,  # 8 minutos
+            'didact': 600,     # 10 minutos (Início Fase 3)
+            'warden': 720,     # 12 minutos
+            'jega': 1080,     # 15 minutos
+            'harbinger': 1200  # 20 minutos
         }
+
+        self.boss_flags = {key: False for key in self.cronograma_bosses.keys()}
 
     def calcular_posicao_spawn(self):
         player = entity_manager.player
@@ -68,87 +70,56 @@ class Spawner:
     def spawnar(self, tipo='normal'):
         pos = self.calcular_posicao_spawn()
         
-        # Lógica de Bosses/Minibosses
-        if tipo == 'hunter': Hunter(posicao=pos, game=self.game)
-        elif tipo == 'knight': Knight(posicao=pos, game=self.game)
-        elif tipo == 'guilty': GuiltySpark(posicao=pos, game=self.game)
-        elif tipo == 'arbiter': BossArbiter(posicao=pos, game=self.game)
-        elif tipo == 'gravemind': FloodWarning(posicao=entity_manager.player.posicao, game=self.game)
-        elif tipo == 'didact': Didact(posicao=pos, game=self.game)
-        elif tipo == 'warden': WardenEternal(posicao=pos, game=self.game)
-        elif tipo == 'harbinger': Harbinger(posicao=pos, game=self.game)
-        elif tipo == 'jega': Jega(posicao=pos, game=self.game)
-
-        
-        # Lógica de Inimigos Normais
+        # Mapeamento de classes para facilitar o código
+        classes_bosses = {
+            'hunter': Hunter, 'guilty': GuiltySpark, 'arbiter': BossArbiter,
+            'gravemind': FloodWarning, 'didact': Didact, 'warden': WardenEternal,
+            'harbinger': Harbinger, 'jega': Jega
+        }
+        if tipo in classes_bosses:
+            # Criamos o boss e guardamos a referência no game
+            novo_boss = classes_bosses[tipo](
+                posicao=pos if tipo != 'gravemind' else entity_manager.player.posicao, 
+                game=self.game, 
+                grupos=entity_manager.all_sprites
+            )
+            self.game.boss_atual = novo_boss  # Envia para o Game quem é o boss
         else:
-            niveis = entity_manager.player.contador_niveis
-            if niveis <= 10:
-                pool = [Infection, Infection, Grunt, Grunt, Jackal, Elite]
-            elif 10 < niveis <= 20:
-                pool = [Grunt, Infection, Infection, Jackal, Elite, Brute]
+            # Seleção de inimigos baseada na FASE do jogo
+            fase = self.game.fase_atual
+            if fase == 1:
+                pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
+            elif fase == 2:
+                pool = [Infection, Infection, Grunt, Jackal, Elite]
+            elif fase == 3:
+                pool = [Infection, Infection, Grunt, Grunt, Jackal, Jackal, Elite, Brute]
             else:
-                pool = [Infection, Grunt, Jackal, Brute, Brute, Elite]
+                pool = [Grunt, Grunt]
 
-            # Seleção por peso (simplificada)
-            chance = randint(1, 1000)
-            if chance < 225: inimigo_classe = pool[0]
-            elif chance < 450: inimigo_classe = pool[1]
-            elif chance < 675: inimigo_classe = pool[2]
-            elif chance < 900: inimigo_classe = pool[3]
-            elif chance < 950: inimigo_classe = pool[4]
-            else: inimigo_classe = pool[5]
-            
+            inimigo_classe = random.choice(pool)
             inimigo_classe(posicao=pos, game=self.game)
 
     def update(self, delta_time):
         self.tempo_proximo_spawn += delta_time
+        tempo_atual = self.game.timer_jogo
         player = entity_manager.player
 
+        # Spawn de Inimigos Comuns
         if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
             self.tempo_proximo_spawn = 0
-            self.hordas_contagem += 1
-            
-            # Spawn padrão (2 inimigos por ciclo)
-            for _ in range(2):
-                self.spawnar()
+            # Aumenta a quantidade de inimigos baseada na fase
+            qtd_spawn = 2 + self.game.fase_atual 
+            for _ in range(qtd_spawn):
+                self.spawnar('normal')
 
-            # Gatilhos de Progressão (Bosses)
-            lvl = player.contador_niveis
-            if lvl >= 1 and not self.boss_flags['jega']:
-                self.boss_flags['jega'] = True
-                self.spawnar('jega')
 
-            if lvl >= 10 and not self.boss_flags['guilty']:
-                self.boss_flags['guilty'] = True
-                self.spawnar('guilty')
-
-            if lvl >= 20 and not self.boss_flags['arbiter']:
-                self.boss_flags['arbiter'] = True
-                self.spawnar('arbiter')
-            
-            if lvl >= 30 and not self.boss_flags['gravemind']:
-                self.boss_flags['gravemind'] = True
-                self.spawnar('gravemind')
-
-            if lvl >= 40 and not self.boss_flags['didact']:
-                self.boss_flags['didact'] = True
-                self.spawnar('didact')
-
-            if lvl >= 50 and not self.boss_flags['hunter']:
-                self.boss_flags['hunter'] = True
-                self.spawnar('hunter')
-            
-            if lvl >= 100 and not self.boss_flags['harbinger']:
-                self.boss_flags['harbinger'] = True
-                self.spawnar('harbinger')
-
-            if lvl >= 100 and not self.boss_flags['warden']:
-                self.boss_flags['warden'] = True
-                self.spawnar('warden')
+        # Spawn de Bosses por Cronômetro
+        for boss, tempo_alvo in self.cronograma_bosses.items():
+            if tempo_atual >= tempo_alvo and not self.boss_flags[boss]:
+                self.boss_flags[boss] = True
+                self.spawnar(boss)
             
             # ... continue para os outros bosses
 
         # Aumenta dificuldade
-        if self.intervalo_spawn_atual > self.intervalo_minimo:
-            self.intervalo_spawn_atual -= self.fator_dificuldade * delta_time
+        self.intervalo_spawn_atual = max(0.5, 2.5 - (tempo_atual * 0.002))

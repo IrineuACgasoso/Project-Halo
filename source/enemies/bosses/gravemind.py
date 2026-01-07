@@ -8,9 +8,18 @@ import random
 
 
 class Gravemind(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game, is_final_form = False):
-        super().__init__(posicao, grupos, jogador, game, vida_base=3000, dano_base=50, velocidade_base=35)
+    def __init__(self, posicao, game, grupos, jogador, is_final_form = False):
+        if is_final_form:
+            valor_vida = 8000
+            self.titulo = "GRAVEMIND, O Monumento de Todos os Pecados"
+        else:
+            valor_vida = 3000
+            self.titulo = "GRAVEMIND"
+        super().__init__(posicao, vida_base=valor_vida, dano_base=50, velocidade_base=35, game=game)
+
         self.game = game
+        self.vida = valor_vida
+        self.vida_base = valor_vida
         self.is_final_form = is_final_form
 
         #Carrega a sprite e animacao da forma final
@@ -19,7 +28,6 @@ class Gravemind(InimigoBase):
             self.animacao_padrao = [self.sprite_principal, pygame.image.load(join('assets', 'img', 'gravemind', 'proto2.png')).convert_alpha()]
             self.ataque_sprite = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'gravemind', 'proto3.png')).convert_alpha(), (600,600))
             self.tamanho_sprite = (600, 600)
-            self.vida = 8000
             self.dano = 100
 
         else:
@@ -28,7 +36,6 @@ class Gravemind(InimigoBase):
             self.animacao_padrao = [self.sprite_principal, pygame.image.load(join('assets', 'img', 'gravemind', 'grave2.png')).convert_alpha()]
             self.ataque_sprite = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'gravemind', 'grave3.png')).convert_alpha(), (450, 450))
             self.tamanho_sprite = (450, 450)
-            self.vida = 500
             self.dano = 50
 
         # Redimensiona as sprites de acordo com a forma
@@ -121,11 +128,10 @@ class Gravemind(InimigoBase):
         if self.game.gravemind_reborns > 1:
             self.game.gravemind_reborns -= 1
             # Spawna o aviso na posição do jogador e se destrói
-            FloodWarning(posicao=self.jogador.posicao, grupos=self.game.all_sprites, game=self.game)
+            FloodWarning(posicao=self.jogador.posicao, grupos = entity_manager.all_sprites, game=self.game)
         elif self.game.gravemind_reborns == 1:
-            if self.game.invocacao_protogravemind == 0:
-                self.game.invocacao_protogravemind += 1
-                ProtoGravePit(posicao=self.jogador.posicao, grupos=self.game.all_sprites, game=self.game)
+            self.game.gravemind_reborns = 0
+            ProtoGravePit(posicao=self.jogador.posicao, grupos=entity_manager.all_sprites, game=self.game)
         self.kill()
 
     def invocar_infecao(self):
@@ -137,8 +143,6 @@ class Gravemind(InimigoBase):
 
         Infection(
         posicao=posicao_spawn_aleatoria, 
-        grupos=(self.game.all_sprites, self.game.inimigos_grupo), 
-        jogador=self.jogador,
         game= self.game
         )
 
@@ -146,7 +150,7 @@ class Gravemind(InimigoBase):
         # Cria uma instância do novo projétil
         AcidBreath(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo), 
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo), 
             jogador=self.jogador,
             game=self.game
             )
@@ -155,33 +159,24 @@ class Gravemind(InimigoBase):
         deslocamento_x = randint(-1200, 1200)
         deslocamento_y = randint(-700, 700)
         posicao_spawn_aleatoria = self.jogador.posicao + pygame.math.Vector2(deslocamento_x, deslocamento_y)
-        FloodWarning(posicao=posicao_spawn_aleatoria, grupos=self.game.all_sprites, game=self.game)
+        FloodWarning(posicao=posicao_spawn_aleatoria, grupos=entity_manager.all_sprites, game=self.game)
 
     def morrer(self, grupos):
         if not self.is_final_form and self.game.gravemind_reborns > 0:
-            return
-        self.game.gravemind_reborns = 3 
-        chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(8):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(6):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 500 <= chance < 800:
-            for _ in range(6):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+            qtd_shards = 2
         else:
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+            qtd_shards = 5
+            
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
+        chance= randint(1,1000)
+
+        # Drop garantido de Shards grandes por ser Boss
+        if chance > 800: qtd_shards += 4
+        elif chance > 600: qtd_shards += 2
+
+        for _ in range(qtd_shards):
+            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
 
     def animar(self):
@@ -204,7 +199,6 @@ class Gravemind(InimigoBase):
         if not self.is_final_form and self.vida <= self.vida_limite: 
             self.estado_respawn = 'desaparecendo'
             self.is_animating_respawn = True
-            self.vida = self.vida_base
         
         self.tempo_invocacao += delta_time * 1000
         self.tempo_acido += delta_time * 1000
@@ -237,7 +231,7 @@ class Gravemind(InimigoBase):
             if self.tempo_burst >= self.intervalo_burst:
                 self.tempo_burst = 0
                 self.tiros_restantes -= 1
-                self.estado_animacao = 'atacando' # NOVO: Define o estado para ataque
+                self.estado_animacao = 'atacando' # Define o estado para ataque
                 self.image = self.ataque_sprite
                 self.acid_breath()
         if self.tiros_restantes == 0:
@@ -259,7 +253,7 @@ class Gravemind(InimigoBase):
             self.animar()
 
 class FloodWarning(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, game):
+    def __init__(self, posicao, game, grupos):
         super().__init__(grupos)
 
         self.game = game
@@ -283,17 +277,18 @@ class FloodWarning(pygame.sprite.Sprite):
             distancia_do_player = self.game.player.posicao.distance_to(self.posicao)
             if distancia_do_player <= self.raio:
                 self.game.player.vida_atual -= self.dano
-            Gravemind(
+            novo_boss = Gravemind(
                 posicao=self.posicao, 
-                grupos=(self.game.all_sprites, self.game.inimigos_grupo),
+                grupos=(entity_manager.all_sprites, entity_manager.inimigos_grupo),
                 jogador=self.game.player,
                 game=self.game
-            )        
+            )     
+            self.game.boss_atual = novo_boss   
             # Remove o círculo de aviso
             self.kill()
 
 class ProtoGravePit(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, game):
+    def __init__(self, posicao, game, grupos):
         super().__init__(grupos)
         
         self.game = game 
@@ -319,12 +314,12 @@ class ProtoGravePit(pygame.sprite.Sprite):
             if distancia_do_player <= self.raio:
                 self.game.player.vida_atual -= self.dano
             #Proto Gravemind
-            Gravemind(
+            novo_boss = Gravemind(
                 posicao=self.posicao,
-                grupos=(self.game.all_sprites, self.game.inimigos_grupo),
+                grupos=(entity_manager.all_sprites, entity_manager.inimigos_grupo),
                 jogador=self.game.player,
                 game=self.game,
                 is_final_form=True  
             )
-                
+            self.game.boss_atual = novo_boss 
             self.kill()

@@ -4,7 +4,6 @@ from os.path import join
 from settings import *
 from player import Player 
 from menu import *
-from hud import *
 from spawner import Spawner
 from entitymanager import entity_manager
 from feats.weapon import *
@@ -12,15 +11,20 @@ from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapa import Mapa
+from hud import HUD
 
 
 
 class Game:
     def __init__(self, tela):
+        # Variaveis de controle de tempo
         self.tela = tela
         self.running = True
         self.clock = pygame.time.Clock()
         self.estado_do_jogo = "menu_principal"
+        self.timer_jogo = 0  # Tempo em segundos
+        self.fase_atual = 1
+        self.boss_atual = None
 
         # Sprites e grupos
         self.all_sprites = entity_manager.all_sprites
@@ -52,6 +56,8 @@ class Game:
 
         # Controle de spawn
         self.spawner = Spawner(self) # Inicializa o spawner
+        self.gravemind_reborns = 3        
+        self.invocacao_protogravemind = 0
 
     
     def eventos(self):
@@ -134,13 +140,21 @@ class Game:
 
     def update(self, delta_time):
         if self.estado_do_jogo == "jogando":
+            # Verificamos se o boss morreu para limpar a referência
+            if self.boss_atual and not self.boss_atual.alive():
+                self.boss_atual = None
+
+            # SÓ INCREMENTA O TIMER SE NÃO HOUVER BOSS
+            if not self.boss_atual:
+                self.timer_jogo += delta_time
+                self.fase_atual = int(self.timer_jogo // 300) + 1 
+                self.spawner.update(delta_time) # Spawner só roda sem boss
+
             if self.player:
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
             
             entity_manager.all_sprites.update(delta_time)
-
-            self.spawner.update(delta_time)
 
             self.colisao(delta_time)
 
@@ -172,6 +186,7 @@ class Game:
                 self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
 
             self.hud.draw(self.tela)
+            self.hud.desenhar_timer(self.tela)
 
         elif self.estado_do_jogo == 'pausa':
             
@@ -204,7 +219,12 @@ class Game:
         entity_manager.projeteis_inimigos_grupo.empty()
 
         # Reseta o spawner para zerar os timers e flags de bosses
+        self.timer_jogo = 0
+        self.fase_atual = 1
         self.spawner = Spawner(self)
+
+        self.gravemind_reborns = 3
+        self.invocacao_protogravemind = 0
 
         self.mapa = Mapa(all_sprites=self.all_sprites)
         self.largura_mapa_pixels = self.mapa.largura_mapa_pixels

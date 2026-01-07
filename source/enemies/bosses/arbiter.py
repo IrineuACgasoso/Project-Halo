@@ -7,9 +7,14 @@ from feats.items import *
 
 
 class BossArbiter(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=9000, dano_base=80, velocidade_base = 90)
+    def __init__(self, posicao, game):
+        valor_vida = 4500
+        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base = 90, game=game)
+        self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
+        
         self.game=game
+        self.vida = valor_vida      # Vida atual (vai diminuir)
+        self.vida_base = valor_vida
         self.velocidade = self.velocidade_base
         #sprites
         self.sprites = {}
@@ -58,7 +63,7 @@ class BossArbiter(InimigoBase):
     def carabin(self):
         Carabin(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=40,
@@ -77,27 +82,17 @@ class BossArbiter(InimigoBase):
             self.rect = self.image.get_rect(center=self.posicao)
 
     def morrer(self, grupos):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 500 <= chance < 800:
-            for _ in range(3):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(2):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+
+        # Drop garantido de Shards grandes por ser Boss
+        qtd_shards = 2
+        if chance > 800: qtd_shards = 4
+        elif chance > 600: qtd_shards = 3
+
+        for _ in range(qtd_shards):
+            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
 
     def update(self, delta_time):

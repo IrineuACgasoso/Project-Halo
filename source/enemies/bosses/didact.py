@@ -8,8 +8,10 @@ import random
 import math
 
 class Didact(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=7500, dano_base=40, velocidade_base=50)
+    def __init__(self, posicao, game):
+        valor_vida = 7500
+        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game)
+        self.titulo = "DIDACT, O Forerunner Banido"
         self.game = game
         #sprites
         self.sprites = {}
@@ -41,7 +43,7 @@ class Didact(InimigoBase):
 
         #pull ability
         self.estado_habilidade = 'parado' # 'parado', 'ataque_pull', 'ataque_laser'
-        self.cooldown_pull = 1000 # 5 segundos de recarga
+        self.cooldown_pull = 5000 # 5 segundos de recarga
         self.tempo_ultimo_pull = pygame.time.get_ticks()
         self.duracao_pull = 5000 # 5 segundos de duração
         self.tempo_inicio_pull = 0
@@ -50,7 +52,7 @@ class Didact(InimigoBase):
         self.tempo_ultimo_dano_pull = 0 
 
         #laser ability
-        self.cooldown_laser = 2000
+        self.cooldown_laser = 12000
         self.tempo_ultimo_laser = pygame.time.get_ticks()
         self.duracao_aviso_laser = 1000 # 1.5 segundos de aviso
         self.duracao_disparo_laser = 500 # 0.5 segundos de disparo
@@ -66,7 +68,7 @@ class Didact(InimigoBase):
         agora = pygame.time.get_ticks()
         if agora - self.tempo_ultimo_laser >= self.cooldown_laser:
             # Define os possíveis valores de cooldown (em milissegundos)
-            possiveis_cooldowns = [5000, 6000, 7000, 8000] 
+            possiveis_cooldowns = [7000, 8000, 9000, 10000] 
             self.cooldown_laser = random.choice(possiveis_cooldowns)
             self.estado_habilidade = 'aviso_laser'
             self.tempo_inicio_laser = agora
@@ -87,7 +89,7 @@ class Didact(InimigoBase):
         Laser(
             posicao_inicial=self.posicao.copy(), # Posição atual do Didact
             posicao_final=self.posicao_alvo_laser.copy(), # Posição travada do jogador
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             game=self.game,
             player=self.game.player
         )
@@ -128,27 +130,17 @@ class Didact(InimigoBase):
                 self.rect = self.image.get_rect(center=self.posicao)
     
     def morrer(self, grupos):
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
         chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(8):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(7):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 500 <= chance < 800:
-            for _ in range(6):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+
+        # Drop garantido de Shards grandes por ser Boss
+        qtd_shards = 5
+        if chance > 800: qtd_shards = 10
+        elif chance > 600: qtd_shards = 7
+
+        for _ in range(qtd_shards):
+            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
         
     def update(self, delta_time):

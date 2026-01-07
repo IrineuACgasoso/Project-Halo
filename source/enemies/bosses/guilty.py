@@ -11,8 +11,12 @@ from entitymanager import entity_manager
 
 class GuiltySpark(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=5000, dano_base=80, velocidade_base= 200, game=game)
+        valor_vida = 5000
+        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base= 200, game=game)
+        self.titulo = "GUILTY SPARK, O Monitor da Instalação 04"
         self.game= game
+        self.vida = valor_vida
+        self.vida_base = valor_vida
         #sprites
         self.sprites = {}
         #left

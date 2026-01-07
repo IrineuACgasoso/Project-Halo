@@ -14,6 +14,8 @@ class InimigoBase(pygame.sprite.Sprite):
     def __init__(self, posicao, vida_base, dano_base, velocidade_base, game):
         super().__init__(entity_manager.all_sprites, entity_manager.inimigos_grupo)
 
+        # Nome
+        self.nome_completo = "INIMIGO"
         # Reference to player
         self.jogador = entity_manager.player
 
