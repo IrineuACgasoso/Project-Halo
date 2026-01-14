@@ -148,7 +148,8 @@ class Game:
             if not self.boss_atual:
                 self.timer_jogo += delta_time
                 self.fase_atual = int(self.timer_jogo // 300) + 1 
-                self.spawner.update(delta_time) # Spawner só roda sem boss
+                self.hud.desenhar_timer(self.tela)
+                self.spawner.update(delta_time) # Spawner só roda sem boss                
 
             if self.player:
                 for arma in self.player.armas.values():
@@ -186,7 +187,6 @@ class Game:
                 self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
 
             self.hud.draw(self.tela)
-            self.hud.desenhar_timer(self.tela)
 
         elif self.estado_do_jogo == 'pausa':
             

@@ -9,7 +9,9 @@ class HUD:
         #seta fonte para o numero da hud
         self.font = pygame.font.Font(None, 36)
 
-
+        # Controle de otimização para busca de boss
+        self.ultimo_check_boss = 0
+        self.intervalo_check_boss = 500
 
         #pega imagem e da scale para ficar menor
         #xp
@@ -24,6 +26,7 @@ class HUD:
         #cafe
         self.icone_cafe = pygame.image.load(join('assets', 'img', 'cafe.png')). convert_alpha()
         self.icone_cafe = pygame.transform.scale(self.icone_cafe, (30, 30))
+
 
     def draw_barra_exp(self, tela):
         jogador = self.game.player
@@ -70,16 +73,40 @@ class HUD:
         minutos = int(tempo_total // 60)
         segundos = int(tempo_total % 60)
         texto_tempo = f"{minutos:02d}:{segundos:02d}"
-        
-        fonte = pygame.font.SysFont("Arial", 36, bold=True)
-        superficie_texto = fonte.render(texto_tempo, True, (255, 255, 255))
-        rect_texto = superficie_texto.get_rect(center=(largura_tela // 2, 45))
-        tela.blit(superficie_texto, rect_texto)
 
-    
+        if not self.game.boss_atual:
+            fonte = pygame.font.SysFont("Arial", 36, bold=True)
+            superficie_texto = fonte.render(texto_tempo, True, (255, 255, 255))
+            rect_texto = superficie_texto.get_rect(center=(largura_tela // 2, 45))
+            tela.blit(superficie_texto, rect_texto)
+
+    def atualizar_boss_foco(self):
+        """Busca o Boss mais próximo do jogador para focar na HUD."""
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_check_boss < self.intervalo_check_boss:
+            return
+
+        self.ultimo_check_boss = agora
+        
+        # Filtra apenas inimigos que são bosses e estão vivos
+        bosses = [sprite for sprite in self.game.inimigos_grupo if hasattr(sprite, 'titulo')]
+        
+        if bosses:
+            # Encontra o boss com a menor distância Euclidiana até o jogador
+            self.game.boss_atual = min(
+                bosses, 
+                key=lambda b: b.posicao.distance_to(self.game.player.posicao)
+            )
+        else:
+            self.game.boss_atual = None
+
+
     def draw_boss_hud(self, tela):
+
+        self.atualizar_boss_foco()
+
         boss = self.game.boss_atual
-        if boss and hasattr(boss, 'vida'):
+        if boss and hasattr(boss, 'vida') and not getattr(boss, 'is_animating_respawn', False):
             # Configurações de Dimensões
             largura_barra = largura_tela * 0.6
             altura_barra = 12 
@@ -103,10 +130,13 @@ class HUD:
             fundo_rect = pygame.Rect(x, y, largura_barra, altura_barra)
             pygame.draw.rect(tela, (15, 15, 15), fundo_rect)
             
+            # Cor da vida: Se for a forma final, podemos usar um roxo, senão vermelho
+            cor_vida = (130, 0, 0) if not getattr(boss, 'is_final_form', False) else (100, 0, 150)
+
             # Retângulo de Vida (Vermelho escuro)
             vida_largura = largura_barra * porcentagem
             vida_rect = pygame.Rect(x, y, vida_largura, altura_barra)
-            pygame.draw.rect(tela, (130, 0, 0), vida_rect)
+            pygame.draw.rect(tela, cor_vida, vida_rect)
             
             # --- MOLDURA ---
             moldura_rect = fundo_rect.inflate(4, 4) # Aumenta 2px de cada lado

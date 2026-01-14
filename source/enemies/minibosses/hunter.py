@@ -18,8 +18,8 @@ class Hunter(InimigoBase):
         self.sprites = {}
         #left
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'hunter','hunter.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'hunter','hunter2.png')).convert_alpha(), (270, 270))
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter.png')).convert_alpha(), (250, 250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter2.png')).convert_alpha(), (270, 270))
             ]
         #right
         self.sprites['right'] = [

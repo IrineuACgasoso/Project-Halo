@@ -40,72 +40,37 @@ class ProjetilInimigoBase(pygame.sprite.Sprite):
 class PlasmaGun(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=3000)
-        self.image = pygame.image.load(join('assets', 'img', 'plasmagun.png'))
+        self.image = pygame.image.load(join('assets', 'img', 'projectiles', 'plasmagun.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
 
 class Carabin(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao =2000):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        self.image = pygame.image.load(join('assets', 'img', 'carabin.png'))
+        self.image = pygame.image.load(join('assets', 'img', 'projectiles', 'carabin.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
 
 class M50(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=2500)
-        self.image = pygame.image.load(join('assets', 'img', 'm50.png'))
+        self.image = pygame.image.load(join('assets', 'img', 'projectiles', 'm50.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
 
 class Dizimator(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao = 1500):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        self.image = pygame.image.load(join('assets', 'img', 'dizimator.png'))
+        self.image = pygame.image.load(join('assets', 'img', 'projectiles', 'dizimator.png'))
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect(center=self.posicao)
-
-class Laser(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, posicao_final, grupos, game, player):
-        super().__init__(
-            posicao_inicial=posicao_inicial,
-            grupos=grupos,
-            jogador=player, # O jogador já está definido como alvo na classe base
-            game=game,
-            dano=player.vida_maxima/2,
-            velocidade=5000, # Velocidade do projétil, ajustada para o laser
-            duracao=1500 # A duração em milissegundos
-        )
-
-        self.posicao_alvo_laser = pygame.math.Vector2(posicao_final)
-        self.direcao = self.posicao_alvo_laser - self.posicao
-        if self.direcao.length() > 0:
-            self.direcao.normalize_ip()
-        else:
-            self.direcao = pygame.math.Vector2(1, 0)
-
-        #sprite
-        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'didact', 'laser.gif')).convert_alpha(), (150, 150))
-        self.image = laser_img_original        
-        # Calcula o ângulo em graus a partir da direção
-        angulo = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
-        self.image = pygame.transform.rotate(laser_img_original, angulo)        
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
-
-        #colisao
-        self.ja_colidiu = False
-
-    def update(self, delta_time):
-        super().update(delta_time)
-        self.rect.center = self.posicao
 
 class CannonBeam(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
         self.posicao = pygame.math.Vector2(posicao_inicial)
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
         #sprite
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'hunter', 'cannon.png')).convert_alpha(), (150, 150))
+        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'cannon.png')).convert_alpha(), (150, 150))
         #hitbox
         # Cria um novo retângulo menor para a colisão
         tamanho_hitbox = (75, 75)  # Ajuste este valor para o tamanho correto do feixe
@@ -139,8 +104,8 @@ class Laser(ProjetilInimigoBase):
             jogador=player, # O jogador já está definido como alvo na classe base
             game=game,
             dano=player.vida_maxima/2,
-            velocidade=5000, # Velocidade do projétil, ajustada para o laser
-            duracao=1500 # A duração em milissegundos
+            velocidade=3000, # Velocidade do projétil, ajustada para o laser
+            duracao=1800 # A duração em milissegundos
         )
 
         self.posicao_alvo_laser = pygame.math.Vector2(posicao_final)
@@ -151,7 +116,7 @@ class Laser(ProjetilInimigoBase):
             self.direcao = pygame.math.Vector2(1, 0)
 
         #sprite
-        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'didact', 'laser.gif')).convert_alpha(), (150, 150))
+        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'laser.gif')).convert_alpha(), (150, 150))
         self.image = laser_img_original        
         # Calcula o ângulo em graus a partir da direção
         angulo = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
@@ -167,14 +132,14 @@ class Laser(ProjetilInimigoBase):
         self.rect.center = self.posicao
 
 class AcidBreath(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=25,velocidade=400, duracao=2700)
+    def __init__(self, posicao_inicial, grupos, jogador, game, velocidade):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=25, velocidade=velocidade, duracao=2700)
         self.jogador = jogador
         self.game = game
         self.posicao = pygame.math.Vector2(posicao_inicial)
 
         # Aparência do projétil (imagem temporária)
-        self.image = pygame.image.load(join('assets', 'img', 'gravemind', 'acid_breath.png')).convert_alpha()
+        self.image = pygame.image.load(join('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (48, 48))
         self.rect = self.image.get_rect(center=self.posicao)
         # Calcula a direção para o jogador no momento da criação
@@ -201,7 +166,7 @@ class LaserBeam(ProjetilInimigoBase):
         self.dano_aplicado = False
 
         #sprite do laser
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'laser.png')).convert_alpha(), (150, 15))
+        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'laser.png')).convert_alpha(), (150, 15))
         
         # Calcula a direção do GuiltySpark para o jogador
         self.direcao = (self.jogador.posicao - self.posicao).normalize()

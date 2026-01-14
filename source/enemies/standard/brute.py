@@ -18,9 +18,9 @@ class Brute(InimigoBase):
         self.sprites = {}
         # Carrega e redimensione as sprites da esquerda
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'brute', 'brute.png')).convert_alpha(),(200,200)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'brute', 'brute2.png')).convert_alpha(),(200,200))
-            #pygame.transform.scale(pygame.image.load(join('assets', 'img', 'brute', 'brute3.png')).convert_alpha(),(150,150))
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute.png')).convert_alpha(),(200,200)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute2.png')).convert_alpha(),(200,200))
+            #pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute3.png')).convert_alpha(),(150,150))
 
         ]
         #Carrega direita

@@ -13,7 +13,6 @@ from entitymanager import entity_manager
 class Grunt(InimigoBase):
     def __init__(self, posicao, game):
         super().__init__(posicao, vida_base=4, dano_base=15, velocidade_base=90, game=game)
-        self.image = pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 80))
         self.rect = self.image.get_rect(center=self.posicao)
         self.velocidade = 70
@@ -25,18 +24,16 @@ class Grunt(InimigoBase):
         #pre animacao
         self.sprites = {}
         sprites_right = [
-            pygame.image.load(join('assets', 'img', 'grunt', 'grunt.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'grunt', 'grunt2.png')).convert_alpha(),
-            #pygame.image.load(join('assets', 'img', 'grunt', 'grunt3.png')).convert_alpha()
+            pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt.png')).convert_alpha(),
+            pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt2.png')).convert_alpha(),
+            #pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt3.png')).convert_alpha()
         ]
         #add esquerda no dict
         self.sprites['right'] = [pygame.transform.scale(sprite, (96, 96)) for sprite in sprites_right]
         #Carrega direita
-        sprites_left = [
+        self.sprites['left'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
         ]
-        #add direita no dict
-        self.sprites['left'] = sprites_left
         #framagem da sprite
         self.frame_atual = 0  
         self.estado_animacao = 'right'

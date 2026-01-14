@@ -17,8 +17,8 @@ class Infection(InimigoBase):
 
         # Carrega e redimensione as sprites da esquerda
         sprites_left = [
-            pygame.image.load(join('assets', 'img', 'infection', 'infection1.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'infection', 'infection2.png')).convert_alpha()
+            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection1.png')).convert_alpha(),
+            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection2.png')).convert_alpha()
         ]
         #add esquerda no dict
         self.sprites['left'] = [pygame.transform.scale(sprite, (75, 75)) for sprite in sprites_left]

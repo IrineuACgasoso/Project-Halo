@@ -10,7 +10,7 @@ from entitymanager import entity_manager
 
 
 class GuiltySpark(InimigoBase):
-    def __init__(self, posicao, game):
+    def __init__(self, posicao, game, grupos):
         valor_vida = 5000
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base= 200, game=game)
         self.titulo = "GUILTY SPARK, O Monitor da Instalação 04"
@@ -21,8 +21,8 @@ class GuiltySpark(InimigoBase):
         self.sprites = {}
         #left
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'guilty.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'guilty', 'guilty2.png')).convert_alpha(), (100, 100))
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty.png')).convert_alpha(), (100, 100)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty2.png')).convert_alpha(), (100, 100))
         ]
 
         #right

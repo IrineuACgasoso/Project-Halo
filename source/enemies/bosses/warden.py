@@ -6,6 +6,7 @@ from player import *
 from enemies.minibosses.knight import Knight
 import random
 import math
+from entitymanager import entity_manager
 
 class WardenEternal(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game, clone = False):
@@ -25,9 +26,9 @@ class WardenEternal(InimigoBase):
         if clone == False:
             self.sprites = {}
             self.sprites['left'] = [
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'warden.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'warden2.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'warden3.png')).convert_alpha(), (550,550))
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden.png')).convert_alpha(), (550,550)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden2.png')).convert_alpha(), (550,550)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden3.png')).convert_alpha(), (550,550))
                 
                 ]
             self.sprites['right'] = [
@@ -37,9 +38,9 @@ class WardenEternal(InimigoBase):
         else:
             self.sprites = {}
             self.sprites['left'] = [
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'clone2.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'clone.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'warden', 'clone3.png')).convert_alpha(), (500,500))
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone2.png')).convert_alpha(), (500,500)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone.png')).convert_alpha(), (500,500)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone3.png')).convert_alpha(), (500,500))
                 
                 ]
             self.sprites['right'] = [
@@ -106,7 +107,7 @@ class WardenEternal(InimigoBase):
                 clone=True
             )
             # Adiciona o clone ao grupo de inimigos
-            self.game.inimigos_grupo.add(clone)
+            entity_manager.inimigos_grupo.add(clone)
         # Zera os clones restantes para que o boss não clone novamente
         self.clones_restantes = 0
 

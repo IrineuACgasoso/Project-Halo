@@ -18,10 +18,10 @@ class Elite(InimigoBase):
         self.sprites = {}
         # Carrega e redimensione as sprites da esquerda
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'elite', 'elite.png')).convert_alpha(),(180,180)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'elite', 'elite.png')).convert_alpha(),(180,180))
-            #pygame.transform.scale(pygame.image.load(join('assets', 'img', 'brute', 'brute3.png')).convert_alpha(),(150,150))
-
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite1.png')).convert_alpha(),(120,180)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite2.png')).convert_alpha(),(120,180)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite3.png')).convert_alpha(),(120,180)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite4.png')).convert_alpha(),(120,180))
         ]
         #Carrega direita
         self.sprites['right'] = [
@@ -30,7 +30,7 @@ class Elite(InimigoBase):
         #Animação
         self.estado_animacao = 'right'
         self.frame_atual = 0
-        self.velocidade_animacao = 250
+        self.velocidade_animacao = 150
         self.ultimo_update_animacao = pygame.time.get_ticks()
         self.image = self.sprites[self.estado_animacao][self.frame_atual]
         self.rect = self.image.get_rect(center=posicao)
@@ -65,12 +65,13 @@ class Elite(InimigoBase):
         self.kill()
 
     def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.posicao)
+        if self.velocidade > 0:
+            agora = pygame.time.get_ticks()
+            if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+                self.ultimo_update_animacao = agora
+                self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
+                self.image = self.sprites[self.estado_animacao][self.frame_atual]
+                self.rect = self.image.get_rect(center=self.posicao)
 
     def update(self, delta_time):
         direcao = (self.jogador.posicao - self.posicao)
@@ -98,7 +99,7 @@ class Elite(InimigoBase):
         else:
             if self.vida_critica:
                 self.image.set_alpha(0)
-        if direcao.length() < 500:
+        if direcao.length() < 350:
             self.velocidade = 0
         else:
             self.velocidade = self.velocidade_base

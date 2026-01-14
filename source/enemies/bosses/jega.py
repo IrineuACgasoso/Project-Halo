@@ -9,7 +9,7 @@ from entitymanager import entity_manager
 
 
 class Jega(InimigoBase):
-    def __init__(self, posicao, game):
+    def __init__(self, posicao, game, grupos):
         valor_vida = 5000
         super().__init__(posicao, vida_base=valor_vida, dano_base=100, velocidade_base= 50, game=game)
 
@@ -21,13 +21,13 @@ class Jega(InimigoBase):
         self.sprites = {}
         #left
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega1.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega2.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega3.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega4.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega5.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega6.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega1.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega2.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega3.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega4.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega5.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega6.png')).convert_alpha(), (256, 256)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
         ]
 
         #right

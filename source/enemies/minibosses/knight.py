@@ -11,16 +11,17 @@ from enemies.enemies import *
 
 class Knight(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=500, dano_base=60, velocidade_base=130)
+        super().__init__(posicao, grupos, jogador, game, vida_base=500, dano_base=60, velocidade_base=50)
         self.game = game
 
         #sprites
         self.sprites = {}
         #right
         self.sprites['right'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'royalknight.png')).convert_alpha(), (200,200)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'royalknight.png')).convert_alpha(), (200,200))
-
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command1.png')).convert_alpha(), (200,200)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command2.png')).convert_alpha(), (200,200)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command3.png')).convert_alpha(), (200,200)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command4.png')).convert_alpha(), (200,200)),
         ]
         #left
         self.sprites['left'] = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']]
@@ -58,7 +59,7 @@ class Knight(InimigoBase):
             grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
-            dano=self.dano_base * 5,
+            dano=self.dano_base * 1.5,
             velocidade= 800,  # Ajuste o dano do laser
             duracao=2000,  # Ajusta a duração em milissegundos
         )
@@ -89,10 +90,10 @@ class Knight(InimigoBase):
 
     def run(self):
         if not self.running:
-            novo_cooldown = [10000, 15000, 20000, 2500]
+            novo_cooldown = [10000, 15000, 20000, 25000]
             self.cooldown_run = random.choice(novo_cooldown)
             self.running = True
-            self.velocidade = self.velocidade_base * 2.5
+            self.velocidade = self.velocidade_base * 4.0
             self.inicio_run = pygame.time.get_ticks()
     
     def animar(self):
@@ -102,8 +103,6 @@ class Knight(InimigoBase):
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
             self.rect = self.image.get_rect(center=self.posicao)
-            # Recrie a hitbox aqui para que ela se adapte ao novo tamanho
-            self.hitbox = pygame.Rect(0, 0, self.rect.width * 0.6, self.rect.height * 0.9)
             self.hitbox.center = self.rect.center
 
     def update(self, delta_time):
