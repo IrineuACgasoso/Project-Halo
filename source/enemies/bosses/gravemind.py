@@ -100,8 +100,8 @@ class Gravemind(InimigoBase):
         # Chama uma vez com delta_time 0 apenas para preparar a primeira fatia
         self.atualizar_sprite_respawn(0)
 
-        #respawns
-        self.vida_limite = self.vida_base / 5
+        # Respawns
+        self.vida_limite = self.vida_base / 6
 
         # Variável para controlar o estado da animação
         self.estado_animacao = 'normal'
@@ -147,6 +147,11 @@ class Gravemind(InimigoBase):
     def collision_rect(self):
         """Retorna a hitbox específica do Gravemind."""
         return self.hitbox
+    
+    @property
+    def invulneravel(self):
+        return self.estado_respawn == 'reaparecendo' or self.estado_respawn == 'desaparecendo'
+        
     
     def get_direction_key(self):
         """Retorna a string 'left' ou 'right' baseada na posição do player"""

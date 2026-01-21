@@ -19,8 +19,10 @@ class BossArbiter(InimigoBase):
         #sprites
         self.sprites = {}
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses' 'arbiter', 'abiboss.png')).convert_alpha(), (200,200)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'abiboss2.png')).convert_alpha(), (200,200))
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss1.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss2.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss3.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss4.png')).convert_alpha(), (250,250))
             ]
         self.sprites['right'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
@@ -31,7 +33,7 @@ class BossArbiter(InimigoBase):
         self.indice_animacao = 0
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]
         self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade_animacao = 300
+        self.velocidade_animacao = 200
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
@@ -58,6 +60,8 @@ class BossArbiter(InimigoBase):
     @property
     def collision_rect(self):
         "Retorna a hitbox de Arbiter."
+        if self.image.get_alpha() == 0:
+            return pygame.Rect(-1000, -1000, 0, 0)
         return self.hitbox
     
     def carabin(self):

@@ -1,24 +1,26 @@
 import pygame
 import random
-from game import *
 from feats.items import *
 from player import *
 from settings import *
-from feats.projetil import CannonBeam
+from feats.projetil import CannonBeam, PlasmaGun
 from enemies.enemies import *
+from entitymanager import entity_manager
 
 
 
 class Hunter(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game):
-        super().__init__(posicao, grupos, jogador, game, vida_base=1500, dano_base=40, velocidade_base=55)
+    def __init__(self, posicao, grupos, game):
+        valor_vida = 750
+        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=40, game=game)
+        self.titulo = "HUNTER, O Guerreiro Mgalekgolo"
         self.game = game
 
         #sprites
         self.sprites = {}
         #left
         self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter.png')).convert_alpha(), (250, 250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter1.png')).convert_alpha(), (250, 250)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter2.png')).convert_alpha(), (270, 270))
             ]
         #right
@@ -28,29 +30,29 @@ class Hunter(InimigoBase):
 
         #framagem da sprite
         self.frame_atual = 0  
-        self.estado_animacao = 'right'
+        self.estado_animacao = 'left'
         self.indice_animacao = 0
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]
         self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade_animacao = 250
+        self.velocidade_animacao = 900
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
         self.mask = pygame.mask.from_surface(self.image)
 
-        #rage run ability
-        self.velocidade = self.velocidade_base
+        # Rage Run Ability
         self.run_ativo = False
         self.cooldown_run = 6000
         self.tempo_ultima_run = pygame.time.get_ticks()
         self.duracao_run = 2500
         self.tempo_inicio_run = 0
+        self.velocidade_corrida = 350
 
-        #cannon beam
+        # Cannon Beam
         self.cooldown_cannon = 3000
         self.tempo_ultimo_cannon = pygame.time.get_ticks()
 
-        #burst
+        # Burst
         self.cooldown_burst = 4000
         self.contagem_burst = 10
         self.burst_restante = 0
@@ -64,27 +66,10 @@ class Hunter(InimigoBase):
         return self.mask
 
     def morrer(self, grupos):
-        chance= randint(1,1000)
-        if chance >= 990:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 960 <= chance < 990:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 960:
-            for _ in range(3):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(2):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+        qtd_shards = 2        
+        for _ in range(qtd_shards):
+            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
+            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=entity_manager.all_sprites)
         self.kill()
 
     def animar(self):
@@ -100,54 +85,31 @@ class Hunter(InimigoBase):
             novo_cooldown = [5000, 5500, 6000, 6500]
             self.cooldown_run = random.choice(novo_cooldown)
             self.run_ativo = True
-            self.velocidade_base = self.velocidade * 4
+            self.velocidade = self.velocidade_corrida
+            self.velocidade_animacao = 300
             self.tempo_inicio_run = pygame.time.get_ticks()
     
     def burst(self):
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=15,
             velocidade=400,
-            tamanho=(32, 32)
+            tamanho=(24, 24)
         )
 
     def cannon_beam(self):
         CannonBeam(
             posicao_inicial=self.posicao,
-            grupos=(self.game.all_sprites, self.game.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=250, 
-            velocidade=350,
-            duracao=2500
+            velocidade=900,
+            duracao=3000
         )
-
-    def morrer(self, grupos):
-        chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(5):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,4)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 500 <= chance < 800:
-            for _ in range(3):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(2):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        self.kill()
         
     def update(self, delta_time):
         agora = pygame.time.get_ticks()
@@ -155,7 +117,8 @@ class Hunter(InimigoBase):
         if self.run_ativo:
             if agora - self.tempo_inicio_run >= self.duracao_run:
                 self.run_ativo = False
-                self.velocidade_base = self.velocidade
+                self.velocidade_animacao = 1000
+                self.velocidade = self.velocidade_base
         # Lógica para ativar a corrida
         if agora - self.tempo_ultima_run >= self.cooldown_run:
             self.tempo_ultima_run = agora
@@ -163,7 +126,7 @@ class Hunter(InimigoBase):
         #Ativa o burst
         if agora - self.tempo_ultimo_burst >= self.cooldown_burst:
             self.burst_restante = self.contagem_burst  
-            novo_cooldown = [7000, 8000, 9000, 10000]
+            novo_cooldown = [5000, 5500, 6000, 6500]
             self.cooldown_burst = random.choice(novo_cooldown)
             self.tempo_ultimo_burst = agora
         #Burst
@@ -176,13 +139,16 @@ class Hunter(InimigoBase):
         #Cannon
         if agora - self.tempo_ultimo_cannon >= self.cooldown_cannon:
             self.tempo_ultimo_cannon = agora
-            novo_cooldown_cannon = [8000, 8500, 9000, 9500]
+            novo_cooldown_cannon = [7500, 8000, 8500, 9000]
             self.cooldown_cannon = random.choice(novo_cooldown_cannon)
             self.cannon_beam()
         
         # O resto da sua lógica de movimento e habilidades
-        direcao = (self.jogador.posicao - self.posicao).normalize()
-        self.posicao += direcao * self.velocidade_base * delta_time
+        direcao = (self.jogador.posicao - self.posicao)
+        if direcao.length() > 0: # Evita divisão por zero
+            direcao = direcao.normalize()
+
+        self.posicao += direcao * self.velocidade * delta_time
         self.rect.center = self.posicao
 
         if direcao.x < 0:

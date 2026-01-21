@@ -12,6 +12,8 @@ from ranking import Ranking
 from levelup import *
 from mapa import Mapa
 from hud import HUD
+from collision import CollisionManager 
+from enemies.standard.sentinel import Sentinel
 
 
 
@@ -49,7 +51,10 @@ class Game:
         self.tela_de_upgrade_ativa = None
         self.buff = False
 
-        #mapa 
+        # Collision Sys
+        self.collision_manager = CollisionManager(self)
+
+        # Mapa 
         self.mapa = None # Inicialize o mapa como None
         self.largura_mapa_pixels = 0
         self.altura_mapa_pixels = 0
@@ -157,7 +162,7 @@ class Game:
             
             entity_manager.all_sprites.update(delta_time)
 
-            self.colisao(delta_time)
+            self.collision_manager.update(delta_time)
 
             if self.player.vida_atual <= 0:
                 #atualizacao pos morte para o ranking
@@ -186,6 +191,10 @@ class Game:
             for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
                 self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
 
+            for inimigo in self.inimigos_grupo:
+                if isinstance(inimigo, Sentinel):
+                    inimigo.draw_laser(self.tela, deslocamento)
+                    
             self.hud.draw(self.tela)
 
         elif self.estado_do_jogo == 'pausa':
@@ -278,80 +287,6 @@ class Game:
         #self.player.armas['Arbitro'] = arma_arbitro
 
         self.estado_do_jogo = 'jogando'
-
-    def colisao(self, delta_time):
-        # Colisão de Projéteis do Jogador com Inimigos
-        inimigos_vivos = list(self.inimigos_grupo)
-        
-        for projetil in list(self.projeteis_jogador_grupo):
-            # Encontra todos os inimigos que colidiram com este projétil
-            inimigos_atingidos = pygame.sprite.spritecollide(
-                projetil, 
-                pygame.sprite.Group(inimigos_vivos), 
-                False,
-                pygame.sprite.collide_mask
-            )
-            
-            # Se o projétil atingiu algum inimigo
-            if inimigos_atingidos:
-                # Se o projétil for da classe Projetil_PingPong (que pertence à Arma_Loop)
-                if isinstance(projetil, Projetil_PingPong):
-                    for inimigo in inimigos_atingidos:
-                        # O projétil tem seu próprio controle de inimigos já atingidos
-                        # para evitar dano repetido. Verificamos se o inimigo ainda não foi atingido por este projétil
-                        if inimigo not in projetil.inimigos_ja_atingidos:
-                            inimigo.vida -= projetil.dano
-                            # Adiciona o inimigo ao conjunto do projétil
-                            projetil.inimigos_ja_atingidos.add(inimigo)
-                
-                # Se for qualquer outro tipo de projétil, ele é destruído ao atingir
-                else:
-                    for inimigo in inimigos_atingidos:
-                        inimigo.vida -= projetil.dano
-                    projetil.kill()
-
-        # Colisão de Projéteis dos Inimigos com o Jogador
-        
-        colisoes_projeteis_inimigos = pygame.sprite.groupcollide(
-            pygame.sprite.Group(self.projeteis_inimigos_grupo),
-            pygame.sprite.Group(self.player),  # Cria um grupo temporário apenas com o jogador
-            True,  # 'dokill' True: remove o projetil
-            False, # 'dokill' False: não remove o jogador
-            pygame.sprite.collide_rect
-        )
-        # Aplica o dano do projétil ao jogador
-        for projetil, _ in colisoes_projeteis_inimigos.items():
-            self.player.tomar_dano_direto(projetil.dano)
-
-        # Colisão do Jogador com Inimigos
-        for inimigo in self.inimigos_grupo:
-            if pygame.sprite.collide_mask(self.player, inimigo):
-                self.player.tomar_dano(inimigo)
-
-        # Coleta de itens
-        itens_coletados = pygame.sprite.spritecollide(self.player, self.item_group, dokill=True)
-        for item in itens_coletados:
-            self.player.coletar_item(item)
-
-        # Colisão com Dot (dano ao longo do tempo)
-        if self.auras_grupo:
-            colisoes_aura = pygame.sprite.groupcollide(
-                self.inimigos_grupo,
-                self.auras_grupo,
-                False,
-                False,
-                pygame.sprite.collide_circle
-            )
-            for inimigo, auras in colisoes_aura.items():
-                for aura in auras:
-                    dano_neste_frame = aura.dano_por_segundo * delta_time
-                    inimigo.vida -= dano_neste_frame
-
-        # Lógica de morte de inimigos
-        for inimigo in list(self.inimigos_grupo):
-            if inimigo.vida <= 0:
-                inimigo.morrer((self.all_sprites, self.item_group))
-
 
     def run(self):
         while self.running:

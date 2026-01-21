@@ -67,6 +67,14 @@ class Jega(InimigoBase):
         self.velocidade_bote = self.velocidade_base * 8
         self.duracao_bote = 1500    # 1 segundo de investida
 
+    @property
+    def collision_rect(self):
+        "Retorna a hitbox de Jega."
+        return self.hitbox
+
+    @property
+    def invulneravel(self):
+        return self.estado == 'orbitando'
     
     def morrer(self, grupos = None):
         alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)

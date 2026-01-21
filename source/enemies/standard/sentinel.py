@@ -1,0 +1,114 @@
+import pygame
+import random
+import math
+from os.path import join
+from enemies.enemies import InimigoBase
+
+class Sentinel(InimigoBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game)
+        self.game = game
+        self.estado_ia = 'chase'
+        
+        # Sprites
+        self.sprites = {}
+        # Right
+        self.sprites['right'] = [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
+        ]
+        # Left
+        self.sprites['left'] = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']]
+
+        self.estado_animacao = 'left'
+        self.indice_animacao = 0
+        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
+        self.rect = self.image.get_rect(center=self.posicao)
+
+        # Configurações de Órbita
+        self.distancia_gatilho_orbita = 350 
+        self.distancia_minima_seguranca = 300 # Se estiver mais perto que isso, ela se afasta
+        self.raio_orbita_atual = 300
+        self.angulo_atual = 0
+        self.centro_orbita_fixo = pygame.math.Vector2(0, 0)
+        
+        # Laser
+        self.beam_ativo = False
+        self.duracao_beam = 2000
+        self.cooldown_pos_ataque = 500 
+        self.timer_estado = 0
+        
+        self.mira_atual = pygame.math.Vector2(posicao)
+        self.velocidade_mira = 0.05
+
+
+    def update(self, delta_time):
+        agora = pygame.time.get_ticks()
+        vetor_player = self.jogador.posicao - self.posicao
+        distancia = vetor_player.length()
+        
+        if self.estado_ia == 'chase':
+            self.indice_animacao = 0
+            
+            # LÓGICA DE MOVIMENTAÇÃO DINÂMICA
+            if distancia > self.distancia_gatilho_orbita:
+                # Longe demais: Persegue
+                direcao = vetor_player.normalize()
+                self.posicao += direcao * self.velocidade * delta_time
+            elif distancia < self.distancia_minima_seguranca:
+                # Perto demais: Afasta-se (Inverte o vetor)
+                if distancia > 0:
+                    direcao_fuga = -vetor_player.normalize()
+                    self.posicao += direcao_fuga * self.velocidade * delta_time
+            
+            # Trigger do Ataque (Só ativa se estiver na janela de distância correta)
+            if agora - self.timer_estado >= self.cooldown_pos_ataque:
+                if self.distancia_minima_seguranca <= distancia <= self.distancia_gatilho_orbita:
+                    self.estado_ia = 'orbiting'
+                    self.timer_estado = agora
+                    self.beam_ativo = True
+                    self.indice_animacao = 1
+                    self.centro_orbita_fixo = pygame.math.Vector2(self.jogador.posicao)
+                    
+                    self.raio_orbita_atual = (self.posicao - self.centro_orbita_fixo).length()
+                    self.angulo_atual = math.atan2(self.posicao.y - self.centro_orbita_fixo.y, 
+                                                   self.posicao.x - self.centro_orbita_fixo.x)
+
+        elif self.estado_ia == 'orbiting':
+            self.angulo_atual += 0.3 * delta_time 
+            
+            self.posicao.x = self.centro_orbita_fixo.x + math.cos(self.angulo_atual) * self.raio_orbita_atual
+            self.posicao.y = self.centro_orbita_fixo.y + math.sin(self.angulo_atual) * self.raio_orbita_atual
+            
+            self.processar_dano_laser(delta_time)
+
+            if agora - self.timer_estado >= self.duracao_beam:
+                self.estado_ia = 'chase'
+                self.timer_estado = agora
+                self.beam_ativo = False
+                self.indice_animacao = 0
+
+        # Suavização da mira e animação
+        self.mira_atual = self.mira_atual.lerp(self.jogador.posicao, self.velocidade_mira)
+        
+        if (self.jogador.posicao.x - self.posicao.x) < 0: self.estado_animacao = 'left'
+        else: self.estado_animacao = 'right'
+
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        self.animar()
+
+    def processar_dano_laser(self, delta_time):
+        dist_mira = (self.mira_atual - self.jogador.posicao).length()
+        if dist_mira < 40:
+             self.jogador.tomar_dano_direto(self.dano_base * delta_time)
+
+    def draw_laser(self, superficie, deslocamento):
+        if self.beam_ativo:
+            p1 = self.posicao - deslocamento
+            p2 = self.mira_atual - deslocamento
+            largura = 4 + math.sin(pygame.time.get_ticks() * 0.02) * 2
+            pygame.draw.line(superficie, (200, 50, 50), p1, p2, int(largura + 2))
+            pygame.draw.line(superficie, (255, 255, 255), p1, p2, 2)
+
+    def animar(self):
+        self.image = self.sprites[self.estado_animacao][self.indice_animacao]

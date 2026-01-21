@@ -69,9 +69,19 @@ class CannonBeam(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
         self.posicao = pygame.math.Vector2(posicao_inicial)
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        #sprite
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'cannon.png')).convert_alpha(), (150, 150))
-        #hitbox
+        
+        # Sprite e Animação
+        self.sprites = [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'cannon', 'c1.png')).convert_alpha(), (80, 80)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'cannon', 'c2.png')).convert_alpha(), (80, 80))
+        ]
+
+        self.frame_atual = 0
+        self.velocidade_animacao = 150
+        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.image = self.sprites[self.frame_atual]
+        self.rect = self.image.get_rect(center=self.posicao)
+
         # Cria um novo retângulo menor para a colisão
         tamanho_hitbox = (75, 75)  # Ajuste este valor para o tamanho correto do feixe
         self.rect = pygame.Rect(0, 0, tamanho_hitbox[0], tamanho_hitbox[1])
@@ -85,6 +95,14 @@ class CannonBeam(ProjetilInimigoBase):
         #self kill
         self.tempo_criacao = pygame.time.get_ticks()
 
+    def animar(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
+            self.ultimo_update_animacao = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.sprites)
+            self.image = self.sprites[self.frame_atual]
+            self.rect = self.image.get_rect(center=self.posicao)
+
     def update(self, delta_time):
         # Atualiza a posição com base na direção e velocidade
         self.posicao += self.direcao * self.velocidade * delta_time
@@ -94,6 +112,7 @@ class CannonBeam(ProjetilInimigoBase):
         tempo_atual = pygame.time.get_ticks()
         if tempo_atual - self.tempo_criacao >= self.duracao:
             self.kill()
+        self.animar()
 
 
 class Laser(ProjetilInimigoBase):
@@ -104,8 +123,8 @@ class Laser(ProjetilInimigoBase):
             jogador=player, # O jogador já está definido como alvo na classe base
             game=game,
             dano=player.vida_maxima/2,
-            velocidade=3000, # Velocidade do projétil, ajustada para o laser
-            duracao=1800 # A duração em milissegundos
+            velocidade=2500, # Velocidade do projétil, ajustada para o laser
+            duracao=2500 # A duração em milissegundos
         )
 
         self.posicao_alvo_laser = pygame.math.Vector2(posicao_final)
@@ -116,7 +135,7 @@ class Laser(ProjetilInimigoBase):
             self.direcao = pygame.math.Vector2(1, 0)
 
         #sprite
-        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'laser.gif')).convert_alpha(), (150, 150))
+        laser_img_original = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'redlaser.png')).convert_alpha(), (150, 150))
         self.image = laser_img_original        
         # Calcula o ângulo em graus a partir da direção
         angulo = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
@@ -160,13 +179,17 @@ class AcidBreath(ProjetilInimigoBase):
             self.kill()
         
 class LaserBeam(ProjetilInimigoBase):
-    def __init__(self, posicao_inimigo, grupos, jogador, game, dano, velocidade, duracao):
+    def __init__(self, posicao_inimigo, grupos, jogador, game, dano, velocidade, duracao, color):
         super().__init__(posicao_inimigo, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
 
         self.dano_aplicado = False
 
-        #sprite do laser
-        self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'laser.png')).convert_alpha(), (150, 15))
+        # Sprite do Laser
+        if color == 'red':
+            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'redlaser.png')).convert_alpha(), (120, 12))
+        else:
+            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'projectiles', 'bluelaser.png')).convert_alpha(), (120, 12))
+
         
         # Calcula a direção do GuiltySpark para o jogador
         self.direcao = (self.jogador.posicao - self.posicao).normalize()

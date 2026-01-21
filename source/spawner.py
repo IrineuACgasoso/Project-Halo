@@ -3,12 +3,14 @@ import random
 from random import randint
 from settings import *
 from entitymanager import entity_manager
+
 # Inimigos base
 from enemies.standard.grunt import Grunt
 from enemies.standard.jackal import Jackal
 from enemies.standard.elite import Elite
 from enemies.standard.brute import Brute
 from enemies.standard.infection import Infection
+from enemies.standard.sentinel import Sentinel
 
 
 # Bosses
@@ -37,10 +39,11 @@ class Spawner:
         self.cronograma_bosses = {
             'hunter': 60,        # 1 minuto
             'guilty': 180,     # 3 minutos
-            'arbiter': 300,    # 5 minutos (Início Fase 2)
-            'gravemind': 1,  # 8 minutos
-            'didact': 600,     # 10 minutos (Início Fase 3)
-            'warden': 720,     # 12 minutos
+            'arbiter': 1,    # 5 minutos (Início Fase 2)
+            'gravemind': 480,  # 8 minutos
+            'knight' : 600,    # 10 minutos
+            'didact': 720,     # 12 minutos (Início Fase 3)
+            'warden': 840,     # 14 minutos
             'jega': 1080,     # 15 minutos
             'harbinger': 1200  # 20 minutos
         }
@@ -73,7 +76,7 @@ class Spawner:
         # Mapeamento de classes para facilitar o código
         classes_bosses = {
             'hunter': Hunter, 'guilty': GuiltySpark, 'arbiter': BossArbiter,
-            'gravemind': FloodWarning, 'didact': Didact, 'warden': WardenEternal,
+            'gravemind': FloodWarning, 'knight' : Knight, 'didact': Didact, 'warden': WardenEternal,
             'harbinger': Harbinger, 'jega': Jega
         }
         if tipo in classes_bosses:
@@ -88,6 +91,8 @@ class Spawner:
             # Seleção de inimigos baseada na FASE do jogo
             fase = self.game.fase_atual
             if fase == 1:
+                pool = [Sentinel]
+            elif fase == 5:
                 pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
             elif fase == 2:
                 pool = [Infection, Infection, Grunt, Jackal, Elite]
