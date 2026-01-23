@@ -5,6 +5,7 @@ from enemies.enemies import *
 from enemies.standard.infection import Infection
 from feats.projetil import AcidBreath
 from feats.effects import DustParticle
+from feats.assets import *
 import random
 import math
 
@@ -16,11 +17,11 @@ class Gravemind(InimigoBase):
             self.gas_invocado = False
             self.raio_safezone = 1000
             self.titulo = "GRAVEMIND, O Monumento de Todos os Pecados"
-            self.numero_particulas = 25
+            self.numero_particulas = 5
             self.dispersao_particulas = (-300, 300)
         else:
             self.titulo = "PROTO GRAVEMIND"
-            self.numero_particulas = 8
+            self.numero_particulas = 2
             self.dispersao_particulas = (-150, 150)
             if is_minion:
                 valor_vida = 400
@@ -40,21 +41,20 @@ class Gravemind(InimigoBase):
         # Carrega a sprite e animacao da forma final e base
         self.sprites = {}
 
-        if self.is_final_form:
+        if is_final_form:
             tamanho = (900, 600)
-            caminho_img = ['proto1.png', 'proto2.png', 'proto3.png']
-
+            lista_assets = ASSETS['enemies']['gravemind']['final']
         else:
             tamanho = (750, 500)
-            caminho_img = ['grave1.png', 'grave2.png', 'grave3.png']
+            lista_assets = ASSETS['enemies']['gravemind']['proto']
 
         self.tamanho_sprite = tamanho
 
         # Carrega e transforma imagens
         # Left (Base)
-        img_idle1 = pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'gravemind', caminho_img[0])).convert_alpha()
-        img_idle2 = pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'gravemind', caminho_img[1])).convert_alpha()
-        img_attack = pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'gravemind', caminho_img[2])).convert_alpha()
+        img_idle1 = lista_assets[0]
+        img_idle2 = lista_assets[1]
+        img_attack = lista_assets[2]
 
         # Popula o dicionário 'left'
         self.sprites['left'] = [
@@ -75,7 +75,7 @@ class Gravemind(InimigoBase):
         # ---- VARIÁVEIS DA ANIMAÇÃO DE RESPAWN ----
         self.altura_atual = 0 
         self.estado_respawn = 'reaparecendo' 
-        self.velocidade_animacao_respawn = 600
+        self.velocidade_animacao_respawn = 200
         self.is_animating_respawn = True
 
         self.image = self.sprites['left'][0]
@@ -90,7 +90,7 @@ class Gravemind(InimigoBase):
         self.hitbox.center = self.rect.center
 
         self.frame_atual = 0
-        self.velocidade_animacao = 400
+        self.velocidade_animacao = 350
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         # Prepara a superfície para o efeito de subir do chão
@@ -102,6 +102,8 @@ class Gravemind(InimigoBase):
 
         # Respawns
         self.vida_limite = self.vida_base / 6
+        self.timer_particula = 0
+        self.intervalo_particula = 0.05  # Spawna uma partícula a cada 0.05 segundos
 
         # Variável para controlar o estado da animação
         self.estado_animacao = 'normal'
@@ -110,37 +112,37 @@ class Gravemind(InimigoBase):
         
         # Infection Spawn (Baixa Prioridade)
         self.timer_infeccao = 0
-        self.cooldown_infeccao = 4500
+        self.cooldown_infeccao = 4.5
         self.qtd_spawn_infeccao = 5
-        self.intervalo_entre_spawns = 250
+        self.intervalo_entre_spawns = 0.25
         self.spawns_restantes = 0
         self.timer_entre_spawns = 0
         
         if self.is_final_form:
-            self.qtd_spawn_infeccao = 10
-            self.intervalo_entre_spawns = 150
-            self.cooldown_infeccao = 3000
+            self.qtd_spawn_infeccao = 8
+            self.intervalo_entre_spawns = 0.15
+            self.cooldown_infeccao = 3
             
         # Acid Breath (Média Prioridade)
         self.timer_acido = 0
-        self.cooldown_acido = 2500
+        self.cooldown_acido = 2.5
         self.qtd_tiros_acido = 8
-        self.intervalo_burst = 250
+        self.intervalo_burst = 0.25
         self.tiros_restantes = 0
         self.timer_burst = 0
         
         if self.is_final_form:
             self.qtd_tiros_acido = 20
-            self.intervalo_burst = 150
-            self.cooldown_acido = 1500
+            self.intervalo_burst = 0.15
+            self.cooldown_acido = 1.5
 
         # Head Spawn (Final Form)
         self.timer_cabecas = 0
-        self.cooldown_cabecas = 15000
+        self.cooldown_cabecas = 15.0
         self.qtd_cabecas = 2
         self.cabecas_restantes = 0
         self.timer_entre_cabecas = 0
-        self.intervalo_spawn_cabeca = 1000
+        self.intervalo_spawn_cabeca = 1.0
 
 
     @property
@@ -203,7 +205,7 @@ class Gravemind(InimigoBase):
 
         largura_total, altura_total = self.tamanho_sprite
         # Garante que a altura seja pelo menos 1 para o subsurface não crashar
-        altura_int = max(1, min(int(self.altura_atual), altura_total))
+        altura_int = int(max(1, min(self.altura_atual, altura_total)))
 
         temp_surface = pygame.Surface((largura_total, altura_total), pygame.SRCALPHA)
         
@@ -235,7 +237,7 @@ class Gravemind(InimigoBase):
     # --- LÓGICA DE AÇÃO (EXECUÇÃO) ---
     def executar_spawn_infeccao(self, delta_time):
         """Estado: spawning_infection"""
-        self.timer_entre_spawns += delta_time * 1000
+        self.timer_entre_spawns += delta_time 
         if self.timer_entre_spawns >= self.intervalo_entre_spawns:
             self.timer_entre_spawns = 0
             self.spawns_restantes -= 1
@@ -248,7 +250,7 @@ class Gravemind(InimigoBase):
 
             if self.spawns_restantes <= 0:
                 # Terminou a ação, reseta cooldown e volta pra Idle
-                novo_cooldown = [4500, 5500, 6500, 7500]
+                novo_cooldown = [5.0, 5.5, 6.5, 7.5]
                 self.cooldown_infeccao = random.choice(novo_cooldown)
                 self.timer_infeccao = 0
                 self.estado_atual = 'idle'
@@ -256,11 +258,11 @@ class Gravemind(InimigoBase):
     def executar_acid_breath(self, delta_time):
         """Estado: acid_breath"""
         if self.is_final_form:
-            velocidade_breath = 750
+            velocidade_breath = 375
         else:
-            velocidade_breath = 400
+            velocidade_breath = 200
 
-        self.timer_burst += delta_time * 1000
+        self.timer_burst += delta_time
         if self.timer_burst >= self.intervalo_burst:
             self.timer_burst = 0
             self.tiros_restantes -= 1
@@ -276,14 +278,14 @@ class Gravemind(InimigoBase):
             
             if self.tiros_restantes <= 0:
                 # Terminou o burst, volta pra Idle
-                novo_cooldown = [3000, 3500, 4000, 4500]
+                novo_cooldown = [4.5, 5.5, 6.0, 6.5]
                 self.cooldown_acido = random.choice(novo_cooldown)
                 self.timer_acido = 0
                 self.estado_atual = 'idle'
 
     def executar_spawn_cabecas(self, delta_time):
         """Estado: spawning_heads"""
-        self.timer_entre_cabecas += delta_time * 1000
+        self.timer_entre_cabecas += delta_time
         if self.timer_entre_cabecas >= self.intervalo_spawn_cabeca:
             self.timer_entre_cabecas = 0
             self.cabecas_restantes -= 1
@@ -300,9 +302,11 @@ class Gravemind(InimigoBase):
             FloodWarning(posicao=posicao_spawn, grupos=entity_manager.all_sprites, game=self.game, spawn_minion=True)
 
             if self.cabecas_restantes <= 0:
-                novo_cooldown_ultimate = [15000, 16000, 18000, 20000]
+                novo_cooldown_ultimate = [20.0, 25.0, 30.0]
                 self.cooldown_cabecas = random.choice(novo_cooldown_ultimate)
                 self.timer_cabecas = 0
+                self.timer_acido = -5.0
+                self.timer_infeccao = -5.0
                 self.estado_atual = 'idle'
 
     def morrer(self, grupos):
@@ -368,10 +372,10 @@ class Gravemind(InimigoBase):
                 self.is_animating_respawn = True
         
         # Atualiza Cooldowns
-        self.timer_infeccao += delta_time * 1000
-        self.timer_acido += delta_time * 1000
+        self.timer_infeccao += delta_time 
+        self.timer_acido += delta_time
         if self.is_final_form:
-            self.timer_cabecas += delta_time * 1000
+            self.timer_cabecas += delta_time 
 
         # Attack FSM
         if self.estado_atual == 'idle':
@@ -410,7 +414,7 @@ class FloodWarning(pygame.sprite.Sprite):
         self.spawn_minion = spawn_minion
         self.game = game
         self.posicao = pygame.math.Vector2(posicao)
-        self.duracao = 2500  # Duração do aviso em milissegundos (3 segundos)
+        self.timer_vida = 2.5  # Duração do aviso em milissegundos (3 segundos)
         self.raio = 300     # Raio do círculo de aviso
         self.dano = 300      # Dano que o jogador receberá se estiver dentro do círculo
         # Cria a sprite visual do círculo
@@ -422,9 +426,9 @@ class FloodWarning(pygame.sprite.Sprite):
         self.tempo_criacao = pygame.time.get_ticks()
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        self.timer_vida -= delta_time
         # Verifica se o tempo do aviso acabou
-        if agora - self.tempo_criacao >= self.duracao:
+        if self.timer_vida <= 0:
             # Verifica a colisão com o jogador
             distancia_do_player = self.game.player.posicao.distance_to(self.posicao)
             if distancia_do_player <= self.raio:
@@ -446,7 +450,7 @@ class ProtoGravePit(pygame.sprite.Sprite):
         
         self.game = game 
         self.posicao = pygame.math.Vector2(posicao)
-        self.duracao = 1800 
+        self.timer_pit = 2.5   
         self.raio = 400      
         self.dano = 10000 
 
@@ -459,9 +463,8 @@ class ProtoGravePit(pygame.sprite.Sprite):
         self.tempo_criacao = pygame.time.get_ticks()
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
-        # Verifica se o tempo do aviso acabou
-        if agora - self.tempo_criacao >= self.duracao:
+        self.timer_pit -= delta_time
+        if self.timer_pit <= 0:
             # Verifica a colisão com o jogador e causa dano
             distancia_do_player = self.game.player.posicao.distance_to(self.posicao)
             if distancia_do_player <= self.raio:
@@ -488,7 +491,7 @@ class MiasmaGas(pygame.sprite.Sprite):
         self.dano_por_segundo = 150 
         
         # OTIMIZAÇÃO: Desenha apenas UMA VEZ no início
-        tamanho = 12000
+        tamanho = 6000
         self.image = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
         self.image.fill((50, 120, 50, 200)) 
         pygame.draw.circle(self.image, (0, 0, 0, 0), (tamanho//2, tamanho//2), self.raio_seguro)
@@ -497,16 +500,14 @@ class MiasmaGas(pygame.sprite.Sprite):
         self.tempo_ultimo_dano = 0
 
     def update(self, delta_time):
-        # Some quando o gravemind for derrotado
         if not self.boss.alive():
             self.kill()
             return
-        
-        # Lógica de Dano
+
         distancia = self.game.player.posicao.distance_to(self.posicao_boss)
         if distancia > self.raio_seguro:
-            agora = pygame.time.get_ticks()
-            if agora - self.tempo_ultimo_dano >= 1000: # Dano a cada 1 segundo
+            self.tempo_ultimo_dano += delta_time # Acumula o tempo real
+            if self.tempo_ultimo_dano >= 1.0: # Se passou 1 segundo
                 self.game.player.vida_atual -= self.dano_por_segundo
-                self.tempo_ultimo_dano = agora
+                self.tempo_ultimo_dano = 0
 

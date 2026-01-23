@@ -5,6 +5,7 @@ from enemies.enemies import InimigoBase
 from player import *
 from settings import *
 from feats.items import *
+from feats.assets import *
 from entitymanager import entity_manager
 
 
@@ -14,20 +15,18 @@ class Infection(InimigoBase):
         super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=120, game=game)
         #sprites
         self.sprites = {}
-
+        tamanho = (75, 75)
         # Carrega e redimensione as sprites da esquerda
-        sprites_left = [
-            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection1.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection2.png')).convert_alpha()
+        self.sprites['left'] = [
+            pygame.transform.scale(img, tamanho) 
+            for img in ASSETS['enemies']['infection']
         ]
-        #add esquerda no dict
-        self.sprites['left'] = [pygame.transform.scale(sprite, (75, 75)) for sprite in sprites_left]
+
         #Carrega direita
-        sprites_right = [
+        self.sprites['right'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
         ]
-        #add direita no dict
-        self.sprites['right'] = sprites_right
+        
         #framagem da sprite
         self.frame_atual = 0  
         self.estado_animacao = 'left'
