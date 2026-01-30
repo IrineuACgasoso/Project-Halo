@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite):
         self.indice_animacao = 0
 
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]
-        self.rect = self.image.get_rect(center = (posicao_inicial[0]/2, posicao_inicial[1]/2))
+        self.rect = self.image.get_rect(center = posicao_inicial)
         self.posicao = pygame.math.Vector2(self.rect.center)
         self.velocidade_animacao = 150
         self.ultimo_update_animacao = pygame.time.get_ticks()
@@ -89,9 +89,57 @@ class Player(pygame.sprite.Sprite):
         if self.direcao != (0,0):
             self.direcao = self.direcao.normalize()
 
-    def movimentacao(self, delta_time):
-        #delta_time serve pra o jogador sempre se mover na mesma velocidade independente do fps
-        self.posicao +=  self.direcao * self.velocidade * delta_time #atualiza a posição atual
+
+    def projetar_fora_da_linha(self, pos_player, p1, p2, raio):
+        # Vetor do segmento de linha
+        aresta = p2 - p1
+        if aresta.length_squared() == 0: return None
+
+        # Acha o ponto mais próximo do centro do player no segmento (p1-p2)
+        # Isso usa projeção escalar limitada entre 0 e 1
+        t = max(0, min(1, (pos_player - p1).dot(aresta) / aresta.length_squared()))
+        ponto_mais_proximo = p1 + t * aresta
+
+        # Vetor do ponto mais próximo até o centro do player
+        diff = pos_player - ponto_mais_proximo
+        distancia = diff.length()
+
+        if distancia < raio:
+            # Se o player está "atravessando" a linha, calculamos o empurrão
+            # Se distancia for 0, o player está exatamente sobre a linha (raro, mas tratamos)
+            if distancia == 0:
+                return pygame.math.Vector2(0, -1) * raio # Empurrão padrão para cima
+            
+            push_mag = raio - distancia + 0.1
+            return diff.normalize() * push_mag
+        
+        return None
+    
+    def mover_com_colisao(self, delta_time, paredes_ativas):
+        # 1. Aplicamos o movimento bruto
+        self.posicao += self.direcao * self.velocidade * delta_time
+        
+        # 2. Resolvemos colisões com Polilinhas (e Polígonos, que viram linhas)
+        # Fazemos isso 2 ou 3 vezes (iterações) para garantir que em cantos apertados 
+        # um empurrão não nos jogue para dentro de outra linha.
+        raio = self.hitbox.width / 2
+        
+        for _ in range(3): # Iteraçoes de segurança
+            for p in paredes_ativas:
+                # Pegamos os pontos da polilinha ou polígono
+                pontos = p['pontos']
+                for i in range(len(pontos) - 1):
+                    p1 = pontos[i]
+                    p2 = pontos[i+1]
+                    
+                    push = self.projetar_fora_da_linha(self.posicao, p1, p2, raio)
+                    if push:
+                        self.posicao += push
+
+        # 3. Sincroniza Hitbox e Rect visual
+        self.hitbox.center = (round(self.posicao.x), round(self.posicao.y))
+        self.rect.center = self.hitbox.center
+    
 
     def animar(self):
         agora = pygame.time.get_ticks()
@@ -99,8 +147,6 @@ class Player(pygame.sprite.Sprite):
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect.center = self.posicao
-        self.hitbox.center = self.rect.center
 
 
     def tomar_dano(self, inimigo):
@@ -120,6 +166,7 @@ class Player(pygame.sprite.Sprite):
             
     def curar(self, quantidade):
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
+
     def coletar_item(self, item):
         houve_level_up = False
         
@@ -161,9 +208,11 @@ class Player(pygame.sprite.Sprite):
     def adicionar_tempo_buff(self, segundos):
         self.buff_timer += segundos
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         self.input()
-        self.movimentacao(delta_time)
+
+        if paredes is not None:
+            self.mover_com_colisao(delta_time, paredes)
 
         if self.buff_timer > 0:
             self.buff_timer -= delta_time
@@ -197,9 +246,11 @@ class Player(pygame.sprite.Sprite):
         elif self.direcao.x > 0:
             self.estado_animacao = 'right'
         if self.direcao.x == 0 and self.direcao.y == 0:
-            self.image = pygame.transform.scale(pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(), (144,144))
-
-        if self.direcao.x != 0 or self.direcao.y != 0:
+            self.image = self.sprites[self.estado_animacao][0] # Usa o frame 0 da direção atual
+        if self.direcao.magnitude() == 0:
+            # Mantém o frame parado
+            pass 
+        else:
             self.animar()
         
 

@@ -42,7 +42,7 @@ class Sentinel(InimigoBase):
         self.velocidade_mira = 0.05
 
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes= None):
         agora = pygame.time.get_ticks()
         vetor_player = self.jogador.posicao - self.posicao
         distancia = vetor_player.length()

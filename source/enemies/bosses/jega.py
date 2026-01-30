@@ -97,7 +97,7 @@ class Jega(InimigoBase):
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         direcao_ao_jogador = (self.jogador.posicao - self.posicao)
         distancia = direcao_ao_jogador.length()
@@ -150,6 +150,8 @@ class Jega(InimigoBase):
                 self.cooldown_habilidade = random.choice([8000, 9000, 10000])
 
         # Atualização de Rect e Animação
+        if paredes:
+            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         
         if direcao_ao_jogador.x < 0:

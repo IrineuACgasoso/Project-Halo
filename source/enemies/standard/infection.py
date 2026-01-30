@@ -17,16 +17,13 @@ class Infection(InimigoBase):
         self.sprites = {}
         tamanho = (75, 75)
         # Carrega e redimensione as sprites da esquerda
-        self.sprites['left'] = [
-            pygame.transform.scale(img, tamanho) 
-            for img in ASSETS['enemies']['infection']
-        ]
+        self.sprites['left'] = ASSETS['enemies']['infection']
 
         #Carrega direita
         self.sprites['right'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
         ]
-        
+
         #framagem da sprite
         self.frame_atual = 0  
         self.estado_animacao = 'left'
@@ -44,11 +41,13 @@ class Infection(InimigoBase):
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
             self.rect = self.image.get_rect(center=self.posicao) # Mantém o centro na mesma posição
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         direcao = (self.jogador.posicao - self.posicao)
         if direcao.length() > 0:
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
+            if paredes:
+                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         if direcao.x < 0:
             self.estado_animacao = 'left'

@@ -183,7 +183,7 @@ class Didact(InimigoBase):
             Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
         
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         direcao = (self.jogador.posicao - self.posicao)
         distancia = direcao.length()
@@ -194,6 +194,8 @@ class Didact(InimigoBase):
 
         if self.velocidade > 0:
                 self.posicao += direcao * self.velocidade * delta_time
+                if paredes:
+                    self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
                 self.rect.center = (round(self.posicao.x), round(self.posicao.y))
                 self.hitbox.center = self.rect.center
 

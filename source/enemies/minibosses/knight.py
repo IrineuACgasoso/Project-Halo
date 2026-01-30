@@ -213,13 +213,15 @@ class Knight(InimigoBase):
         self.rect = self.image.get_rect(center=self.posicao)
         self.hitbox.center = self.rect.center
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         if (self.estado_habilidade != 'tp_traveling') and (self.estado_habilidade != 'laser'):
             direcao = (self.jogador.posicao - self.posicao)
             if direcao.length() > 0:
                 direcao.normalize_ip()
                 self.posicao += direcao * self.velocidade * delta_time
+                if paredes:
+                    self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
                 self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             self.hitbox.center = self.rect.center
 

@@ -93,7 +93,7 @@ class Harbinger(InimigoBase):
 
         self.carabin()
     
-    def update(self, delta_time):
+    def update(self, delta_time, paredes = None):
         agora = pygame.time.get_ticks()
         direcao = (self.jogador.posicao - self.posicao)
 
@@ -120,6 +120,8 @@ class Harbinger(InimigoBase):
         if direcao.length() > 0:
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
+            if paredes:
+                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
         #Ativa carabina

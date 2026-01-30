@@ -10,7 +10,7 @@ from feats.weapon import *
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
-from mapa import Mapa
+from mapmanager import Mapa
 from hud import HUD
 from collision import CollisionManager 
 from enemies.standard.sentinel import Sentinel
@@ -56,6 +56,8 @@ class Game:
 
         # Mapa 
         self.mapa = None # Inicialize o mapa como None
+        self.caminho_mapa = join('assets', 'map', 'm1.tmj')
+        self.mapa = Mapa(self.caminho_mapa)
         self.largura_mapa_pixels = 0
         self.altura_mapa_pixels = 0
 
@@ -157,11 +159,20 @@ class Game:
                 self.spawner.update(delta_time) # Spawner só roda sem boss                
 
             if self.player:
+                paredes_ativas = self.mapa.paredes   
+                #paredes_ativas = self.mapa.get_paredes_proximas(self.player.posicao)             
+                self.player.update(delta_time, paredes_ativas)                
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
+                for sprite in self.all_sprites:
+                    if sprite != self.player:
+                        # Se for um inimigo, enviamos as paredes
+                        if sprite in self.inimigos_grupo:
+                            sprite.update(delta_time, paredes_ativas)
+                        else:
+                            # Projéteis e itens geralmente não precisam colidir com paredes (ou tem lógica própria)
+                            sprite.update(delta_time)
             
-            entity_manager.all_sprites.update(delta_time)
-
             self.collision_manager.update(delta_time)
 
             if self.player.vida_atual <= 0:
@@ -187,6 +198,8 @@ class Game:
         elif self.estado_do_jogo == 'jogando':
             deslocamento = self.mapa.get_camera_offset(self.player.posicao, (largura_tela, altura_tela))
             self.mapa.draw(self.tela, deslocamento)
+            # Função para Debug de Tiled
+            #self.mapa.draw_debug(self.tela, deslocamento)
             # Itera por todos os sprites e desenha cada um
             for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
                 self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
@@ -196,6 +209,7 @@ class Game:
                     inimigo.draw_laser(self.tela, deslocamento)
                     
             self.hud.draw(self.tela)
+            
 
         elif self.estado_do_jogo == 'pausa':
             
@@ -235,12 +249,15 @@ class Game:
         self.gravemind_reborns = 3
         self.invocacao_protogravemind = 0
 
-        self.mapa = Mapa(all_sprites=self.all_sprites)
+        self.mapa = Mapa(self.caminho_mapa, all_sprites=self.all_sprites)
         self.largura_mapa_pixels = self.mapa.largura_mapa_pixels
         self.altura_mapa_pixels = self.mapa.altura_mapa_pixels
+
+        posicao_centro = (self.largura_mapa_pixels / 2, self.altura_mapa_pixels / 2)
+
         # Cria o player
         self.player = Player(
-            posicao_inicial=(self.mapa.largura_mapa_pixels / 2, self.mapa.altura_mapa_pixels),
+            posicao_inicial=posicao_centro,
             grupos=self.all_sprites,
             game=self
         )

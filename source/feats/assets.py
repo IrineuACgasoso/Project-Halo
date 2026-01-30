@@ -22,6 +22,13 @@ ASSETS = {
 
 
     'enemies': {
+        'arbiter': {
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss1.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss2.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss3.png')).convert_alpha(), (250,250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss4.png')).convert_alpha(), (250,250))
+        },
+
         'gravemind': {
             'final': [
                 pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'gravemind', 'final', 'proto1.png')).convert_alpha(),
@@ -36,8 +43,8 @@ ASSETS = {
         },
 
         'infection': [
-            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection1.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection2.png')).convert_alpha()
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection1.png')).convert_alpha(), (75, 75)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'infection', 'infection2.png')).convert_alpha(), (75, 75))
         ]
     }
 }

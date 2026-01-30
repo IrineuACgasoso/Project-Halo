@@ -111,7 +111,7 @@ class Hunter(InimigoBase):
             duracao=3000
         )
         
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         # Lógica de controle do estado de corrida
         if self.run_ativo:
@@ -149,6 +149,8 @@ class Hunter(InimigoBase):
             direcao = direcao.normalize()
 
         self.posicao += direcao * self.velocidade * delta_time
+        if paredes:
+            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
         self.rect.center = self.posicao
 
         if direcao.x < 0:

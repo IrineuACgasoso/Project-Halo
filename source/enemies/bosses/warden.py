@@ -159,12 +159,14 @@ class WardenEternal(InimigoBase):
                 Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
         self.kill()
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes= None):
         direcao = (self.jogador.posicao - self.posicao)
         agora = pygame.time.get_ticks()
         if direcao.length() > 0:
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
+            if paredes:
+                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         #invocacao de knights
         if not self.clone:

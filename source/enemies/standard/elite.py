@@ -73,7 +73,7 @@ class Elite(InimigoBase):
                 self.image = self.sprites[self.estado_animacao][self.frame_atual]
                 self.rect = self.image.get_rect(center=self.posicao)
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         direcao = (self.jogador.posicao - self.posicao)
         agora = pygame.time.get_ticks()
         #Ativa invisibi
@@ -105,6 +105,8 @@ class Elite(InimigoBase):
             self.velocidade = self.velocidade_base
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
+            if paredes:
+                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         if direcao.x < 0:
             self.estado_animacao = 'left'

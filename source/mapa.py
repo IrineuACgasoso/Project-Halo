@@ -3,7 +3,7 @@ import pytmx
 from os.path import join
 from settings import *
 
-class Mapa:
+class Mapaao:
     def __init__(self, all_sprites=None):
         self.all_sprites = all_sprites
         self.tmx_data = pytmx.load_pygame(join('assets', 'map', 'mapa_cin.tmx'))

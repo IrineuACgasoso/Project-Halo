@@ -209,13 +209,15 @@ class GuiltySpark(InimigoBase):
         self.rect = self.image.get_rect(center=self.posicao)
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         direcao = (self.jogador.posicao - self.posicao)
         if direcao.length() > 0:
             direcao.normalize_ip()
 
         self.posicao += direcao * self.velocidade * delta_time
+        if paredes:
+            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
         if self.vida <= self.vida_base / 2 and not self.enrage:

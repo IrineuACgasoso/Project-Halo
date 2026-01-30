@@ -1,8 +1,10 @@
 import pygame
 import random
+import math
 from random import randint
 from settings import *
 from entitymanager import entity_manager
+from mapmanager import Mapa
 
 # Inimigos base
 from enemies.standard.grunt import Grunt
@@ -39,8 +41,8 @@ class Spawner:
         self.cronograma_bosses = {
             'hunter': 60,        # 1 minuto
             'guilty': 180,     # 3 minutos
-            'arbiter': 1,    # 5 minutos (Início Fase 2)
-            'gravemind': 480,  # 8 minutos
+            'arbiter': 300,    # 5 minutos (Início Fase 2)
+            'gravemind': 640,  # 8 minutos
             'knight' : 600,    # 10 minutos
             'didact': 720,     # 12 minutos (Início Fase 3)
             'warden': 840,     # 14 minutos
@@ -51,24 +53,33 @@ class Spawner:
         self.boss_flags = {key: False for key in self.cronograma_bosses.keys()}
 
     def calcular_posicao_spawn(self):
-        player = entity_manager.player
-        # Define as bordas fora da visão da câmera
-        camera_center_x, camera_center_y = player.posicao.x, player.posicao.y
-        
-        borda_esquerda = camera_center_x - largura_tela / 2
-        borda_direita = camera_center_x + largura_tela / 2
-        borda_topo = camera_center_y - altura_tela / 2
-        borda_baixo = camera_center_y + altura_tela / 2
+        # 1. Segurança: se a lista estiver vazia, usa o fallback ao redor do player
+        if not self.game.mapa.pontos_de_spawn:
+            return self.game.player.posicao + pygame.math.Vector2(800, 0)
 
-        lado = random.choice(['top', 'bottom', 'left', 'right'])
-        if lado == 'top':
-            return (random.uniform(borda_esquerda, borda_direita), borda_topo - 50)
-        elif lado == 'bottom':
-            return (random.uniform(borda_esquerda, borda_direita), borda_baixo + 50)
-        elif lado == 'left':
-            return (borda_esquerda - 50, random.uniform(borda_topo, borda_baixo))
+        player_pos = self.game.player.posicao
+        
+        # 2. Filtrar pontos que estão fora da tela, mas não longe demais
+        # Usamos distance_squared_to porque é muito mais leve (não calcula raiz quadrada)
+        # 700 pixels de distância (fora da tela) -> 700 * 700 = 490.000
+        # 1600 pixels de distância (limite máximo) -> 1600 * 1600 = 2.560.000
+        pontos_validos = [
+            p for p in self.game.mapa.pontos_de_spawn 
+            if 490000 < p.distance_squared_to(player_pos) < 2560000
+        ]
+
+        # 3. Retornar a posição
+        if pontos_validos:
+            # Escolhe um ponto válido aleatório e adiciona um pequeno "offset" 
+            # para os inimigos não nascerem exatamente um dentro do outro
+            ponto_escolhido = random.choice(pontos_validos)
+            variacao = pygame.math.Vector2(random.uniform(-20, 20), random.uniform(-20, 20))
+            return ponto_escolhido + variacao
         else:
-            return (borda_direita + 50, random.uniform(borda_topo, borda_baixo))
+            # Se o player estiver num lugar isolado do mapa sem pontos perto,
+            # pega o ponto mais distante que encontrar para não spawnar na cara dele.
+            self.game.mapa.pontos_de_spawn.sort(key=lambda p: p.distance_squared_to(player_pos), reverse=True)
+            return self.game.mapa.pontos_de_spawn[0]
 
     def spawnar(self, tipo='normal'):
         pos = self.calcular_posicao_spawn()
@@ -91,7 +102,7 @@ class Spawner:
             # Seleção de inimigos baseada na FASE do jogo
             fase = self.game.fase_atual
             if fase == 1:
-                pool = [Sentinel]
+                pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
             elif fase == 5:
                 pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
             elif fase == 2:

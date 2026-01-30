@@ -9,7 +9,7 @@ from feats.items import *
 class BossArbiter(InimigoBase):
     def __init__(self, posicao, game, grupos):
         valor_vida = 4500
-        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base = 90, game=game)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base = 40, game=game)
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
         
         self.game=game
@@ -43,7 +43,7 @@ class BossArbiter(InimigoBase):
 
         #invisibilidade 
         self.cooldown_invisibilidade = 8000
-        self.duracao_invisi = 5000
+        self.duracao_invisi = 3500
         self.invisivel = False
         self.ultima_invisibi = pygame.time.get_ticks()
         self.duracao_falha = 30
@@ -71,7 +71,7 @@ class BossArbiter(InimigoBase):
             jogador=self.jogador,
             game=self.game,
             dano=40,
-            velocidade=600,
+            velocidade=300,
             tamanho=(16, 16)
         )
 
@@ -99,12 +99,14 @@ class BossArbiter(InimigoBase):
             Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
         self.kill()
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         direcao = (self.jogador.posicao - self.posicao)
         if direcao.length() > 0:
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
+            if paredes:
+                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             self.hitbox.center = self.rect.center
 
@@ -114,7 +116,7 @@ class BossArbiter(InimigoBase):
                 self.cooldown_invisibilidade = random.choice(novo_cooldown)
                 self.invisivel = True
                 self.ultima_invisibi = agora
-                self.velocidade *= 4
+                self.velocidade *= 2
                 self.image.set_alpha(0)
         else:
             # Lógica para quando o boss está invisível
