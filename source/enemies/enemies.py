@@ -5,14 +5,20 @@ from player import *
 from settings import *
 from feats.projetil import PlasmaGun, Dizimator, Carabin, M50
 from feats.items import *
+from feats.assets import ASSETS
 from entitymanager import entity_manager
 
 
 
 
 class InimigoBase(pygame.sprite.Sprite):
-    def __init__(self, posicao, vida_base, dano_base, velocidade_base, game):
+    GLOBAL_SPRITE_CACHE = {}
+    def __init__(self, posicao, vida_base, dano_base, velocidade_base, game, sprite_key, flip_sprite= False):
         super().__init__(entity_manager.all_sprites, entity_manager.inimigos_grupo)
+
+        self.sprite_key = sprite_key
+        # Gerencia o cache automaticamente para qualquer filho
+        self._check_and_load_sprites(sprite_key, flip_sprite)
 
         # Nome
         self.nome_completo = "INIMIGO"
@@ -46,6 +52,38 @@ class InimigoBase(pygame.sprite.Sprite):
         self.invencivel = False
         self.tempo_criacao = pygame.time.get_ticks() # Adicionado para uso futuro, se necessário
         self.tempo_invencibilidade = 0
+
+    def _check_and_load_sprites(self, key, flip_sprite):
+        """Carrega e organiza o cache. Se flip_sprite for True, o arquivo de disco é 'left'."""
+        if key not in InimigoBase.GLOBAL_SPRITE_CACHE:
+            InimigoBase.GLOBAL_SPRITE_CACHE[key] = {}
+            conteudo = ASSETS['enemies'][key]
+            
+            # Normaliza o conteúdo para um dicionário para facilitar o processamento
+            if isinstance(conteudo, list):
+                processar = {'default': conteudo}
+            else:
+                processar = conteudo
+
+            for var_name, frames in processar.items():
+                frames_invertidos = [pygame.transform.flip(f, True, False) for f in frames]
+                
+                if flip_sprite:
+                    # Se o original olha para a esquerda, o flipado olha para a direita
+                    InimigoBase.GLOBAL_SPRITE_CACHE[key][var_name] = {
+                        'left': frames,
+                        'right': frames_invertidos
+                    }
+                else:
+                    # Caso padrão: original olha para a direita, flipado para a esquerda
+                    InimigoBase.GLOBAL_SPRITE_CACHE[key][var_name] = {
+                        'right': frames,
+                        'left': frames_invertidos
+                    }
+    
+    def get_sprites(self, variante):
+        """Busca as sprites no cache usando a chave do inimigo"""
+        return InimigoBase.GLOBAL_SPRITE_CACHE[self.sprite_key][variante]
 
         
     def aplicar_dificuldade(self):
@@ -91,7 +129,7 @@ class InimigoBase(pygame.sprite.Sprite):
         if paredes:
             self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
 
-        self.rect.center = self.posicao
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
     @property
     def collision_rect(self):

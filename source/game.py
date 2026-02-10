@@ -7,25 +7,27 @@ from menu import *
 from spawner import Spawner
 from entitymanager import entity_manager
 from feats.weapon import *
+from feats.effects import Portal
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapmanager import Mapa
 from hud import HUD
 from collision import CollisionManager 
+from stagemanager import StageManager
 from enemies.standard.sentinel import Sentinel
 
 
 
 class Game:
     def __init__(self, tela):
-        # Variaveis de controle de tempo
+        # Variaveis de controle de tempo e fase
         self.tela = tela
         self.running = True
         self.clock = pygame.time.Clock()
         self.estado_do_jogo = "menu_principal"
         self.timer_jogo = 0  # Tempo em segundos
-        self.fase_atual = 1
+        self.fase_atual = 0
         self.boss_atual = None
 
         # Sprites e grupos
@@ -56,8 +58,8 @@ class Game:
 
         # Mapa 
         self.mapa = None # Inicialize o mapa como None
-        self.caminho_mapa = join('assets', 'map', 'm1.tmj')
-        self.mapa = Mapa(self.caminho_mapa)
+        self.caminho_mapa = join(f'assets', 'map', f'{self.fase_atual}', f'm{self.fase_atual}.tmj')
+        self.mapa = Mapa(self.caminho_mapa, self.fase_atual)
         self.largura_mapa_pixels = 0
         self.altura_mapa_pixels = 0
 
@@ -66,7 +68,19 @@ class Game:
         self.gravemind_reborns = 3        
         self.invocacao_protogravemind = 0
 
-    
+        # Mudança de Fase
+        self.stage_manager = StageManager(self) # Centraliza transições
+        self.portal_atual = None
+        self.timer_portal = 0
+        self.spawnar_portal_em_breve = False
+
+
+    def boss_derrotado(self):
+        print(f"Boss da fase {self.fase_atual} derrotado!")
+        self.boss_atual = None
+        self.spawnar_portal_em_breve = True
+        self.timer_portal = pygame.time.get_ticks()
+            
     def eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -78,15 +92,13 @@ class Game:
             # MENU PRINCIPAL
             if self.estado_do_jogo == "menu_principal":
                 escolha = self.menu_principal.handle_event(evento)
-                if escolha == 'Start Game':
+                if escolha == 'START GAME':
                     self.iniciar_novo_jogo()
-                if escolha == 'Colaboradores':
+                if escolha == 'CREATORS':
                     self.estado_do_jogo = 'colaboradores'
-                if escolha == 'Ranking':
+                if escolha == 'RANKING':
                     self.estado_do_jogo = 'ranking'
-                elif escolha == 'Colaboradores':
-                    self.estado_do_jogo = 'colaboradores'
-                elif escolha == 'Sair':
+                elif escolha == 'QUIT':
                     self.running = False
 
             # JOGANDO
@@ -147,20 +159,40 @@ class Game:
 
     def update(self, delta_time):
         if self.estado_do_jogo == "jogando":
+            agora = pygame.time.get_ticks()
+
+            # Lógica do Timer do Portal
+            if self.spawnar_portal_em_breve:
+                if agora - self.timer_portal >= 2000: # 2000ms = 2 segundos
+                    self.portal_atual = Portal(self.mapa.portal_pos, self.all_sprites)
+                    self.spawnar_portal_em_breve = False
+                
             # Verificamos se o boss morreu para limpar a referência
             if self.boss_atual and not self.boss_atual.alive():
-                self.boss_atual = None
+                self.boss_derrotado() # Chama o método que incrementa fase e carrega mapa
+            
+            # Checar transição de fase via Portal
+            # Verificação de Colisão com Máscara
+            if self.portal_atual:
+                # Calcula o deslocamento (offset) entre o player e o portal
+                offset_x = self.portal_atual.rect.x - self.player.rect.x
+                offset_y = self.portal_atual.rect.y - self.player.rect.y
+                
+                # Verifica se as máscaras se sobrepõem
+                if self.player.mask.overlap(self.portal_atual.mask, (offset_x, offset_y)):
+                    if not self.stage_manager.transicao_ativa:
+                        self.stage_manager.iniciar_transicao()
 
-            # SÓ INCREMENTA O TIMER SE NÃO HOUVER BOSS
-            if not self.boss_atual:
+            # SÓ INCREMENTA O TIMER SE A FASE ESTIVER CARREGADA
+            if not self.stage_manager.transicao_ativa and not self.boss_atual \
+                and not self.spawnar_portal_em_breve and not self.portal_atual:
                 self.timer_jogo += delta_time
-                self.fase_atual = int(self.timer_jogo // 300) + 1 
                 self.hud.desenhar_timer(self.tela)
                 self.spawner.update(delta_time) # Spawner só roda sem boss                
 
             if self.player:
-                paredes_ativas = self.mapa.paredes   
-                #paredes_ativas = self.mapa.get_paredes_proximas(self.player.posicao)             
+                #paredes_ativas = self.mapa.paredes   
+                paredes_ativas = self.mapa.get_paredes_proximas(self.player.posicao)             
                 self.player.update(delta_time, paredes_ativas)                
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
@@ -174,6 +206,8 @@ class Game:
                             sprite.update(delta_time)
             
             self.collision_manager.update(delta_time)
+
+            self.stage_manager.update(delta_time)
 
             if self.player.vida_atual <= 0:
                 #atualizacao pos morte para o ranking
@@ -199,7 +233,7 @@ class Game:
             deslocamento = self.mapa.get_camera_offset(self.player.posicao, (largura_tela, altura_tela))
             self.mapa.draw(self.tela, deslocamento)
             # Função para Debug de Tiled
-            #self.mapa.draw_debug(self.tela, deslocamento)
+            self.mapa.draw_debug(self.tela, deslocamento)
             # Itera por todos os sprites e desenha cada um
             for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
                 self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
@@ -209,6 +243,8 @@ class Game:
                     inimigo.draw_laser(self.tela, deslocamento)
                     
             self.hud.draw(self.tela)
+
+            self.stage_manager.draw()
             
 
         elif self.estado_do_jogo == 'pausa':
@@ -231,7 +267,8 @@ class Game:
             self.tela_de_upgrade_ativa.draw(self.tela)
 
         pygame.display.update()
-    
+
+        
     def iniciar_novo_jogo(self):
 
         # Limpa tudo
@@ -243,21 +280,21 @@ class Game:
 
         # Reseta o spawner para zerar os timers e flags de bosses
         self.timer_jogo = 0
-        self.fase_atual = 1
+        self.fase_atual = 0
         self.spawner = Spawner(self)
 
         self.gravemind_reborns = 3
         self.invocacao_protogravemind = 0
 
-        self.mapa = Mapa(self.caminho_mapa, all_sprites=self.all_sprites)
+        self.mapa = Mapa(self.caminho_mapa, self.fase_atual, all_sprites=self.all_sprites)
         self.largura_mapa_pixels = self.mapa.largura_mapa_pixels
         self.altura_mapa_pixels = self.mapa.altura_mapa_pixels
 
-        posicao_centro = (self.largura_mapa_pixels / 2, self.altura_mapa_pixels / 2)
+        posicao_inicial = self.mapa.get_player_spawn_pos()
 
         # Cria o player
         self.player = Player(
-            posicao_inicial=posicao_centro,
+            posicao_inicial=posicao_inicial,
             grupos=self.all_sprites,
             game=self
         )

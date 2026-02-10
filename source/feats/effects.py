@@ -1,6 +1,7 @@
 import pygame
 import random
 from random import randint
+from feats.assets import *
 
 class DustParticle(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos):
@@ -91,3 +92,12 @@ class PrometheanTeleport(pygame.sprite.Sprite):
             cor = self.cor_promethean if randint(0,10) > 2 else (255, 255, 255)
             
             pygame.draw.rect(self.image, cor, (offset_x, offset_y, tamanho, tamanho))
+
+class Portal(pygame.sprite.Sprite):
+    def __init__(self, pos, grupos):
+        super().__init__(grupos)
+        self.image = ASSETS['effects']['portal']
+        # Cria a máscara baseada nos pixels não transparentes da imagem
+        self.mask = pygame.mask.from_surface(self.image)
+        # Desenha um círculo ciano para debug ou visualização
+        self.rect = self.image.get_rect(center=pos)

@@ -9,7 +9,7 @@ from feats.items import *
 class BossArbiter(InimigoBase):
     def __init__(self, posicao, game, grupos):
         valor_vida = 4500
-        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base = 40, game=game)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base = 90, game=game)
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
         
         self.game=game

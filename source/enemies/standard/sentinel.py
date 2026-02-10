@@ -3,6 +3,8 @@ import random
 import math
 from os.path import join
 from enemies.enemies import InimigoBase
+from feats.assets import ASSETS
+from entitymanager import entity_manager
 
 class Sentinel(InimigoBase):
     def __init__(self, posicao, game):

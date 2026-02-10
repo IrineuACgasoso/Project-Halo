@@ -11,48 +11,35 @@ from entitymanager import entity_manager
 
 class Hunter(InimigoBase):
     def __init__(self, posicao, grupos, game):
-        valor_vida = 750
-        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=40, game=game)
+        # 1. Base gerencia o Cache Global
+        super().__init__(posicao, vida_base=750, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"
-        self.game = game
-
-        #sprites
-        self.sprites = {}
-        #left
-        self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter1.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'hunter','hunter2.png')).convert_alpha(), (270, 270))
-            ]
-        #right
-        self.sprites['right'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-            ]
-
-        #framagem da sprite
+        
+        # 2. Sprites do Cache
+        self.sprites = self.get_sprites('default')
         self.frame_atual = 0  
         self.estado_animacao = 'left'
-        self.indice_animacao = 0
-        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
-        self.rect = self.image.get_rect(center=self.posicao)
+        self.image = self.sprites[self.estado_animacao][self.frame_atual]
+        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
+        
         self.velocidade_animacao = 900
         self.ultimo_update_animacao = pygame.time.get_ticks()
-
-        #hitbox
+        
+        # Hitbox (Inicia a mask)
         self.mask = pygame.mask.from_surface(self.image)
 
-        # Rage Run Ability
+        # Timers e Habilidades 
+        # RUN
         self.run_ativo = False
         self.cooldown_run = 6000
         self.tempo_ultima_run = pygame.time.get_ticks()
         self.duracao_run = 2500
         self.tempo_inicio_run = 0
         self.velocidade_corrida = 350
-
-        # Cannon Beam
+        # CANNON
         self.cooldown_cannon = 3000
         self.tempo_ultimo_cannon = pygame.time.get_ticks()
-
-        # Burst
+        # BURST
         self.cooldown_burst = 4000
         self.contagem_burst = 10
         self.burst_restante = 0
@@ -60,36 +47,26 @@ class Hunter(InimigoBase):
         self.intervalo_burst = 150
         self.cronometro_burst = 0
 
-    @property
-    def collision_rect(self):
-        "Retorna a hitbox de Hunter."
-        return self.mask
-
-    def morrer(self, grupos):
-        qtd_shards = 2        
-        for _ in range(qtd_shards):
-            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=entity_manager.all_sprites)
-        self.kill()
-
     def animar(self):
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.posicao)
-    
+            
+            # ATUALIZAÇÃO IMPORTANTE: Mask e Rect
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
+
     def run(self):
-        if not self.run_ativo:
-            novo_cooldown = [5000, 5500, 6000, 6500]
-            self.cooldown_run = random.choice(novo_cooldown)
-            self.run_ativo = True
-            self.velocidade = self.velocidade_corrida
-            self.velocidade_animacao = 300
-            self.tempo_inicio_run = pygame.time.get_ticks()
-    
+        """Ativa o estado de investida do Hunter."""
+        self.run_ativo = True
+        self.tempo_inicio_run = pygame.time.get_ticks()
+        self.velocidade = self.velocidade_corrida
+        self.velocidade_animacao = 200 # Animação rápida durante a corrida
+
     def burst(self):
+        """Dispara a metralhadora de plasma."""
         PlasmaGun(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
@@ -101,62 +78,58 @@ class Hunter(InimigoBase):
         )
 
     def cannon_beam(self):
+        """Dispara o canhão principal."""
         CannonBeam(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=250, 
-            velocidade=900,
+            velocidade=750,
             duracao=3000
         )
-        
+
     def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
-        # Lógica de controle do estado de corrida
+
+        # --- LÓGICA DE HABILIDADES ---
+        # Rage Run
         if self.run_ativo:
             if agora - self.tempo_inicio_run >= self.duracao_run:
                 self.run_ativo = False
-                self.velocidade_animacao = 1000
+                self.velocidade_animacao = 900
                 self.velocidade = self.velocidade_base
-        # Lógica para ativar a corrida
-        if agora - self.tempo_ultima_run >= self.cooldown_run:
+        elif agora - self.tempo_ultima_run >= self.cooldown_run:
             self.tempo_ultima_run = agora
             self.run()
-        #Ativa o burst
+
+        # Burst logic
         if agora - self.tempo_ultimo_burst >= self.cooldown_burst:
             self.burst_restante = self.contagem_burst  
-            novo_cooldown = [5000, 5500, 6000, 6500]
-            self.cooldown_burst = random.choice(novo_cooldown)
+            self.cooldown_burst = random.choice([5000, 5500, 6000, 6500])
             self.tempo_ultimo_burst = agora
-        #Burst
+
         if self.burst_restante > 0:
             self.cronometro_burst += delta_time * 1000
             if self.cronometro_burst >= self.intervalo_burst:
                 self.cronometro_burst = 0
                 self.burst_restante -= 1
                 self.burst()
-        #Cannon
+
+        # Cannon
         if agora - self.tempo_ultimo_cannon >= self.cooldown_cannon:
             self.tempo_ultimo_cannon = agora
-            novo_cooldown_cannon = [7500, 8000, 8500, 9000]
-            self.cooldown_cannon = random.choice(novo_cooldown_cannon)
+            self.cooldown_cannon = random.choice([7500, 8000, 8500, 9000])
             self.cannon_beam()
-        
-        # O resto da sua lógica de movimento e habilidades
-        direcao = (self.jogador.posicao - self.posicao)
-        if direcao.length() > 0: # Evita divisão por zero
-            direcao = direcao.normalize()
 
-        self.posicao += direcao * self.velocidade * delta_time
-        if paredes:
-            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
-        self.rect.center = self.posicao
+        # --- MOVIMENTAÇÃO E ANIMAÇÃO ---
+        # Deixa a Base fazer o movimento matemático e colisões
+        super().update(delta_time, paredes)
 
-        if direcao.x < 0:
+        # Atualiza o lado para onde ele olha baseado no jogador
+        if self.jogador.posicao.x < self.posicao.x:
             self.estado_animacao = 'left'
-        elif direcao.x > 0:
+        else:
             self.estado_animacao = 'right'
 
         self.animar()
-

@@ -6,13 +6,14 @@ from player import *
 from settings import *
 from feats.projetil import PlasmaGun
 from feats.items import *
+from feats.assets import ASSETS
 from entitymanager import entity_manager
 
 
 
 class Grunt(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=4, dano_base=15, velocidade_base=90, game=game)
+        super().__init__(posicao, vida_base=4, dano_base=15, velocidade_base=90, game=game, sprite_key= 'grunt')
         self.image = pygame.transform.scale(self.image, (100, 80))
         self.rect = self.image.get_rect(center=self.posicao)
         self.velocidade = 70
@@ -23,13 +24,8 @@ class Grunt(InimigoBase):
         self.ultimo_tiro = pygame.time.get_ticks()
         #pre animacao
         self.sprites = {}
-        sprites_right = [
-            pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt2.png')).convert_alpha(),
-            #pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt3.png')).convert_alpha()
-        ]
         #add esquerda no dict
-        self.sprites['right'] = [pygame.transform.scale(sprite, (96, 96)) for sprite in sprites_right]
+        self.sprites['right'] = ASSETS['enemies']['grunt']
         #Carrega direita
         self.sprites['left'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']

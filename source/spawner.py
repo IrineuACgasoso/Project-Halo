@@ -5,6 +5,7 @@ from random import randint
 from settings import *
 from entitymanager import entity_manager
 from mapmanager import Mapa
+from feats.assets import *
 
 # Inimigos base
 from enemies.standard.grunt import Grunt
@@ -26,6 +27,7 @@ from enemies.bosses.jega import Jega
 
 # Minibosses
 from enemies.minibosses.hunter import Hunter
+from enemies.minibosses.zealot import Zealot
 from enemies.minibosses.knight import Knight
 
 class Spawner:
@@ -39,12 +41,13 @@ class Spawner:
 
         # Flags de controle de Bosses
         self.cronograma_bosses = {
-            'hunter': 60,        # 1 minuto
-            'guilty': 180,     # 3 minutos
-            'arbiter': 300,    # 5 minutos (Início Fase 2)
-            'gravemind': 640,  # 8 minutos
+            'hunter': 1,        # 1 minuto
+            'zealot': 2,       #
+            'guilty': 300,     # 2 minutos
+            'arbiter': 400,    # 5 minutos (Início Fase 2)
+            'gravemind': 500,  # 8 minutos
             'knight' : 600,    # 10 minutos
-            'didact': 720,     # 12 minutos (Início Fase 3)
+            'didact': 700,     # 12 minutos (Início Fase 3)
             'warden': 840,     # 14 minutos
             'jega': 1080,     # 15 minutos
             'harbinger': 1200  # 20 minutos
@@ -53,40 +56,40 @@ class Spawner:
         self.boss_flags = {key: False for key in self.cronograma_bosses.keys()}
 
     def calcular_posicao_spawn(self):
-        # 1. Segurança: se a lista estiver vazia, usa o fallback ao redor do player
+        # DEBUG: Verifique no console se os pontos existem na nova fase
+        # print(f"Pontos no mapa atual: {len(self.game.mapa.pontos_de_spawn)}")
+
         if not self.game.mapa.pontos_de_spawn:
-            return self.game.player.posicao + pygame.math.Vector2(800, 0)
+            # Fallback total: spawnar em volta do player caso o JSON esteja bugado
+            ângulo = random.uniform(0, math.pi * 2)
+            direcao = pygame.math.Vector2(math.cos(ângulo), math.sin(ângulo))
+            return self.game.player.posicao + (direcao * 800)
 
         player_pos = self.game.player.posicao
         
-        # 2. Filtrar pontos que estão fora da tela, mas não longe demais
-        # Usamos distance_squared_to porque é muito mais leve (não calcula raiz quadrada)
-        # 700 pixels de distância (fora da tela) -> 700 * 700 = 490.000
-        # 1600 pixels de distância (limite máximo) -> 1600 * 1600 = 2.560.000
+        # Reduzi a distância mínima para 500 (garante que spawne fora da visão mas ache pontos)
+        # 500*500 = 250.000 | 2000*2000 = 4.000.000
         pontos_validos = [
             p for p in self.game.mapa.pontos_de_spawn 
-            if 490000 < p.distance_squared_to(player_pos) < 2560000
+            if 250000 < p.distance_squared_to(player_pos) < 4000000
         ]
 
-        # 3. Retornar a posição
         if pontos_validos:
-            # Escolhe um ponto válido aleatório e adiciona um pequeno "offset" 
-            # para os inimigos não nascerem exatamente um dentro do outro
             ponto_escolhido = random.choice(pontos_validos)
-            variacao = pygame.math.Vector2(random.uniform(-20, 20), random.uniform(-20, 20))
+            variacao = pygame.math.Vector2(random.uniform(-30, 30), random.uniform(-30, 30))
             return ponto_escolhido + variacao
         else:
-            # Se o player estiver num lugar isolado do mapa sem pontos perto,
-            # pega o ponto mais distante que encontrar para não spawnar na cara dele.
-            self.game.mapa.pontos_de_spawn.sort(key=lambda p: p.distance_squared_to(player_pos), reverse=True)
-            return self.game.mapa.pontos_de_spawn[0]
+            # Se não achou no raio ideal, pega QUALQUER ponto que não esteja "na cara" do player
+            # Pega o ponto mais distante disponível
+            ponto_distante = max(self.game.mapa.pontos_de_spawn, key=lambda p: p.distance_squared_to(player_pos))
+            return ponto_distante
 
     def spawnar(self, tipo='normal'):
         pos = self.calcular_posicao_spawn()
         
         # Mapeamento de classes para facilitar o código
         classes_bosses = {
-            'hunter': Hunter, 'guilty': GuiltySpark, 'arbiter': BossArbiter,
+            'hunter': Hunter, 'zealot': Zealot, 'guilty': GuiltySpark, 'arbiter': BossArbiter,
             'gravemind': FloodWarning, 'knight' : Knight, 'didact': Didact, 'warden': WardenEternal,
             'harbinger': Harbinger, 'jega': Jega
         }
@@ -101,10 +104,10 @@ class Spawner:
         else:
             # Seleção de inimigos baseada na FASE do jogo
             fase = self.game.fase_atual
-            if fase == 1:
+            if fase == 0:
                 pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
-            elif fase == 5:
-                pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
+            elif fase == 1:
+                pool = [Infection, Infection, Infection, Grunt, Grunt, Grunt, Jackal, Jackal, Sentinel, Elite]
             elif fase == 2:
                 pool = [Infection, Infection, Grunt, Jackal, Elite]
             elif fase == 3:
@@ -118,24 +121,41 @@ class Spawner:
     def update(self, delta_time):
         self.tempo_proximo_spawn += delta_time
         tempo_atual = self.game.timer_jogo
-        player = entity_manager.player
+        fase = self.game.fase_atual
 
-        # Spawn de Inimigos Comuns
+        # 1. Inimigos Comuns (Dificuldade sempre sobe)
         if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
             self.tempo_proximo_spawn = 0
-            # Aumenta a quantidade de inimigos baseada na fase
-            qtd_spawn = 2 + self.game.fase_atual 
+            # A dificuldade escala com o tempo acumulado de todas as fases
+            qtd_spawn = 2 + fase 
             for _ in range(qtd_spawn):
                 self.spawnar('normal')
 
-
-        # Spawn de Bosses por Cronômetro
-        for boss, tempo_alvo in self.cronograma_bosses.items():
-            if tempo_atual >= tempo_alvo and not self.boss_flags[boss]:
-                self.boss_flags[boss] = True
-                self.spawnar(boss)
-            
-            # ... continue para os outros bosses
-
-        # Aumenta dificuldade
+        # 2. Escala de dificuldade baseada no tempo de horda acumulado
         self.intervalo_spawn_atual = max(0.5, 2.5 - (tempo_atual * 0.002))
+
+        # 3. Bosses Relativos à Fase
+        # Se o timer parou no boss anterior, ele volta a correr agora.
+        bosses_por_fase = {
+            0: ['hunter'],
+            1: ['zealot'],
+            2: ['guilty'],            
+            3: ['arbiter'],
+            4: ['gravemind'],
+            5: ['knight'],
+            6: ['didact'],
+            7: ['jega'],
+
+            #5: ['knight', 'didact', 'warden'],
+            #6: ['jega', 'harbinger']
+        }
+
+        if fase in bosses_por_fase:
+            for boss in bosses_por_fase[fase]:
+                tempo_alvo = self.cronograma_bosses[boss]
+                
+                # Se o player já passou do tempo desse boss (porque o timer é contínuo)
+                # OU se o tempo acabou de chegar, ele spawna.
+                if tempo_atual >= tempo_alvo and not self.boss_flags[boss]:
+                    self.boss_flags[boss] = True
+                    self.spawnar(boss)

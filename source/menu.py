@@ -1,43 +1,114 @@
 import pygame
+import math
 import os
 from os.path import join
+from colaboradores import TelaColaboradores
+from feats.assets import ASSETS
 from settings import *  # largura_tela, altura_tela, fps
 # ------------------- MENUS -------------------
+
 
 class MenuPrincipal:
     def __init__(self, game):
         self.game = game
-        self.font = pygame.font.SysFont(None, 48)
-        self.bg = pygame.image.load(join('assets', 'img', 'CInMenu.jpeg'))
-        self.bg = pygame.transform.scale(self.bg, (largura_tela, altura_tela))
-        self.bg_rect = self.bg.get_rect(center=self.game.tela.get_rect().center)
-        self.opcoes = ["Start Game", "Ranking", "Colaboradores", "Sair"]
+        
+        # Tentativa de carregar a fonte Orbitron enviada (Bold para o menu)
+        # Se preferir a VariableFont ou outro peso, mude o caminho abaixo
+        try:
+            self.font_path = "assets/fonts/orbitron/Orbitron-Bold.ttf" # Ajuste o caminho conforme sua pasta
+            self.font = pygame.font.Font(self.font_path, 40)
+        except:
+            self.font = pygame.font.SysFont('Consolas', 36, bold=True)
+        
+        # --- CARREGAMENTO DAS CAMADAS ---
+        self.camada_fundo = ASSETS['menu']['menuback']
+        self.camada_planeta = ASSETS['menu']['menuback2']
+        self.camada_anel = ASSETS['menu']['haloring']
+        self.logo = ASSETS['menu']['logo']
+        
+        # --- VARIÁVEIS DE ANIMAÇÃO ---
+        self.timer = 0
+        self.opcoes = ["START GAME", "RANKING", "CREATORS", "QUIT"]
         self.selecionada = 0
 
-        # Música de fundo
-        #self.musica = join('assets', 'sounds', 'musica_menu.ogg')
-        #pygame.mixer.music.load(self.musica)
-        #pygame.mixer.music.set_volume(0.0)
-        #pygame.mixer.music.play(-1)
+        # Cores Estilo Halo
+        self.COR_BRANCO_SEL = (250, 250, 255)
+        self.COR_CIANO_NEON = (0, 255, 255)
+        self.COR_AZUL_MENU = (70, 140, 210) # Azul mais sóbrio para itens não focados
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
+            if event.key == pygame.K_w or event.key == pygame.K_UP:
                 self.selecionada = (self.selecionada - 1) % len(self.opcoes)
-            elif event.key == pygame.K_s:
+            elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 self.selecionada = (self.selecionada + 1) % len(self.opcoes)
             elif event.key == pygame.K_RETURN:
-                pygame.mixer.music.stop()
                 return self.opcoes[self.selecionada]
         return None
 
     def draw(self, tela):
-        tela.blit(self.bg, (0, 0))
-        for i, texto in enumerate(self.opcoes):
-            cor = (255, 0, 0) if i == self.selecionada else (255, 255, 255)
-            txt = self.font.render(texto, True, cor)
-            tela.blit(txt, (100, 100 + i * 60))
+        self.timer += 0.008 
+        tela.blit(self.camada_fundo, (0, 0))
+        
+        # --- LÓGICA DE ZOOM (Mantida conforme original) ---
+        oscilacao = (math.sin(self.timer) * 0.7) + (math.sin(self.timer * 2) * 0.3)
+        curva_respiracao = (oscilacao + 1.0) / 2.0
+        variacao_zoom = curva_respiracao * 0.25
+        
+        # Camada Planeta
+        p_z = 1.01 + (variacao_zoom * 0.2)
+        img_p = pygame.transform.smoothscale(self.camada_planeta, (int(largura_tela*p_z), int(altura_tela*p_z)))
+        tela.blit(img_p, img_p.get_rect(center=(largura_tela//2, altura_tela//2)))
 
+        # Camada Anel
+        a_z = 1.02 + variacao_zoom
+        img_a = pygame.transform.smoothscale(self.camada_anel, (int(largura_tela*a_z), int(altura_tela*a_z)))
+        tela.blit(img_a, img_a.get_rect(center=(largura_tela//2, altura_tela//2)))
+
+        # Logo
+        brilho_logo = int(200 + math.sin(self.timer * 3) * 55)
+        self.logo.set_alpha(brilho_logo)
+        tela.blit(self.logo, self.logo.get_rect(center=(largura_tela//2, 120)))
+
+        # --- OPÇÕES ESTILO HALO ---
+        # --- OPÇÕES ---
+        for i, texto in enumerate(self.opcoes):
+            sel = (i == self.selecionada)
+            
+            if sel:
+                # 1. Desenha o Glow em 8 direções para cobrir as diagonais
+                alpha_glow = int(120 + math.sin(self.timer * 8) * 50)
+                
+                rect_base = None # Será definido abaixo
+                
+                # Desenhamos o glow ANTES do texto principal
+                # Usamos um range maior de offsets para um brilho mais espesso
+                for offset in range(1, 5):
+                    glow_surf = self.font.render(texto, True, self.COR_CIANO_NEON)
+                    glow_surf.set_alpha(max(0, alpha_glow // offset))
+                    
+                    if rect_base is None:
+                        rect_base = glow_surf.get_rect(center=(largura_tela // 2, 300 + i * 65))
+                    
+                    # Lista de direções (x, y): Cardeais + Diagonais
+                    direcoes = [
+                        (-offset, 0), (offset, 0), (0, -offset), (0, offset), # Cardeais
+                        (-offset, -offset), (offset, -offset), (-offset, offset), (offset, offset) # Diagonais
+                    ]
+                    
+                    for dx, dy in direcoes:
+                        tela.blit(glow_surf, (rect_base.x + dx, rect_base.y + dy))
+
+                # 2. Desenha o Texto Principal em BRANCO por cima do glow
+                txt_surf = self.font.render(texto, True, self.COR_BRANCO_SEL)
+                rect = txt_surf.get_rect(center=(largura_tela // 2, 300 + i * 65))
+                tela.blit(txt_surf, rect)
+
+            else:
+                # Texto Azul normal (não selecionado)
+                txt_surf = self.font.render(texto, True, self.COR_AZUL_MENU)
+                rect = txt_surf.get_rect(center=(largura_tela // 2, 300 + i * 65))
+                tela.blit(txt_surf, rect)
 
 class MenuPausa:
     def __init__(self, game):
@@ -79,87 +150,3 @@ class TelaGameOver:
             self.som_tocado = True
         tela.blit(self.bg, (0, 0))
         
-class Game:
-    def __init__(self, tela):
-        self.tela = tela
-        self.clock = pygame.time.Clock()
-        self.running = True
-
-        self.menu_principal = MenuPrincipal(self)
-        self.menu_pausa = MenuPausa(self)
-        self.tela_game_over = TelaGameOver(self)
-
-        self.estado_do_jogo = "menu_principal"
-        self.colaboradores = None
-
-    def iniciar_novo_jogo(self):
-        self.estado_do_jogo = 'jogando'
-
-    def run(self):
-        while self.running:
-            delta_time = self.clock.tick(fps) / 1000
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-
-                # ---------- MENU PRINCIPAL ----------
-                if self.estado_do_jogo == "menu_principal":
-                    escolha = self.menu_principal.handle_event(event)
-                    if escolha == 'Start Game':
-                        self.iniciar_novo_jogo()
-                    elif escolha == 'Ranking':
-                        self.estado_do_jogo = 'ranking'
-                    elif escolha == 'Colaboradores':
-                        self.colaboradores = Colaboradores(self)
-                        self.estado_do_jogo = 'colaboradores'
-                    elif escolha == 'Sair':
-                        self.running = False
-
-                # ---------- PAUSA ----------
-                elif self.estado_do_jogo == "pausa":
-                    escolha = self.menu_pausa.handle_event(event)
-                    if escolha == "Continuar":
-                        self.estado_do_jogo = "jogando"
-                    elif escolha == "Sair para Menu":
-                        self.estado_do_jogo = "menu_principal"
-                        self.menu_principal = MenuPrincipal(self)
-
-                # ---------- GAME OVER ----------
-                elif self.estado_do_jogo == "game_over":
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                        self.estado_do_jogo = "menu_principal"
-                        self.menu_principal = MenuPrincipal(self)
-
-                # ---------- COLABORADORES ----------
-                elif self.estado_do_jogo == "colaboradores":
-                    action = self.colaboradores.handle_event(event)
-                    if action == 'sair':
-                        self.estado_do_jogo = "menu_principal"
-                        self.menu_principal = MenuPrincipal(self)
-
-            self.draw()
-
-        pygame.quit()
-
-    def draw(self):
-        if self.estado_do_jogo == "menu_principal":
-            self.menu_principal.draw(self.tela)
-        elif self.estado_do_jogo == "jogando":
-            self.tela.fill((0, 0, 0))
-        elif self.estado_do_jogo == "pausa":
-            self.menu_pausa.draw(self.tela)
-        elif self.estado_do_jogo == "game_over":
-            self.tela_game_over.draw(self.tela)
-        elif self.estado_do_jogo == "colaboradores":
-            self.colaboradores.draw(self.tela)
-
-        pygame.display.update()
-
-
-if __name__ == "__main__":
-    pygame.init()
-    pygame.mixer.init()
-    tela = pygame.display.set_mode((largura_tela, altura_tela))
-    pygame.display.set_caption("Jogo com Música")
-    game = Game(tela)
-    game.run()

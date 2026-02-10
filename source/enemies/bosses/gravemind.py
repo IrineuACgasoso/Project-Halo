@@ -26,7 +26,7 @@ class Gravemind(InimigoBase):
             if is_minion:
                 valor_vida = 400
             else:
-                valor_vida = 1000
+                valor_vida = 2000
         super().__init__(posicao, vida_base=valor_vida, dano_base=50, velocidade_base=35, game=game)
 
         self.game = game
@@ -75,7 +75,7 @@ class Gravemind(InimigoBase):
         # ---- VARIÁVEIS DA ANIMAÇÃO DE RESPAWN ----
         self.altura_atual = 0 
         self.estado_respawn = 'reaparecendo' 
-        self.velocidade_animacao_respawn = 200
+        self.velocidade_animacao_respawn = 300
         self.is_animating_respawn = True
 
         self.image = self.sprites['left'][0]
@@ -350,7 +350,7 @@ class Gravemind(InimigoBase):
             # Atualiza o rect para garantir centralização
             self.rect = self.image.get_rect(center=self.rect.center)
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes = None):
         if self.is_final_form and not self.is_animating_respawn and not self.gas_invocado:
             MiasmaGas(
                 posicao_boss=self.posicao,

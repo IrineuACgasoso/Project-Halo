@@ -115,7 +115,7 @@ class GuiltySpark(InimigoBase):
                 novo_cooldown = [6000, 7000, 8000, 9000]
             else:
                 novo_cooldown = [8000, 10000, 11000, 12000]
-            self.cooldown_laser = random.choice(novo_cooldown)
+            self.cooldown_invocacao = random.choice(novo_cooldown)
 
             # Reinicia os estados
             self.image = self.sprites[self.estado_animacao][0]
@@ -156,24 +156,44 @@ class GuiltySpark(InimigoBase):
             
 
     def teleporte(self):
-        # Gera um ângulo aleatório (em radianos)
-        angulo = random.uniform(0, 2 * math.pi)
-        # Define a distância de teleporte entre 150 e 250 pixels do jogador
-        distancia_teleporte = random.uniform(150, 250)
-        # Calcula a nova posição
-        nova_posicao_x = self.jogador.posicao.x + distancia_teleporte * math.cos(angulo)
-        nova_posicao_y = self.jogador.posicao.y + distancia_teleporte * math.sin(angulo)
-        Teleport((round(nova_posicao_x), round(nova_posicao_y)))
-        self.posicao.x = nova_posicao_x
-        self.posicao.y = nova_posicao_y
-        # Atualiza a posição do retângulo
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-        # Recebe um buff de velocidade a cada teleporte
-        self.velocidade *= 1.1
-        self.velocidade_anterior = self.velocidade
-        # Salva o ultimo tp
-        self.ultimo_tp = pygame.time.get_ticks()
-        # Volta pro estado padrão
+        """
+        Teleporta o boss garantindo que o destino seja válido 
+        de acordo com o sistema de Navigation do Mapa.
+        """
+        posicao_valida = False
+        tentativas = 0
+        max_tentativas = 30
+        nova_pos = pygame.math.Vector2(0, 0)
+
+        while not posicao_valida and tentativas < max_tentativas:
+            tentativas += 1
+            
+            # Gera um raio aleatório ao redor do jogador
+            angulo = random.uniform(0, 2 * math.pi)
+            distancia = random.uniform(200, 450) # Distância do TP
+            
+            target_x = self.jogador.posicao.x + distancia * math.cos(angulo)
+            target_y = self.jogador.posicao.y + distancia * math.sin(angulo)
+            nova_pos.update(target_x, target_y)
+            
+            # USA O SEU MÉTODO DO MAPA:
+            if self.game.mapa.posicao_e_valida(nova_pos):
+                posicao_valida = True
+
+        if posicao_valida:
+            # Efeito de saída na posição antiga
+            Teleport(self.rect.center)
+            
+            # Atualiza posição
+            self.posicao = pygame.math.Vector2(nova_pos)
+            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+            
+            # Efeito de entrada na posição nova
+            Teleport(self.rect.center)
+            
+            # Feedback sonoro ou buffs se houver
+            self.ultimo_tp = pygame.time.get_ticks()
+            
         self.estado_habilidade = 'idle'
 
     def rage(self):

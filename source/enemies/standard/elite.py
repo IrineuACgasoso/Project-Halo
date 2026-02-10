@@ -6,12 +6,13 @@ from player import *
 from settings import *
 from feats.projetil import Carabin
 from feats.items import *
+from feats.assets import ASSETS
 from entitymanager import entity_manager
 
 
 class Elite(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=90, game=game)
+        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=90, game=game, sprite_key='elite')
         self.game
 
         #sprites

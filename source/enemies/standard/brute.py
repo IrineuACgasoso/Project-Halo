@@ -6,23 +6,19 @@ from player import *
 from settings import *
 from feats.projetil import Dizimator
 from feats.items import *
+from feats.assets import *
 from entitymanager import entity_manager
 
 
 class Brute(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=75, game=game)
+        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=75, game=game, sprite_key='brute')
         self.game
 
         #sprites
         self.sprites = {}
         # Carrega e redimensione as sprites da esquerda
-        self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute.png')).convert_alpha(),(200,200)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute2.png')).convert_alpha(),(200,200))
-            #pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'brute', 'brute3.png')).convert_alpha(),(150,150))
-
-        ]
+        self.sprites['left'] = ASSETS['enemies']['brute']
         #Carrega direita
         self.sprites['right'] = [
             pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
@@ -67,7 +63,7 @@ class Brute(InimigoBase):
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
             self.rect = self.image.get_rect(center=self.posicao)
 
-    def update(self, delta_time):
+    def update(self, delta_time, paredes = None):
         direcao = (self.jogador.posicao - self.posicao)
         agora = pygame.time.get_ticks()
         if direcao.length() > 0:
@@ -82,6 +78,8 @@ class Brute(InimigoBase):
         if self.vida <= self.vida_base / 2 and self.rage == False:
             self.velocidade *= 3
             self.rage = True
+        if paredes:
+            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
         if direcao.x < 0:
             self.estado_animacao = 'left'
         elif direcao.x > 0:

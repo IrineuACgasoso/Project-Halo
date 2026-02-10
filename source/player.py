@@ -44,6 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.ultimo_update_animacao = pygame.time.get_ticks()
 
         #hitbox
+        self.mask = pygame.mask.from_surface(self.image) 
         self.tamanho_hitbox = self.rect.width / 1.5
         self.hitbox = pygame.Rect(0, 0, self.tamanho_hitbox, self.rect.height)
         self.hitbox.center = self.rect.center
@@ -117,7 +118,8 @@ class Player(pygame.sprite.Sprite):
     
     def mover_com_colisao(self, delta_time, paredes_ativas):
         # 1. Aplicamos o movimento bruto
-        self.posicao += self.direcao * self.velocidade * delta_time
+        dt_seguro = min(delta_time, 0.033)
+        self.posicao += self.direcao * self.velocidade * dt_seguro
         
         # 2. Resolvemos colisões com Polilinhas (e Polígonos, que viram linhas)
         # Fazemos isso 2 ou 3 vezes (iterações) para garantir que em cantos apertados 
@@ -213,6 +215,17 @@ class Player(pygame.sprite.Sprite):
 
         if paredes is not None:
             self.mover_com_colisao(delta_time, paredes)
+        
+        # Calcula se o player está em uma zona de Void
+        forca, ponto_alvo, dist = self.game.mapa.calcular_puxo_void(self.posicao)
+
+        if ponto_alvo: # Se for diferente de None, o player está no vácuo
+            self.posicao += forca
+            self.tomar_dano_direto(1)
+            
+            # Se o player chegar muito perto do VoidPoint ele morre
+            if dist < 15: 
+                self.tomar_dano_direto(9999)
 
         if self.buff_timer > 0:
             self.buff_timer -= delta_time
@@ -260,11 +273,3 @@ class Player(pygame.sprite.Sprite):
         if hack[pygame.K_l]:
             falta = self.experiencia_level_up - self.experiencia_atual
             self.experiencia_atual += falta
-
-
-
-
-
-   
-
-
