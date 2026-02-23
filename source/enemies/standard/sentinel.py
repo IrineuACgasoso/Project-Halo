@@ -8,20 +8,14 @@ from entitymanager import entity_manager
 
 class Sentinel(InimigoBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game)
+        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel')
         self.game = game
         self.estado_ia = 'chase'
         
         # Sprites
         self.sprites = {}
         # Right
-        self.sprites['right'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
-        ]
-        # Left
-        self.sprites['left'] = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']]
-
+        self.sprites = self.get_sprites('default')
         self.estado_animacao = 'left'
         self.indice_animacao = 0
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]

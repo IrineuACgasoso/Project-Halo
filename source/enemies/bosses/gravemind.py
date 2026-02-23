@@ -13,21 +13,25 @@ import math
 class Gravemind(InimigoBase):
     def __init__(self, posicao, game, grupos, jogador, is_final_form = False, is_minion=False):
         if is_final_form:
+            self.tipo = 'final'
             valor_vida = 8000
             self.gas_invocado = False
             self.raio_safezone = 1000
             self.titulo = "GRAVEMIND, O Monumento de Todos os Pecados"
             self.numero_particulas = 5
             self.dispersao_particulas = (-300, 300)
+            self.tamanho_sprite = (900, 600)
         else:
+            self.tipo = 'proto'
             self.titulo = "PROTO GRAVEMIND"
             self.numero_particulas = 2
             self.dispersao_particulas = (-150, 150)
+            self.tamanho_sprite = (750, 500)
             if is_minion:
-                valor_vida = 400
+                valor_vida = 500
             else:
                 valor_vida = 2000
-        super().__init__(posicao, vida_base=valor_vida, dano_base=50, velocidade_base=35, game=game)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=50, velocidade_base=35, game=game, sprite_key=None)
 
         self.game = game
         self.vida = valor_vida
@@ -38,39 +42,31 @@ class Gravemind(InimigoBase):
         # --- FSM (MÁQUINA DE ESTADOS) ---
         self.estado_atual = 'idle' # idle, acid_breath, spawning_infection, spawning_heads, respawning
 
-        # Carrega a sprite e animacao da forma final e base
+        # --- NOVO TRECHO (Lendo 'default' e 'attack') ---
         self.sprites = {}
 
+        # Como mudamos no assets.py, precisamos buscar direto no dicionário raiz do inimigo
         if is_final_form:
-            tamanho = (900, 600)
-            lista_assets = ASSETS['enemies']['gravemind']['final']
+            dict_sprites = ASSETS['enemies']['gravemind']['final']
         else:
-            tamanho = (750, 500)
-            lista_assets = ASSETS['enemies']['gravemind']['proto']
+            dict_sprites = ASSETS['enemies']['gravemind']['proto']
 
-        self.tamanho_sprite = tamanho
-
-        # Carrega e transforma imagens
-        # Left (Base)
-        img_idle1 = lista_assets[0]
-        img_idle2 = lista_assets[1]
-        img_attack = lista_assets[2]
-
-        # Popula o dicionário 'left'
-        self.sprites['left'] = [
-            pygame.transform.scale(img_idle1, tamanho),
-            pygame.transform.scale(img_idle2, tamanho)
-        ]
+        # Pega os frames normais (idle) e espelha para a direita
+        img_idle1 = dict_sprites['default'][0]
+        img_idle2 = dict_sprites['default'][1]
         
-        # Popula o dicionário 'right' (Flip do left)
+        self.sprites['left'] = [img_idle1, img_idle2]
         self.sprites['right'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
+            pygame.transform.flip(img_idle1, True, False),
+            pygame.transform.flip(img_idle2, True, False)
         ]
 
-        # Popula o ataque (precisa de 'left' e 'right' também)
-        attack_scaled = pygame.transform.scale(img_attack, tamanho)
-        self.sprites['attack_left'] = attack_scaled
-        self.sprites['attack_right'] = pygame.transform.flip(attack_scaled, True, False)
+        # Pega a imagem de ataque e espelha para a direita
+        img_attack = dict_sprites['attack'][0]
+        
+        self.sprites['attack_left'] = img_attack
+        self.sprites['attack_right'] = pygame.transform.flip(img_attack, True, False)
+        # ------------------------------------------------
 
         # ---- VARIÁVEIS DA ANIMAÇÃO DE RESPAWN ----
         self.altura_atual = 0 

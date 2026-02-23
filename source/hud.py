@@ -118,12 +118,16 @@ class HUD:
             
             # --- DESENHO DO NOME ---
             nome_texto = boss.titulo
-            fonte_boss = pygame.font.SysFont("Cinzel", 25)
+            self.font_path = join('assets', 'fonts', 'cinzel', 'Cinzel-Regular.otf')
+            fonte_boss = pygame.font.Font(self.font_path, 25)
             surf_nome = fonte_boss.render(nome_texto, True, (215, 175, 65)) # Tom levemente dourado
-            
-            # Centraliza o texto corretamente usando o rect
-            rect_nome = surf_nome.get_rect(center=(largura_tela // 2, y - 15))
-            tela.blit(surf_nome, rect_nome)
+            rect_nome = surf_nome.get_rect(center=(largura_tela // 2, y - 17))
+
+            # Sombra no texto para dar destaque
+            surf_sombra = fonte_boss.render(nome_texto, True, (10, 10, 10))
+            rect_sombra = surf_sombra.get_rect(center=(largura_tela // 2 + 2, y - 15))
+            tela.blit(surf_sombra, rect_sombra) # Desenha a sombra primeiro
+            tela.blit(surf_nome, rect_nome)     # Desenha o texto principal por cima
 
             # --- DESENHO DAS BARRAS ---
             # Retângulo de Fundo (Sombra/Preto)
@@ -138,10 +142,37 @@ class HUD:
             vida_rect = pygame.Rect(x, y, vida_largura, altura_barra)
             pygame.draw.rect(tela, cor_vida, vida_rect)
             
-            # --- MOLDURA ---
-            moldura_rect = fundo_rect.inflate(4, 4) # Aumenta 2px de cada lado
-            
+            if hasattr(boss, 'escudo_atual') and boss.escudo_atual > 0 and boss.escudo_maximo > 0:
+                porcentagem_escudo = max(0, min(1, boss.escudo_atual / boss.escudo_maximo))
+                escudo_largura = largura_barra * porcentagem_escudo
+                escudo_rect = pygame.Rect(x, y, escudo_largura, altura_barra)
+                # Uma cor azul brilhante para o escudo
+                pygame.draw.rect(tela, (0, 120, 255), escudo_rect)
+
+            # --- MOLDURA DECORADA ---
+            # 1. Borda escura externa (Sombra da moldura)
+            sombra_moldura = fundo_rect.inflate(6, 6)
+            pygame.draw.rect(tela, (20, 15, 5), sombra_moldura, 3)
+
+            # 2. Borda dourada principal
+            moldura_rect = fundo_rect.inflate(4, 4) 
             pygame.draw.rect(tela, (215, 175, 60), moldura_rect, 2)
+
+            # 3. Detalhes metálicos nos cantos (Pequenos quadrados dourados mais claros)
+            tam_canto = 6
+            cor_canto = (255, 230, 120)
+            
+            # Canto Superior Esquerdo
+            pygame.draw.rect(tela, cor_canto, (moldura_rect.left - 2, moldura_rect.top - 2, tam_canto, tam_canto))
+            # Canto Superior Direito
+            pygame.draw.rect(tela, cor_canto, (moldura_rect.right - tam_canto + 2, moldura_rect.top - 2, tam_canto, tam_canto))
+            # Canto Inferior Esquerdo
+            pygame.draw.rect(tela, cor_canto, (moldura_rect.left - 2, moldura_rect.bottom - tam_canto + 2, tam_canto, tam_canto))
+            # Canto Inferior Direito
+            pygame.draw.rect(tela, cor_canto, (moldura_rect.right - tam_canto + 2, moldura_rect.bottom - tam_canto + 2, tam_canto, tam_canto))
+
+            # DICA: Quando você tiver uma imagem de moldura, apague a parte "MOLDURA DECORADA" acima e use:
+            # tela.blit(self.imagem_moldura_boss, (x - offset, y - offset))
 
 
     def draw(self, tela):

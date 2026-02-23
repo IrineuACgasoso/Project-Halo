@@ -101,3 +101,52 @@ class Portal(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         # Desenha um círculo ciano para debug ou visualização
         self.rect = self.image.get_rect(center=pos)
+
+
+class LaserWarning(pygame.sprite.Sprite):
+    def __init__(self, start_pos, end_pos, grupos, game,
+                 cor_laser=(250, 0, 0, 30), # Vermelho transparente padrão
+                 largura=300):
+        
+        super().__init__(grupos)
+        self.game = game
+        self.start_pos = pygame.math.Vector2(start_pos)
+        
+        direcao = pygame.math.Vector2(end_pos) - self.start_pos
+        if direcao.length() > 0:
+            direcao.normalize_ip()
+        else:
+            direcao = pygame.math.Vector2(1, 0)
+            
+        self.end_pos = self.start_pos + direcao * 2000
+        self.duracao = 1500
+        self.largura = 300
+        self.tempo_criacao = pygame.time.get_ticks()
+
+        # --- Atributos Parametrizados ---
+        self.cor_laser = cor_laser
+        self.largura = largura
+
+        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=self.start_pos)
+
+    def draw(self, surface, offset):
+        agora = pygame.time.get_ticks()
+        if agora - self.tempo_criacao < self.duracao:
+            start_pos_ajustada = self.start_pos - offset
+            end_pos_ajustada = self.end_pos - offset
+            
+            # 1. Cria uma surface temporária com suporte a transparência
+            temp_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+            
+            # 2. Desenha o laser muito transparente nela (Alpha = 30)
+            pygame.draw.line(temp_surface, self.cor_laser, start_pos_ajustada, end_pos_ajustada, self.largura)
+            
+            # 3. Cola o resultado na tela principal
+            surface.blit(temp_surface, (0, 0))
+
+    def update(self, delta_time):
+        if pygame.time.get_ticks() - self.tempo_criacao >= self.duracao:
+            self.kill()
+
+

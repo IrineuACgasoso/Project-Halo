@@ -89,6 +89,19 @@ class Hunter(InimigoBase):
             duracao=3000
         )
 
+    def morrer(self, grupos):
+        qtd_shards = 2
+
+        chance= randint(1,1000)
+        if chance >= 900: qtd_shards += 1
+
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
+
+        for _ in range(qtd_shards):
+            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+        self.kill()
+
     def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
 

@@ -15,7 +15,7 @@ class Jackal(InimigoBase):
         super().__init__(posicao, vida_base=15, dano_base=10, velocidade_base=50, game=game, sprite_key= 'jackal')
 
         # Sorteio do tipo
-        escolhido = randint(1, 20)
+        escolhido = random.randint(1, 20)
         if escolhido < 20:
             self.tipo = random.choice(['blue', 'red'])
         else:

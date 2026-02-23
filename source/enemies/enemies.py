@@ -18,7 +18,8 @@ class InimigoBase(pygame.sprite.Sprite):
 
         self.sprite_key = sprite_key
         # Gerencia o cache automaticamente para qualquer filho
-        self._check_and_load_sprites(sprite_key, flip_sprite)
+        if self.sprite_key is not None:
+            self._check_and_load_sprites(sprite_key, flip_sprite)
 
         # Nome
         self.nome_completo = "INIMIGO"
@@ -32,6 +33,10 @@ class InimigoBase(pygame.sprite.Sprite):
         self.vida_base = vida_base
         self.dano_base = dano_base
         self.velocidade_base = velocidade_base
+
+        # --- SISTEMA DE ESCUDO ---
+        self.escudo_maximo = 0
+        self.escudo_atual = 0
 
         #setting true stats
         self.vida = self.vida_base
@@ -66,6 +71,10 @@ class InimigoBase(pygame.sprite.Sprite):
                 processar = conteudo
 
             for var_name, frames in processar.items():
+                # Se 'frames' for apenas uma imagem solta, transforma ela em uma lista de 1 item
+                if isinstance(frames, pygame.Surface):
+                    frames = [frames]
+                    
                 frames_invertidos = [pygame.transform.flip(f, True, False) for f in frames]
                 
                 if flip_sprite:
@@ -85,7 +94,24 @@ class InimigoBase(pygame.sprite.Sprite):
         """Busca as sprites no cache usando a chave do inimigo"""
         return InimigoBase.GLOBAL_SPRITE_CACHE[self.sprite_key][variante]
 
-        
+    def adicionar_escudo(self, valor):
+        """Define o valor do escudo do inimigo."""
+        self.escudo_maximo = valor
+        self.escudo_atual = valor
+
+    def receber_dano(self, quantidade):
+        """Gerencia o dano, retirando do escudo primeiro e o restante da vida."""
+        if self.escudo_atual > 0:
+            self.escudo_atual -= quantidade
+            if self.escudo_atual < 0:
+                # Se o dano for maior que o escudo, o que sobra vai para a vida
+                dano_restante = abs(self.escudo_atual)
+                self.escudo_atual = 0
+                self.vida -= dano_restante
+        else:
+            # Se não tem escudo, toma dano direto na vida
+            self.vida -= quantidade
+
     def aplicar_dificuldade(self):
         self.vida *= 1 + self.jogador.contador_niveis / 10
         self.dano *= 1 + self.jogador.contador_niveis / 10

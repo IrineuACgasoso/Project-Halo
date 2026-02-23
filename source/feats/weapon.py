@@ -2,6 +2,7 @@ import pygame
 import math
 from settings import *
 from player import *
+from feats.assets import ASSETS
 
 class Arma(ABC):
     def __init__(self, jogador):
@@ -80,8 +81,12 @@ class RifleAssalto(Arma):
         self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         
         # Carregue a imagem do seu projétil aqui
-        self.surface_projetil = pygame.image.load(join('assets', 'img', 'player', 'ra.png')).convert_alpha()
+        self.surface_projetil = pygame.transform.scale(ASSETS['projectiles']['ar'], (24,24))
 
+        # Cria o Cache de Rotações (Dicionário com 360 imagens)
+        self.cache_imagens = {}
+        for ang in range(360):
+            self.cache_imagens[ang] = pygame.transform.rotate(self.surface_projetil, ang)
         
         # Status Iniciais
         self.nivel = 1
@@ -113,13 +118,19 @@ class RifleAssalto(Arma):
     def disparar(self):
         inimigo_alvo = self.encontrar_inimigo_mais_proximo()
         if inimigo_alvo and inimigo_alvo.alive():
-            # Calcula a direção para o inimigo mais próximo
             direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
             
+            # Calcula o ângulo e converte para número inteiro (0 a 359)
+            angulo_exato = math.degrees(math.atan2(-direcao_vetor.y, direcao_vetor.x))
+            angulo_int = int(round(angulo_exato)) % 360 # O % 360 garante que fique entre 0 e 359
+            
+            # Puxa a imagem JÁ PRONTA do cache. Zero custo de processamento!
+            imagem_rotacionada = self.cache_imagens[angulo_int]
+
             # Dispara projéteis múltiplos, se o nível permitir
             for _ in range(self.projeteis_por_disparo):
                 Projetil(
-                    surface=self.surface_projetil, 
+                    surface=imagem_rotacionada,  # Passa a imagem JÁ GIRADA
                     jogador=self.jogador,
                     velocidade=self.velocidade_projetil,
                     direcao=direcao_vetor,

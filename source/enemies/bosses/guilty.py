@@ -5,6 +5,7 @@ from enemies.enemies import *
 from feats.projetil import *
 from feats.items import *
 from player import *
+from feats.assets import *
 from feats.projetil import LaserBeam
 from enemies.standard.sentinel import Sentinel
 from entitymanager import entity_manager
@@ -13,38 +14,14 @@ from entitymanager import entity_manager
 class GuiltySpark(InimigoBase):
     def __init__(self, posicao, game, grupos):
         valor_vida = 5000
-        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base= 100, game=game)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base= 100, game=game, sprite_key='guilty', flip_sprite=True)
         self.titulo = "GUILTY SPARK, O Monitor da Instalação 04"
         self.game= game
         self.vida = valor_vida
         self.vida_base = valor_vida
+
         # Sprites
-        self.sprites = {}
-        # Left
-        self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty2.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty3.png')).convert_alpha(), (100, 100))
-        ]
-
-        # Right
-        self.sprites['right'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-        ]
-
-        # Damaged
-        self.sprites['dleft'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty4.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty5.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty6.png')).convert_alpha(), (100, 100)),
-
-        ]
-
-        # Right
-        self.sprites['dright'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['dleft']
-        ]
-        # Image
+        self.sprites = self.get_sprites('normal')
         self.estado_animacao = 'left'
         self.frame_atual = 0  
         self.indice_animacao = 0
@@ -100,7 +77,7 @@ class GuiltySpark(InimigoBase):
                 pos_spawn = pygame.math.Vector2(self.posicao.x + off_x, self.posicao.y + off_y)
                 
                 # Cria o efeito visual de teleporte na posição
-                Teleport((round(pos_spawn.x), round(pos_spawn.y)))
+                GuiltyTeleport((round(pos_spawn.x), round(pos_spawn.y)))
                 
                 # Note: Passamos a posição e a referência do game
                 nova_sentinela = Sentinel(pos_spawn, self.game)
@@ -182,14 +159,14 @@ class GuiltySpark(InimigoBase):
 
         if posicao_valida:
             # Efeito de saída na posição antiga
-            Teleport(self.rect.center)
+            GuiltyTeleport(self.rect.center)
             
             # Atualiza posição
             self.posicao = pygame.math.Vector2(nova_pos)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             
             # Efeito de entrada na posição nova
-            Teleport(self.rect.center)
+            GuiltyTeleport(self.rect.center)
             
             # Feedback sonoro ou buffs se houver
             self.ultimo_tp = pygame.time.get_ticks()
@@ -199,6 +176,10 @@ class GuiltySpark(InimigoBase):
     def rage(self):
         if not self.enrage:
             self.enrage = True
+            # Damaged
+            self.sprites = self.get_sprites('damaged')
+            self.indice_animacao = 0
+
             self.num_laser += 2
             self.velocidade_anterior *= 2.5
             self.cooldown_laser = 1000
@@ -206,7 +187,7 @@ class GuiltySpark(InimigoBase):
 
     def morrer(self, grupos = None):
         alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        chance= randint(1,1000)
+        chance= random.randint(1,1000)
 
         # Drop garantido de Shards grandes por ser Boss
         qtd_shards = 2
@@ -220,11 +201,6 @@ class GuiltySpark(InimigoBase):
 
     def animar(self):
         """Atualiza a sprite do GuiltySpark com base na sua direção."""
-        if self.enrage:
-                # Cria uma temp para criar a string do estado damaged
-                temp = f'd{self.estado_animacao}'
-                self.estado_animacao = temp
-
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]
         self.rect = self.image.get_rect(center=self.posicao)
         self.mask = pygame.mask.from_surface(self.image)
@@ -281,23 +257,11 @@ class GuiltySpark(InimigoBase):
             self.animar()
 
 
-class Teleport(pygame.sprite.Sprite):
+class GuiltyTeleport(pygame.sprite.Sprite):
     def __init__(self, posicao):
         super().__init__(entity_manager.all_sprites)
         self.posicao = pygame.math.Vector2(posicao) 
-        self.sprites = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp1.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp2.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp3.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp4.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp5.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp6.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp7.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp8.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp9.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp10.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp11.png')).convert_alpha(), (128, 160)),
-        ]
+        self.sprites = ASSETS['enemies']['guilty']['teleport']
 
         # Animação
         self.frame_atual = 0

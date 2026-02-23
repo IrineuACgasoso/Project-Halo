@@ -28,11 +28,11 @@ class CollisionManager:
                 if isinstance(projetil, Projetil_PingPong):
                     for inimigo in inimigos_atingidos:
                         if inimigo not in projetil.inimigos_ja_atingidos:
-                            inimigo.vida -= projetil.dano
+                            inimigo.receber_dano(projetil.dano)
                             projetil.inimigos_ja_atingidos.add(inimigo)
                 else:
                     for inimigo in inimigos_atingidos:
-                        inimigo.vida -= projetil.dano
+                        inimigo.receber_dano(projetil.dano)
                     projetil.kill()
         
         # Projéteis dos Inimigos -> Jogador
@@ -65,7 +65,7 @@ class CollisionManager:
             )
             for inimigo, auras in colisoes_aura.items():
                 for aura in auras:
-                    inimigo.vida -= aura.dano_por_segundo * delta_time
+                    inimigo.receber_dano(aura.dano_por_segundo * delta_time)
         
         # Check de Morte (Limpeza)
         for inimigo in list(entity_manager.inimigos_grupo):

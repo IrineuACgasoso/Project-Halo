@@ -12,7 +12,7 @@ from enemies.standard.grunt import Grunt
 from enemies.standard.jackal import Jackal
 from enemies.standard.elite import Elite
 from enemies.standard.brute import Brute
-from enemies.standard.infection import Infection
+from enemies.standard.infection import Infection, FloodForms
 from enemies.standard.sentinel import Sentinel
 
 
@@ -41,10 +41,10 @@ class Spawner:
 
         # Flags de controle de Bosses
         self.cronograma_bosses = {
-            'hunter': 1,        # 1 minuto
-            'zealot': 2,       #
-            'guilty': 300,     # 2 minutos
-            'arbiter': 400,    # 5 minutos (Início Fase 2)
+            'hunter': 60,        # 1 minuto
+            'zealot': 120,       #
+            'guilty': 180,     # 2 minutos
+            'arbiter': 240,    # 5 minutos (Início Fase 2)
             'gravemind': 500,  # 8 minutos
             'knight' : 600,    # 10 minutos
             'didact': 700,     # 12 minutos (Início Fase 3)
@@ -83,7 +83,38 @@ class Spawner:
             # Pega o ponto mais distante disponível
             ponto_distante = max(self.game.mapa.pontos_de_spawn, key=lambda p: p.distance_squared_to(player_pos))
             return ponto_distante
+        
+    def forcar_proximo_boss(self):
+        """DEBUG: Invoca o próximo boss pendente da fase atual imediatamente."""
+        
+        bosses_por_fase = {
+            0: ['didact'],
+            1: ['zealot'],
+            2: ['guilty'],            
+            3: ['arbiter'],
+            4: ['gravemind'],
+            5: ['knight'],
+            6: ['didact'],
+            7: ['jega'],
+        }
 
+        fase = self.game.fase_atual
+
+        # Verifica se existe boss configurado para essa fase
+        if fase in bosses_por_fase:
+            for boss in bosses_por_fase[fase]:
+                # Se o boss ainda não foi invocado (flag é False)
+                if not self.boss_flags[boss]:
+                    
+                    # 1. Marca como invocado para o timer normal não invocar de novo
+                    self.boss_flags[boss] = True 
+                    
+                    # 2. Chama o spawn
+                    self.spawnar(boss)
+                    
+                    # 3. Retorna para não invocar todos de uma vez se tiver mais de um na lista
+                    return 
+            
     def spawnar(self, tipo='normal'):
         pos = self.calcular_posicao_spawn()
         
@@ -105,7 +136,8 @@ class Spawner:
             # Seleção de inimigos baseada na FASE do jogo
             fase = self.game.fase_atual
             if fase == 0:
-                pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
+                pool = [FloodForms]
+                #pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
             elif fase == 1:
                 pool = [Infection, Infection, Infection, Grunt, Grunt, Grunt, Jackal, Jackal, Sentinel, Elite]
             elif fase == 2:
@@ -137,7 +169,7 @@ class Spawner:
         # 3. Bosses Relativos à Fase
         # Se o timer parou no boss anterior, ele volta a correr agora.
         bosses_por_fase = {
-            0: ['hunter'],
+            0: ['didact'],
             1: ['zealot'],
             2: ['guilty'],            
             3: ['arbiter'],
@@ -145,9 +177,6 @@ class Spawner:
             5: ['knight'],
             6: ['didact'],
             7: ['jega'],
-
-            #5: ['knight', 'didact', 'warden'],
-            #6: ['jega', 'harbinger']
         }
 
         if fase in bosses_por_fase:

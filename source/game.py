@@ -85,49 +85,50 @@ class Game:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.running = False
+            
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_RETURN and (evento.mod & pygame.KMOD_ALT):
                     pygame.display.toggle_fullscreen()
 
-            # MENU PRINCIPAL
+            # --- MENU PRINCIPAL ---
             if self.estado_do_jogo == "menu_principal":
                 escolha = self.menu_principal.handle_event(evento)
                 if escolha == 'START GAME':
                     self.iniciar_novo_jogo()
-                if escolha == 'CREATORS':
-                    self.estado_do_jogo = 'colaboradores'
-                if escolha == 'RANKING':
+                elif escolha == 'RANKING':
                     self.estado_do_jogo = 'ranking'
+                elif escolha == 'CREATORS':
+                    self.estado_do_jogo = 'colaboradores'
                 elif escolha == 'QUIT':
                     self.running = False
 
-            # JOGANDO
+            # --- JOGANDO ---
             elif self.estado_do_jogo == "jogando":
                 if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
                     self.estado_do_jogo = "pausa"
 
-            # PAUSA
+            # --- PAUSA (CORRIGIDO) ---
             elif self.estado_do_jogo == "pausa":
                 escolha = self.menu_pausa.handle_event(evento)
-                if escolha == "Continuar":
+                
+                # As strings devem bater com as opções definidas em MenuPausa
+                if escolha == "RESUME":
                     self.estado_do_jogo = "jogando"
-                elif escolha == "Sair para Menu":
+                elif escolha == "EXIT TO MENU":
                     self.estado_do_jogo = "menu_principal"
+                    # Opcional: Reiniciar o menu principal para resetar animações
                     self.menu_principal = MenuPrincipal(self)
 
-            # LEVEL UP
+            # --- LEVEL UP ---
             elif self.estado_do_jogo == 'level_up':
                 if self.tela_de_upgrade_ativa:
                     escolha_idx = self.tela_de_upgrade_ativa.handle_event(evento)
-           
                     if escolha_idx is not None and escolha_idx < len(self.tela_de_upgrade_ativa.opcoes_de_armas_obj):
                         arma_escolhida = self.tela_de_upgrade_ativa.opcoes_de_armas_obj[escolha_idx]
                         nome_da_arma = arma_escolhida.nome
                         
-                        #upgrade em arma no inventario
                         if nome_da_arma in self.player.armas:
                             self.player.armas[nome_da_arma].upgrade()
-                        #nova arma
                         else:
                             self.player.armas[nome_da_arma] = arma_escolhida 
                             arma_escolhida.equipar()
@@ -135,27 +136,34 @@ class Game:
                         self.estado_do_jogo = 'jogando'
                         self.tela_de_upgrade_ativa = None
             
-            #tela de colaboradores
+            # --- COLABORADORES ---
             elif self.estado_do_jogo == 'colaboradores':
-                self.tela_colaboradores.handle_event(evento)
-            #tela de ranking
+                action = self.tela_colaboradores.handle_event(evento)
+                if action == 'sair':
+                    self.estado_do_jogo = 'menu_principal'
+            
+            # --- RANKING ---
             elif self.estado_do_jogo == 'ranking':
                 action = self.ranking.handle_event(evento)
                 if action == 'exit_to_menu':
                     self.estado_do_jogo = 'menu_principal'
 
-            # COLABORADORES
-            elif self.estado_do_jogo == 'colaboradores':
-                action = self.colaboradores.handle_event(evento)
-                if action == 'sair':
-                    self.estado_do_jogo = 'menu_principal'
-
-            # GAME OVER
+            # --- GAME OVER (CORRIGIDO) ---
             elif self.estado_do_jogo == "game_over":
-                if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN:
-                    if hasattr(self, 'player'):
+                escolha = self.tela_game_over.handle_event(evento)
+                
+                # Strings devem bater com TelaGameOver.opcoes
+                if escolha == "RESTART MISSION":
+                    if hasattr(self, 'player') and self.player:
                         self.ranking.start_name_input(self.player.pontuacao)
-                    self.estado_do_jogo = "ranking"
+                    self.iniciar_novo_jogo()
+                    self.tela_game_over.som_tocado = False
+                    
+                elif escolha == "EXIT TO MENU":
+                    if hasattr(self, 'player') and self.player:
+                        self.ranking.start_name_input(self.player.pontuacao)
+                    self.estado_do_jogo = "menu_principal"
+                    self.tela_game_over.som_tocado = False
 
     def update(self, delta_time):
         if self.estado_do_jogo == "jogando":
@@ -236,8 +244,11 @@ class Game:
             self.mapa.draw_debug(self.tela, deslocamento)
             # Itera por todos os sprites e desenha cada um
             for sprite in sorted(self.all_sprites, key=lambda s: s.rect.centery):
-                self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
-
+                if hasattr(sprite, 'draw'):
+                    sprite.draw(self.tela, deslocamento)
+                else:
+                    self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
+            
             for inimigo in self.inimigos_grupo:
                 if isinstance(inimigo, Sentinel):
                     inimigo.draw_laser(self.tela, deslocamento)

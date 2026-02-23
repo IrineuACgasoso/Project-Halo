@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from levelup import TelaDeUpgrade
+from entitymanager import entity_manager
 
 
 class Player(pygame.sprite.Sprite):
@@ -269,7 +270,29 @@ class Player(pygame.sprite.Sprite):
 
         if self.experiencia_atual >= self.experiencia_level_up:
             self.level_up()
+        
+        # --- ÁREA DOS HACKS ---
         hack = pygame.key.get_pressed()
+        
+        # Hack L: Level Up
         if hack[pygame.K_l]:
             falta = self.experiencia_level_up - self.experiencia_atual
             self.experiencia_atual += falta
+        
+        # Hack P: Spawnar Portal (Instant Exit)
+        elif hack[pygame.K_p]:
+            # Verifica se o jogo já tem um portal ativo. 
+            if self.game.portal_atual is None:
+                # Importação local para evitar erro circular (Player importar Portal e Portal importar Player)
+                from feats.effects import Portal 
+                
+                offset = 50 if self.estado_animacao == 'right' else -50
+                pos_portal = self.posicao + pygame.math.Vector2(offset, 0)
+                
+                novo_portal = Portal(pos_portal, entity_manager.all_sprites)
+                self.game.portal_atual = novo_portal
+
+        elif hack[pygame.K_b]:
+            if self.game.boss_atual is None:
+                if hasattr(self.game, 'spawner'):
+                    self.game.spawner.forcar_proximo_boss()
