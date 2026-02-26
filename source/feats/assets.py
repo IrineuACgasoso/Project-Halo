@@ -15,6 +15,7 @@ ASSETS = {
         'bcarabin': pygame.image.load(join('assets', 'img', 'projectiles', 'bcarabin.png')).convert_alpha(),
         'm50': pygame.image.load(join('assets', 'img', 'projectiles', 'm50.png')).convert_alpha(),
         'ar': pygame.image.load(join('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
+        'lightrifle': pygame.image.load(join('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
         'dizimator': pygame.image.load(join('assets', 'img', 'projectiles', 'dizimator.png')).convert_alpha(),
         'acid_breath': pygame.image.load(join('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha(),
         'red_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'redlaser.png')).convert_alpha(),
@@ -196,6 +197,20 @@ ASSETS = {
         'sentinel': [
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
+        ],
+
+        'crawler' : [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw1.png')).convert_alpha(), (128, 128)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw2.png')).convert_alpha(), (128, 128)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw3.png')).convert_alpha(), (128, 128)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw4.png')).convert_alpha(), (128, 128)),
+            ],
+        
+        'watcher' : [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (96, 96)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (96, 96)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (96, 96)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (96, 96)),
         ]
     },
 

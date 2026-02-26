@@ -60,6 +60,12 @@ class BossArbiter(InimigoBase):
             return pygame.Rect(-1000, -1000, 0, 0)
         return self.hitbox
     
+    @property
+    def invulneravel(self):
+        return self.alpha_atual < 200
+    
+    
+    
     def carabin(self):
         Carabin(
             posicao_inicial=self.posicao,
@@ -104,7 +110,7 @@ class BossArbiter(InimigoBase):
             self.alpha_alvo = 255 # Alvo é ficar visível
             # Ativa a invisibilidade se o cooldown acabou
             if agora - self.ultima_invisibi >= self.cooldown_invisibilidade:
-                self.cooldown_invisibilidade = random.choice([8000, 10000, 11000, 12000])
+                self.cooldown_invisibilidade = random.choice([9000, 12000, 15000, 18000])
                 self.invisivel = True
                 self.adicionar_escudo(250)
                 self.ultima_invisibi = agora

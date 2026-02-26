@@ -150,3 +150,55 @@ class LaserWarning(pygame.sprite.Sprite):
             self.kill()
 
 
+import pygame
+
+class RaioEscudo(pygame.sprite.Sprite):
+    def __init__(self, fonte, alvo, grupos, cor=(255, 40, 0)):
+        super().__init__(grupos)
+        self.fonte = fonte
+        self.alvo = alvo
+        self.cor = cor
+        
+        self.duracao = 250 
+        self.tempo_criacao = pygame.time.get_ticks()
+        
+        self.gerar_imagem()
+
+    def gerar_imagem(self):
+        # 1. Usa o rect.center para garantir que o raio saia do meio do inimigo
+        pos_fonte = pygame.math.Vector2(self.fonte.rect.center)
+        pos_alvo = pygame.math.Vector2(self.alvo.rect.center)
+
+        # 2. Bounding Box
+        min_x = min(pos_fonte.x, pos_alvo.x)
+        max_x = max(pos_fonte.x, pos_alvo.x)
+        min_y = min(pos_fonte.y, pos_alvo.y)
+        max_y = max(pos_fonte.y, pos_alvo.y)
+
+        # 3. Força valores inteiros na criação da Surface
+        padding = 15
+        width = int(max(max_x - min_x + padding * 2, 1))
+        height = int(max(max_y - min_y + padding * 2, 1))
+
+        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+        
+        # 4. Posição global no mundo
+        topleft_global = pygame.math.Vector2(min_x - padding, min_y - padding)
+        self.rect = self.image.get_rect(topleft=topleft_global)
+        
+        # 5. A câmera precisa do self.posicao para aplicar o offset!
+        self.posicao = pygame.math.Vector2(self.rect.center)
+
+        # 6. Calcula a posição local desenhando na Surface
+        local_start = pos_fonte - topleft_global
+        local_end = pos_alvo - topleft_global
+
+        pygame.draw.line(self.image, (*self.cor, 100), local_start, local_end, 15) 
+        pygame.draw.line(self.image, (255, 255, 255), local_start, local_end, 3)
+
+    def update(self, delta_time, paredes=None):
+        agora = pygame.time.get_ticks()
+        if agora - self.tempo_criacao > self.duracao or not self.alvo.alive() or not self.fonte.alive():
+            self.kill()
+        else:
+            self.gerar_imagem()

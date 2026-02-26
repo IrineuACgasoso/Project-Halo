@@ -76,15 +76,13 @@ class GuiltySpark(InimigoBase):
             for off_x, off_y in eixos:
                 pos_spawn = pygame.math.Vector2(self.posicao.x + off_x, self.posicao.y + off_y)
                 
-                # Cria o efeito visual de teleporte na posição
-                GuiltyTeleport((round(pos_spawn.x), round(pos_spawn.y)))
-                
-                # Note: Passamos a posição e a referência do game
-                nova_sentinela = Sentinel(pos_spawn, self.game)
-                
-                # Adiciona aos grupos necessários através do entity_manager
-                entity_manager.all_sprites.add(nova_sentinela)
-                entity_manager.inimigos_grupo.add(nova_sentinela)
+                # SÓ invoca a sentinela e o efeito se o chão for válido!
+                if self.game.mapa.posicao_e_valida(pos_spawn):
+                    GuiltyTeleport((round(pos_spawn.x), round(pos_spawn.y)))
+                    
+                    nova_sentinela = Sentinel(pos_spawn, self.game)
+                    entity_manager.all_sprites.add(nova_sentinela)
+                    entity_manager.inimigos_grupo.add(nova_sentinela)
 
             # Reinicia os contadores e cooldowns
             self.ultima_invocacao = agora

@@ -14,6 +14,8 @@ from enemies.standard.elite import Elite
 from enemies.standard.brute import Brute
 from enemies.standard.infection import Infection, FloodForms
 from enemies.standard.sentinel import Sentinel
+from enemies.standard.crawler import Crawler
+from enemies.standard.watcher import Watcher
 
 
 # Bosses
@@ -88,7 +90,7 @@ class Spawner:
         """DEBUG: Invoca o próximo boss pendente da fase atual imediatamente."""
         
         bosses_por_fase = {
-            0: ['didact'],
+            0: ['arbiter'],
             1: ['zealot'],
             2: ['guilty'],            
             3: ['arbiter'],
@@ -136,7 +138,7 @@ class Spawner:
             # Seleção de inimigos baseada na FASE do jogo
             fase = self.game.fase_atual
             if fase == 0:
-                pool = [FloodForms]
+                pool = [Crawler, Watcher]
                 #pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
             elif fase == 1:
                 pool = [Infection, Infection, Infection, Grunt, Grunt, Grunt, Jackal, Jackal, Sentinel, Elite]

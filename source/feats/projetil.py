@@ -105,6 +105,25 @@ class BurstRifle(ProjetilInimigoBase):
         # Pega o rect já baseado na imagem rotacionada
         self.rect = self.image.get_rect(center=self.posicao)
 
+class LightRifle(ProjetilInimigoBase):
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, direcao_spread):
+        # Chama a classe base com os parâmetros que ela exige
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, duracao=2000)
+        
+        # SOBRESCREVE a direção reta da classe base usando a direção com spread do inimigo
+        if direcao_spread.length() > 0:
+            self.direcao = direcao_spread.normalize()
+        
+        # Pega a imagem e já deixa no tamanho certo ANTES de gerar o cache de rotação
+        imagem_base = pygame.transform.scale(ASSETS['projectiles']['lightrifle'], tamanho)
+        
+        # Chama a função do cache. Ela vai usar a 'self.direcao'(com spread) para girar!
+        self.image = self.carregar_projetil_rotacionado('ar', imagem_base)
+        
+        # Pega o rect já baseado na imagem rotacionada
+        self.rect = self.image.get_rect(center=self.posicao)
+
+
 class CannonBeam(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
