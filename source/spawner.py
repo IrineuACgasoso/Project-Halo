@@ -16,6 +16,7 @@ from enemies.standard.infection import Infection, FloodForms
 from enemies.standard.sentinel import Sentinel
 from enemies.standard.crawler import Crawler
 from enemies.standard.watcher import Watcher
+from enemies.standard.soldier import Soldier
 
 
 # Bosses
@@ -30,6 +31,7 @@ from enemies.bosses.jega import Jega
 # Minibosses
 from enemies.minibosses.hunter import Hunter
 from enemies.minibosses.zealot import Zealot
+from enemies.minibosses.scarab import Scarab
 from enemies.minibosses.knight import Knight
 
 class Spawner:
@@ -41,12 +43,41 @@ class Spawner:
         self.fator_dificuldade = 0.0001
         self.hordas_contagem = 0
 
+        # OTIMIZAÇÃO COM PESOS: { fase: { "classes": [], "pesos": [] } }
+        self.pools_por_fase = {
+            0: {
+                "classes": [Grunt, Jackal, Elite],
+                "pesos": [60, 30, 10]  # 60% Grunt, 30% Jackal, 10% Elite
+            },
+            1: {
+                "classes": [Infection, Grunt, Jackal, Elite],
+                "pesos": [40, 30, 20, 10] # Muita Infection, pouco Elite
+            },
+            2: {
+                "classes": [Infection, FloodForms, Grunt, Jackal, Elite, Sentinel],
+                "pesos": [20, 20, 20, 20, 10, 10]
+            },
+            3: {
+                "classes": [Grunt, Jackal, Elite, Brute],
+                "pesos": [40, 20, 20, 20]
+            },
+            4: {
+                "classes": [Infection, FloodForms, Grunt, Jackal, Elite, Brute],
+                "pesos": [20, 25, 20, 15, 10, 10]
+            }
+            # Adicione as outras fases seguindo o padrão
+        }
+        
+        # Fallback caso a fase não exista no dicionário
+        self.default_pool = {"classes": [Grunt], "pesos": [100]}
+
         # Flags de controle de Bosses
         self.cronograma_bosses = {
             'hunter': 60,        # 1 minuto
             'zealot': 120,       #
             'guilty': 180,     # 2 minutos
-            'arbiter': 240,    # 5 minutos (Início Fase 2)
+            'scarab': 240,      # 4 minutos
+            'arbiter': 300,    # 5 minutos (Início Fase 2)
             'gravemind': 500,  # 8 minutos
             'knight' : 600,    # 10 minutos
             'didact': 700,     # 12 minutos (Início Fase 3)
@@ -92,12 +123,13 @@ class Spawner:
         bosses_por_fase = {
             0: ['arbiter'],
             1: ['zealot'],
-            2: ['guilty'],            
-            3: ['arbiter'],
-            4: ['gravemind'],
-            5: ['knight'],
-            6: ['didact'],
-            7: ['jega'],
+            2: ['guilty'], 
+            3: ['scarab'],           
+            4: ['arbiter'],
+            5: ['gravemind'],
+            6: ['knight'],
+            7: ['didact'],
+            8: ['jega'],
         }
 
         fase = self.game.fase_atual
@@ -122,7 +154,7 @@ class Spawner:
         
         # Mapeamento de classes para facilitar o código
         classes_bosses = {
-            'hunter': Hunter, 'zealot': Zealot, 'guilty': GuiltySpark, 'arbiter': BossArbiter,
+            'hunter': Hunter, 'zealot': Zealot, 'guilty': GuiltySpark, 'scarab': Scarab, 'arbiter': BossArbiter,
             'gravemind': FloodWarning, 'knight' : Knight, 'didact': Didact, 'warden': WardenEternal,
             'harbinger': Harbinger, 'jega': Jega
         }
@@ -135,21 +167,16 @@ class Spawner:
             )
             self.game.boss_atual = novo_boss  # Envia para o Game quem é o boss
         else:
-            # Seleção de inimigos baseada na FASE do jogo
-            fase = self.game.fase_atual
-            if fase == 0:
-                pool = [Crawler, Watcher]
-                #pool = [Grunt, Grunt, Grunt, Grunt, Grunt, Grunt, Jackal, Jackal, Jackal, Elite]
-            elif fase == 1:
-                pool = [Infection, Infection, Infection, Grunt, Grunt, Grunt, Jackal, Jackal, Sentinel, Elite]
-            elif fase == 2:
-                pool = [Infection, Infection, Grunt, Jackal, Elite]
-            elif fase == 3:
-                pool = [Infection, Infection, Grunt, Grunt, Jackal, Jackal, Elite, Brute]
-            else:
-                pool = [Grunt, Grunt]
-
-            inimigo_classe = random.choice(pool)
+            # Pega os dados da fase atual ou o default
+            dados_fase = self.pools_por_fase.get(self.game.fase_atual, self.default_pool)
+            
+            # OTIMIZAÇÃO: random.choices escolhe baseado nos pesos
+            inimigo_classe = random.choices(
+                population=dados_fase["classes"],
+                weights=dados_fase["pesos"],
+                k=1 # Queremos apenas 1 inimigo
+            )[0]
+            
             inimigo_classe(posicao=pos, game=self.game)
 
     def update(self, delta_time):
@@ -173,12 +200,13 @@ class Spawner:
         bosses_por_fase = {
             0: ['didact'],
             1: ['zealot'],
-            2: ['guilty'],            
-            3: ['arbiter'],
-            4: ['gravemind'],
-            5: ['knight'],
-            6: ['didact'],
-            7: ['jega'],
+            2: ['guilty'],
+            3: ['scarab'],            
+            4: ['arbiter'],
+            5: ['gravemind'],
+            6: ['knight'],
+            7: ['didact'],
+            8: ['jega'],
         }
 
         if fase in bosses_por_fase:

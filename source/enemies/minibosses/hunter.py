@@ -3,7 +3,7 @@ import random
 from feats.items import *
 from player import *
 from settings import *
-from feats.projetil import CannonBeam, PlasmaGun
+from feats.projetil import LaserBeam, PlasmaGun
 from enemies.enemies import *
 from entitymanager import entity_manager
 
@@ -79,14 +79,15 @@ class Hunter(InimigoBase):
 
     def cannon_beam(self):
         """Dispara o canhão principal."""
-        CannonBeam(
+        LaserBeam(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=250, 
             velocidade=750,
-            duracao=3000
+            duracao=3000,
+            color='green'
         )
 
     def morrer(self, grupos):

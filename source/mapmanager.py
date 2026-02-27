@@ -31,18 +31,6 @@ class Mapa:
         self.carregar_json(caminho_json)
 
 
-    def get_camera_offset(self, player_pos, screen_size):
-        largura_tela, altura_tela = screen_size
-        # Centraliza no player
-        offset_x = player_pos.x - largura_tela / 2
-        offset_y = player_pos.y - altura_tela / 2
-        
-        # Trava a câmera nas bordas do mapa
-        offset_x = max(0, min(offset_x, self.largura_mapa_pixels - largura_tela))
-        offset_y = max(0, min(offset_y, self.altura_mapa_pixels - altura_tela))
-        
-        return pygame.math.Vector2(offset_x, offset_y)
-
     def carregar_json(self, caminho):
         with open(caminho, 'r') as f:
             dados = json.load(f)

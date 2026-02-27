@@ -33,10 +33,11 @@ class GuiltySpark(InimigoBase):
         # Hitbox
         self.mask = pygame.mask.from_surface(self.image)
 
+        self.novo_cooldown = (3000, 4000, 5000, 6000, 8000, 10000)
         # Invocação de Sentinels
         self.wait = 1000
         self.start_sentinel = pygame.time.get_ticks()
-        self.cooldown_invocacao = 10000 # 10 segundos entre invocações
+        self.cooldown_invocacao = random.choice(self.novo_cooldown)
         self.ultima_invocacao = pygame.time.get_ticks()
         
         # Distância dos eixos onde as sentinelas aparecerão
@@ -46,7 +47,7 @@ class GuiltySpark(InimigoBase):
         self.num_laser = 1
         self.laser_restantes = 0
         self.intervalo_burst = 150
-        self.cooldown_laser = 3000
+        self.cooldown_laser = random.choice(self.novo_cooldown)
         self.ultimo_laser = pygame.time.get_ticks()
         self.estado_habilidade = 'idle'
 
@@ -86,11 +87,7 @@ class GuiltySpark(InimigoBase):
 
             # Reinicia os contadores e cooldowns
             self.ultima_invocacao = agora
-            if self.enrage:
-                novo_cooldown = [6000, 7000, 8000, 9000]
-            else:
-                novo_cooldown = [8000, 10000, 11000, 12000]
-            self.cooldown_invocacao = random.choice(novo_cooldown)
+            self.cooldown_invocacao = random.choice(self.novo_cooldown)
 
             # Reinicia os estados
             self.image = self.sprites[self.estado_animacao][0]
@@ -105,7 +102,7 @@ class GuiltySpark(InimigoBase):
                     self.laser_restantes -= 1
                     self.ultimo_laser = agora
                     LaserBeam(
-                        posicao_inimigo=self.posicao,
+                        posicao_inicial=self.posicao,
                         grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
                         jogador=self.jogador,
                         game=self.game,
@@ -119,11 +116,7 @@ class GuiltySpark(InimigoBase):
                 self.ultimo_laser = agora
 
                 # Novo Cooldown
-                if self.enrage:
-                    novo_cooldown = [1500, 2000, 2500, 3000]
-                else:
-                    novo_cooldown = [4000, 6000, 7000, 8000]
-                self.cooldown_laser = random.choice(novo_cooldown)
+                self.cooldown_laser = random.choice(self.novo_cooldown)
 
                 # Retorna ao estado e sprite normal
                 self.image = self.sprites[self.estado_animacao][0]
@@ -177,11 +170,12 @@ class GuiltySpark(InimigoBase):
             # Damaged
             self.sprites = self.get_sprites('damaged')
             self.indice_animacao = 0
-
+            # Cooldowns e melhoria das habilidades
+            self.novo_cooldown = (500, 1500, 2500, 4000, 5000)
+            self.cooldown_invocacao = random.choice(self.novo_cooldown)
+            self.cooldown_laser = random.choice(self.novo_cooldown)
             self.num_laser += 2
             self.velocidade_anterior *= 2.5
-            self.cooldown_laser = 1000
-            self.cooldown_invocacao = 2000
 
     def morrer(self, grupos = None):
         alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)

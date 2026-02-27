@@ -80,15 +80,21 @@ class Jackal(InimigoBase):
                 self.escudo_quebrado = True # Trava o IF para sempre
             
     def plasma(self):
+        direcao_tiro = self.jogador.posicao - self.posicao
+        if direcao_tiro.length() > 0:
+            direcao_tiro = direcao_tiro.normalize()
+        else:
+            direcao_tiro = pygame.math.Vector2(1, 0)
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
-            tamanho=(12,12),
-            dano=8,
-            velocidade=250
+            tamanho=(28,28),
+            dano=4,
+            velocidade=250,
+            direcao_spread = direcao_tiro
         )
 
     def sniper(self):

@@ -12,6 +12,7 @@ from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
 from mapmanager import Mapa
+from camera import Camera
 from hud import HUD
 from collision import CollisionManager 
 from stagemanager import StageManager
@@ -60,6 +61,7 @@ class Game:
         self.mapa = None # Inicialize o mapa como None
         self.caminho_mapa = join(f'assets', 'map', f'{self.fase_atual}', f'm{self.fase_atual}.tmj')
         self.mapa = Mapa(self.caminho_mapa, self.fase_atual)
+        self.camera = Camera(largura_tela, altura_tela, self.mapa)
         self.largura_mapa_pixels = 0
         self.altura_mapa_pixels = 0
 
@@ -201,7 +203,8 @@ class Game:
             if self.player:
                 #paredes_ativas = self.mapa.paredes   
                 paredes_ativas = self.mapa.get_paredes_proximas(self.player.posicao)             
-                self.player.update(delta_time, paredes_ativas)                
+                self.player.update(delta_time, paredes_ativas) 
+                self.camera.update(self.player.posicao)               
                 for arma in self.player.armas.values():
                     arma.update(delta_time)
                 for sprite in self.all_sprites:
@@ -238,7 +241,7 @@ class Game:
             self.menu_principal.draw(self.tela)
 
         elif self.estado_do_jogo == 'jogando':
-            deslocamento = self.mapa.get_camera_offset(self.player.posicao, (largura_tela, altura_tela))
+            deslocamento = self.camera.offset + self.camera.shake_offset
             self.mapa.draw(self.tela, deslocamento)
             # Função para Debug de Tiled
             self.mapa.draw_debug(self.tela, deslocamento)
@@ -249,8 +252,10 @@ class Game:
                 else:
                     self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
             
+            # Desenha lasers por cima dos sprites
             for inimigo in self.inimigos_grupo:
-                if isinstance(inimigo, Sentinel):
+                # Verifica se o inimigo tem o método draw_laser (Sentinel e Scarab terão)
+                if hasattr(inimigo, 'draw_laser'):
                     inimigo.draw_laser(self.tela, deslocamento)
                     
             self.hud.draw(self.tela)

@@ -68,13 +68,19 @@ class Grunt(InimigoBase):
         self.animar()
 
     def plasma(self):
+        direcao_tiro = self.jogador.posicao - self.posicao
+        if direcao_tiro.length() > 0:
+            direcao_tiro = direcao_tiro.normalize()
+        else:
+            direcao_tiro = pygame.math.Vector2(1, 0)
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
-            tamanho=(12,12),
+            tamanho=(36, 36),
             dano=5,
-            velocidade=250
+            velocidade=650,
+            direcao_spread=direcao_tiro
         )    

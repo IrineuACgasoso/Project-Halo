@@ -5,259 +5,152 @@ from feats.weapon import *
 from feats.assets import *
 import math
 
-#PROJETEIS INIMIGOS
+#PROJETIL INIMIGO BASE
 class ProjetilInimigoBase(pygame.sprite.Sprite):
-    # Dicionário global que vai guardar as rotações de todas as armas
     GLOBAL_PROJECTILE_CACHE = {}
-    def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
+
+    def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao, 
+                 tamanho=(20, 20), sprite_key=None, direcao_custom=None):
         super().__init__(grupos)
-        self.jogador = jogador
+        # 1. ATRIBUTOS BÁSICOS (Definir antes de qualquer lógica visual)
         self.game = game
-        self.posicao = pygame.math.Vector2(posicao_inicial)
-        
-        #status
+        self.jogador = jogador
         self.dano = dano
         self.velocidade = velocidade
         self.duracao = duracao
+        self.spawn_time = pygame.time.get_ticks()
+        self.posicao = pygame.math.Vector2(posicao_inicial)
 
-        # Aparência
-        self.image = pygame.Surface((20,20))
-        self.rect = self.image.get_rect(center=self.posicao)
-
-        # Calcula a direção para o jogador
-        direcao_para_jogador = self.jogador.posicao - self.posicao
-        if direcao_para_jogador.length() > 0:
-            self.direcao = direcao_para_jogador.normalize()
+        # 2. DEFINIR DIREÇÃO (Obrigatório para a rotação funcionar)
+        if direcao_custom is not None:
+            if isinstance(direcao_custom, pygame.math.Vector2):
+                self.direcao = direcao_custom
+            else:
+                self.direcao = pygame.math.Vector2(direcao_custom)
         else:
-            self.direcao = pygame.math.Vector2(0, 0)
-        
-        self.tempo_criacao = pygame.time.get_ticks()
+            # Se não houver direção customizada, mira no jogador
+            alvo = self.jogador.posicao - self.posicao
+            if alvo.length() > 0:
+                self.direcao = alvo.normalize()
+            else:
+                self.direcao = pygame.math.Vector2(1, 0) # Direção padrão caso esteja em cima do player
 
-    def carregar_projetil_rotacionado(self, proj_key, imagem_original):
-        """
-        Gerencia o cache de 360 graus. 
-        Calcula o ângulo atual e retorna a imagem já girada do cache.
-        """
-        # 1. Se essa arma ainda não tem cache, cria as 360 rotações de uma vez
-        if proj_key not in ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE:
-            ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[proj_key] = {}
-            for angulo in range(360):
-                # Rotaciona a imagem base e salva no cache
-                ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[proj_key][angulo] = pygame.transform.rotate(imagem_original, angulo)
+        # 3. GERENCIAR VISUAL (Agora self.direcao já existe!)
+        if sprite_key and sprite_key in ASSETS['projectiles']:
+            self.chave_cache = f"{sprite_key}_{tamanho[0]}x{tamanho[1]}"
+            self.image_base = self.obter_imagem_base(sprite_key, tamanho)
+            self.image = self.renderizar_com_rotacao()
+        else:
+            self.image = pygame.Surface(tamanho, pygame.SRCALPHA)
+            self.image.fill((255, 0, 255))
 
-        # 2. Calcula o ângulo exato baseado na direção do tiro
+        self.rect = self.image.get_rect(center=self.posicao)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    @staticmethod
+    def limpar_cache_global():
+        ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE.clear()
+
+    def obter_imagem_base(self, sprite_key, tamanho):
+        """ Garante que o pygame.transform.scale só ocorra UMA vez por tipo de projétil """
+        # Usamos uma sub-chave para a imagem original escalada
+        base_key = f"base_{sprite_key}_{tamanho[0]}x{tamanho[1]}"
+        if base_key not in ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE:
+            ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[base_key] = pygame.transform.scale(ASSETS['projectiles'][sprite_key], tamanho)
+        return ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[base_key]
+
+    def renderizar_com_rotacao(self):
+        """ O CORAÇÃO DO LAZY LOADING """
+        # 1. Prepara o dicionário daquela arma se não existir
+        if self.chave_cache not in ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE:
+            ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[self.chave_cache] = {}
+
+        # 2. Calcula o ângulo
         angulo_exato = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
         angulo_int = int(round(angulo_exato)) % 360
 
-        # 3. Retorna a imagem perfeitamente rotacionada sem nenhum custo de CPU!
-        return ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[proj_key][angulo_int]
+        # 3. LAZY LOADING: Só rotaciona se este ângulo específico nunca foi pedido
+        if angulo_int not in ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[self.chave_cache]:
+            #print(f"[CACHE] Gerando nova rotação: {self.chave_cache} Angulo: {angulo_int}")
+            ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[self.chave_cache][angulo_int] = \
+                pygame.transform.rotate(self.image_base, angulo_int)
 
+        return ProjetilInimigoBase.GLOBAL_PROJECTILE_CACHE[self.chave_cache][angulo_int]
+    
     def update(self, delta_time):
+        # Movimento
         self.posicao += self.direcao * self.velocidade * delta_time
-        self.rect.center = self.posicao
-        
-        # Mata o projétil se o tempo de vida se esgotar
-        if pygame.time.get_ticks() - self.tempo_criacao >= self.duracao:
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+
+        # Cooldown de vida
+        if pygame.time.get_ticks() - self.spawn_time > self.duracao:
             self.kill()
 
+# --- CLASSES FILHAS SIMPLIFICADAS ---
+
 class PlasmaGun(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=3000)
-        self.image = pygame.transform.scale(ASSETS['projectiles']['plasma'], tamanho)
-        self.rect = self.image.get_rect(center=self.posicao)
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, direcao_spread):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=3000, tamanho=tamanho, sprite_key='plasma', direcao_custom=direcao_spread)
 
 class Carabin(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao =2000, is_Banished = False):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        if not is_Banished:
-            self.image = pygame.transform.scale(ASSETS['projectiles']['carabin'], tamanho)
-        else:
-            self.image = pygame.transform.scale(ASSETS['projectiles']['bcarabin'], tamanho)
-        self.rect = self.image.get_rect(center=self.posicao)
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao=2000, is_Banished=False):
+        s_key = 'bcarabin' if is_Banished else 'carabin'
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=duracao, tamanho=tamanho, sprite_key=s_key)
 
 class M50(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=2500)
-        self.image = pygame.transform.scale(ASSETS['projectiles']['m50'], tamanho)    
-        self.rect = self.image.get_rect(center=self.posicao)
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=2500, tamanho=tamanho, sprite_key='m50')
 
 class Dizimator(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao = 1500):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        self.image = pygame.transform.scale(ASSETS['projectiles']['dizimator'], tamanho)
-        self.rect = self.image.get_rect(center=self.posicao)
+    def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, duracao=1500):
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=duracao, tamanho=tamanho, sprite_key='dizimator')
 
 class BurstRifle(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, direcao_spread):
-        # Chama a classe base com os parâmetros que ela exige
-        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, duracao=2000)
-        
-        # SOBRESCREVE a direção reta da classe base usando a direção com spread do inimigo
-        if direcao_spread.length() > 0:
-            self.direcao = direcao_spread.normalize()
-        
-        # Pega a imagem e já deixa no tamanho certo ANTES de gerar o cache de rotação
-        imagem_base = pygame.transform.scale(ASSETS['projectiles']['ar'], tamanho)
-        
-        # Chama a função do cache. Ela vai usar a 'self.direcao'(com spread) para girar!
-        self.image = self.carregar_projetil_rotacionado('ar', imagem_base)
-        
-        # Pega o rect já baseado na imagem rotacionada
-        self.rect = self.image.get_rect(center=self.posicao)
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=2000, tamanho=tamanho, sprite_key='ar', direcao_custom=direcao_spread)
 
 class LightRifle(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, tamanho, dano, velocidade, direcao_spread):
-        # Chama a classe base com os parâmetros que ela exige
-        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, duracao=2000)
-        
-        # SOBRESCREVE a direção reta da classe base usando a direção com spread do inimigo
-        if direcao_spread.length() > 0:
-            self.direcao = direcao_spread.normalize()
-        
-        # Pega a imagem e já deixa no tamanho certo ANTES de gerar o cache de rotação
-        imagem_base = pygame.transform.scale(ASSETS['projectiles']['lightrifle'], tamanho)
-        
-        # Chama a função do cache. Ela vai usar a 'self.direcao'(com spread) para girar!
-        self.image = self.carregar_projetil_rotacionado('ar', imagem_base)
-        
-        # Pega o rect já baseado na imagem rotacionada
-        self.rect = self.image.get_rect(center=self.posicao)
-
-
-class CannonBeam(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-        
-        # Sprite e Animação
-        self.sprites = [pygame.transform.scale(img, (80, 80)) for img in ASSETS['projectiles']['cannon']]
-
-        self.frame_atual = 0
-        self.velocidade_animacao = 150
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-        self.image = self.sprites[self.frame_atual]
-        self.rect = self.image.get_rect(center=self.posicao)
-
-        # Cria um novo retângulo menor para a colisão
-        tamanho_hitbox = (75, 75)  # Ajuste este valor para o tamanho correto do feixe
-        self.rect = pygame.Rect(0, 0, tamanho_hitbox[0], tamanho_hitbox[1])
-        self.rect.center = self.image.get_rect(center=self.posicao).center
-        #direcao
-        direcao = self.jogador.posicao - self.posicao
-        if direcao.length() > 0:
-            self.direcao = direcao.normalize()
-        else:
-            self.direcao = pygame.math.Vector2(1, 0)
-        #self kill
-        self.tempo_criacao = pygame.time.get_ticks()
-
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites)
-            self.image = self.sprites[self.frame_atual]
-
-    def update(self, delta_time):
-        super().update(delta_time)
-        self.animar()
-
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=2000, tamanho=tamanho, sprite_key='lightrifle', direcao_custom=direcao_spread)
 
 class Laser(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, posicao_final, grupos, game, player):
-        super().__init__(
-            posicao_inicial=posicao_inicial,
-            grupos=grupos,
-            jogador=player, # O jogador já está definido como alvo na classe base
-            game=game,
-            dano=player.vida_maxima/2,
-            velocidade=2500, # Velocidade do projétil, ajustada para o laser
-            duracao=2500 # A duração em milissegundos
-        )
-        tamanho = (150, 150)
-        self.posicao_alvo_laser = pygame.math.Vector2(posicao_final)
-        self.direcao = self.posicao_alvo_laser - self.posicao
-        if self.direcao.length() > 0:
-            self.direcao.normalize_ip()
-        else:
-            self.direcao = pygame.math.Vector2(1, 0)
-
-        #sprite
-        laser_img_original = pygame.transform.scale(ASSETS['projectiles']['red_laser'], tamanho)
-
-        self.image = laser_img_original        
-        # Calcula o ângulo em graus a partir da direção
-        angulo = math.degrees(math.atan2(-self.direcao.y, self.direcao.x))
-        self.image = pygame.transform.rotate(laser_img_original, angulo)        
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
-
-        #colisao
-        self.ja_colidiu = False
-
-    def update(self, delta_time):
-        super().update(delta_time)
-        self.rect.center = self.posicao
+    def __init__(self, posicao_inicial, posicao_final, grupos, game, player, tamanho=(150, 150)):
+        # Calcula a direção específica do laser de ponto A para B
+        direcao = (posicao_final - posicao_inicial)
+        super().__init__(posicao_inicial, grupos, player, game, 
+                         dano=player.vida_maxima/2, velocidade=2500, duracao=2500, 
+                         tamanho=tamanho, sprite_key='red_laser', direcao_custom=direcao)
 
 class AcidBreath(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, velocidade):
-        super().__init__(posicao_inicial, grupos, jogador, game, dano=25, velocidade=velocidade, duracao=2700)
-        self.jogador = jogador
-        self.game = game
-        self.posicao = pygame.math.Vector2(posicao_inicial)
-
-        # Aparência do projétil (imagem temporária)
-        tamanho = (48, 48)
-        self.image = pygame.transform.scale(ASSETS['projectiles']['acid_breath'], tamanho)
-        self.rect = self.image.get_rect(center=self.posicao)
-        # Calcula a direção para o jogador no momento da criação
-        direcao_para_jogador = self.jogador.posicao - self.posicao
-        if direcao_para_jogador.length() > 0:
-            self.direcao = direcao_para_jogador.normalize()
-        else:
-            self.direcao = pygame.math.Vector2(0, 0)
-
+        super().__init__(posicao_inicial, grupos, jogador, game, dano=25, velocidade=velocidade, 
+                         duracao=2700, tamanho=(48, 48), sprite_key='acid_breath')
         
 class LaserBeam(ProjetilInimigoBase):
-    def __init__(self, posicao_inimigo, grupos, jogador, game, dano, velocidade, duracao, color):
-        super().__init__(posicao_inimigo, grupos, jogador, game, dano=dano, velocidade=velocidade, duracao=duracao)
-
-        self.dano_aplicado = False
-        
-        tamanho = (120, 12)
-        # Sprite do Laser
+    """ Usado pelo Scarab e GuiltySpark """
+    def __init__(self, posicao_inicial, grupos, jogador, game, dano, velocidade, duracao, color='red', tamanho=(120, 12)):
         if color == 'red':
-            self.image = pygame.transform.scale(ASSETS['projectiles']['red_laser'], tamanho)
+            s_key = 'red_laser'
+        elif color == 'blue':
+            s_key = 'blue_laser'
         else:
-            self.image = pygame.transform.scale(ASSETS['projectiles']['blue_laser'], tamanho)
-
-        
-        # Calcula a direção do GuiltySpark para o jogador
-        self.direcao = (self.jogador.posicao - self.posicao).normalize()
-
-        # Rotaciona a sprite do laser na direção do tiro
-        angulo = self.direcao.as_polar()[1]
-        self.image = pygame.transform.rotate(self.image, -angulo)
-        self.image.set_alpha(255)
-        
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
+            s_key = 'green_laser'
+        super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
+                         duracao=duracao, tamanho=tamanho, sprite_key=s_key)
+        self.dano_aplicado = False
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
-        tempo_decorrido = agora - self.tempo_criacao
-        
-        # Move o projétil a cada frame
-        self.posicao += self.direcao * self.velocidade * delta_time
-        self.rect.center = self.posicao
-        
-        # Lógica de colisão
+        super().update(delta_time)
+        # Lógica extra de dano único por colisão se necessário
         if not self.dano_aplicado and pygame.sprite.collide_mask(self, self.jogador):
             self.jogador.tomar_dano_direto(self.dano)
             self.dano_aplicado = True
-        
-        # Destrói o projétil após a duração
-        if tempo_decorrido >= self.duracao:
-            self.kill()
     
 
 

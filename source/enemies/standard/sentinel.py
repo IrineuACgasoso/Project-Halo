@@ -3,6 +3,7 @@ import random
 import math
 from os.path import join
 from enemies.enemies import InimigoBase
+from feats.effects import ContinuousBeam
 from feats.assets import ASSETS
 from entitymanager import entity_manager
 
@@ -31,33 +32,30 @@ class Sentinel(InimigoBase):
         # Laser
         self.beam_ativo = False
         self.duracao_beam = 2000
-        self.cooldown_pos_ataque = 500 
+        self.cooldown_pos_ataque = 2000 
         self.timer_estado = 0
         
-        self.mira_atual = pygame.math.Vector2(posicao)
+        self.laser = ContinuousBeam(self, color=(255, 255, 180), largura_base=3, dano_por_segundo=10, suavizacao=0.05)
         self.velocidade_mira = 0.05
 
 
-    def update(self, delta_time, paredes= None):
+    def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         vetor_player = self.jogador.posicao - self.posicao
         distancia = vetor_player.length()
         
         if self.estado_ia == 'chase':
             self.indice_animacao = 0
-            
-            # LÓGICA DE MOVIMENTAÇÃO DINÂMICA
+            # Lógica de movimentação
             if distancia > self.distancia_gatilho_orbita:
-                # Longe demais: Persegue
                 direcao = vetor_player.normalize()
                 self.posicao += direcao * self.velocidade * delta_time
             elif distancia < self.distancia_minima_seguranca:
-                # Perto demais: Afasta-se (Inverte o vetor)
                 if distancia > 0:
                     direcao_fuga = -vetor_player.normalize()
                     self.posicao += direcao_fuga * self.velocidade * delta_time
             
-            # Trigger do Ataque (Só ativa se estiver na janela de distância correta)
+            # Troca para órbita/ataque
             if agora - self.timer_estado >= self.cooldown_pos_ataque:
                 if self.distancia_minima_seguranca <= distancia <= self.distancia_gatilho_orbita:
                     self.estado_ia = 'orbiting'
@@ -65,18 +63,17 @@ class Sentinel(InimigoBase):
                     self.beam_ativo = True
                     self.indice_animacao = 1
                     self.centro_orbita_fixo = pygame.math.Vector2(self.jogador.posicao)
-                    
                     self.raio_orbita_atual = (self.posicao - self.centro_orbita_fixo).length()
                     self.angulo_atual = math.atan2(self.posicao.y - self.centro_orbita_fixo.y, 
-                                                   self.posicao.x - self.centro_orbita_fixo.x)
+                                                 self.posicao.x - self.centro_orbita_fixo.x)
 
         elif self.estado_ia == 'orbiting':
             self.angulo_atual += 0.3 * delta_time 
-            
             self.posicao.x = self.centro_orbita_fixo.x + math.cos(self.angulo_atual) * self.raio_orbita_atual
             self.posicao.y = self.centro_orbita_fixo.y + math.sin(self.angulo_atual) * self.raio_orbita_atual
             
-            self.processar_dano_laser(delta_time)
+            # O LASER ATUALIZA A MIRA AQUI DENTRO:
+            self.laser.update(delta_time, self.jogador.posicao)
 
             if agora - self.timer_estado >= self.duracao_beam:
                 self.estado_ia = 'chase'
@@ -84,27 +81,19 @@ class Sentinel(InimigoBase):
                 self.beam_ativo = False
                 self.indice_animacao = 0
 
-        # Suavização da mira e animação
-        self.mira_atual = self.mira_atual.lerp(self.jogador.posicao, self.velocidade_mira)
-        
-        if (self.jogador.posicao.x - self.posicao.x) < 0: self.estado_animacao = 'left'
-        else: self.estado_animacao = 'right'
+        if (self.jogador.posicao.x - self.posicao.x) < 0: 
+            self.estado_animacao = 'left'
+        else: 
+            self.estado_animacao = 'right'
 
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         self.animar()
 
-    def processar_dano_laser(self, delta_time):
-        dist_mira = (self.mira_atual - self.jogador.posicao).length()
-        if dist_mira < 40:
-             self.jogador.tomar_dano_direto(self.dano_base * delta_time)
-
+    # MUDE o draw_laser para usar o objeto self.laser:
     def draw_laser(self, superficie, deslocamento):
         if self.beam_ativo:
-            p1 = self.posicao - deslocamento
-            p2 = self.mira_atual - deslocamento
-            largura = 4 + math.sin(pygame.time.get_ticks() * 0.02) * 2
-            pygame.draw.line(superficie, (200, 50, 50), p1, p2, int(largura + 2))
-            pygame.draw.line(superficie, (255, 255, 255), p1, p2, 2)
-
+            # Agora usa a classe nova, mantendo o padrão do Scarab
+            self.laser.draw(superficie, deslocamento)
+        
     def animar(self):
         self.image = self.sprites[self.estado_animacao][self.indice_animacao]

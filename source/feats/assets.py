@@ -20,10 +20,8 @@ ASSETS = {
         'acid_breath': pygame.image.load(join('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha(),
         'red_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'redlaser.png')).convert_alpha(),
         'blue_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'bluelaser.png')).convert_alpha(),
-        'cannon': [
-            pygame.image.load(join('assets', 'img', 'projectiles', 'cannon', 'c1.png')).convert_alpha(),
-            pygame.image.load(join('assets', 'img', 'projectiles', 'cannon', 'c2.png')).convert_alpha()
-        ]
+        'green_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'greenlaser.png')).convert_alpha()
+        
     },
 
 
@@ -64,6 +62,16 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp10.png')).convert_alpha(), (128, 160)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp11.png')).convert_alpha(), (128, 160))
             ]
+        },
+
+        'scarab' : {
+            'default' : [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab1.png')).convert_alpha(),(1024, 1024)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab2.png')).convert_alpha(),(1024, 1024)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab3.png')).convert_alpha(),(1024, 1024)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab4.png')).convert_alpha(),(1024, 1024))
+            ],
+            'broken' : []
         },
 
         'arbiter': [
@@ -211,8 +219,25 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (96, 96)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (96, 96)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (96, 96)),
-        ]
-    },
+        ],
+
+        'soldier' : {
+            'default' : [
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier1.png')).convert_alpha(), (96, 120)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier2.png')).convert_alpha(), (96, 120)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier3.png')).convert_alpha(), (96, 120)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier4.png')).convert_alpha(), (96, 120)),
+                ],
+
+            'sniper' : [ 
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper1.png')).convert_alpha(), (128, 128)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper2.png')).convert_alpha(), (128, 128)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper3.png')).convert_alpha(), (128, 128)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper4.png')).convert_alpha(), (128, 128)),
+                ]
+            }
+                
+        },
 
 
     'maps': {

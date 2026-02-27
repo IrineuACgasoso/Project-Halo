@@ -1,6 +1,7 @@
 import pygame
 from os.path import join
 from settings import *
+from camera import Camera
 from player import *
 
 class HUD:
@@ -49,8 +50,8 @@ class HUD:
     def draw_barra_vida(self, tela):
         jogador = self.game.player
 
-        # Obtém o deslocamento da câmera através do mapa
-        deslocamento = self.game.mapa.get_camera_offset(jogador.posicao, (largura_tela, altura_tela))
+        # Obtém o deslocamento da câmera 
+        deslocamento = self.game.camera.offset + self.game.camera.shake_offset
 
         posicao_x = jogador.rect.centerx - (jogador.rect.width / 2) - deslocamento[0]
         posicao_y = jogador.rect.bottom + 10 - deslocamento[1]
