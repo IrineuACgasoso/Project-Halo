@@ -36,6 +36,7 @@ class Scarab(InimigoBase):
         self.cooldown_laser = 12000  # Intervalo entre lasers
         self.ultimo_laser = pygame.time.get_ticks()
         
+        self.fase_desestabilizado = False
         self.fase_critica = False 
 
         # 5. Armamento de Plasma (Torretas Laterais)
@@ -57,13 +58,18 @@ class Scarab(InimigoBase):
         agora = pygame.time.get_ticks()
 
         # --- LÓGICA DE FASES ---
-        if not self.fase_critica and self.vida < self.vida_base * 0.5:
+        if not self.fase_desestabilizado and self.vida < self.vida_base * 0.6:
+            self.fase_desestabilizado = True
+            self.sprites = self.get_sprites('damaged')
+            self.cooldown_laser = 10000
+        if not self.fase_critica and self.vida < self.vida_base * 0.4:
             self.fase_critica = True
+            self.sprites = self.get_sprites('broken')
             self.opcoes_cooldown = (2000, 3000, 4000, 5000)
             self.cooldown_plasma = random.choice(self.opcoes_cooldown)
             self.cooldown_laser = 8000
             self.velocidade *= 2
-            self.velocidade_animacao /= 1.5
+            self.velocidade_animacao /= 2
             self.delay_entre_tiros /= 1.5
             self.intensidade_shake *= 3
             # Dica: adicione som de alarme aqui!

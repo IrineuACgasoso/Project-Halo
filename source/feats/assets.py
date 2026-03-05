@@ -71,7 +71,18 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab3.png')).convert_alpha(),(1024, 1024)),
             pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab4.png')).convert_alpha(),(1024, 1024))
             ],
-            'broken' : []
+            'damaged' : [
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged1.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged2.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged3.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged4.png')).convert_alpha(),(1024, 1024))
+             ],
+            'broken' : [
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken1.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken2.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken3.png')).convert_alpha(),(1024, 1024)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken4.png')).convert_alpha(),(1024, 1024))
+            ]
         },
 
         'arbiter': [
