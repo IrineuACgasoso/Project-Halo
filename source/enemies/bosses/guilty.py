@@ -8,7 +8,7 @@ from player import *
 from feats.assets import *
 from feats.projetil import LaserBeam
 from enemies.standard.sentinel import Sentinel
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class GuiltySpark(InimigoBase):

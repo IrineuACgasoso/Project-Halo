@@ -6,7 +6,7 @@ from player import *
 from settings import *
 from feats.items import *
 from feats.effects import RaioEscudo
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 class Watcher(InimigoBase):
     def __init__(self, posicao, game):

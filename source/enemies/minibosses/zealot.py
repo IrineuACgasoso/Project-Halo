@@ -4,7 +4,7 @@ import math
 from os.path import join
 from enemies.enemies import *
 from feats.assets import ASSETS
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class Zealot(InimigoBase):

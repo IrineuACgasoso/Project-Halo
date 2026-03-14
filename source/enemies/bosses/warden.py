@@ -6,7 +6,7 @@ from player import *
 from enemies.minibosses.knight import Knight
 import random
 import math
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 class WardenEternal(InimigoBase):
     def __init__(self, posicao, grupos, jogador, game, clone = False):

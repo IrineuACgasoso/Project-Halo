@@ -6,7 +6,7 @@ from settings import *
 from feats.projetil import PlasmaGun
 from feats.effects import ContinuousBeam
 from enemies.enemies import *
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 class Scarab(InimigoBase):
     def __init__(self, posicao, grupos, game):

@@ -4,18 +4,18 @@ from os.path import join
 from settings import *
 from player import Player 
 from menu import *
-from spawner import Spawner
-from entitymanager import entity_manager
+from systems.spawner import Spawner
+from systems.entitymanager import entity_manager
 from feats.weapon import *
 from feats.effects import Portal
 from colaboradores import TelaColaboradores
 from ranking import Ranking 
 from levelup import *
-from mapmanager import Mapa
-from camera import Camera
-from hud import HUD
-from collision import CollisionManager 
-from stagemanager import StageManager
+from systems.mapmanager import Mapa
+from systems.camera import Camera
+from systems.hud import HUD
+from systems.collision import CollisionManager 
+from systems.stagemanager import StageManager
 from enemies.standard.sentinel import Sentinel
 
 

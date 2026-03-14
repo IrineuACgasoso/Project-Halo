@@ -3,8 +3,8 @@ import random
 import math
 from random import randint
 from settings import *
-from entitymanager import entity_manager
-from mapmanager import Mapa
+from systems.entitymanager import entity_manager
+from systems.mapmanager import Mapa
 from feats.assets import *
 
 # Inimigos base
@@ -121,7 +121,7 @@ class Spawner:
         """DEBUG: Invoca o próximo boss pendente da fase atual imediatamente."""
         
         bosses_por_fase = {
-            0: ['arbiter'],
+            0: ['hunter'],
             1: ['zealot'],
             2: ['guilty'], 
             3: ['scarab'],           
@@ -198,7 +198,7 @@ class Spawner:
         # 3. Bosses Relativos à Fase
         # Se o timer parou no boss anterior, ele volta a correr agora.
         bosses_por_fase = {
-            0: ['didact'],
+            0: ['hunter'],
             1: ['zealot'],
             2: ['guilty'],
             3: ['scarab'],            

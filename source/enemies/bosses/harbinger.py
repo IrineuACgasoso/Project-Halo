@@ -6,7 +6,7 @@ from game import *
 from player import *
 from feats.items import *
 from feats.projetil import Carabin
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 

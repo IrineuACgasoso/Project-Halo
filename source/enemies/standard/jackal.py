@@ -7,7 +7,7 @@ from settings import *
 from feats.projetil import PlasmaGun, M50
 from feats.items import *
 from feats.assets import ASSETS
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class Jackal(InimigoBase):

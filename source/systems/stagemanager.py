@@ -1,9 +1,9 @@
 import pygame
 from os.path import join
-from mapmanager import Mapa
-from entitymanager import entity_manager
+from systems.mapmanager import Mapa
+from systems.entitymanager import entity_manager
 from feats.effects import Portal
-from spawner import Spawner
+from systems.spawner import Spawner
 
 class StageManager:
     def __init__(self, game):

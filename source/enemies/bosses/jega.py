@@ -5,7 +5,7 @@ from enemies.enemies import InimigoBase
 from feats.projetil import *
 from feats.items import *
 from player import *
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class Jega(InimigoBase):

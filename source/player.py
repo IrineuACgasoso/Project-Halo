@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 from levelup import TelaDeUpgrade
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class Player(pygame.sprite.Sprite):

@@ -5,7 +5,7 @@ from player import *
 from settings import *
 from feats.projetil import LaserBeam, PlasmaGun
 from enemies.enemies import *
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 

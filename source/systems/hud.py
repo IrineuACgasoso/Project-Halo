@@ -1,7 +1,7 @@
 import pygame
 from os.path import join
 from settings import *
-from camera import Camera
+from systems.camera import Camera
 from player import *
 
 class HUD:

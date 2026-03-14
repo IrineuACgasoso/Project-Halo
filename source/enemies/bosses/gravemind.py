@@ -8,6 +8,7 @@ from feats.effects import DustParticle
 from feats.assets import *
 import random
 import math
+from systems.entitymanager import entity_manager
 
 
 class Gravemind(InimigoBase):

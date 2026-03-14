@@ -7,7 +7,7 @@ from enemies.enemies import InimigoBase
 from feats.projetil import Laser
 from feats.skills import OndaEMP, ArtilhariaAviso
 from feats.effects import LaserWarning
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 
 
 class Didact(InimigoBase):

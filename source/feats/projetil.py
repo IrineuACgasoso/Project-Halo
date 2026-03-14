@@ -1,4 +1,4 @@
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 from enemies.enemies import *
 from feats.items import *
 from feats.weapon import *

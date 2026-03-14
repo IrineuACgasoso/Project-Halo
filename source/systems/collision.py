@@ -1,5 +1,5 @@
 import pygame
-from entitymanager import entity_manager
+from systems.entitymanager import entity_manager
 from feats.weapon import Projetil_PingPong
 
 class CollisionManager:
