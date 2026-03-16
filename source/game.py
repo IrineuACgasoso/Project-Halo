@@ -2,7 +2,7 @@ import pygame
 import random
 from os.path import join
 from windows.settings import *
-from player import Player 
+from player.player import Player 
 from windows.menu import *
 from systems.spawner import Spawner
 from systems.entitymanager import entity_manager
@@ -10,7 +10,7 @@ from feats.weapon import *
 from feats.effects import Portal
 from windows.colaboradores import TelaColaboradores
 from windows.ranking import Ranking 
-from levelup import *
+from player.levelup import *
 from systems.mapmanager import Mapa
 from systems.camera import Camera
 from systems.hud import HUD

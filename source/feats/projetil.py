@@ -119,14 +119,6 @@ class LightRifle(ProjetilInimigoBase):
         super().__init__(posicao_inicial, grupos, jogador, game, dano, velocidade, 
                          duracao=2000, tamanho=tamanho, sprite_key='lightrifle', direcao_custom=direcao_spread)
 
-class Laser(ProjetilInimigoBase):
-    def __init__(self, posicao_inicial, posicao_final, grupos, game, player, tamanho=(150, 150)):
-        # Calcula a direção específica do laser de ponto A para B
-        direcao = (posicao_final - posicao_inicial)
-        super().__init__(posicao_inicial, grupos, player, game, 
-                         dano=player.vida_maxima/2, velocidade=2500, duracao=2500, 
-                         tamanho=tamanho, sprite_key='red_laser', direcao_custom=direcao)
-
 class AcidBreath(ProjetilInimigoBase):
     def __init__(self, posicao_inicial, grupos, jogador, game, velocidade):
         super().__init__(posicao_inicial, grupos, jogador, game, dano=25, velocidade=velocidade, 

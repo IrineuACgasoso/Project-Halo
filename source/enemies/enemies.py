@@ -1,7 +1,7 @@
 import pygame
 import random
 from os.path import join
-from player import *
+from player.player import *
 from windows.settings import *
 from feats.projetil import PlasmaGun, Dizimator, Carabin, M50
 from feats.items import *

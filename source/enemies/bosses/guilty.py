@@ -4,7 +4,7 @@ import math
 from enemies.enemies import *
 from feats.projetil import *
 from feats.items import *
-from player import *
+from player.player import *
 from feats.assets import *
 from feats.projetil import LaserBeam
 from enemies.standard.sentinel import Sentinel

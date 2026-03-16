@@ -2,7 +2,7 @@ import pygame
 from game import *
 from feats.items import *
 from enemies.enemies import *
-from player import *
+from player.player import *
 from enemies.minibosses.knight import Knight
 import random
 import math
@@ -135,28 +135,10 @@ class WardenEternal(InimigoBase):
             game=self.game
         )
 
-    def morrer(self, grupos):
-        chance= randint(1,1000)
-        if chance >= 950:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(10):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 800 <= chance < 950:
-            chance2 = randint(1,5)
-            if chance2 == 4:
-                Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=grupos)
-            for _ in range(8):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        elif 600 <= chance < 800:
-            for _ in range(6):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
-        else:
-            for _ in range(4):
-                posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-                Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 8, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 100)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 
     def update(self, delta_time, paredes= None):

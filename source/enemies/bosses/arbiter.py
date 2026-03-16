@@ -2,7 +2,7 @@ import pygame
 import random
 from enemies.enemies import *
 from game import *
-from player import *
+from player.player import *
 from feats.items import *
 from systems.entitymanager import entity_manager
 
@@ -63,8 +63,6 @@ class BossArbiter(InimigoBase):
     @property
     def invulneravel(self):
         return self.alpha_atual < 200
-    
-    
     
     def carabin(self):
         Carabin(

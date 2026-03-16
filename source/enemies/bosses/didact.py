@@ -4,7 +4,7 @@ from os.path import join
 from game import *
 from feats.items import Items
 from enemies.enemies import InimigoBase
-from feats.projetil import Laser
+from feats.projetil import LaserBeam
 from feats.skills import OndaEMP, ArtilhariaAviso
 from feats.effects import LaserWarning
 from systems.entitymanager import entity_manager
@@ -13,7 +13,7 @@ from systems.entitymanager import entity_manager
 class Didact(InimigoBase):
     def __init__(self, posicao, game, grupos):
         valor_vida = 8000
-        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game, sprite_key='didact', flip_sprite=True)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=60, velocidade_base=50, game=game, sprite_key='didact', flip_sprite=True)
         
         self.titulo = "DIDACT, O Forerunner Banido"
         self.game = game
@@ -83,32 +83,36 @@ class Didact(InimigoBase):
     # ---------------------------------------------------------
     def ativar_laser(self):
         agora = pygame.time.get_ticks()
-        self.cooldown_laser = random.choice([4000, 4500, 5000, 5500])
+        self.cooldown_laser = random.randint(4000, 5500)
         self.velocidade = 0
         self.estado_habilidade = 'aviso_laser'
         self.tempo_inicio_laser = agora
         self.tempo_ultimo_laser = agora
         
         self.posicao_alvo_laser = self.jogador.posicao.copy()
-        LaserWarning(
-            start_pos=self.posicao,
-            end_pos=self.posicao_alvo_laser,
-            grupos=self.game.all_sprites,
-            game=self.game
-        )
+        LaserWarning(owner=self, 
+                     alvo=self.jogador, 
+                     grupos=entity_manager.all_sprites, 
+                     game=self.game,
+                     duracao=1600
+                     )
 
     def disparar_laser(self):
-        Laser(
+        LaserBeam(
             posicao_inicial=self.posicao.copy(),
-            posicao_final=self.posicao_alvo_laser.copy(),
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            jogador=self.jogador,
             game=self.game,
-            player=self.jogador
+            dano= self.dano_base * 4,
+            velocidade=1500,
+            duracao=1500,
+            color= 'red',
+            tamanho= (128, 128)
         )
 
     def puxar_jogador(self):
         agora = pygame.time.get_ticks()
-        self.cooldown_pull = random.choice([10000, 12000, 15000, 17000])
+        self.cooldown_pull = random.randint(10000, 15000)
         self.estado_habilidade = 'ataque_pull'
         self.tempo_inicio_pull = agora
         self.tempo_ultimo_pull = agora
@@ -157,11 +161,11 @@ class Didact(InimigoBase):
         # Enrage aos 15% (acontece dentro ou depois da Crypta)
         if percentual_vida < 0.15 and not self.enrage:
             self.enrage = True
-            self.cooldown_laser = 4000
-            self.cooldown_pull = 6000
+            self.cooldown_laser = random.randint(1000, 1500)
+            self.cooldown_pull = random.randint(500, 1500)
             
         elif percentual_vida < 0.3 and not self.enrage: # Fase 4
-            self.velocidade_animacao = 400
+            self.velocidade_animacao = 180
             self.velocidade_puxao = 600
             
         elif percentual_vida < 0.5 and not self.enrage: # Fase 3
@@ -281,15 +285,9 @@ class Didact(InimigoBase):
         self.executar_estados(agora, delta_time)
         self.animar()
 
-    def morrer(self, grupos):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        chance = random.randint(1, 1000)
-
-        qtd_shards = 10 if chance > 800 else 7 if chance > 600 else 5
-
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
-            
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 8, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 80)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 

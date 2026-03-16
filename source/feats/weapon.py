@@ -1,7 +1,7 @@
 import pygame
 import math
 from windows.settings import *
-from player import *
+from player.player import *
 from feats.assets import ASSETS
 
 class Arma(ABC):

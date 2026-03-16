@@ -3,7 +3,7 @@ import random
 import math
 from enemies.enemies import *
 from game import *
-from player import *
+from player.player import *
 from feats.items import *
 from feats.projetil import Carabin
 from systems.entitymanager import entity_manager
@@ -143,6 +143,12 @@ class Harbinger(InimigoBase):
         elif direcao.x > 0:
             self.estado_animacao = 'right'
         self.animar()
+
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 8, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 100)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        self.kill()
 
     
     def carabin(self):

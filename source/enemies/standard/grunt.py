@@ -2,7 +2,7 @@ import pygame
 import random
 from enemies.enemies import InimigoBase
 from os.path import join
-from player import *
+from player.player import *
 from windows.settings import *
 from feats.projetil import PlasmaGun
 from feats.items import *

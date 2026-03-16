@@ -1,7 +1,7 @@
 import pygame
 import random
 from feats.items import *
-from player import *
+from player.player import *
 from windows.settings import *
 from feats.projetil import LaserBeam, PlasmaGun
 from enemies.enemies import *

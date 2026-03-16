@@ -3,7 +3,7 @@ from os.path import join
 from windows.settings import *
 from systems.camera import Camera
 from feats.assets import ASSETS
-from player import *
+from player.player import *
 
 class HUD:
     def __init__(self, game):

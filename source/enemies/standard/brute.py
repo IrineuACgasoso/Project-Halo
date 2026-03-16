@@ -2,7 +2,7 @@ import pygame
 import random
 from os.path import join
 from enemies.enemies import InimigoBase
-from player import *
+from player.player import *
 from windows.settings import *
 from feats.projetil import Dizimator
 from feats.items import *

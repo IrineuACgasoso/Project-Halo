@@ -1,6 +1,6 @@
 import pygame
 from windows.settings import *
-from levelup import TelaDeUpgrade
+from player.levelup import TelaDeUpgrade
 from systems.entitymanager import entity_manager
 
 
@@ -184,7 +184,7 @@ class Player(pygame.sprite.Sprite):
             if self.ganhar_xp(50):
                 houve_level_up = True
         elif item.tipo == 'life_orb':
-            self.curar(self.vida_maxima/4)
+            self.curar(self.vida_maxima)
         elif item.tipo == 'cafe':
             self.vida_atual = self.vida_maxima
             self.adicionar_tempo_buff(10)
@@ -201,7 +201,7 @@ class Player(pygame.sprite.Sprite):
         self.vida_maxima += 25
         self.velocidade += 10
         self.pontuacao += 100
-        self.curar(self.vida_maxima)
+        self.curar(self.vida_maxima / 4)
 
         self.game.estado_do_jogo = 'level_up'
         self.game.tela_de_upgrade_ativa = TelaDeUpgrade(self.game.tela, self, self.game)

@@ -4,7 +4,7 @@ import math
 from enemies.enemies import InimigoBase
 from feats.projetil import *
 from feats.items import *
-from player import *
+from player.player import *
 from systems.entitymanager import entity_manager
 
 
@@ -84,17 +84,10 @@ class Jega(InimigoBase):
             is_Banished=True
         )
     
-    def morrer(self, grupos=None):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        chance = random.randint(1, 1000)
-
-        qtd_shards = 2
-        if chance > 800: qtd_shards = 4
-        elif chance > 600: qtd_shards = 3
-
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 80)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 
     # --- FUNÇÕES FATORADAS ---
