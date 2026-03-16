@@ -2,7 +2,7 @@ import pygame
 import math
 import os
 from os.path import join
-from settings import largura_tela, altura_tela
+from windows.settings import largura_tela, altura_tela
 from feats.assets import ASSETS
 
 class MenuPrincipal:

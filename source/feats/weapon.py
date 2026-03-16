@@ -1,6 +1,6 @@
 import pygame
 import math
-from settings import *
+from windows.settings import *
 from player import *
 from feats.assets import ASSETS
 

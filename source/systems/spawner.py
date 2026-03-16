@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 from random import randint
-from settings import *
+from windows.settings import *
 from systems.entitymanager import entity_manager
 from systems.mapmanager import Mapa
 from feats.assets import *

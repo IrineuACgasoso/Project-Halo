@@ -89,18 +89,10 @@ class BossArbiter(InimigoBase):
         # Sempre reaplica o alpha atual, pois a troca de sprites reseta a transparência
         self.image.set_alpha(int(self.alpha_atual))
 
-    def morrer(self, grupos):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        chance = random.randint(1, 1000)
-
-        # Drop garantido de Shards grandes por ser Boss
-        qtd_shards = 2
-        if chance > 800: qtd_shards = 4
-        elif chance > 600: qtd_shards = 3
-
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 75)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 
     # --- FUNÇÕES FATORADAS DAS HABILIDADES ---

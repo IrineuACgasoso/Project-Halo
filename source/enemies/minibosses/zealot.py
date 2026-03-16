@@ -9,7 +9,7 @@ from systems.entitymanager import entity_manager
 
 class Zealot(InimigoBase):
     def __init__(self, posicao, game, grupos):
-        valor_vida = 1500
+        valor_vida = 1800
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base=100, game=game, sprite_key='zealot')
         self.titulo = "ZEALOT, Soldado de Elite Covenant"
 
@@ -32,8 +32,8 @@ class Zealot(InimigoBase):
         self.last_stealth = pygame.time.get_ticks()
         
         # Cooldowns e Timers
-        self.cooldown_stealth = random.randint(4000, 7000) # Cooldown inicial aleatório
-        self.tempo_invisivel_perseguindo = 1500 # Quanto tempo (ms) ele corre invisível após o TP
+        self.cooldown_stealth = random.randint(3000, 6000) # Cooldown inicial aleatório
+        self.tempo_invisivel_perseguindo = 2000 # Quanto tempo (ms) ele corre invisível após o TP
         self.inicio_perseguicao_invisivel = 0
 
         self.hitbox = pygame.Rect(0, 0, self.rect.width / 2, self.rect.height)
@@ -107,8 +107,7 @@ class Zealot(InimigoBase):
         self.alpha = 255
         self.image.set_alpha(self.alpha)
         self.last_stealth = pygame.time.get_ticks()
-        novo_cooldown = [3500, 4000, 4500, 5000]
-        self.cooldown_stealth = random.choice(novo_cooldown)  # Novo cooldown aleatório
+        self.cooldown_stealth = random.randint(2500, 4500)  # Novo cooldown aleatório
         self.estado_habilidade = 'idle'
 
     def update(self, delta_time, paredes=None):
@@ -143,12 +142,10 @@ class Zealot(InimigoBase):
         self.estado_animacao = 'left' if (self.game.player.posicao.x < self.posicao.x) else 'right'
         self.animar()
     
-    def morrer(self, grupos):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        qtd_shards = 2        
-        for _ in range(qtd_shards):
-            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 3, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 
     def animar(self):

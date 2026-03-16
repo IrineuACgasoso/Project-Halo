@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from windows.settings import *
 from game import Game
 
 def main():

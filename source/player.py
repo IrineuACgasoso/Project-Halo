@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from windows.settings import *
 from levelup import TelaDeUpgrade
 from systems.entitymanager import entity_manager
 

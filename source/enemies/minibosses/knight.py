@@ -3,7 +3,7 @@ import random
 import math
 from feats.items import *
 from player import *
-from settings import *
+from windows.settings import *
 from feats.projetil import LaserBeam
 from enemies.enemies import *
 from feats.effects import PrometheanTeleport

@@ -2,7 +2,7 @@ import pygame
 import random
 from os.path import join
 from player import *
-from settings import *
+from windows.settings import *
 from feats.projetil import PlasmaGun, Dizimator, Carabin, M50
 from feats.items import *
 from feats.assets import ASSETS
@@ -134,16 +134,9 @@ class InimigoBase(pygame.sprite.Sprite):
 
 
     def morrer(self, grupos = None):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        dado = randint(0, 1000)
-        if dado == 1000:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'cafe.png'), tipo='cafe', grupos=alvo_grupos)
-        elif dado >= 990:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
-        elif dado >= 970:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'lifeOrb.png'), tipo='life_orb', grupos=alvo_grupos)
-        else:
-            Items(posicao=self.posicao, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
+        Items.spawn_drop(self.posicao, grupos, 'exp_shard', 1, 100)
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
         self.kill()
 
     def update(self, delta_time, paredes = None):

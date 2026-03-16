@@ -3,7 +3,7 @@ import random
 from os.path import join
 from enemies.enemies import InimigoBase
 from player import *
-from settings import *
+from windows.settings import *
 from feats.items import *
 from feats.projetil import BurstRifle
 from feats.effects import DustParticle
@@ -161,9 +161,9 @@ class FloodForms(InimigoBase):
         else:
             qtd_shards = 1
 
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
+        Items.spawn_drop(self.posicao, grupos, 'exp_shard', qtd_shards, 100)
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
         
         if self.is_Carry:
             for _ in range(2 * qtd_shards):

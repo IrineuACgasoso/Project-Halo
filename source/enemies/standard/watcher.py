@@ -3,7 +3,7 @@ import random
 from os.path import join
 from enemies.enemies import InimigoBase
 from player import *
-from settings import *
+from windows.settings import *
 from feats.items import *
 from feats.effects import RaioEscudo
 from systems.entitymanager import entity_manager

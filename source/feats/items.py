@@ -1,43 +1,44 @@
 import pygame
-from settings import *
-
-
+import random
+from feats.assets import ASSETS 
 
 class Items(pygame.sprite.Sprite):
-    def __init__(self, sheet_item, posicao, tipo, grupos):
+    def __init__(self, posicao, tipo, grupos):
         super().__init__(grupos)
-        #posicao
-        self.posicao_original = pygame.math.Vector2(posicao)
+        
+        # Busca a imagem no ASSETS (agora centralizado)
+        self.image = ASSETS['items'].get(tipo)
+        if not self.image: # Fallback caso o tipo não exista
+             self.image = ASSETS['items']['shard']
+             
+        self.rect = self.image.get_rect(center=posicao)
         self.posicao = pygame.math.Vector2(posicao)
-
-        #drop
-        self.direcao = pygame.math.Vector2(0, 1)
-        self.velocidade = -100
-        self.gravidade = 8
+        self.posicao_final_y = self.posicao.y
+        
+        self.velocidade = 180 
+        self.gravidade = 500
         self.dropping = True
-
-        #imagem
-        self.frame = pygame.image.load(sheet_item).convert_alpha()
-        self.image = self.frame
-        self.rect = self.image.get_rect(center = self.posicao)
-
         self.tipo = tipo
+
+    @classmethod
+    def spawn_drop(cls, posicao, grupos, tipo, qtd, probabilidade):
+        """
+        Método estático para gerenciar a criação de drops.
+        Inimigo chama: Items.spawn_drop(pos, grupos, 'item', qtd, %)
+        """
+        if random.randint(1, 100) <= probabilidade:
+            for _ in range(qtd):
+                # Desvio aleatório para os itens não ficarem colados
+                offset = pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
+                cls(posicao + offset, tipo, grupos)
 
     def update(self, delta_time):
         if self.dropping:
-            #movimento de drop
-            self.velocidade += self.gravidade
-            self.posicao += self.direcao * self.velocidade * delta_time
-            self.rect.centery = self.posicao.y
+            self.velocidade -= self.gravidade * delta_time
+            self.posicao.y -= self.velocidade * delta_time
             
-            if self.velocidade > 0 and self.posicao.y >= self.posicao_original.y:
-                self.posicao.y = self.posicao_original.y
-                self.rect.centery = self.posicao.y
-                self.velocidade = 0
+            if self.posicao.y >= self.posicao_final_y:
+                self.posicao.y = self.posicao_final_y
                 self.dropping = False
-    
-        
-
-
-        
-
+            
+            self.rect.centery = round(self.posicao.y)

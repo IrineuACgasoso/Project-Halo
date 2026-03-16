@@ -2,7 +2,7 @@ import pygame
 import random
 from feats.items import *
 from player import *
-from settings import *
+from windows.settings import *
 from feats.projetil import PlasmaGun
 from feats.effects import ContinuousBeam
 from enemies.enemies import *
@@ -161,9 +161,8 @@ class Scarab(InimigoBase):
             self.game.camera.shake(intensidade= self.intensidade_shake)
 
     def morrer(self, grupos):
-        # Explosão épica com muitos itens
-        for _ in range(5):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-100, 100), random.randint(-100, 100))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), 
-                  tipo='big_shard', grupos=(entity_manager.all_sprites, entity_manager.item_group))
+        # Scarab dropa 5 big_shards com 100% de chance e 1 vida com 50%
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 5, 100)
+        Items.spawn_drop(self.posicao, grupos, 'health', 1, 50)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()

@@ -1,15 +1,15 @@
 import pygame
 import random
 from os.path import join
-from settings import *
+from windows.settings import *
 from player import Player 
-from menu import *
+from windows.menu import *
 from systems.spawner import Spawner
 from systems.entitymanager import entity_manager
 from feats.weapon import *
 from feats.effects import Portal
-from colaboradores import TelaColaboradores
-from ranking import Ranking 
+from windows.colaboradores import TelaColaboradores
+from windows.ranking import Ranking 
 from levelup import *
 from systems.mapmanager import Mapa
 from systems.camera import Camera

@@ -1,7 +1,8 @@
 import pygame
 from os.path import join
-from settings import *
+from windows.settings import *
 from systems.camera import Camera
+from feats.assets import ASSETS
 from player import *
 
 class HUD:
@@ -16,16 +17,16 @@ class HUD:
 
         #pega imagem e da scale para ficar menor
         #xp
-        self.icone_exp_shard = pygame.image.load(join('assets', 'img', 'expShard.png')).convert_alpha()
+        self.icone_exp_shard = ASSETS['items']['exp_shard']
         self.icone_exp_shard = pygame.transform.scale(self.icone_exp_shard, (30, 30))
         #big shard
-        self.icone_big_shard = pygame.image.load(join('assets', 'img', 'bigShard.png')).convert_alpha()
+        self.icone_big_shard = ASSETS['items']['big_shard']
         self.icone_big_shard = pygame.transform.scale(self.icone_big_shard, (30, 30))
         #life orb
-        self.icone_life_orb = pygame.image.load(join('assets', 'img', 'lifeOrb.png')).convert_alpha()
+        self.icone_life_orb = ASSETS['items']['life_orb']
         self.icone_life_orb = pygame.transform.scale(self.icone_life_orb, (30, 30))
         #cafe
-        self.icone_cafe = pygame.image.load(join('assets', 'img', 'cafe.png')). convert_alpha()
+        self.icone_cafe = ASSETS['items']['cafe']
         self.icone_cafe = pygame.transform.scale(self.icone_cafe, (30, 30))
 
 

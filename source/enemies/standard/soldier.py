@@ -4,7 +4,7 @@ import math
 from os.path import join
 from enemies.enemies import InimigoBase
 from player import *
-from settings import *
+from windows.settings import *
 from feats.items import *
 from feats.projetil import LightRifle
 from feats.effects import PrometheanTeleport

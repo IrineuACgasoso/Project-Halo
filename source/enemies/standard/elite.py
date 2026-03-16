@@ -3,7 +3,7 @@ import random
 from os.path import join
 from enemies.enemies import InimigoBase
 from player import *
-from settings import *
+from windows.settings import *
 from feats.projetil import Carabin
 from feats.items import *
 from feats.assets import ASSETS
@@ -58,11 +58,10 @@ class Elite(InimigoBase):
             tamanho=(12, 12)
         )
 
-    def morrer(self, grupos):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-        for _ in range(3):
-            posicao_drop = self.posicao + pygame.math.Vector2(randint(-30, 30), randint(-30, 30))
-            Items(posicao=posicao_drop, sheet_item=join('assets', 'img', 'expShard.png'), tipo='exp_shard', grupos=alvo_grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'exp_shard', 3, 100)
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
         self.kill()
 
     def animar(self):

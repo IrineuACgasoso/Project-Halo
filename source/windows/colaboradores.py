@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from windows.settings import *
 
 class TelaColaboradores:
     def __init__(self, game):

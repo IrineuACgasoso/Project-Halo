@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from windows.settings import *
 from os.path import join
 
 
@@ -22,6 +22,14 @@ ASSETS = {
         'blue_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'bluelaser.png')).convert_alpha(),
         'green_laser': pygame.image.load(join('assets', 'img', 'projectiles', 'greenlaser.png')).convert_alpha()
         
+    },
+
+    'items': {
+        'exp_shard': pygame.image.load(join('assets', 'img', 'itens', 'expshard.png')).convert_alpha(),
+        'big_shard': pygame.image.load(join('assets', 'img', 'itens', 'bigshard.png')).convert_alpha(),
+        'life_orb': pygame.image.load(join('assets', 'img', 'itens', 'lifeorb.png')).convert_alpha(),
+        'light_bullet': pygame.image.load(join('assets', 'img', 'itens', 'lightbullet.png')).convert_alpha(),
+        'cafe': pygame.image.load(join('assets', 'img', 'itens', 'cafe.png')).convert_alpha(),
     },
 
 

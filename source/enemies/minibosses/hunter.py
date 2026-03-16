@@ -2,7 +2,7 @@ import pygame
 import random
 from feats.items import *
 from player import *
-from settings import *
+from windows.settings import *
 from feats.projetil import LaserBeam, PlasmaGun
 from enemies.enemies import *
 from systems.entitymanager import entity_manager
@@ -67,14 +67,21 @@ class Hunter(InimigoBase):
 
     def burst(self):
         """Dispara a metralhadora de plasma."""
+        direcao_tiro = self.jogador.posicao - self.posicao
+        if direcao_tiro.length() > 0:
+            direcao_tiro = direcao_tiro.normalize()
+        else:
+            direcao_tiro = pygame.math.Vector2(1, 0)
+
         PlasmaGun(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
             jogador=self.jogador,
             game=self.game,
             dano=15,
-            velocidade=400,
-            tamanho=(24, 24)
+            velocidade=500,
+            tamanho=(36, 36),
+            direcao_spread=direcao_tiro
         )
 
     def cannon_beam(self):
@@ -87,20 +94,14 @@ class Hunter(InimigoBase):
             dano=250, 
             velocidade=750,
             duracao=3000,
-            color='green'
+            color='green',
+            tamanho= (96, 96)
         )
 
-    def morrer(self, grupos):
-        qtd_shards = 2
-
-        chance= randint(1,1000)
-        if chance >= 900: qtd_shards += 1
-
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
-
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+    def morrer(self, grupos = None):
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 2, 100)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
 
     def update(self, delta_time, paredes=None):
