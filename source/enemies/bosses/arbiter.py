@@ -1,7 +1,6 @@
 import pygame
 import random
 from enemies.enemies import *
-from game import *
 from player.player import *
 from feats.items import *
 from systems.entitymanager import entity_manager

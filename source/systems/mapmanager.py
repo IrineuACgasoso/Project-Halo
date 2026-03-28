@@ -35,8 +35,6 @@ class Mapa:
         with open(caminho, 'r') as f:
             dados = json.load(f)
 
-
-
         for camada in dados['layers']:
 
             # PAREDES 

@@ -17,6 +17,7 @@ from systems.hud import HUD
 from systems.collision import CollisionManager 
 from systems.stagemanager import StageManager
 from enemies.standard.sentinel import Sentinel
+from feats.assets import path
 
 
 
@@ -59,7 +60,7 @@ class Game:
 
         # Mapa 
         self.mapa = None # Inicialize o mapa como None
-        self.caminho_mapa = join(f'assets', 'map', f'{self.fase_atual}', f'm{self.fase_atual}.tmj')
+        self.caminho_mapa = path(f'assets', 'img', 'map', str(self.fase_atual), f'm{self.fase_atual}.tmj')
         self.mapa = Mapa(self.caminho_mapa, self.fase_atual)
         self.camera = Camera(largura_tela, altura_tela, self.mapa)
         self.largura_mapa_pixels = 0

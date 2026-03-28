@@ -1,1 +1,17 @@
+# Pastas geradas pelo PyInstaller
+dist/
+build/
+*.spec
+
+# Pastas de ambiente virtual (se você usar)
+venv/
+.venv/
+env/
+
+# Arquivos temporários do Python
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Outros
+.vscode/

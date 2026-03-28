@@ -1,7 +1,6 @@
 import pygame
 import random
 import math
-from game import *
 from feats.items import *
 from enemies.enemies import *
 from enemies.standard.infection import Infection

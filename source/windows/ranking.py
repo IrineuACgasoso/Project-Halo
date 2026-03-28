@@ -1,5 +1,6 @@
 import pygame
 from os.path import join
+from feats.assets import ASSETS
 
 class Ranking:
     def __init__(self, game):
@@ -17,9 +18,7 @@ class Ranking:
         self.active = False
 
         # --- Carregar background ---
-        self.background = pygame.image.load(join('assets', 'img', 'ranking.jpg')).convert()
-        # Opcional: ajustar para a tela
-        self.background = pygame.transform.scale(self.background, (self.game.tela.get_width(), self.game.tela.get_height()))
+        self.background = ASSETS['menu']['ranking']
 
     def start_name_input(self, score):
         self.input_mode = True

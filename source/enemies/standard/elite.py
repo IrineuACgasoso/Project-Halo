@@ -16,18 +16,7 @@ class Elite(InimigoBase):
         self.game
 
         #sprites
-        self.sprites = {}
-        # Carrega e redimensione as sprites da esquerda
-        self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite1.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite2.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite3.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'covenant', 'elite', 'elite4.png')).convert_alpha(),(120,180))
-        ]
-        #Carrega direita
-        self.sprites['right'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-        ]
+        self.sprites = self.get_sprites('default')
         #Animação
         self.estado_animacao = 'right'
         self.frame_atual = 0

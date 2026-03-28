@@ -2,7 +2,6 @@ import pygame
 import random
 import math
 from enemies.enemies import *
-from game import *
 from player.player import *
 from feats.items import *
 from feats.projetil import Carabin

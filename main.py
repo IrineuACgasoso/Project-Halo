@@ -1,6 +1,6 @@
 import pygame
-from windows.settings import *
-from game import Game
+from source.windows.settings import *
+from source.game import Game
 
 def main():
     pygame.init()

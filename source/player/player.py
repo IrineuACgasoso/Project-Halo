@@ -2,6 +2,7 @@ import pygame
 from windows.settings import *
 from player.levelup import TelaDeUpgrade
 from systems.entitymanager import entity_manager
+from feats.assets import ASSETS
 
 
 class Player(pygame.sprite.Sprite):
@@ -19,19 +20,12 @@ class Player(pygame.sprite.Sprite):
 
         #animacao
         self.sprites = {}
-        sprite_right = [pygame.image.load(join('assets', 'img', 'player', 'player.png')).convert_alpha(),
-                        pygame.image.load(join('assets', 'img', 'player', 'player2.png')).convert_alpha(),
-                        pygame.image.load(join('assets', 'img', 'player', 'player3.png')).convert_alpha(),
-                        pygame.image.load(join('assets', 'img', 'player', 'player2.png')).convert_alpha()
-        ]
-        #sprites direita
-        self.sprites['right'] = [pygame.transform.scale(sprite, (144, 144)) for sprite in sprite_right]
 
-        sprites_left = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
-        ]
+        #sprites direita
+        self.sprites['right'] = ASSETS['player']['right']
+
         #sprite esquerda
-        self.sprites['left'] = sprites_left
+        self.sprites['left'] = ASSETS['player']['left']
 
         #variaveis de animacao
         self.frame_atual = 0  

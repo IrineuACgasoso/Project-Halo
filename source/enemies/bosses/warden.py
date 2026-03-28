@@ -1,5 +1,4 @@
 import pygame
-from game import *
 from feats.items import *
 from enemies.enemies import *
 from player.player import *

@@ -1,7 +1,6 @@
 import pygame
 import random
 from os.path import join
-from game import *
 from feats.items import Items
 from enemies.enemies import InimigoBase
 from feats.projetil import LaserBeam
