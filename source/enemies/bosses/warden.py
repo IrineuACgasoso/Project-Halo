@@ -8,43 +8,25 @@ import math
 from systems.entitymanager import entity_manager
 
 class WardenEternal(InimigoBase):
-    def __init__(self, posicao, grupos, jogador, game, clone = False):
+    def __init__(self, posicao, game, grupos, clone = False):
         if clone:
             valor_vida = 10000
             velocidade_base = 100
         else:
             valor_vida = 7000
             velocidade_base = 80
-        super().__init__(posicao, grupos, jogador, game, vida_base=valor_vida, dano_base=90, velocidade_base=velocidade_base)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=90, velocidade_base=velocidade_base, sprite_key = 'warden')
         self.titulo = "WARDEN ETERNAL, O Guardião do Domínio"
         self.game = game
         self.vida = valor_vida
         self.vida_base = valor_vida
         #sprites
-        #original
+        # Original
         if clone == False:
-            self.sprites = {}
-            self.sprites['left'] = [
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden2.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden3.png')).convert_alpha(), (550,550))
-                
-                ]
-            self.sprites['right'] = [
-                pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-            ]
-        #clone
+            self.sprites = self.get_sprites('default')
+        # Clone
         else:
-            self.sprites = {}
-            self.sprites['left'] = [
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone2.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone3.png')).convert_alpha(), (500,500))
-                
-                ]
-            self.sprites['right'] = [
-                pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-            ]
+            self.sprites = self.get_sprites('clone')
 
         # Inicia a animação
         self.frame_atual = 0

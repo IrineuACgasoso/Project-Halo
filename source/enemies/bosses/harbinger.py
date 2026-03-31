@@ -13,22 +13,12 @@ from systems.entitymanager import entity_manager
 class Harbinger(InimigoBase):
     def __init__(self, posicao, game, grupos):
         valor_vida = 7500
-        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game)
+        super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game, sprite_key='harbinger')
         self.titulo = "HARBINGER, A Rainha Endless"
         self.vida = valor_vida
         self.vida_base = valor_vida
         #sprites
-        self.sprites = {}
-        self.sprites['left'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb1.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb2.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb3.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb4.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb5.png')).convert_alpha(), (200,300))
-            ]
-        self.sprites['right'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['left']
-        ]
+        self.sprites = self.get_sprites('default')
         
         #framagem da sprite
         self.frame_atual = 0  

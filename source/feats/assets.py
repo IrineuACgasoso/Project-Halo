@@ -153,6 +153,13 @@ ASSETS = {
             },
         },
 
+        'knight' : [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command1.png')).convert_alpha(), (250, 250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command2.png')).convert_alpha(), (250, 250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command3.png')).convert_alpha(), (250, 250)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command4.png')).convert_alpha(), (250, 250)),
+        ],
+
         'didact' : {
             'default' : [
                 pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'did1.png')).convert_alpha(), (250, 375)),
@@ -168,6 +175,19 @@ ASSETS = {
                 ]
         },
 
+        'warden' : {
+            'default' : [
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden.png')).convert_alpha(), (550,550)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden2.png')).convert_alpha(), (550,550)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'warden3.png')).convert_alpha(), (550,550))
+            ],
+            'clone' : [
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone2.png')).convert_alpha(), (500,500)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone.png')).convert_alpha(), (500,500)),
+                pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'warden', 'clone3.png')).convert_alpha(), (500,500))
+            ]
+        },
+
         'jega' : [
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega1.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega2.png')).convert_alpha(), (256, 256)),
@@ -176,6 +196,14 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega5.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega6.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
+        ],
+
+        'harbinger' : [
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb1.png')).convert_alpha(), (200,300)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb2.png')).convert_alpha(), (200,300)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb3.png')).convert_alpha(), (200,300)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb4.png')).convert_alpha(), (200,300)),
+            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb5.png')).convert_alpha(), (200,300))
         ],
 
         'grunt': [

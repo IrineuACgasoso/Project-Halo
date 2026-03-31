@@ -13,21 +13,13 @@ from systems.entitymanager import entity_manager
 
 class Knight(InimigoBase):
     def __init__(self, posicao, grupos, game):
-        super().__init__(posicao, vida_base=500, dano_base=60, velocidade_base=50, game=game)
+        super().__init__(posicao, vida_base=500, dano_base=60, velocidade_base=50, game=game, sprite_key='knight')
         self.game = game
         self.titulo = 'PROMETHEAN KNIGHT'
 
-        #sprites
-        self.sprites = {}
-        #right
-        self.sprites['right'] = [
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command1.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command2.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command3.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(join('assets', 'img', 'enemies', 'prometheans', 'knight', 'command4.png')).convert_alpha(), (250, 250)),
-        ]
-        #left
-        self.sprites['left'] = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']]
+        # Sprites
+        self.sprites = self.get_sprites('default')
+        
         # Inicia a animação
         self.frame_atual = 0
         self.estado_animacao = 'right' 

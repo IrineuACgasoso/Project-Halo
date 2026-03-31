@@ -56,7 +56,7 @@ class StageManager:
         game.boss_atual = None
         
         # Novo Mapa
-        caminho = join('assets', 'map', f'{game.fase_atual}', f'm{game.fase_atual}.tmj')
+        caminho = join('assets', 'img', 'map', f'{game.fase_atual}', f'm{game.fase_atual}.tmj')
         game.mapa = Mapa(caminho, game.fase_atual, all_sprites=entity_manager.all_sprites)
         
         # Player
