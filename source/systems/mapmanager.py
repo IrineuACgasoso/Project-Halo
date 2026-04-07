@@ -1,7 +1,7 @@
 import pygame
 from os.path import join
 import json
-from feats.assets import *
+from source.feats.assets import *
 
 class Mapa:
     def __init__(self, caminho_json, fase_atual, all_sprites=None):

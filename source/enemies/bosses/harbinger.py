@@ -1,11 +1,11 @@
 import pygame
 import random
 import math
-from enemies.enemies import *
-from player.player import *
-from feats.items import *
-from feats.projetil import Carabin
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import *
+from source.player.player import *
+from source.feats.items import *
+from source.feats.projetil import Carabin
+from source.systems.entitymanager import entity_manager
 
 
 

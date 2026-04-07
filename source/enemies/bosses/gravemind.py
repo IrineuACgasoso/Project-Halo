@@ -1,13 +1,13 @@
 import pygame
 import random
 import math
-from feats.items import *
-from enemies.enemies import *
-from enemies.standard.infection import Infection
-from feats.projetil import AcidBreath
-from feats.effects import DustParticle
-from feats.assets import *
-from systems.entitymanager import entity_manager
+from source.feats.items import *
+from source.enemies.enemies import *
+from source.enemies.standard.infection import Infection
+from source.feats.projetil import AcidBreath
+from source.feats.effects import DustParticle
+from source.feats.assets import *
+from source.systems.entitymanager import entity_manager
 
 class Gravemind(InimigoBase):
     def __init__(self, posicao, game, jogador=None, is_final_form=False, is_minion=False, grupos=None):

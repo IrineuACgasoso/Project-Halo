@@ -7,7 +7,7 @@ class EntityManager:
         self.inimigos_grupo = pygame.sprite.Group()
         self.projeteis_jogador_grupo = pygame.sprite.Group()
         self.projeteis_inimigos_grupo = pygame.sprite.Group()
-        self.item_group = pygame.sprite.Group()
+        self.items_grupo = pygame.sprite.Group()
         self.auras_grupo = pygame.sprite.Group()
         self.player = None
 

@@ -1,13 +1,13 @@
 import pygame
 import random
 from os.path import join
-from enemies.enemies import InimigoBase
-from player.player import *
-from windows.settings import *
-from feats.projetil import PlasmaGun, M50
-from feats.items import *
-from feats.assets import ASSETS
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import InimigoBase
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.projetil import PlasmaGun, M50
+from source.feats.items import *
+from source.feats.assets import ASSETS
+from source.systems.entitymanager import entity_manager
 
 
 class Jackal(InimigoBase):

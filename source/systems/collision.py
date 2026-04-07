@@ -1,6 +1,6 @@
 import pygame
-from systems.entitymanager import entity_manager
-from feats.weapon import Projetil_PingPong
+from source.systems.entitymanager import entity_manager
+from source.feats.weapons import Projetil_PingPong
 
 class CollisionManager:
     def __init__(self, game):
@@ -46,9 +46,9 @@ class CollisionManager:
                 if getattr(inimigo, 'invulneravel', False): continue
                 
                 if isinstance(projetil, Projetil_PingPong):
-                    if inimigo not in projetil.inimigos_ja_atingidos:
+                    if inimigo not in projetil.inimigos_atingidos:
                         inimigo.receber_dano(projetil.dano)
-                        projetil.inimigos_ja_atingidos.add(inimigo)
+                        projetil.inimigos_atingidos.add(inimigo)
                 else:
                     inimigo.receber_dano(projetil.dano)
                     projetil.kill()
@@ -77,7 +77,7 @@ class CollisionManager:
                 player.tomar_dano(inimigo)
 
         # 4. Coleta de itens (Rect é suficiente)
-        itens_coletados = pygame.sprite.spritecollide(player, entity_manager.item_group, True)
+        itens_coletados = pygame.sprite.spritecollide(player, entity_manager.items_grupo, True)
         for item in itens_coletados:
             player.coletar_item(item)
 
@@ -98,4 +98,4 @@ class CollisionManager:
         # 6. Check de Morte (Limpeza concentrada)
         for inimigo in inimigos:
             if inimigo.vida <= 0:
-                inimigo.morrer((entity_manager.all_sprites, entity_manager.item_group))
+                inimigo.morrer((entity_manager.all_sprites, entity_manager.items_grupo))

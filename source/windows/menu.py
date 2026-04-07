@@ -2,8 +2,8 @@ import pygame
 import math
 import os
 from os.path import join
-from windows.settings import largura_tela, altura_tela
-from feats.assets import ASSETS
+from source.windows.settings import largura_tela, altura_tela
+from source.feats.assets import ASSETS
 
 class MenuPrincipal:
     def __init__(self, game):

@@ -1,9 +1,9 @@
 import pygame
 from os.path import join
-from windows.settings import *
-from systems.camera import Camera
-from feats.assets import ASSETS
-from player.player import *
+from source.windows.settings import *
+from source.systems.camera import Camera
+from source.feats.assets import ASSETS
+from source.player.player import *
 
 class HUD:
     def __init__(self, game):

@@ -1,8 +1,8 @@
-from systems.entitymanager import entity_manager
-from enemies.enemies import *
-from feats.items import *
-from feats.weapon import *
-from feats.assets import *
+from source.systems.entitymanager import entity_manager
+from source.enemies.enemies import *
+from source.feats.items import *
+from source.feats.weapons import *
+from source.feats.assets import *
 import math
 
 #PROJETIL INIMIGO BASE

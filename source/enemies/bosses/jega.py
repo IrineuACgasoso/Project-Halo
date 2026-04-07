@@ -1,11 +1,11 @@
 import pygame
 import random
 import math
-from enemies.enemies import InimigoBase
-from feats.projetil import *
-from feats.items import *
-from player.player import *
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import InimigoBase
+from source.feats.projetil import *
+from source.feats.items import *
+from source.player.player import *
+from source.systems.entitymanager import entity_manager
 
 
 class Jega(InimigoBase):

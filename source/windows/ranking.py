@@ -1,6 +1,6 @@
 import pygame
 from os.path import join
-from feats.assets import ASSETS
+from source.feats.assets import ASSETS
 
 class Ranking:
     def __init__(self, game):

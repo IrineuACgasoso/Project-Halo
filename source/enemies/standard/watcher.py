@@ -1,12 +1,12 @@
 import pygame
 import random
 from os.path import join
-from enemies.enemies import InimigoBase
-from player.player import *
-from windows.settings import *
-from feats.items import *
-from feats.effects import RaioEscudo
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import InimigoBase
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.items import *
+from source.feats.effects import RaioEscudo
+from source.systems.entitymanager import entity_manager
 
 class Watcher(InimigoBase):
     def __init__(self, posicao, game):

@@ -2,9 +2,9 @@ import pygame
 import random
 import math
 from os.path import join
-from enemies.enemies import *
-from feats.assets import ASSETS
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import *
+from source.feats.assets import ASSETS
+from source.systems.entitymanager import entity_manager
 
 
 class Zealot(InimigoBase):
@@ -27,13 +27,13 @@ class Zealot(InimigoBase):
         # FSM e Variáveis de Habilidade
         self.estado_habilidade = 'idle' 
         self.alpha = 255
-        self.rage_mult = 2.8
+        self.rage_mult = 4.0
         self.enrage = False
         self.last_stealth = pygame.time.get_ticks()
         
         # Cooldowns e Timers
         self.cooldown_stealth = random.randint(3000, 6000) # Cooldown inicial aleatório
-        self.tempo_invisivel_perseguindo = 2000 # Quanto tempo (ms) ele corre invisível após o TP
+        self.tempo_invisivel_perseguindo = 2500 # Quanto tempo (ms) ele corre invisível após o TP
         self.inicio_perseguicao_invisivel = 0
 
         self.hitbox = pygame.Rect(0, 0, self.rect.width / 2, self.rect.height)
@@ -61,14 +61,14 @@ class Zealot(InimigoBase):
                 self.posicao += direcao * (self.velocidade * self.rage_mult) * self.dt
             
             # LÓGICA DE VISIBILIDADE
-            if tempo_decorrido < 800:
+            if tempo_decorrido < 1500:
                 # Primeiro 0.8 segundo: Totalmente invisível
                 self.alpha = 0
             else:
                 # Após 1 segundo: Começa o Fade In
                 self.estado_habilidade = 'stealth_in'
                 if self.alpha < 255:
-                    self.alpha = min(255, self.alpha + 10)
+                    self.alpha = min(255, self.alpha + 15)
                 
             # FINALIZAÇÃO: Só encerra quando o tempo total (1.5s) bater E o alpha estiver cheio
             if tempo_decorrido > self.tempo_invisivel_perseguindo and self.alpha >= 255:
@@ -80,7 +80,7 @@ class Zealot(InimigoBase):
 
     def realizar_teleporte(self):
         raio_min = 500
-        raio_max = 600
+        raio_max = 750
         tentativas = 40  # Quantas vezes ele tenta achar um ponto válido antes de desistir
         
         for _ in range(tentativas):

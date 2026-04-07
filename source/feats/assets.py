@@ -1,5 +1,5 @@
 import pygame
-from windows.settings import *
+from source.windows.settings import *
 import sys
 import os
 
@@ -41,6 +41,8 @@ ASSETS = {
         'bcarabin': pygame.image.load(path('assets', 'img', 'projectiles', 'bcarabin.png')).convert_alpha(),
         'm50': pygame.image.load(path('assets', 'img', 'projectiles', 'm50.png')).convert_alpha(),
         'ar': pygame.image.load(path('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
+        'pingpong' : pygame.image.load(path('assets', 'img', 'projectiles', 'bola_pingpong.png')),
+        'lista' : pygame.image.load(path('assets', 'img', 'projectiles','listas.png')).convert_alpha(),
         'lightrifle': pygame.image.load(path('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
         'dizimator': pygame.image.load(path('assets', 'img', 'projectiles', 'dizimator.png')).convert_alpha(),
         'acid_breath': pygame.image.load(path('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha(),
@@ -61,6 +63,19 @@ ASSETS = {
     'player': {
         'right': player_right_frames,
         'left': [pygame.transform.flip(sprite, True, False) for sprite in player_right_frames]
+    },
+
+    'buddies' : {
+        'cortana' : [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'cortana', 'cortana1.png')).convert_alpha(), (128, 192)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'cortana', 'cortana2.png')).convert_alpha(), (128, 192)),
+        ],
+        'arbiter' : [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter1.png')).convert_alpha(), (192, 192)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter2.png')).convert_alpha(), (192, 192)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter3.png')).convert_alpha(), (192, 192)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter4.png')).convert_alpha(), (192, 192)),
+        ]
     },
 
 

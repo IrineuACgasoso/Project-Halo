@@ -2,13 +2,13 @@ import pygame
 import random
 import math
 from os.path import join
-from enemies.enemies import InimigoBase
-from player.player import *
-from windows.settings import *
-from feats.items import *
-from feats.projetil import LightRifle
-from feats.effects import PrometheanTeleport
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import InimigoBase
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.items import *
+from source.feats.projetil import LightRifle
+from source.feats.effects import PrometheanTeleport
+from source.systems.entitymanager import entity_manager
 
 # (Aviso: certifique-se de que a classe PrometheanTeleport está importada aqui!)
 

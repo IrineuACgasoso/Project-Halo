@@ -1,6 +1,6 @@
 import pygame
-from windows.settings import *
-from feats.assets import ASSETS
+from source.windows.settings import *
+from source.feats.assets import ASSETS
 
 class TelaColaboradores:
     def __init__(self, game):

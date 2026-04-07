@@ -1,13 +1,13 @@
 import pygame
 import random
 import math
-from feats.items import *
-from player.player import *
-from windows.settings import *
-from feats.projetil import LaserBeam
-from enemies.enemies import *
-from feats.effects import PrometheanTeleport
-from systems.entitymanager import entity_manager
+from source.feats.items import *
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.projetil import LaserBeam
+from source.enemies.enemies import *
+from source.feats.effects import PrometheanTeleport
+from source.systems.entitymanager import entity_manager
 
 
 
@@ -179,7 +179,7 @@ class Knight(InimigoBase):
         chance= randint(1,1000)
         if chance >= 900: qtd_shards += 1
 
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.items_grupo)
 
         for _ in range(qtd_shards):
             pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))

@@ -1,14 +1,14 @@
 import pygame
 import random
 import math
-from enemies.enemies import *
-from feats.projetil import *
-from feats.items import *
-from player.player import *
-from feats.assets import *
-from feats.projetil import LaserBeam
-from enemies.standard.sentinel import Sentinel
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import *
+from source.feats.projetil import *
+from source.feats.items import *
+from source.player.player import *
+from source.feats.assets import *
+from source.feats.projetil import LaserBeam
+from source.enemies.standard.sentinel import Sentinel
+from source.systems.entitymanager import entity_manager
 
 
 class GuiltySpark(InimigoBase):

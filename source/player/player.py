@@ -1,8 +1,8 @@
 import pygame
-from windows.settings import *
-from player.levelup import TelaDeUpgrade
-from systems.entitymanager import entity_manager
-from feats.assets import ASSETS
+from source.windows.settings import *
+from source.player.levelup import TelaDeUpgrade
+from source.systems.entitymanager import entity_manager
+from source.feats.assets import ASSETS
 
 
 class Player(pygame.sprite.Sprite):
@@ -278,7 +278,7 @@ class Player(pygame.sprite.Sprite):
             # Verifica se o jogo já tem um portal ativo. 
             if self.game.portal_atual is None:
                 # Importação local para evitar erro circular (Player importar Portal e Portal importar Player)
-                from feats.effects import Portal 
+                from source.feats.effects import Portal 
                 
                 offset = 50 if self.estado_animacao == 'right' else -50
                 pos_portal = self.posicao + pygame.math.Vector2(offset, 0)

@@ -2,10 +2,10 @@ import pygame
 import random
 import math
 from os.path import join
-from enemies.enemies import InimigoBase
-from feats.effects import ContinuousBeam
-from feats.assets import ASSETS
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import InimigoBase
+from source.feats.effects import ContinuousBeam
+from source.feats.assets import ASSETS
+from source.systems.entitymanager import entity_manager
 
 class Sentinel(InimigoBase):
     def __init__(self, posicao, game):

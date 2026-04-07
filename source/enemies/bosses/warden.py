@@ -1,11 +1,11 @@
 import pygame
-from feats.items import *
-from enemies.enemies import *
-from player.player import *
-from enemies.minibosses.knight import Knight
+from source.feats.items import *
+from source.enemies.enemies import *
+from source.player.player import *
+from source.enemies.minibosses.knight import Knight
 import random
 import math
-from systems.entitymanager import entity_manager
+from source.systems.entitymanager import entity_manager
 
 class WardenEternal(InimigoBase):
     def __init__(self, posicao, game, grupos, clone = False):

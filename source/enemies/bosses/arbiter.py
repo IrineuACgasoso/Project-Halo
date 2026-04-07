@@ -1,9 +1,9 @@
 import pygame
 import random
-from enemies.enemies import *
-from player.player import *
-from feats.items import *
-from systems.entitymanager import entity_manager
+from source.enemies.enemies import *
+from source.player.player import *
+from source.feats.items import *
+from source.systems.entitymanager import entity_manager
 
 
 

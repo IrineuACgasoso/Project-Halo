@@ -1,12 +1,12 @@
 import pygame
 import random
 from os.path import join
-from feats.items import Items
-from enemies.enemies import InimigoBase
-from feats.projetil import LaserBeam
-from feats.skills import OndaEMP, ArtilhariaAviso
-from feats.effects import LaserWarning
-from systems.entitymanager import entity_manager
+from source.feats.items import Items
+from source.enemies.enemies import InimigoBase
+from source.feats.projetil import LaserBeam
+from source.feats.skills import OndaEMP, ArtilhariaAviso
+from source.feats.effects import LaserWarning
+from source.systems.entitymanager import entity_manager
 
 
 class Didact(InimigoBase):

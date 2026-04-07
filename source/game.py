@@ -1,23 +1,23 @@
 import pygame
 import random
 from os.path import join
-from windows.settings import *
-from player.player import Player 
-from windows.menu import *
-from systems.spawner import Spawner
-from systems.entitymanager import entity_manager
-from feats.weapon import *
-from feats.effects import Portal
-from windows.colaboradores import TelaColaboradores
-from windows.ranking import Ranking 
-from player.levelup import *
-from systems.mapmanager import Mapa
-from systems.camera import Camera
-from systems.hud import HUD
-from systems.collision import CollisionManager 
-from systems.stagemanager import StageManager
-from enemies.standard.sentinel import Sentinel
-from feats.assets import path
+from source.windows.settings import *
+from source.player.player import Player 
+from source.windows.menu import *
+from source.systems.spawner import Spawner
+from source.systems.entitymanager import entity_manager
+from source.feats.weapons import *
+from source.feats.effects import Portal
+from source.windows.colaboradores import TelaColaboradores
+from source.windows.ranking import Ranking 
+from source.player.levelup import *
+from source.systems.mapmanager import Mapa
+from source.systems.camera import Camera
+from source.systems.hud import HUD
+from source.systems.collision import CollisionManager 
+from source.systems.stagemanager import StageManager
+from source.enemies.standard.sentinel import Sentinel
+from source.feats.assets import path
 
 
 
@@ -39,7 +39,7 @@ class Game:
         self.inimigos_grupo = entity_manager.inimigos_grupo
         self.projeteis_jogador_grupo = entity_manager.projeteis_jogador_grupo
         self.projeteis_inimigos_grupo = entity_manager.projeteis_inimigos_grupo
-        self.item_group = entity_manager.item_group
+        self.items_grupo = entity_manager.items_grupo
 
         # Menus
         self.menu_principal = MenuPrincipal(self)
@@ -134,7 +134,8 @@ class Game:
                             self.player.armas[nome_da_arma].upgrade()
                         else:
                             self.player.armas[nome_da_arma] = arma_escolhida 
-                            arma_escolhida.equipar()
+                            if hasattr(arma_escolhida, 'equipar'):
+                                arma_escolhida.equipar()
                         
                         self.estado_do_jogo = 'jogando'
                         self.tela_de_upgrade_ativa = None
@@ -291,7 +292,7 @@ class Game:
         # Limpa tudo
         entity_manager.all_sprites.empty()
         entity_manager.inimigos_grupo.empty()
-        entity_manager.item_group.empty()
+        entity_manager.items_grupo.empty()
         entity_manager.projeteis_jogador_grupo.empty()
         entity_manager.projeteis_inimigos_grupo.empty()
 
@@ -348,7 +349,7 @@ class Game:
                      #game=self)
         #arma_arbitro = ArmaArbitro(
             #jogador=self.player,
-            #grupos=(self.all_sprites, self.inimigos_grupo, self.item_group),
+            #grupos=(self.all_sprites, self.inimigos_grupo, self.items_grupo),
             #game=self)
 
         self.player.armas['Rifle de Assalto'] = rifle

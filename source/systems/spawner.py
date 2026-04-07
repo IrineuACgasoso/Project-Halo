@@ -2,37 +2,37 @@ import pygame
 import random
 import math
 from random import randint
-from windows.settings import *
-from systems.entitymanager import entity_manager
-from systems.mapmanager import Mapa
-from feats.assets import *
+from source.windows.settings import *
+from source.systems.entitymanager import entity_manager
+from source.systems.mapmanager import Mapa
+from source.feats.assets import *
 
 # Inimigos base
-from enemies.standard.grunt import Grunt
-from enemies.standard.jackal import Jackal
-from enemies.standard.elite import Elite
-from enemies.standard.brute import Brute
-from enemies.standard.infection import Infection, FloodForms
-from enemies.standard.sentinel import Sentinel
-from enemies.standard.crawler import Crawler
-from enemies.standard.watcher import Watcher
-from enemies.standard.soldier import Soldier
+from source.enemies.standard.grunt import Grunt
+from source.enemies.standard.jackal import Jackal
+from source.enemies.standard.elite import Elite
+from source.enemies.standard.brute import Brute
+from source.enemies.standard.infection import Infection, FloodForms
+from source.enemies.standard.sentinel import Sentinel
+from source.enemies.standard.crawler import Crawler
+from source.enemies.standard.watcher import Watcher
+from source.enemies.standard.soldier import Soldier
 
 
 # Bosses
-from enemies.bosses.guilty import GuiltySpark
-from enemies.bosses.arbiter import BossArbiter
-from enemies.bosses.gravemind import FloodWarning
-from enemies.bosses.didact import Didact
-from enemies.bosses.warden import WardenEternal
-from enemies.bosses.harbinger import Harbinger
-from enemies.bosses.jega import Jega
+from source.enemies.bosses.guilty import GuiltySpark
+from source.enemies.bosses.arbiter import BossArbiter
+from source.enemies.bosses.gravemind import FloodWarning
+from source.enemies.bosses.didact import Didact
+from source.enemies.bosses.warden import WardenEternal
+from source.enemies.bosses.harbinger import Harbinger
+from source.enemies.bosses.jega import Jega
 
 # Minibosses
-from enemies.minibosses.hunter import Hunter
-from enemies.minibosses.zealot import Zealot
-from enemies.minibosses.scarab import Scarab
-from enemies.minibosses.knight import Knight
+from source.enemies.minibosses.hunter import Hunter
+from source.enemies.minibosses.zealot import Zealot
+from source.enemies.minibosses.scarab import Scarab
+from source.enemies.minibosses.knight import Knight
 
 class Spawner:
     def __init__(self, game):

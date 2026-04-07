@@ -1,12 +1,12 @@
 import pygame
 import random
 from os.path import join
-from player.player import *
-from windows.settings import *
-from feats.projetil import PlasmaGun, Dizimator, Carabin, M50
-from feats.items import *
-from feats.assets import ASSETS
-from systems.entitymanager import entity_manager
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.projetil import PlasmaGun, Dizimator, Carabin, M50
+from source.feats.items import *
+from source.feats.assets import ASSETS
+from source.systems.entitymanager import entity_manager
 
 
 

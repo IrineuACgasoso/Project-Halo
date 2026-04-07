@@ -1,6 +1,6 @@
 import pygame
 import random
-from feats.assets import ASSETS 
+from source.feats.assets import ASSETS 
 
 class Items(pygame.sprite.Sprite):
     def __init__(self, posicao, tipo, grupos):

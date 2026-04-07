@@ -1,9 +1,9 @@
 import pygame
 from os.path import join
-from systems.mapmanager import Mapa
-from systems.entitymanager import entity_manager
-from feats.effects import Portal
-from systems.spawner import Spawner
+from source.systems.mapmanager import Mapa
+from source.systems.entitymanager import entity_manager
+from source.feats.effects import Portal
+from source.systems.spawner import Spawner
 
 class StageManager:
     def __init__(self, game):
@@ -47,9 +47,25 @@ class StageManager:
         game = self.game
         game.fase_atual += 1
         
-        # Limpeza
+        # Criamos uma lista de quem DEVE sobreviver
+        sobreviventes = [game.player]
+        
+        # Adicionamos os companheiros (Cortana/Árbitro) à lista de sobreviventes
+        for arma in game.player.armas.values():
+            if hasattr(arma, 'sprite_companion') and arma.sprite_companion:
+                sobreviventes.append(arma.sprite_companion)
+
+        # Limpeza: Só mata quem NÃO está na lista de sobreviventes
         for sprite in list(entity_manager.all_sprites):
-            if sprite != game.player: sprite.kill()
+            if sprite not in sobreviventes: 
+                sprite.kill()
+
+        # Coloca os companheiros na mesma posição nova do jogador para não cruzarem o mapa voando
+        nova_pos = game.mapa.get_player_spawn_pos()
+        for arma in game.player.armas.values():
+            if hasattr(arma, 'sprite_companion') and arma.sprite_companion:
+                arma.sprite_companion.posicao = pygame.math.Vector2(nova_pos)
+                arma.sprite_companion.rect.center = nova_pos
 
         game.portal_atual = None             # Remove a referência do portal antigo
         game.spawnar_portal_em_breve = False # Garante que a flag de espera suma

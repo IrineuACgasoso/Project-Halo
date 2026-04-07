@@ -1,14 +1,15 @@
 import pygame
 import random
-from windows.settings import *
-from feats.weapon import Arma, Arma_Loop, ArmaLista, Dicionario_Divino, ArmaArbitro
+from source.windows.settings import *
+from source.feats.weapons import *
 
 MAX_ARMAS = 6
 TODAS_AS_ARMAS = {
     "Bola Calderânica": Arma_Loop,
     "Ciclo de Lâminas": ArmaLista,
     "Dicionário Divino": Dicionario_Divino,
-    "Árbitro": ArmaArbitro,
+    "Árbitro": Arbitro,
+    "Cortana": Cortana
 }
 
 class TelaDeUpgrade:
@@ -45,23 +46,17 @@ class TelaDeUpgrade:
             
             else:
                 classe_arma = TODAS_AS_ARMAS[nome_arma]
-                grupos = ()
+                grupos = (
+                    self.game.all_sprites,
+                    self.game.inimigos_grupo,      # <-- Agora na posição correta
+                    self.game.items_grupo          # <-- Agora na posição correta
+                )
 
-                if classe_arma == Arma_Loop:
-                    grupos = (self.game.all_sprites, self.game.projeteis_jogador_grupo, self.game.inimigos_grupo)
-                
-                elif classe_arma == ArmaLista:
-                    grupos = (self.game.all_sprites, self.game.projeteis_jogador_grupo)
-                
-                elif classe_arma == Dicionario_Divino:
-                    grupos = (self.game.all_sprites, self.game.auras_grupo)
-                
-                elif classe_arma == ArmaArbitro:
-                    grupos = (self.game.all_sprites, self.game.inimigos_grupo, self.game.item_group)
+                # Se for o Dicionário Divino, ele vai ignorar o segundo grupo, 
+                # mas o Python não vai dar erro de unpack porque você entregou 3 valores.
 
-
-                arma_para_exibir = classe_arma(self.jogador, grupos, self.game)
-            
+                arma_para_exibir = classe_arma(self.jogador, grupos, self.game, criar_sprite=False)
+                        
             self.opcoes_de_armas_obj.append(arma_para_exibir)
 
             # O resto da criação dos cards continua igual
@@ -169,10 +164,9 @@ class OpcaoDeUpgrade:
         lista_stats_formatada = self.arma.get_estatisticas_para_exibir()
 
         posicao_y_stats = self.rect.y + 80
-        if arma_ja_existe_no_inventario:
-            for texto_stat in lista_stats_formatada:
-                desenhar_texto(surface, texto_stat, (self.rect.x + 10, posicao_y_stats), self.fonte_pequena)
-                posicao_y_stats += 25 
+        for texto_stat in lista_stats_formatada:
+            desenhar_texto(surface, texto_stat, (self.rect.x + 10, posicao_y_stats), self.fonte_pequena)
+            posicao_y_stats += 25 
 
 def desenhar_texto(surface, texto, pos, fonte, cor='white'):
     """Função auxiliar para desenhar texto na tela."""

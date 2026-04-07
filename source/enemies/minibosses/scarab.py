@@ -1,12 +1,12 @@
 import pygame
 import random
-from feats.items import *
-from player.player import *
-from windows.settings import *
-from feats.projetil import PlasmaGun
-from feats.effects import ContinuousBeam
-from enemies.enemies import *
-from systems.entitymanager import entity_manager
+from source.feats.items import *
+from source.player.player import *
+from source.windows.settings import *
+from source.feats.projetil import PlasmaGun
+from source.feats.effects import ContinuousBeam
+from source.enemies.enemies import *
+from source.systems.entitymanager import entity_manager
 
 class Scarab(InimigoBase):
     def __init__(self, posicao, grupos, game):

@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 from random import randint
-from feats.assets import *
+from source.feats.assets import *
 
 class DustParticle(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos):
