@@ -96,20 +96,27 @@ class GuiltySpark(InimigoBase):
     def laser_attack(self):
         agora = pygame.time.get_ticks()
 
+        # Calcula a direção do Laser
+        direcao_beam = self.calcular_direcao_tiro()
+
         if agora - self.start_laser >= self.wait:
             if self.laser_restantes > 0:
                 if agora - self.ultimo_laser >= self.intervalo_burst:
                     self.laser_restantes -= 1
                     self.ultimo_laser = agora
+
                     LaserBeam(
-                        posicao_inicial=self.posicao,
-                        grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
-                        jogador=self.jogador,
-                        game=self.game,
-                        dano=self.dano_base * 2,
-                        velocidade= 1500,  # Ajuste o dano do laser
-                        duracao=1500,  # Ajusta a duração em milissegundos
-                        color='blue'
+                        posicao_inicial = self.posicao,
+                        grupos          = (entity_manager.all_sprites,),
+                        jogador         = self.jogador,
+                        game            = self.game,
+                        dono            ='INIMIGO',
+                        tamanho         = (150, 25),
+                        dano            = self.dano_base * 2,
+                        velocidade      = 1500,  # Ajuste o dano do laser
+                        direcao_spread  = direcao_beam,
+                        vai_rotacionar  = True,
+                        color           ='blue'
                     )
             else:
                 # Reseta os contadores

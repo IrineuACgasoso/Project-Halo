@@ -37,14 +37,19 @@ class Elite(InimigoBase):
         self.vida_critica = False
 
     def carabin(self):
+        # Calculamos a direção para o jogador
+        direcao_tiro = self.calcular_direcao_tiro(0.005)
+
         Carabin(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,), # A base adiciona o grupo de inimigos sozinha agora
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
+            tamanho=(16, 16), 
             dano=10,
-            velocidade=500,
-            tamanho=(12, 12)
+            velocidade=600,
+            direcao_spread=direcao_tiro
         )
 
     def morrer(self, grupos = None):

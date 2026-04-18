@@ -75,21 +75,19 @@ class Crawler(InimigoBase):
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):
-        direcao_tiro = self.jogador.posicao - self.posicao
-        if direcao_tiro.length() > 0:
-            direcao_tiro = direcao_tiro.normalize()
-        else:
-            direcao_tiro = pygame.math.Vector2(1, 0)
+        # Calcula a direção para o jogador 
+        direcao_com_spread = self.calcular_direcao_tiro(0.05)
             
         LightRifle(
             posicao_inicial=self.posicao.copy(),
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             tamanho=(32, 32),
             dano=5,
             velocidade=800,
-            direcao_spread=direcao_tiro
+            direcao_spread=direcao_com_spread
         ) 
 
     def iniciar_teleporte(self):

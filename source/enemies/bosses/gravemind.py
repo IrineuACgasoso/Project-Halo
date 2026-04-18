@@ -141,9 +141,9 @@ class Gravemind(InimigoBase):
                 self.tiros_restantes -= 1
                 self.ultimo_tiro_burst = agora
                 AcidBreath(posicao_inicial=self.posicao, 
-                           grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo), 
-                           jogador=self.jogador, 
-                           game=self.game, 
+                           grupos=(entity_manager.all_sprites,), 
+                           jogador=self.jogador, game=self.game,
+                           dono='INIMIGO',
                            velocidade=self.velocidade_baforada)
         else:
             self.ultima_baforada = agora

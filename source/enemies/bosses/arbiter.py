@@ -3,6 +3,7 @@ import random
 from source.enemies.enemies import *
 from source.player.player import *
 from source.feats.items import *
+from source.feats.projetil import Carabin
 from source.systems.entitymanager import entity_manager
 
 
@@ -66,9 +67,10 @@ class BossArbiter(InimigoBase):
     def carabin(self):
         Carabin(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono='INIMIGO',
             dano=40,
             velocidade=750,
             tamanho=(16, 16)

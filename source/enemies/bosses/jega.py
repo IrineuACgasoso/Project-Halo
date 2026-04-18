@@ -75,9 +75,10 @@ class Jega(InimigoBase):
     def carabin(self):
         Carabin(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono='INIMIGO',
             dano=40,
             velocidade=500,
             tamanho=(24, 24),

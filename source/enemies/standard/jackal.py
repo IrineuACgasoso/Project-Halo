@@ -88,23 +88,28 @@ class Jackal(InimigoBase):
         # Cria uma instância do PlasmaGun
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             tamanho=(28,28),
             dano=4,
             velocidade=250,
-            direcao_spread = direcao_tiro
+            direcao_spread = direcao_tiro,
+            vai_rotacionar = False
         )
 
     def sniper(self):
+        direcao_tiro = (self.jogador.posicao - self.posicao)
         # Cria uma instância do PlasmaGun
         M50(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             tamanho=(45,45),
             dano=50,
-            velocidade=750
+            velocidade=750,
+            direcao_spread=direcao_tiro
         )

@@ -1,6 +1,7 @@
 import pygame
 from source.systems.entitymanager import entity_manager
-from source.feats.weapons import Projetil_PingPong
+from source.player.weapons import *
+from source.feats.projetil import *
 
 class CollisionManager:
     def __init__(self, game):
@@ -26,43 +27,34 @@ class CollisionManager:
         player = self.game.player
         if not player: return
 
-        # OTIMIZAÇÃO: Não recriamos o Grupo. Iteramos sobre o grupo existente 
-        # e filtramos logicamente para evitar overhead de memória.
-        inimigos = entity_manager.inimigos_grupo.sprites()
-        projeteis_player = entity_manager.projeteis_jogador_grupo.sprites()
-
         # 1. Projéteis do Jogador -> Inimigos
-        for projetil in projeteis_player:
-            # Pegamos apenas inimigos próximos ou na tela se quiser otimizar mais, 
-            # mas o spritecollide já faz um bom trabalho com Rects.
+        # Usamos o grupo específico do EntityManager. 
+        # Como esse grupo SÓ tem tiros do player, não precisa checar 'if dono == player'
+        for projetil in entity_manager.projeteis_jogador_grupo:
             atingidos = pygame.sprite.spritecollide(
                 projetil, 
                 entity_manager.inimigos_grupo, 
                 False, 
                 self.custom_collision
             )
-
             for inimigo in atingidos:
-                if getattr(inimigo, 'invulneravel', False): continue
-                
-                if isinstance(projetil, Projetil_PingPong):
-                    if inimigo not in projetil.inimigos_atingidos:
-                        inimigo.receber_dano(projetil.dano)
-                        projetil.inimigos_atingidos.add(inimigo)
-                else:
-                    inimigo.receber_dano(projetil.dano)
-                    projetil.kill()
-                    break # Projétil comum morre no primeiro impacto
+                # A MÁGICA ESTÁ AQUI: Chamamos o método que você já tem na base.
+                # Ele vai aplicar o dano, checar piercing e, no caso da Needler, 
+                # vai contar as agulhas. Tudo sem o Manager saber os detalhes.
+                projetil.ao_atingir_alvo(inimigo)
 
-        # 2. Projéteis dos Inimigos -> Jogador (Usa Rect para ser justo e rápido)
+        # 2. Projéteis dos Inimigos -> Jogador
+        # Mudamos de 'True' para 'False' no kill, para deixar o PROJÉTIL decidir se morre
         colisoes_proj_inimigos = pygame.sprite.spritecollide(
             player,
             entity_manager.projeteis_inimigos_grupo,
-            True,
+            False, 
             pygame.sprite.collide_rect
         )
         for projetil in colisoes_proj_inimigos:
-            player.tomar_dano_direto(projetil.dano)
+            # O projétil do inimigo também usa o ao_atingir_alvo!
+            # Assim, se um inimigo tiver um tiro com piercing, funciona no player também.
+            projetil.ao_atingir_alvo(player)
 
         # 3. Colisão de Contato: Jogador -> Inimigos
         # Aqui o custom_collision ajuda muito com o Scarab
@@ -96,6 +88,6 @@ class CollisionManager:
                     inimigo.receber_dano(total_dano * delta_time)
 
         # 6. Check de Morte (Limpeza concentrada)
-        for inimigo in inimigos:
+        for inimigo in entity_manager.inimigos_grupo:
             if inimigo.vida <= 0:
                 inimigo.morrer((entity_manager.all_sprites, entity_manager.items_grupo))

@@ -41,12 +41,14 @@ class Brute(InimigoBase):
     def dizim(self):
         Dizimator(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             tamanho=(48,48),
             dano=15,
-            velocidade=800)
+            velocidade=800
+            )
     
     def morrer(self, grupos = None):
         Items.spawn_drop(self.posicao, grupos, 'exp_shard', 3, 100)

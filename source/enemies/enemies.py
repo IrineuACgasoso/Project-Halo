@@ -3,7 +3,6 @@ import random
 from os.path import join
 from source.player.player import *
 from source.windows.settings import *
-from source.feats.projetil import PlasmaGun, Dizimator, Carabin, M50
 from source.feats.items import *
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
@@ -98,6 +97,28 @@ class InimigoBase(pygame.sprite.Sprite):
         """Define o valor do escudo do inimigo."""
         self.escudo_maximo = valor
         self.escudo_atual = valor
+
+    def calcular_direcao_tiro(self, spread_range=0):
+        """
+        Calcula a direção para o jogador com spread opcional.
+        spread_range: 0 para tiro preciso, ou um valor (ex: 0.05) para espalhamento.
+        """
+        direcao = self.jogador.posicao - self.posicao
+        if direcao.length() > 0:
+            direcao = direcao.normalize()
+        else:
+            direcao = pygame.math.Vector2(1, 0)
+
+        if spread_range > 0:
+            spread = pygame.math.Vector2(
+                random.uniform(-spread_range, spread_range),
+                random.uniform(-spread_range, spread_range)
+            )
+            direcao = (direcao + spread)
+            if direcao.length() > 0:
+                direcao = direcao.normalize()
+                
+        return direcao
 
     def receber_dano(self, quantidade):
         """Gerencia o dano, retirando do escudo primeiro e o restante da vida."""

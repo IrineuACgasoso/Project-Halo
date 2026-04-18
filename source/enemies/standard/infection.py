@@ -128,32 +128,23 @@ class FloodForms(InimigoBase):
                     self.cooldown_ataque = random.choice(novo_cooldown)
 
     def disparar(self):
-        # Calcula a direção para o jogador usando o Vector2 (igual à sua base)
-        direcao = self.jogador.posicao - self.posicao
-        if direcao.length() > 0:
-            direcao = direcao.normalize()
-            
-        # Adiciona o Spread (espalhamento) para a bala não ser 100% teleguiada
-        spread = pygame.math.Vector2(random.uniform(-0.1, 0.1), random.uniform(-0.1, 0.1))
-        direcao_com_spread = (direcao + spread)
-        
-        if direcao_com_spread.length() > 0:
-             direcao_com_spread = direcao_com_spread.normalize()
+        # Calcula a direção para o jogador
+        direcao_com_spread = self.calcular_direcao_tiro(0.2)
 
-        # Cria o projétil seguindo o padrão da sua ProjetilInimigoBase
         BurstRifle(
-            posicao_inicial=self.posicao.copy(),
-            grupos= (entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
-            jogador=self.jogador,
-            game=self.game,
-            tamanho=(24, 24), # Ajuste o tamanho da bala (Largura x Altura) aqui
-            dano=8,
-            velocidade=700,
-            direcao_spread=direcao_com_spread # Passa a direção bagunçada para a bala
+            posicao_inicial = self.posicao.copy(),
+            grupos          = (entity_manager.all_sprites,),
+            jogador         = self.jogador,
+            game            = self.game,
+            dono            = 'INIMIGO',
+            tamanho         = (32, 32), # Ajuste o tamanho da bala (Largura x Altura) aqui
+            dano            = 8,
+            velocidade      = 700,
+            direcao_spread  = direcao_com_spread, # Passa a direção bagunçada para a bala
         )
 
     def morrer(self, grupos=None):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.item_group)
+        alvo_grupos = (entity_manager.all_sprites, entity_manager.items_grupo)
         chance = random.randint(1, 1000)
 
         if self.is_Carry: 

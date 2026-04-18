@@ -137,14 +137,16 @@ class Scarab(InimigoBase):
             dir_tiro = (self.jogador.posicao - p_pos).normalize()
             
             PlasmaGun(
-                posicao_inicial=p_pos,
-                grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
-                jogador=self.jogador,
-                game=self.game,
-                tamanho=(96, 16), # Plasma "Heavy"
-                dano= 20,
-                velocidade=750,
-                direcao_spread=dir_tiro
+                posicao_inicial = p_pos,
+                grupos          = (entity_manager.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'INIMIGO',
+                tamanho         = (96, 16), # Plasma "Heavy"
+                dano            = 20,
+                velocidade      = 750,
+                direcao_spread  = dir_tiro,
+                vai_rotacionar  = True
             )
 
     def animar(self):
@@ -163,6 +165,6 @@ class Scarab(InimigoBase):
     def morrer(self, grupos):
         # Scarab dropa 5 big_shards com 100% de chance e 1 vida com 50%
         Items.spawn_drop(self.posicao, grupos, 'big_shard', 5, 100)
-        Items.spawn_drop(self.posicao, grupos, 'health', 1, 50)
+        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
         Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()

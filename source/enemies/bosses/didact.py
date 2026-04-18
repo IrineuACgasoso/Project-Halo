@@ -99,9 +99,10 @@ class Didact(InimigoBase):
     def disparar_laser(self):
         LaserBeam(
             posicao_inicial=self.posicao.copy(),
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             dano= self.dano_base * 4,
             velocidade=1500,
             duracao=1500,

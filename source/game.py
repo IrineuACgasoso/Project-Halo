@@ -1,23 +1,28 @@
 import pygame
 import random
 from os.path import join
+# WINDOWS
 from source.windows.settings import *
-from source.player.player import Player 
 from source.windows.menu import *
-from source.systems.spawner import Spawner
-from source.systems.entitymanager import entity_manager
-from source.feats.weapons import *
-from source.feats.effects import Portal
 from source.windows.colaboradores import TelaColaboradores
 from source.windows.ranking import Ranking 
-from source.player.levelup import *
+# SYSTEMS
 from source.systems.mapmanager import Mapa
 from source.systems.camera import Camera
 from source.systems.hud import HUD
 from source.systems.collision import CollisionManager 
 from source.systems.stagemanager import StageManager
-from source.enemies.standard.sentinel import Sentinel
+from source.systems.spawner import Spawner
+from source.systems.entitymanager import entity_manager
+# FEATS
+from source.feats.buddies import *
+from source.feats.effects import Portal
 from source.feats.assets import path
+# PLAYER
+from source.player.weapons import *
+from source.player.levelup import *
+from source.player.player import Player 
+
 
 
 
@@ -126,16 +131,34 @@ class Game:
             elif self.estado_do_jogo == 'level_up':
                 if self.tela_de_upgrade_ativa:
                     escolha_idx = self.tela_de_upgrade_ativa.handle_event(evento)
-                    if escolha_idx is not None and escolha_idx < len(self.tela_de_upgrade_ativa.opcoes_de_armas_obj):
-                        arma_escolhida = self.tela_de_upgrade_ativa.opcoes_de_armas_obj[escolha_idx]
-                        nome_da_arma = arma_escolhida.nome
+                    if escolha_idx is not None:
+                        # Pegamos o nome da arma pela lista de nomes que geramos na tela
+                        nome_da_arma = self.tela_de_upgrade_ativa.nomes_das_opcoes[escolha_idx]
                         
                         if nome_da_arma in self.player.armas:
                             self.player.armas[nome_da_arma].upgrade()
                         else:
-                            self.player.armas[nome_da_arma] = arma_escolhida 
-                            if hasattr(arma_escolhida, 'equipar'):
-                                arma_escolhida.equipar()
+                            # Busca os metadados
+                            dados = DADOS_ARMAS[nome_da_arma]
+                            
+                            # MONTAGEM DINÂMICA DOS GRUPOS
+                            # Criamos uma tupla pegando os grupos do 'self' (Game) baseados nas strings do dicionário
+                            grupos_necessarios = tuple(getattr(self, nome_grupo) for nome_grupo in dados["grupos"])
+                            
+                            # Instancia a classe correta
+                            ClasseArma = dados["classe"]
+                            nova_arma = ClasseArma(
+                                self.player, 
+                                grupos_necessarios, 
+                                self, 
+                                criar_sprite=True
+                            )
+
+                            if hasattr(nova_arma, 'equipar'):
+                                nova_arma.equipar()
+
+                            # Guardamos no inventário
+                            self.player.armas[nome_da_arma] = nova_arma
                         
                         self.estado_do_jogo = 'jogando'
                         self.tela_de_upgrade_ativa = None

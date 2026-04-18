@@ -39,6 +39,7 @@ ASSETS = {
         'plasma': pygame.image.load(path('assets', 'img', 'projectiles', 'plasmagun.png')).convert_alpha(),
         'carabin': pygame.image.load(path('assets', 'img', 'projectiles', 'carabin.png')).convert_alpha(),
         'bcarabin': pygame.image.load(path('assets', 'img', 'projectiles', 'bcarabin.png')).convert_alpha(),
+        'needler': pygame.image.load(path('assets', 'img', 'projectiles', 'needler.png')).convert_alpha(),
         'm50': pygame.image.load(path('assets', 'img', 'projectiles', 'm50.png')).convert_alpha(),
         'ar': pygame.image.load(path('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
         'pingpong' : pygame.image.load(path('assets', 'img', 'projectiles', 'bola_pingpong.png')),

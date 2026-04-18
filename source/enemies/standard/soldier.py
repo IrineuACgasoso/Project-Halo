@@ -100,9 +100,10 @@ class Soldier(InimigoBase):
             
         LightRifle(
             posicao_inicial=self.posicao.copy(),
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             tamanho=self.tamanho,
             dano=self.dano_rifle,
             velocidade=self.velocidade_rifle,

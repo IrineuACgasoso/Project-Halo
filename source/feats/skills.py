@@ -1,7 +1,7 @@
 from source.systems.entitymanager import entity_manager
 from source.enemies.enemies import *
 from source.feats.items import *
-from source.feats.weapons import *
+from source.player.weapons import *
 from source.feats.assets import *
 import math
 

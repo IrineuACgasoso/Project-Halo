@@ -67,35 +67,38 @@ class Hunter(InimigoBase):
 
     def burst(self):
         """Dispara a metralhadora de plasma."""
-        direcao_tiro = self.jogador.posicao - self.posicao
-        if direcao_tiro.length() > 0:
-            direcao_tiro = direcao_tiro.normalize()
-        else:
-            direcao_tiro = pygame.math.Vector2(1, 0)
+        # Calcula a direção para o jogador 
+        direcao_com_spread = self.calcular_direcao_tiro(0.15)
 
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+            grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
+            dono = 'INIMIGO',
             dano=15,
             velocidade=500,
             tamanho=(36, 36),
-            direcao_spread=direcao_tiro
+            direcao_spread=direcao_com_spread
         )
 
     def cannon_beam(self):
         """Dispara o canhão principal."""
+        # Calcula a direção do Cannon
+        direcao_tiro = self.calcular_direcao_tiro()
+
         LaserBeam(
-            posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
-            jogador=self.jogador,
-            game=self.game,
-            dano=250, 
-            velocidade=750,
-            duracao=3000,
-            color='green',
-            tamanho= (96, 96)
+            posicao_inicial= self.posicao,
+            grupos         = (entity_manager.all_sprites,),
+            jogador        = self.jogador,
+            game           = self.game,
+            dono           = 'INIMIGO',
+            tamanho        = (96, 96),
+            dano           = 250, 
+            velocidade     = 750,
+            direcao_spread = direcao_tiro,
+            vai_rotacionar = False,
+            color          = 'green',
         )
 
     def morrer(self, grupos = None):

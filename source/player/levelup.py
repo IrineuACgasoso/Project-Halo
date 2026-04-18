@@ -1,69 +1,83 @@
 import pygame
 import random
 from source.windows.settings import *
-from source.feats.weapons import *
+from source.player.weapons import *
+from source.feats.buddies import *
+
 
 MAX_ARMAS = 6
-TODAS_AS_ARMAS = {
-    "Bola Calderânica": Arma_Loop,
-    "Ciclo de Lâminas": ArmaLista,
-    "Dicionário Divino": Dicionario_Divino,
-    "Árbitro": Arbitro,
-    "Cortana": Cortana
+
+# Metadados: Nome -> {Classe, Descrição, Ícone (opcional)}
+DADOS_ARMAS = {
+    "Rifle de Assalto": {
+        "classe": RifleAssalto,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Rifle padrão do UNSC de cadência elevada.",
+    },
+    "Bola Calderânica": {
+        "classe": Arma_Loop,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Uma esfera de energia que orbita o jogador.",
+    },
+    "Ciclo de Lâminas": {
+        "classe": ArmaLista,
+        "descricao": "Lâminas giratórias que cortam inimigos próximos.",
+    },
+    # TERMINE OS GRUPOS
+    "Dicionário Divino": {
+        "classe": Dicionario_Divino,
+        "grupos": ["all_sprites", "auras_grupo", "inimigos_grupo"],
+        "descricao": "Palavras sagradas que criam uma aura de proteção.",
+    },
+    "Árbitro": {
+        "classe": Arbitro,
+        "grupos": ["all_sprites", "inimigos_grupo", "items_grupo"],
+        "descricao": "Um elite aliado que caça inimigos próximos.",
+    },
+    "Cortana": {
+        "classe": Cortana,
+        "grupos": ["all_sprites", "inimigos_grupo", "items_grupo"],
+        "descricao": "Busca itens e XP próximos a você.",
+    },
+    "Needler": {
+        "classe": Needler,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Dispara agulhas teleguiadas que explodem ao acumular."
+    }
 }
+
 
 class TelaDeUpgrade:
     def __init__(self, tela, jogador, game):
         self.tela = tela
         self.jogador = jogador
         self.game = game
+        self.opcao_selecionada = 0
 
+        # Fontes maiores para melhor leitura
         self.fonte_grande = pygame.font.Font(None, 20)
         self.fonte_pequena = pygame.font.Font(None, 15)
 
-        self.opcao_selecionada = 0
-        
-
-        #cálculo do layout
-        largura_painel, altura_painel = 800, 350
+        # Cálculo do layout
+        largura_painel, altura_painel = 850, 400
         self.painel_rect = pygame.Rect((largura_tela - largura_painel) // 2, (altura_tela - altura_painel) // 2, largura_painel, altura_painel)
         
+        self.nomes_das_opcoes = self.gerar_opcoes_aleatorias() 
         self.opcoes = []
+
         padding = 20
         largura_opcao = (self.painel_rect.width - padding * 4) // 3
         altura_opcao = self.painel_rect.height - padding * 3 - 50 # Espaço para título
 
-
-        self.nomes_das_opcoes = self.gerar_opcoes_aleatorias() 
-        self.opcoes_de_armas_obj = []
-
-        #card de cada arma
+        # Criação dos cards
         for i, nome_arma in enumerate(self.nomes_das_opcoes):
-            arma_para_exibir = None
+            pos_x = self.painel_rect.x + padding + i * (largura_opcao + padding)
+            pos_y = self.painel_rect.y + 70
+            rect = pygame.Rect(pos_x, pos_y, largura_opcao, altura_opcao)
             
-            if nome_arma in self.jogador.armas:
-                arma_para_exibir = self.jogador.armas[nome_arma]
-            
-            else:
-                classe_arma = TODAS_AS_ARMAS[nome_arma]
-                grupos = (
-                    self.game.all_sprites,
-                    self.game.inimigos_grupo,      # <-- Agora na posição correta
-                    self.game.items_grupo          # <-- Agora na posição correta
-                )
+            # Passamos o NOME da arma, não o OBJETO instanciado
+            self.opcoes.append(OpcaoDeUpgrade(nome_arma, rect, self.jogador))
 
-                # Se for o Dicionário Divino, ele vai ignorar o segundo grupo, 
-                # mas o Python não vai dar erro de unpack porque você entregou 3 valores.
-
-                arma_para_exibir = classe_arma(self.jogador, grupos, self.game, criar_sprite=False)
-                        
-            self.opcoes_de_armas_obj.append(arma_para_exibir)
-
-            # O resto da criação dos cards continua igual
-            posicao_x = self.painel_rect.x + padding + i * (largura_opcao + padding)
-            posicao_y = self.painel_rect.y + padding + 50
-            retangulo_opcao = pygame.Rect(posicao_x, posicao_y, largura_opcao, altura_opcao)
-            self.opcoes.append(OpcaoDeUpgrade(arma_para_exibir, retangulo_opcao))
 
     def gerar_opcoes_aleatorias(self):
         opcoes_de_upgrade = []
@@ -76,7 +90,7 @@ class TelaDeUpgrade:
         # 2. Popula as opções de novas armas com as que o jogador AINDA NÃO possui
         if len(self.jogador.armas) < MAX_ARMAS:
             nomes_armas_possuidas = {arma.nome for arma in self.jogador.armas.values()}
-            for nome_arma_total in TODAS_AS_ARMAS.keys():
+            for nome_arma_total in DADOS_ARMAS.keys():
                 if nome_arma_total not in nomes_armas_possuidas:
                     opcoes_de_armas_novas.append(nome_arma_total)
 
@@ -107,68 +121,108 @@ class TelaDeUpgrade:
             elif event.key == pygame.K_a:
                 self.opcao_selecionada = (self.opcao_selecionada - 1) % len(self.opcoes)
             elif event.key == pygame.K_SPACE or event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                return self.opcao_selecionada #retorna o índice da escolha
+                return self.opcao_selecionada # Retorna o índice da escolha
         
         return None
 
     def draw(self, surface):
-        #escurece o fundo
+        # Fade-Out leve no fundo
         overlay = pygame.Surface((largura_tela, altura_tela), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         surface.blit(overlay, (0, 0))
 
-        #desenha o painel principal
-        pygame.draw.rect(surface, (30, 30, 40), self.painel_rect, border_radius=10)
+        # Painel Principal
+        pygame.draw.rect(surface, (20, 25, 30), self.painel_rect, border_radius=10)
         pygame.draw.rect(surface, (90, 90, 100), self.painel_rect, 3, border_radius=10)
         desenhar_texto(surface, "LEVEL UP!", (self.painel_rect.x + 20, self.painel_rect.y + 15), self.fonte_grande)
 
-        #,anda cada card de opção se desenhar
+        # Desenha a borda de seleção da escolha atual
         for i, opcao in enumerate(self.opcoes):
             esta_selecionada = (i == self.opcao_selecionada)
             opcao.draw(surface, esta_selecionada)
 
 class OpcaoDeUpgrade:
-    def __init__(self, arma_prototipo, retangulo):
-        self.arma = arma_prototipo
+    def __init__(self, nome_arma, retangulo, jogador):
+        self.nome = nome_arma
         self.rect = retangulo
-        self.fonte_grande = pygame.font.Font(None, 24)
-        self.fonte_pequena = pygame.font.Font(None, 20)
+        self.jogador = jogador
+        self.dados = DADOS_ARMAS[nome_arma] # Busca metadados estáticos
+
+        self.fonte_titulo = pygame.font.Font(None, 26)
+        self.fonte_texto = pygame.font.Font(None, 20)
 
 
     def draw(self, surface, esta_selecionada):
-        #desenha o fundo do card
-        pygame.draw.rect(surface, (45, 45, 60), self.rect, border_radius=8)
-
-        #desenha a borda de destaque
-        cor_borda = (220, 200, 60) if esta_selecionada else (120, 120, 130)
-        pygame.draw.rect(surface, cor_borda, self.rect, 3, border_radius=8)
-
-        #exibe o nome e o nível da arma
-        nome_arma = self.arma.nome
-        nivel_atual = self.arma.nivel
-
-        stats_futuros = self.arma.ver_proximo_upgrade()
-
-        arma_ja_existe_no_inventario = nome_arma in self.arma.jogador.armas
-        if arma_ja_existe_no_inventario:
-            titulo = f"{nome_arma} - Nv. {nivel_atual} -> {stats_futuros['nivel']}"
+        # CORES TEMÁTICAS
+        COR_FUNDO = (15, 20, 30)       
+        COR_BORDA = (0, 150, 255)   
+        COR_SELECAO = (255, 200, 0)    
+        
+        if esta_selecionada:
+            pygame.draw.rect(surface, (25, 35, 50), self.rect, border_radius=10) # Fundo levemente mais claro
+            cor_borda_atual = COR_SELECAO
+            espessura = 4
         else:
-            titulo = f"{nome_arma} - NOVA!"
+            pygame.draw.rect(surface, COR_FUNDO, self.rect, border_radius=10)
+            cor_borda_atual = COR_BORDA
+            espessura = 2
 
-        desenhar_texto(surface, titulo, (self.rect.x + 10, self.rect.y + 10), self.fonte_grande)
+        # Borda externa
+        pygame.draw.rect(surface, cor_borda_atual, self.rect, espessura, border_radius=10)
 
-        descricao = self.arma.descricao
-        desenhar_texto(surface, descricao, (self.rect.x + 10, self.rect.y + 40), self.fonte_pequena)
+        # Título e nível
+        arma_adquirida = self.jogador.armas.get(self.nome)
+        if arma_adquirida:
+            texto_titulo = f"{self.nome} (Nv. {arma_adquirida.nivel})"
+            cor_titulo = (50, 255, 150) # Roxo para upgrade
+        else:
+            texto_titulo = f"{self.nome} (NOVA!)"
+            cor_titulo = (255, 255, 255)
 
-        #pega estatisticas da arma agora e futura
-        lista_stats_formatada = self.arma.get_estatisticas_para_exibir()
+        desenhar_texto(surface, texto_titulo, (self.rect.x + 15, self.rect.y + 15), self.fonte_titulo, cor_titulo)
 
-        posicao_y_stats = self.rect.y + 80
-        for texto_stat in lista_stats_formatada:
-            desenhar_texto(surface, texto_stat, (self.rect.x + 10, posicao_y_stats), self.fonte_pequena)
-            posicao_y_stats += 25 
+        # Descrição com Quebra de Linha
+        desenhar_texto_com_quebra(
+            surface, 
+            self.dados["descricao"], 
+            (self.rect.x + 15, self.rect.y + 55), 
+            self.rect.width - 30, 
+            self.fonte_texto, 
+            (200, 210, 220)
+        )
+
+        # Stats (Só mostra se a arma já existir)
+        if arma_adquirida:
+            pos_y = self.rect.y + 120
+            stats = arma_adquirida.get_estatisticas_para_exibir()
+            for s in stats:
+                # # Exibir o > entre stats
+                texto_stat = f"> {s}"
+                desenhar_texto(surface, texto_stat, (self.rect.x + 10, pos_y), self.fonte_texto, (0, 200, 255))
+                pos_y += 22
 
 def desenhar_texto(surface, texto, pos, fonte, cor='white'):
     """Função auxiliar para desenhar texto na tela."""
     text_surface = fonte.render(str(texto), True, cor)
     surface.blit(text_surface, pos)
+
+def desenhar_texto_com_quebra(surface, texto, pos, largura_max, fonte, cor='white'):
+    palavras = texto.split(' ')
+    linhas = []
+    linha_atual = ""
+    
+    for palavra in palavras:
+        test_line = linha_atual + palavra + " "
+        if fonte.size(test_line)[0] < largura_max:
+            linha_atual = test_line
+        else:
+            linhas.append(linha_atual)
+            linha_atual = palavra + " "
+    linhas.append(linha_atual)
+
+    x, y = pos
+    for linha in linhas:
+        text_surface = fonte.render(linha, True, cor)
+        surface.blit(text_surface, (x, y))
+        y += fonte.get_linesize() # Pula para a linha de baixo
+

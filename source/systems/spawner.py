@@ -7,7 +7,7 @@ from source.systems.entitymanager import entity_manager
 from source.systems.mapmanager import Mapa
 from source.feats.assets import *
 
-# Inimigos base
+# Inimigos Base
 from source.enemies.standard.grunt import Grunt
 from source.enemies.standard.jackal import Jackal
 from source.enemies.standard.elite import Elite
@@ -47,7 +47,7 @@ class Spawner:
         self.pools_por_fase = {
             0: {
                 "classes": [Grunt, Jackal, Elite],
-                "pesos": [60, 30, 10]  # 60% Grunt, 30% Jackal, 10% Elite
+                "pesos": [75, 20, 5]  # 60% Grunt, 30% Jackal, 10% Elite
             },
             1: {
                 "classes": [Infection, Grunt, Jackal, Elite],
@@ -64,6 +64,26 @@ class Spawner:
             4: {
                 "classes": [Infection, FloodForms, Grunt, Jackal, Elite, Brute],
                 "pesos": [20, 25, 20, 15, 10, 10]
+            },
+            5: {
+                "classes": [Grunt, Jackal, Elite, Brute],
+                "pesos": [20, 20, 10, 50]
+            },
+            6: {
+                "classes": [Infection, FloodForms, Grunt, Jackal, Elite, Brute, Sentinel],
+                "pesos": [5, 15, 10, 10, 20, 20, 20]
+            },
+            7: {
+                "classes": [Grunt, Jackal, Brute, Sentinel],
+                "pesos": [20, 20, 40, 20]
+            },
+            8: {
+                "classes": [Infection, FloodForms, Sentinel],
+                "pesos": [40, 50, 10]
+            },
+            9: {
+                "classes": [Grunt, Jackal, Elite, Soldier, Crawler, Watcher],
+                "pesos": [10, 10, 10, 40, 20, 10]
             }
             # Adicione as outras fases seguindo o padrão
         }

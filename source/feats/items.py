@@ -9,7 +9,7 @@ class Items(pygame.sprite.Sprite):
         # Busca a imagem no ASSETS (agora centralizado)
         self.image = ASSETS['items'].get(tipo)
         if not self.image: # Fallback caso o tipo não exista
-             self.image = ASSETS['items']['shard']
+             self.image = ASSETS['items']['exp_shard']
              
         self.rect = self.image.get_rect(center=posicao)
         self.posicao = pygame.math.Vector2(posicao)

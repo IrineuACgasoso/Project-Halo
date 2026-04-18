@@ -80,9 +80,10 @@ class Knight(InimigoBase):
 
             LaserBeam(
                 posicao_inimigo=self.posicao,
-                grupos=(entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo),
+                grupos=(entity_manager.all_sprites,),
                 jogador=self.jogador,
                 game=self.game,
+                dono = 'INIMIGO',
                 dano=self.dano_base * 2.5,
                 velocidade= 1500,  # Ajuste o dano do laser
                 duracao=2000,  # Ajusta a duração em milissegundos
@@ -174,16 +175,9 @@ class Knight(InimigoBase):
 
 
     def morrer(self, grupos):
-        qtd_shards = 2
-
-        chance= randint(1,1000)
-        if chance >= 900: qtd_shards += 1
-
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.items_grupo)
-
-        for _ in range(qtd_shards):
-            pos_offset = self.posicao + pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-            Items(posicao=pos_offset, sheet_item=join('assets', 'img', 'bigShard.png'), tipo='big_shard', grupos=alvo_grupos)
+        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
+        Items.spawn_drop(self.posicao, grupos, 'health', 1, 50)
+        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
         self.kill()
     
     def animar(self):
