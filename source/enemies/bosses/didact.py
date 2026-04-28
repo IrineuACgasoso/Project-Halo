@@ -143,7 +143,13 @@ class Didact(InimigoBase):
         # Mira em um ponto aleatório próximo ao jogador (prevendo movimento)
         offset = pygame.math.Vector2(random.randint(-150, 150), random.randint(-150, 150))
         alvo = self.jogador.posicao + offset
-        ArtilhariaAviso(posicao=alvo, grupos=self.game.all_sprites, game=self.game, atacante=self, dano=200)
+        ArtilhariaAviso(
+            posicao = alvo, 
+            grupos  = self.game.all_sprites, 
+            game    = self.game, 
+            dono    = 'INIMIGO', 
+            dano    = 200
+            )
 
     # ---------------------------------------------------------
     # ATUALIZAÇÃO E ESTADOS

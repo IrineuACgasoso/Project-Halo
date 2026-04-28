@@ -63,20 +63,21 @@ class OndaEMP(pygame.sprite.Sprite):
 
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, game, atacante,
+    def __init__(self, posicao, grupos, game, dono,
                  dano = 100,
                  cor_borda=(255, 0, 0, 150),        # Borda vermelha padrão
                  cor_preenchimento=(255, 0, 0, 50), # Preenchimento vermelho padrão
                  cor_explosao=(255, 100, 50, 220),  # Explosão laranja/avermelhada padrão
-                 raio_explosao=120):
+                 raio_explosao=120,
+                 duracao = 1000):
         
         super().__init__(grupos)
         self.game = game
-        self.atacante = atacante
+        self.dono = dono
         self.posicao = pygame.math.Vector2(posicao)
         
         self.raio_explosao = 120
-        self.duracao_aviso = 1000 
+        self.duracao_aviso = duracao
         self.tempo_criacao = pygame.time.get_ticks()
         self.explodiu = False
 
@@ -118,9 +119,20 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             self.explodiu = True
             self.tempo_criacao = agora 
             
-            jogador = self.atacante.jogador
-            if (jogador.posicao - self.posicao).length() <= self.raio_explosao:
-                jogador.tomar_dano_direto(self.dano)
+            # Lógica de dano universal
+            if self.dono == 'PLAYER':
+                alvos = entity_manager.inimigos_grupo.sprites()
+            else:
+                alvos = [self.game.jogador]
+
+            for alvo in alvos:
+                distancia = (alvo.posicao - self.posicao).length()
+                if distancia <= self.raio_explosao:
+                    # Verifica qual método de dano o alvo usa
+                    if hasattr(alvo, 'tomar_dano_direto'):
+                        alvo.tomar_dano_direto(self.dano)
+                    elif hasattr(alvo, 'receber_dano'):
+                        alvo.receber_dano(self.dano)
                 
         elif self.explodiu and agora - self.tempo_criacao >= 150:
             self.kill()

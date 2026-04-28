@@ -72,14 +72,15 @@ class Hunter(InimigoBase):
 
         PlasmaGun(
             posicao_inicial=self.posicao,
-            grupos=(entity_manager.all_sprites,),
-            jogador=self.jogador,
-            game=self.game,
-            dono = 'INIMIGO',
-            dano=15,
-            velocidade=500,
-            tamanho=(36, 36),
-            direcao_spread=direcao_com_spread
+            grupos          = (entity_manager.all_sprites,),
+            jogador         = self.jogador,
+            game            = self.game,
+            dono            = 'INIMIGO',
+            dano            = 15,
+            velocidade      = 500,
+            tamanho         = (36, 36),
+            direcao_spread  = direcao_com_spread,
+            vai_rotacionar  = False
         )
 
     def cannon_beam(self):

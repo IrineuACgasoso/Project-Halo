@@ -76,7 +76,13 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter2.png')).convert_alpha(), (192, 192)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter3.png')).convert_alpha(), (192, 192)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter4.png')).convert_alpha(), (192, 192)),
-        ]
+        ],
+        'marine' : [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine1.png')).convert_alpha(), (96, 144)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine2.png')).convert_alpha(), (96, 144)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine3.png')).convert_alpha(), (96, 144)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine4.png')).convert_alpha(), (96, 144)),
+        ],
     },
 
 

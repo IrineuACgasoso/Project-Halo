@@ -4,6 +4,7 @@ from source.feats.items import *
 from source.player.weapons import *
 from source.feats.assets import *
 from source.feats.assets import ASSETS
+from source.feats.skills import ArtilhariaAviso
 import math
 
 #PROJETIL BASE
@@ -316,7 +317,18 @@ class ProjetilNeedler(ProjetilUniversal):
 
         if alvo.agulhas_presas >= 7:
             # Efeito de explosão (Dano massivo)
-            alvo.receber_dano(self.dano * 10) 
+            ArtilhariaAviso(
+                posicao             = alvo.posicao,
+                grupos              = self.game.all_sprites,
+                game                = self.game, 
+                dono                = self.dono,
+                dano                = self.dano * 6,
+                cor_borda           = (255, 0, 255, 120),
+                cor_preenchimento   = (200, 0, 255, 30),
+                cor_explosao        = (230, 0, 255, 150),
+                raio_explosao       = 180,
+                duracao             = 500
+                )
             alvo.agulhas_presas = 0
             # spawn_explosion_effect(alvo.posicao) # Dica para o futuro
 

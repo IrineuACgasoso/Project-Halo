@@ -39,6 +39,11 @@ DADOS_ARMAS = {
         "grupos": ["all_sprites", "inimigos_grupo", "items_grupo"],
         "descricao": "Busca itens e XP próximos a você.",
     },
+    "UNSC Marine": {
+        "classe": Marine,
+        "grupos": ["all_sprites", "inimigos_grupo", "items_grupo"],
+        "descricao": "Leal soldado que auxilia coletando itens e atacando inimigos.",
+    },
     "Needler": {
         "classe": Needler,
         "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
