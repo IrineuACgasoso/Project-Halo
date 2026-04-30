@@ -373,7 +373,7 @@ class Projetil_Lista(ProjetilUniversal):
 
 class Projetil_PingPong(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, game, direcao, dano, velocidade, rebatidas):
-        super().__init__super().__init__(
+        super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 

@@ -52,7 +52,12 @@ class StageManager:
         
         # Adicionamos os companheiros (Cortana/Árbitro) à lista de sobreviventes
         for arma in game.player.armas.values():
-            if hasattr(arma, 'sprite_companion') and arma.sprite_companion:
+            # Suporte para armas com múltiplos companions (Marine)
+            if hasattr(arma, 'companions'):
+                for companion in arma.companions:
+                    sobreviventes.append(companion)
+            # Suporte para Árbitro e Cortana (companion único)
+            elif hasattr(arma, 'sprite_companion') and arma.sprite_companion:
                 sobreviventes.append(arma.sprite_companion)
 
         # Limpeza: Só mata quem NÃO está na lista de sobreviventes
@@ -63,7 +68,11 @@ class StageManager:
         # Coloca os companheiros na mesma posição nova do jogador para não cruzarem o mapa voando
         nova_pos = game.mapa.get_player_spawn_pos()
         for arma in game.player.armas.values():
-            if hasattr(arma, 'sprite_companion') and arma.sprite_companion:
+            if hasattr(arma, 'companions'):
+                for companion in arma.companions:
+                    companion.posicao = pygame.math.Vector2(nova_pos)
+                    companion.rect.center = nova_pos
+            elif hasattr(arma, 'sprite_companion') and arma.sprite_companion:
                 arma.sprite_companion.posicao = pygame.math.Vector2(nova_pos)
                 arma.sprite_companion.rect.center = nova_pos
 

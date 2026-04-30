@@ -91,7 +91,7 @@ class HUD:
         self.ultimo_check_boss = agora
         
         # Filtra apenas inimigos que são bosses e estão vivos
-        bosses = [sprite for sprite in self.game.inimigos_grupo if hasattr(sprite, 'titulo')]
+        bosses = [sprite for sprite in entity_manager.inimigos_grupo if hasattr(sprite, 'titulo')]
         
         if bosses:
             # Encontra o boss com a menor distância Euclidiana até o jogador
