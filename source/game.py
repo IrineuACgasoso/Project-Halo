@@ -54,6 +54,7 @@ class Game:
         self.tela_game_over     = TelaGameOver(self)
         self.tela_colaboradores = TelaColaboradores(self)
         self.ranking            = Ranking(self)
+        self.tela_configuracoes = TelaConfiguracoes(self)
         self.hud                = HUD(self)
         self.collision_manager  = CollisionManager(self)
 
@@ -241,6 +242,9 @@ class Game:
 
         elif self.estado_do_jogo == 'ranking':
             self.ranking.draw(self.tela)
+
+        elif self.estado_do_jogo == 'configuracoes':
+            self.tela_configuracoes.draw(self.tela)
 
         elif self.estado_do_jogo == "game_over":
             self.tela_game_over.draw(self.tela)

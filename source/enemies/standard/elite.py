@@ -2,7 +2,6 @@ import pygame
 import random
 from os.path import join
 from source.enemies.enemies import InimigoBase
-from source.player.player import *
 from source.windows.settings import *
 from source.feats.projetil import Carabin
 from source.feats.items import *

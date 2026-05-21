@@ -4,7 +4,6 @@ import math
 from source.enemies.enemies import *
 from source.feats.projetil import *
 from source.feats.items import *
-from source.player.player import *
 from source.feats.assets import *
 from source.feats.projetil import LaserBeam
 from source.enemies.standard.sentinel import Sentinel

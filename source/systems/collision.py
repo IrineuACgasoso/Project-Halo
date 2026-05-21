@@ -84,7 +84,7 @@ class CollisionManager:
             )
             for inimigo, auras in colisoes_aura.items():
                 if not getattr(inimigo, 'invulneravel', False):
-                    total_dano = sum(aura.dano_por_segundo for aura in auras)
+                    total_dano = sum(aura.dano_por_segundo for aura in auras if aura.ativa)
                     inimigo.receber_dano(total_dano * delta_time)
 
         # 6. Check de Morte (Limpeza concentrada)

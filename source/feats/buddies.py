@@ -2,11 +2,10 @@ import pygame
 import math
 import random
 from source.windows.settings import *
-from source.player.player import *
 from source.feats.assets import ASSETS
 from source.feats.data import COMPANION_DATA
 from source.feats.projetil import BurstRifle
-from source.feats.baseweapon import *
+from source.feats.baseweapon import Arma
 
 
 class Companheiro(pygame.sprite.Sprite):
@@ -237,6 +236,12 @@ class Companheiro(pygame.sprite.Sprite):
                         self.ultimo_dano_tempo = agora
 
         elif self.estado_logico == 'COLETANDO':
+            if not self.alvo.alive():
+                self.liberar_item_atual()
+                self.estado_logico = 'SEGUINDO'
+                self.alvo = self.jogador
+                self.ponto_vagabundeio = None
+                return
             vel = self.velocidade_correr
             self.direcao_movimento = (self.alvo.posicao - self.posicao).normalize()
             if dist_sq < 30**2:  # Dist ao quadrado
@@ -370,6 +375,7 @@ class Cortana(Arma):
     def upgrade(self):
         super().upgrade()
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
+        self.jogador.velocidade += 10
 
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)
@@ -434,7 +440,7 @@ class Marine(Arma):
 
     def upgrade(self):
         super().upgrade()
-        self.aplicar_upgrades(self.companions, self.nivel, self.NOME_ASSET, target=self.companions)
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.companions)
         self.dano = self.companions[0].dano if self.companions else self.dano
         if self._deve_melhorar(
             COMPANION_DATA[self.NOME_ASSET]['stats']['_soldados']['range'],

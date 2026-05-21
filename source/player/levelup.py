@@ -21,13 +21,14 @@ DADOS_ARMAS = {
     },
     "Ciclo de Lâminas": {
         "classe": ArmaLista,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
         "descricao": "Lâminas giratórias que cortam inimigos próximos.",
     },
     # TERMINE OS GRUPOS
-    "Dicionário Divino": {
-        "classe": Dicionario_Divino,
+    "Escudo MK-2": {
+        "classe": MK2_Shield,
         "grupos": ["all_sprites", "auras_grupo", "inimigos_grupo"],
-        "descricao": "Palavras sagradas que criam uma aura de proteção.",
+        "descricao": "Gera um escudo e causa dano por segundo ao redor do jogador.",
     },
     "Árbitro": {
         "classe": Arbitro,

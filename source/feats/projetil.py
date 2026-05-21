@@ -1,11 +1,10 @@
+import pygame
+import math
+
 from source.systems.entitymanager import entity_manager
-from source.enemies.enemies import *
-from source.feats.items import *
-from source.player.weapons import *
 from source.feats.assets import *
 from source.feats.assets import ASSETS
-from source.feats.skills import ArtilhariaAviso
-import math
+
 
 #PROJETIL BASE
 class ProjetilUniversal(pygame.sprite.Sprite):
@@ -104,6 +103,7 @@ class Aura(pygame.sprite.Sprite):
     def __init__(self, jogador, raio, dano_por_segundo, grupos):
         super().__init__(grupos)
         self.jogador = jogador
+        self.ativa = True
         
         # Atributos exigidos pelo seu CollisionManager (Item 5)
         self.dono = 'PLAYER'
@@ -117,7 +117,6 @@ class Aura(pygame.sprite.Sprite):
         
         # O Pygame usa o atributo 'radius' para o collide_circle
         self.radius = self.raio 
-        
         self.desenhar_aura()
 
     def desenhar_aura(self):
@@ -140,9 +139,18 @@ class Aura(pygame.sprite.Sprite):
         self.desenhar_aura()
 
     def update(self, delta_time):
-        # A aura apenas segue o jogador. 
-        # O dano é aplicado pelo CollisionManager.update()
         self.rect.center = self.jogador.posicao
+
+        # Shield quebrado
+        if self.jogador.escudo_atual <= 0:
+
+            self.ativa = False
+            self.image.set_alpha(0)
+            return
+
+        # Shield ativo
+        self.ativa = True
+        self.image.set_alpha(120)
 
 
 # --- CLASSES FILHAS SIMPLIFICADAS ---
@@ -304,6 +312,8 @@ class ProjetilNeedler(ProjetilUniversal):
 
 
     def ao_atingir_alvo(self, alvo):
+        # Import Local
+        from source.feats.skills import ArtilhariaAviso
         # 1. Checa invulnerabilidade antes de tudo
         if getattr(alvo, 'invulneravel', False):
             return # Atravessa sem contar agulha e sem morrer
@@ -349,7 +359,7 @@ class Projetil_Lista(ProjetilUniversal):
             duracao=duracao, 
             piercing=float('inf')
         )
-
+        self.jogador = game.player
         self.angulo = angulo_inicial  # Posição angular inicial no círculo
         self.distancia_orbita = distancia_orbita
         self.velocidade_rotacao = velocidade_rotacao #graus por segundo

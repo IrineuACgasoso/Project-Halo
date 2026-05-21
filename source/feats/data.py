@@ -20,12 +20,13 @@ COMPANION_DATA = {
     'cortana': {
         'tipo': 'COLETOR',
         'stats': {
-            'velocidade_andar':         {'value': 180,   'label': 'Velocidade Base',      'increase': 25,  'range': 1},
-            'velocidade_correr':        {'value': 280,   'label': 'Velocidade de Busca',  'increase': 25,  'range': 1},
-            'raio_deteccao_item':       {'value': 400,   'label': 'Raio de Busca',        'increase': 50,  'range': 1},
-            'pode_atirar':              {'value': False, 'label': None,                   'increase': 0,   'range': 0},
-            'velocidade_animacao':      {'value': 200,   'label': None,                   'increase': 0,   'range': 0},
-            'distancia_maxima_retorno': {'value': 500,   'label': None,                   'increase': 0,   'range': 0},
+            'velocidade_andar':         {'value': 180,   'label': 'Velocidade Base',                'increase': 25,  'range': 1},
+            'velocidade_correr':        {'value': 280,   'label': 'Velocidade de Busca',            'increase': 25,  'range': 1},
+            'raio_deteccao_item':       {'value': 400,   'label': 'Raio de Busca',                  'increase': 50,  'range': 1},
+            'pode_atirar':              {'value': False, 'label': None,                             'increase': 0,   'range': 0},
+            'velocidade_animacao':      {'value': 200,   'label': None,                             'increase': 0,   'range': 0},
+            'distancia_maxima_retorno': {'value': 500,   'label': None,                             'increase': 0,   'range': 0},
+            'jogador_speed_bonus':      {'value': 0,     'label': 'Bônus de Velocidade do Jogador', 'increase': 10,  'range': 1},
         }
     },
 
@@ -53,7 +54,7 @@ WEAPON_DATA = {
     'rifle_assalto': {
         'stats': {
             'dano':                  {'value': 1,    'label': 'Dano',             'increase': 1,   'range': 1},
-            'cooldown':              {'value': 500,  'label': 'Cadência (ms)',    'increase': -20, 'range': 2,  'min': 100},
+            'cooldown':              {'value': 500,  'label': 'Cadência (ms)',    'increase': -20, 'range': 2, 'min': 100},
             'projeteis_por_disparo': {'value': 1,    'label': 'Projéteis',        'increase': 1,   'range': [3, 5, 7, 9]},
             'velocidade_projetil':   {'value': 2000, 'label': None,               'increase': 0,   'range': 0},
         }
@@ -70,20 +71,23 @@ WEAPON_DATA = {
 
     'ciclo_de_laminas': {
         'stats': {
-            'dano':              {'value': 15,   'label': 'Dano',              'increase': 5,  'range': 1},
-            'velocidade_rotacao':{'value': 120,  'label': 'Velocidade Angular','increase': 10, 'range': 1},
-            'distancia_orbita':  {'value': 140,  'label': 'Raio da Órbita',    'increase': 10, 'range': 1},
-            'num_listas':        {'value': 1,    'label': 'Num. Listas',       'increase': 1,  'range': 2},
-            'duracao':           {'value': 5000, 'label': None,                'increase': 0,  'range': 0},
-            'cooldown':          {'value': 6000, 'label': None,                'increase': 0,  'range': 0},
+            'dano':              {'value': 5,    'label': 'Dano',              'increase':  3,  'range': 1},
+            'velocidade_rotacao':{'value': 120,  'label': 'Velocidade Angular','increase':  10, 'range': 1},
+            'distancia_orbita':  {'value': 140,  'label': 'Raio da Órbita',    'increase':  10, 'range': 1},
+            'num_listas':        {'value': 1,    'label': 'Num. Listas',       'increase':  1,  'range': 2},
+            'duracao':           {'value': 5000, 'label': None,                'increase':  0,  'range': 0},
+            'cooldown':          {'value': 3000, 'label': 'Cooldown',          'increase': -50, 'range': 1, 'min': 0},
         }
     },
 
-    'dicionario_divino': {
+    'mk2_shield': {
         'stats': {
-            'dano_por_segundo': {'value': 1,          'label': 'Dano/s',  'increase': 1,  'range': 2},
-            'raio':             {'value': 120,         'label': 'Raio',   'increase': 20, 'range': 1},
-            'cooldown':         {'value': float('inf'),'label': None,     'increase': 0,  'range': 0},
+            'dano_por_segundo':         {'value': 1,           'label': 'Dano/s',      'increase': 1,   'range': 2},
+            'raio':                     {'value': 120,         'label': 'Raio',        'increase': 20,  'range': 1},
+            'cooldown':                 {'value': float('inf'),'label':  None,         'increase': 0,   'range': 0},
+            'escudo':                   {'value': 50,          'label': 'Escudo',      'increase': 25,  'range': 1},
+            'shield_regen':             {'value': 5000,        'label': 'Delay Regen', 'increase': -75, 'range': 1, 'min': 2000},
+            'velocidade_regen_escudo':  {'value': 25,          'label': 'Shield Regen','increase': 5,   'range': 1},
         }
     },
 

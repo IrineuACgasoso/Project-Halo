@@ -17,6 +17,7 @@ class EventManager:
             'jogando':        self._jogando,
             'pausa':          self._pausa,
             'level_up':       self._level_up,
+            'configuracoes':  self._configuracoes,
             'colaboradores':  self._colaboradores,
             'ranking':        self._ranking,
             'game_over':      self._game_over,
@@ -49,6 +50,8 @@ class EventManager:
             g.iniciar_novo_jogo()
         elif escolha == 'RANKING':
             g.estado_do_jogo = 'ranking'
+        elif escolha == 'SETTINGS':
+            g.estado_do_jogo = 'configuracoes'
         elif escolha == 'CREATORS':
             g.estado_do_jogo = 'colaboradores'
         elif escolha == 'QUIT':
@@ -109,6 +112,11 @@ class EventManager:
     def _ranking(self, evento):
         g = self.game
         if g.ranking.handle_event(evento) == 'exit_to_menu':
+            g.estado_do_jogo = 'menu_principal'
+
+    def _configuracoes(self, evento):
+        g = self.game
+        if g.tela_configuracoes.handle_event(evento) == 'sair':
             g.estado_do_jogo = 'menu_principal'
 
     def _game_over(self, evento):

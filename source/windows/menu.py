@@ -26,7 +26,7 @@ class MenuPrincipal:
         self.logo = ASSETS['menu']['logo']
         
         self.timer = 0
-        self.opcoes = ["START GAME", "RANKING", "CREATORS", "QUIT"]
+        self.opcoes = ["START GAME", "RANKING", "SETTINGS", "CREATORS", "QUIT"]
         self.selecionada = 0
 
         # Cores Halo
@@ -93,6 +93,7 @@ class MenuPrincipal:
                 rect = txt_surf.get_rect(center=(x, y))
             tela.blit(txt_surf, rect)
 
+   
     def draw(self, tela):
         self.timer += 0.008 
         tela.blit(self.camada_fundo, (0, 0))
@@ -112,7 +113,7 @@ class MenuPrincipal:
         brilho = int(200 + math.sin(self.timer * 3) * 55)
         self.logo.set_alpha(brilho)
         tela.blit(self.logo, self.logo.get_rect(center=(largura_tela//2, 120)))
-
+        
         for i, texto in enumerate(self.opcoes):
             self.draw_glow_text(tela, texto, largura_tela//2, 300 + i * 65, i == self.selecionada)
 

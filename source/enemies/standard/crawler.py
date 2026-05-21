@@ -3,7 +3,6 @@ import random
 import math
 from os.path import join
 from source.enemies.enemies import InimigoBase
-from source.player.player import *
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import LightRifle

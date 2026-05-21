@@ -1,13 +1,10 @@
 import pygame
 import random
 from os.path import join
-from source.player.player import *
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
-
-
 
 
 class InimigoBase(pygame.sprite.Sprite):

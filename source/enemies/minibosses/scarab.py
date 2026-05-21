@@ -1,7 +1,6 @@
 import pygame
 import random
 from source.feats.items import *
-from source.player.player import *
 from source.windows.settings import *
 from source.feats.projetil import PlasmaGun
 from source.feats.effects import ContinuousBeam

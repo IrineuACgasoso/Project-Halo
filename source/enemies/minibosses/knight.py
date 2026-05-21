@@ -2,7 +2,6 @@ import pygame
 import random
 import math
 from source.feats.items import *
-from source.player.player import *
 from source.windows.settings import *
 from source.feats.projetil import LaserBeam
 from source.enemies.enemies import *

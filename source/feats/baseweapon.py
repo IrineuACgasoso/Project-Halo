@@ -1,7 +1,6 @@
 import pygame
 import math
 from source.windows.settings import *
-from source.player.player import *
 from source.feats.assets import ASSETS
 from source.feats.data import *
 

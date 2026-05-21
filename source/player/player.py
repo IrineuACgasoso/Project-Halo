@@ -46,7 +46,17 @@ class Player(pygame.sprite.Sprite):
         #armas do player
         self.armas = {}
 
-        #status
+        # --- SISTEMA DE ESCUDO ---
+        self.escudo_maximo = 0
+        self.escudo_atual = 0
+        # Regeneração
+        self.shield_regen = 0
+        self.velocidade_regen_escudo = 0
+        # Controle
+        self.ultimo_dano_sofrido = 0
+        self.regenerando_escudo = False
+
+        #Status
         self.vida_maxima = 500
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0
@@ -146,21 +156,98 @@ class Player(pygame.sprite.Sprite):
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
 
 
-    def tomar_dano(self, inimigo):
-        if not self.invencivel:
-            self.vida_atual -= inimigo.dano
+    def adicionar_escudo(self, valor):
+        self.escudo_maximo = valor
+        self.escudo_atual = valor
+
+    def atualizar_escudo(self, delta_time):
+        # Não possui shield
+        if self.escudo_maximo <= 0:
+            return
+        # Shield já cheio
+        if self.escudo_atual >= self.escudo_maximo:
+            return
+
+        agora = pygame.time.get_ticks()
+
+        tempo_sem_dano = (
+            agora - self.ultimo_dano_sofrido
+        )
+
+        # Começou Regeneração
+        if tempo_sem_dano >= self.shield_regen:
+            self.regenerando_escudo = True
+
+        # Regenera
+        if self.regenerando_escudo:
+
+            self.escudo_atual += (
+                self.velocidade_regen_escudo * delta_time
+            )
+
+            # Clamp
+            if self.escudo_atual >= self.escudo_maximo:
+
+                self.escudo_atual = self.escudo_maximo
+                self.regenerando_escudo = False
+
+
+    def receber_dano(self, dano, ignorar_invencibilidade=False):
+        """
+        Sistema central de dano do player.
+        """
+        
+        # Invencibilidade
+        if self.invencivel and not ignorar_invencibilidade:
+            return
+
+        # Ativa iframe
+        if not ignorar_invencibilidade:
             self.invencivel = True
             self.tempo_ultimo_dano = pygame.time.get_ticks()
 
-    def tomar_dano_direto(self, dano):
-        """
-        Aplica dano direto ao jogador sem a lógica de invencibilidade.
-        Usado para ataques especiais, como do boss.
-        """
-        self.vida_atual -= dano
+        # Interrompe Regeneração de Escudo
+        self.ultimo_dano_sofrido = pygame.time.get_ticks()
+        self.regenerando_escudo = False
+
+        # ===== ESCUDO =====
+        if self.escudo_atual > 0:
+
+            self.escudo_atual -= dano
+
+            # Sobrou dano
+            if self.escudo_atual < 0:
+                dano_restante = abs(self.escudo_atual)
+
+                self.escudo_atual = 0
+                self.vida_atual -= dano_restante
+
+        # ===== VIDA =====
+        else:
+            self.vida_atual -= dano
+
+        # Clamp
         if self.vida_atual < 0:
             self.vida_atual = 0
-            
+
+        # Morte
+        if self.vida_atual <= 0:
+            self.kill()
+
+    def tomar_dano(self, inimigo):
+        """
+        Compatibilidade com projéteis/inimigos antigos.
+        """
+        self.receber_dano(inimigo.dano)
+
+
+    def tomar_dano_direto(self, dano):
+        """
+        Compatibilidade com código antigo.
+        Ignora invencibilidade.
+        """
+        self.receber_dano(dano, ignorar_invencibilidade=True)
+                
     def curar(self, quantidade):
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
 
@@ -196,6 +283,7 @@ class Player(pygame.sprite.Sprite):
         self.velocidade += 10
         self.pontuacao += 100
         self.curar(self.vida_maxima / 4)
+        self.escudo_atual = self.escudo_maximo
 
         self.game.estado_do_jogo = 'level_up'
         self.game.tela_de_upgrade_ativa = TelaDeUpgrade(self.game.tela, self, self.game)
@@ -207,6 +295,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, delta_time, paredes=None):
         self.input()
+        self.atualizar_escudo(delta_time)
 
         if paredes is not None:
             self.mover_com_colisao(delta_time, paredes)

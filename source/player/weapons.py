@@ -1,7 +1,6 @@
 import pygame
 import math
 from source.windows.settings import *
-from source.player.player import *
 from source.feats.assets import ASSETS
 from source.feats.data import WEAPON_DATA
 from source.feats.baseweapon import *
@@ -101,6 +100,19 @@ class ArmaLista(Arma):
         self.descricao = "Protegem o jogador!"
         self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
+        self.tempo_fim_ciclo = 0
+
+    def update(self, delta_time):
+        agora = pygame.time.get_ticks()
+
+        if agora >= self.tempo_fim_ciclo:
+            self.disparar()
+
+            self.tempo_fim_ciclo = (
+                agora +
+                self.duracao +
+                self.cooldown
+            )
 
     def disparar(self):
         angulo_step = 360 / self.num_listas
@@ -128,20 +140,26 @@ class ArmaLista(Arma):
         return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
 
 
-class Dicionario_Divino(Arma):
-    NOME_ASSET = 'dicionario_divino'
+class MK2_Shield(Arma):
+    NOME_ASSET = 'mk2_shield'
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs) 
         self.all_sprites, self.auras_grupos, self.inimigos_grupo = grupos
-        self.nome = "Dicionário Divino"
-        self.descricao = "Causa dano por segundo ao redor do jogador."
+        self.nome = "Escudo MK-2"
+        self.descricao = "Gera um escudo e causa dano por segundo ao redor do jogador."
         self.area_de_dano = None
         self.inicializar_stats(self.NOME_ASSET)
 
 
     def equipar(self):
+        self.jogador.adicionar_escudo(self.escudo)
+        self.jogador.shield_regen = self.shield_regen
+        self.jogador.velocidade_regen_escudo = (self.velocidade_regen_escudo)
+
+        # Cria aura
         if self.area_de_dano is None:
+
             self.area_de_dano = Aura(
                 jogador=self.jogador,
                 raio=self.raio,
@@ -156,6 +174,9 @@ class Dicionario_Divino(Arma):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
         if self.area_de_dano:
             self.area_de_dano.atualizar_stats(self.raio, self.dano_por_segundo)
+        self.jogador.shield_regen = self.shield_regen
+        self.jogador.velocidade_regen_escudo = (self.velocidade_regen_escudo)
+        self.jogador.escudo_maximo = self.escudo
 
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)

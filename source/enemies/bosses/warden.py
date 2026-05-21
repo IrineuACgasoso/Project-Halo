@@ -1,7 +1,6 @@
 import pygame
 from source.feats.items import *
 from source.enemies.enemies import *
-from source.player.player import *
 from source.enemies.minibosses.knight import Knight
 import random
 import math
