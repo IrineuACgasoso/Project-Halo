@@ -1,154 +1,9 @@
 import pygame
 import math
-import os
-from os.path import join
-from random import randint
-from abc import ABC, abstractmethod
 
+from .settings_constants import *
 
-largura_tela = 1280
-altura_tela = 720
-
-
-fps = 60
-cores = {
-    "preto": (0,0,0),
-    "branco": (255,255,255),
-    "verde": (0,255,50),
-    "dourado": (215, 175, 55)
-}
-
-# Resoluções disponíveis
-RESOLUCOES = [
-    (1280, 720),
-    (1600, 900),
-    (1920, 1080),
-]
-
-RESOLUCAO_LABELS = {
-    (1280, 720):  "1280x720  (HD)",
-    (1600, 900):  "1600x900  (HD+)",
-    (1920, 1080): "1920x1080 (Full HD)",
-}
-
-
-class TelaConfiguracoes:
-    def __init__(self, game):
-        self.game = game
-        self.timer = 0
-
-        # ── Fontes ─────────────────────────────────────────────────────────────
-        font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
-        try:
-            if os.path.exists(font_path):
-                self.font_titulo  = pygame.font.Font(font_path, 52)
-                self.font_label   = pygame.font.Font(font_path, 22)
-                self.font_valor   = pygame.font.Font(font_path, 18)
-                self.font_dica    = pygame.font.Font(font_path, 14)
-            else:
-                raise FileNotFoundError
-        except Exception:
-            self.font_titulo = pygame.font.SysFont('Consolas', 52, bold=True)
-            self.font_label  = pygame.font.SysFont('Consolas', 22, bold=True)
-            self.font_valor  = pygame.font.SysFont('Consolas', 18)
-            self.font_dica   = pygame.font.SysFont('Consolas', 14)
-
-        # ── Cores tema Halo ─────────────────────────────────────────────────────
-        self.COR_CIANO       = (0, 255, 255)
-        self.COR_CIANO_ESCURO= (0, 120, 140)
-        self.COR_BRANCO      = (255, 255, 255)
-        self.COR_AZUL        = (70, 140, 210)
-        self.COR_FUNDO_PAINEL= (8, 18, 28, 200)
-        self.COR_BORDA       = (0, 180, 200)
-        self.COR_BORDA_SEL   = (0, 255, 255)
-        self.COR_AMARELO     = (255, 200, 50)
-
-        # ── Estado das opções ───────────────────────────────────────────────────
-        self.volume           = pygame.mixer.music.get_volume()  # 0.0 ~ 1.0
-        self.resolucao_idx    = self._resolucao_atual_idx()
-        self.fullscreen       = False
-
-        # Controle de foco (qual "linha" está selecionada: 0=volume, 1=resolução, 2=fullscreen)
-        self.foco = 0
-        self.num_opcoes = 3
-
-        # ── Superfície de fundo com scanlines ──────────────────────────────────
-        self._scanlines = self._gerar_scanlines()
-
-    # ── Helpers ────────────────────────────────────────────────────────────────
-
-    def _resolucao_atual_idx(self):
-        tela_info = pygame.display.get_surface().get_size()
-        try:
-            return RESOLUCOES.index(tela_info)
-        except ValueError:
-            return 0
-
-    def _gerar_scanlines(self):
-        """Gera uma surface semitransparente com linhas horizontais estilo CRT."""
-        surf = pygame.Surface((largura_tela, altura_tela), pygame.SRCALPHA)
-        for y in range(0, altura_tela, 3):
-            pygame.draw.line(surf, (0, 0, 0, 40), (0, y), (largura_tela, y))
-        return surf
-
-    def _aplicar_resolucao(self):
-        res = RESOLUCOES[self.resolucao_idx]
-        flags = pygame.FULLSCREEN if self.fullscreen else 0
-        pygame.display.set_mode(res, flags)
-
-    def _aplicar_volume(self):
-        pygame.mixer.music.set_volume(self.volume)
-
-    # ── Eventos ────────────────────────────────────────────────────────────────
-
-    def handle_event(self, evento):
-        if evento.type != pygame.KEYDOWN:
-            return None
-
-        key = evento.key
-
-        # Navega entre opções
-        if key in (pygame.K_w, pygame.K_UP):
-            self.foco = (self.foco - 1) % self.num_opcoes
-
-        elif key in (pygame.K_s, pygame.K_DOWN):
-            self.foco = (self.foco + 1) % self.num_opcoes
-
-        # Altera valor da opção focada
-        elif key in (pygame.K_a, pygame.K_LEFT):
-            self._diminuir()
-
-        elif key in (pygame.K_d, pygame.K_RIGHT):
-            self._aumentar()
-
-        # Confirma/toggle
-        elif key in (pygame.K_RETURN, pygame.K_SPACE):
-            if self.foco == 2:  # fullscreen é toggle
-                self.fullscreen = not self.fullscreen
-                self._aplicar_resolucao()
-
-        # Sai
-        elif key == pygame.K_ESCAPE:
-            return 'sair'
-
-        return None
-
-    def _diminuir(self):
-        if self.foco == 0:   # volume
-            self.volume = max(0.0, round(self.volume - 0.1, 1))
-            self._aplicar_volume()
-        elif self.foco == 1:  # resolução
-            self.resolucao_idx = (self.resolucao_idx - 1) % len(RESOLUCOES)
-            self._aplicar_resolucao()
-
-    def _aumentar(self):
-        if self.foco == 0:   # volume
-            self.volume = min(1.0, round(self.volume + 0.1, 1))
-            self._aplicar_volume()
-        elif self.foco == 1:  # resolução
-            self.resolucao_idx = (self.resolucao_idx + 1) % len(RESOLUCOES)
-            self._aplicar_resolucao()
-
+class SettingsDraw:
     # ── Draw ───────────────────────────────────────────────────────────────────
 
     def draw(self, tela):
@@ -203,18 +58,18 @@ class TelaConfiguracoes:
 
         # Glow
         for off in range(1, 4):
-            glow = self.font_titulo.render("CONFIGURAÇÕES", True, self.COR_CIANO)
+            glow = self.font_titulo.render("CONFIGURAÇÕES", True, COR_CIANO)
             glow.set_alpha(max(0, 80 // off))
             r = glow.get_rect(center=(cx, 130))
             for dx, dy in [(-off,0),(off,0),(0,-off),(0,off)]:
                 tela.blit(glow, (r.x+dx, r.y+dy))
 
-        txt = self.font_titulo.render("CONFIGURAÇÕES", True, self.COR_BRANCO)
+        txt = self.font_titulo.render("CONFIGURAÇÕES", True, COR_BRANCO)
         txt.set_alpha(brilho)
         tela.blit(txt, txt.get_rect(center=(cx, 130)))
 
         # Subtítulo
-        sub = self.font_dica.render("TERMINAL DE CONTROLE DO SISTEMA", True, self.COR_CIANO_ESCURO)
+        sub = self.font_dica.render("TERMINAL DE CONTROLE DO SISTEMA", True, COR_CIANO_ESCURO)
         tela.blit(sub, sub.get_rect(center=(cx, 175)))
 
     def _desenhar_linha_divisoria(self, tela, cx, y):
@@ -225,8 +80,8 @@ class TelaConfiguracoes:
             # Gradiente: transparente nas pontas, sólido no centro
             dist = abs(x - comprimento // 2) / (comprimento // 2)
             a = int(alpha * (1 - dist))
-            surf.set_at((x, 0), (*self.COR_CIANO, a))
-            surf.set_at((x, 1), (*self.COR_CIANO_ESCURO, a // 2))
+            surf.set_at((x, 0), (*COR_CIANO, a))
+            surf.set_at((x, 1), (*COR_CIANO_ESCURO, a // 2))
         tela.blit(surf, surf.get_rect(center=(cx, y)))
 
     def _desenhar_painel(self, tela, cx, y, largura, altura):
@@ -243,10 +98,10 @@ class TelaConfiguracoes:
             (largura - corte, altura), (corte, altura),
             (0, altura - corte), (0, corte)
         ]
-        pygame.draw.polygon(surf, (*self.COR_BORDA, 160), pontos_borda, 2)
+        pygame.draw.polygon(surf, (*COR_BORDA, 160), pontos_borda, 2)
 
         # Detalhes de canto
-        cor_canto = (*self.COR_AMARELO, 200)
+        cor_canto = (*COR_AMARELO, 200)
         for px, py in [(0, 0), (largura, 0), (0, altura), (largura, altura)]:
             pygame.draw.circle(surf, cor_canto, (px, py), 4)
 
@@ -254,7 +109,7 @@ class TelaConfiguracoes:
 
     def _desenhar_volume(self, tela, cx, y, foco):
         label = self.font_label.render("VOLUME", True,
-                                       self.COR_BRANCO if foco else self.COR_AZUL)
+                                       COR_BRANCO if foco else COR_AZUL)
         tela.blit(label, label.get_rect(center=(cx, y)))
 
         # Corredor (slider)
@@ -280,13 +135,13 @@ class TelaConfiguracoes:
                                  (sx + i, sy + 2), (sx + i, sy + slider_h - 2))
 
         # Borda do trilho
-        cor_borda = self.COR_BORDA_SEL if foco else self.COR_BORDA
+        cor_borda = COR_BORDA_SEL if foco else COR_BORDA
         pygame.draw.rect(tela, cor_borda, trilho, 2, border_radius=4)
 
         # Marcador deslizante
         handle_x = sx + fill_w
         handle_rect = pygame.Rect(handle_x - 6, sy - 4, 12, slider_h + 8)
-        pygame.draw.rect(tela, self.COR_BRANCO if foco else self.COR_AZUL,
+        pygame.draw.rect(tela, COR_BRANCO if foco else COR_AZUL,
                          handle_rect, border_radius=3)
 
         # Tracinhos de segmento (10 divisões)
@@ -296,7 +151,7 @@ class TelaConfiguracoes:
 
         # Valor numérico
         pct = self.font_valor.render(f"{int(self.volume * 100):3d}%", True,
-                                     self.COR_CIANO if foco else self.COR_AZUL)
+                                     COR_CIANO if foco else COR_AZUL)
         tela.blit(pct, (cx + slider_w // 2 + 15, sy))
 
         # Setas < >
@@ -305,7 +160,7 @@ class TelaConfiguracoes:
 
     def _desenhar_resolucao(self, tela, cx, y, foco):
         label = self.font_label.render("RESOLUÇÃO", True,
-                                       self.COR_BRANCO if foco else self.COR_AZUL)
+                                       COR_BRANCO if foco else COR_AZUL)
         tela.blit(label, label.get_rect(center=(cx, y)))
 
         # Botões de resolução
@@ -323,14 +178,14 @@ class TelaConfiguracoes:
 
             selecionado = (i == self.resolucao_idx)
             cor_fundo  = (0, 80, 100)  if selecionado else (10, 25, 35)
-            cor_borda  = self.COR_CIANO_ESCURO if selecionado else (40, 80, 100)
-            cor_texto  = self.COR_BRANCO if selecionado else self.COR_AZUL
+            cor_borda  = COR_CIANO_ESCURO if selecionado else (40, 80, 100)
+            cor_texto  = COR_BRANCO if selecionado else COR_AZUL
 
             # Glow pulsante no selecionado
             if selecionado and foco:
                 alpha_g = int(60 + math.sin(self.timer * 6) * 30)
                 glow_s = pygame.Surface((btn_w + 10, btn_h + 10), pygame.SRCALPHA)
-                pygame.draw.rect(glow_s, (*self.COR_CIANO, alpha_g),
+                pygame.draw.rect(glow_s, (*COR_CIANO, alpha_g),
                                  (0, 0, btn_w + 10, btn_h + 10), border_radius=6)
                 tela.blit(glow_s, (bx - 5, by - 5))
 
@@ -346,7 +201,7 @@ class TelaConfiguracoes:
 
     def _desenhar_fullscreen(self, tela, cx, y, foco):
         label = self.font_label.render("TELA CHEIA", True,
-                                       self.COR_BRANCO if foco else self.COR_AZUL)
+                                       COR_BRANCO if foco else COR_AZUL)
         tela.blit(label, label.get_rect(center=(cx, y)))
 
         # Indicador ON/OFF estilo LED
@@ -378,7 +233,7 @@ class TelaConfiguracoes:
         tela.blit(txt, txt.get_rect(center=led_rect.center))
 
         if foco:
-            dica = self.font_dica.render("ENTER para alternar", True, self.COR_CIANO_ESCURO)
+            dica = self.font_dica.render("ENTER para alternar", True, COR_CIANO_ESCURO)
             tela.blit(dica, dica.get_rect(center=(cx, y + 28 + led_h + 14)))
 
     def _desenhar_setas(self, tela, cx, cy, largura_controle):
@@ -387,7 +242,7 @@ class TelaConfiguracoes:
         margem = largura_controle // 2 + 20
 
         for dx, char in [(-margem - offset, "<"), (margem + offset, ">")]:
-            txt = self.font_label.render(char, True, self.COR_CIANO)
+            txt = self.font_label.render(char, True, COR_CIANO)
             tela.blit(txt, txt.get_rect(center=(cx + dx, cy)))
 
     def _desenhar_dica(self, tela, cx):

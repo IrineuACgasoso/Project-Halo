@@ -54,7 +54,7 @@ class Game:
         self.tela_game_over     = TelaGameOver(self)
         self.tela_colaboradores = TelaColaboradores(self)
         self.ranking            = Ranking(self)
-        self.tela_configuracoes = TelaConfiguracoes(self)
+        self.tela_configuracoes = Settings(self)
         self.hud                = HUD(self)
         self.collision_manager  = CollisionManager(self)
 

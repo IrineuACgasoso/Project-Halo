@@ -1,5 +1,6 @@
 import pygame
 import math
+from abc import ABC, abstractmethod
 from source.windows.settings import *
 from source.feats.assets import ASSETS
 from source.feats.data import *
