@@ -1,5 +1,6 @@
 import pygame
 from os.path import join
+
 from source.windows.settings import largura_tela, altura_tela
 from source.systems.entitymanager import entity_manager
 from source.feats.assets import ASSETS
@@ -50,7 +51,7 @@ class HUD:
         self._ultimo_check_boss   = 0
         self._intervalo_check_boss = 500
 
-    # ── helpers ──────────────────────────────────────────────────────────────
+    # ── Helpers ──────────────────────────────────────────────────────────────
 
     @staticmethod
     def _carregar_fonte(path, size):
@@ -75,7 +76,7 @@ class HUD:
         else:
             self.game.boss_atual = None
 
-    # ── desenhos individuais ─────────────────────────────────────────────────
+    # ── Desenhos individuais ─────────────────────────────────────────────────
 
     def _draw_player_bars(self, tela):
         p = self.game.player
@@ -129,7 +130,7 @@ class HUD:
             tela.blit(surf, (48, y + 6))
             y += 34
 
-    # ── público ──────────────────────────────────────────────────────────────
+    # ── Público ──────────────────────────────────────────────────────────────
 
     def draw(self, tela):
         self._draw_player_bars(tela)
