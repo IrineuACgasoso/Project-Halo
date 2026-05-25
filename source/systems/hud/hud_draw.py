@@ -1,6 +1,23 @@
 import pygame
 import math
 
+from source.windows.settings import largura_tela, altura_tela
+
+
+# Constantes de layout (canto superior direito)
+_ESCUDO_W  = 260
+_ESCUDO_H  = 16
+_VIDA_W    = 200
+_VIDA_H    = 11
+_MARGEM_X  = 24
+_MARGEM_Y  = 28
+_GAP       = 6          # espaço entre barra de escudo e vida
+
+# XP (centro-topo)
+_XP_W      = 320
+_XP_H      = 10
+_XP_Y      = 8
+
 
 def _chanfrado(rect, corte=8):
     """Retorna polígono com cantos cortados (estilo Halo)."""
@@ -109,7 +126,7 @@ def draw_boss_hud(surface, boss, font_titulo, font_barra, largura_tela, altura_t
     y = altura_tela - 72
     corte = 6
 
-    pct = max(0.0, min(1.0, boss.vida / boss.vida_base))
+    pct = max(0.0, min(1.0, boss.vida / boss.vida_maxima))
     cor_vida = (160, 0, 0) if not getattr(boss, 'is_final_form', False) else (110, 0, 160)
 
     # --- Nome ---
@@ -158,3 +175,56 @@ def _draw_corner_ornaments(surface, rect, cor, corte):
         pts = [(cx, cy - size), (cx + size, cy), (cx, cy + size), (cx - size, cy)]
         pygame.draw.polygon(surface, cor, pts)
         pygame.draw.polygon(surface, (255, 255, 200), pts, 1)
+
+
+# ── Desenhos individuais ─────────────────────────────────────────────────
+
+def _draw_player_bars(tela, player):
+    p = player
+    rx = largura_tela - _MARGEM_X - _ESCUDO_W
+    ry = _MARGEM_Y
+
+    pct_escudo = max(0.0, min(1.0, p.escudo_atual / p.escudo_maximo)) if getattr(p, 'escudo_maximo', 0) > 0 else 0.0
+    pct_vida   = max(0.0, min(1.0, p.vida_atual / p.vida_maxima))
+
+    draw_barra_escudo(tela, pygame.Rect(rx, ry, _ESCUDO_W, _ESCUDO_H), pct_escudo)
+
+    # Barra de vida alinhada à direita, abaixo do escudo
+    vx = largura_tela - _MARGEM_X - _VIDA_W
+    vy = ry + _ESCUDO_H + _GAP
+    draw_barra_vida(tela, pygame.Rect(vx, vy, _VIDA_W, _VIDA_H), pct_vida)
+
+def _draw_xp(tela, player, font_xp):
+    p  = player
+    cx = (largura_tela - _XP_W) // 2
+    pct = max(0.0, min(1.0, p.experiencia_atual / p.experiencia_level_up))
+    draw_barra_xp(
+        tela,
+        pygame.Rect(cx, _XP_Y, _XP_W, _XP_H),
+        pct,
+        p.contador_niveis,
+        p.experiencia_atual,
+        p.experiencia_level_up,
+        fonte = font_xp,
+    )
+
+def _draw_timer(tela, timer_jogo, font_timer):
+    t  = timer_jogo
+    txt = f"{int(t // 60):02d}:{int(t % 60):02d}"
+    surf = font_timer.render(txt, True, (255, 255, 255))
+    tela.blit(surf, surf.get_rect(center=(largura_tela // 2, 44)))
+
+def _draw_coletaveis(tela, coletaveis_player, icones, font_hud):
+    col  = coletaveis_player
+    itens = [
+        ('life_orb',  col['life_orb']),
+        ('exp_shard', col['exp_shard']),
+        ('big_shard', col['big_shard']),
+        ('cafe',      col['cafe']),
+    ]
+    y = 28
+    for tipo, qtd in itens:
+        tela.blit(icones[tipo], (18, y))
+        surf = font_hud.render(str(qtd), True, (230, 230, 230))
+        tela.blit(surf, (48, y + 6))
+        y += 34

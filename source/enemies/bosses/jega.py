@@ -1,13 +1,13 @@
 import pygame
 import random
 import math
-from source.enemies.enemies import InimigoBase
+from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.projetil import *
 from source.feats.items import *
 from source.systems.entitymanager import entity_manager
 
 
-class Jega(InimigoBase):
+class Jega(BaseEnemy):
     def __init__(self, posicao, game, grupos):
         valor_vida = 5000
         super().__init__(posicao, vida_base=valor_vida, dano_base=100, velocidade_base=50, game=game, sprite_key='jega', flip_sprite=True)
@@ -197,7 +197,7 @@ class Jega(InimigoBase):
 
         # 3. Colisão com o Mapa (Se não estiver orbitando pelas paredes)
         if paredes and self.estado != 'orbitando':
-            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+            self.aplicar_colisao_mapa(paredes)
             
         # Atualiza Retângulos
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))

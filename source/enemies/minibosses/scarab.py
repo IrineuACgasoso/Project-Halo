@@ -4,10 +4,10 @@ from source.feats.items import *
 from source.windows.settings import *
 from source.feats.projetil import PlasmaGun
 from source.feats.effects import ContinuousBeam
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.systems.entitymanager import entity_manager
 
-class Scarab(InimigoBase):
+class Scarab(BaseEnemy):
     def __init__(self, posicao, grupos, game):
         # 1. Atributos Colossais
         super().__init__(posicao, vida_base=15000, dano_base=80, velocidade_base=35, 

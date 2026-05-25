@@ -9,21 +9,14 @@ from .hud_draw import (
     draw_barra_vida,
     draw_barra_xp,
     draw_boss_hud,
+    _draw_player_bars,
+    _draw_corner_ornaments,
+    _draw_coletaveis,
+    _draw_timer,
+    _draw_xp
 )
 
-# Constantes de layout (canto superior direito)
-_ESCUDO_W  = 260
-_ESCUDO_H  = 16
-_VIDA_W    = 200
-_VIDA_H    = 11
-_MARGEM_X  = 24
-_MARGEM_Y  = 28
-_GAP       = 6          # espaço entre barra de escudo e vida
 
-# XP (centro-topo)
-_XP_W      = 320
-_XP_H      = 10
-_XP_Y      = 8
 
 
 class HUD:
@@ -76,67 +69,18 @@ class HUD:
         else:
             self.game.boss_atual = None
 
-    # ── Desenhos individuais ─────────────────────────────────────────────────
-
-    def _draw_player_bars(self, tela):
-        p = self.game.player
-        rx = largura_tela - _MARGEM_X - _ESCUDO_W
-        ry = _MARGEM_Y
-
-        pct_escudo = max(0.0, min(1.0, p.escudo_atual / p.escudo_maximo)) if getattr(p, 'escudo_maximo', 0) > 0 else 0.0
-        pct_vida   = max(0.0, min(1.0, p.vida_atual / p.vida_maxima))
-
-        draw_barra_escudo(tela, pygame.Rect(rx, ry, _ESCUDO_W, _ESCUDO_H), pct_escudo)
-
-        # Barra de vida alinhada à direita, abaixo do escudo
-        vx = largura_tela - _MARGEM_X - _VIDA_W
-        vy = ry + _ESCUDO_H + _GAP
-        draw_barra_vida(tela, pygame.Rect(vx, vy, _VIDA_W, _VIDA_H), pct_vida)
-
-    def _draw_xp(self, tela):
-        p  = self.game.player
-        cx = (largura_tela - _XP_W) // 2
-        pct = max(0.0, min(1.0, p.experiencia_atual / p.experiencia_level_up))
-        draw_barra_xp(
-            tela,
-            pygame.Rect(cx, _XP_Y, _XP_W, _XP_H),
-            pct,
-            p.contador_niveis,
-            p.experiencia_atual,
-            p.experiencia_level_up,
-            fonte=self._font_xp,
-        )
-
-    def _draw_timer(self, tela):
-        if self.game.boss_atual:
-            return
-        t  = self.game.timer_jogo
-        txt = f"{int(t // 60):02d}:{int(t % 60):02d}"
-        surf = self._font_timer.render(txt, True, (255, 255, 255))
-        tela.blit(surf, surf.get_rect(center=(largura_tela // 2, 44)))
-
-    def _draw_coletaveis(self, tela):
-        col  = self.game.player.coletaveis
-        itens = [
-            ('life_orb',  col['life_orb']),
-            ('exp_shard', col['exp_shard']),
-            ('big_shard', col['big_shard']),
-            ('cafe',      col['cafe']),
-        ]
-        y = 28
-        for tipo, qtd in itens:
-            tela.blit(self._icones[tipo], (18, y))
-            surf = self._font_hud.render(str(qtd), True, (230, 230, 230))
-            tela.blit(surf, (48, y + 6))
-            y += 34
+    
 
     # ── Público ──────────────────────────────────────────────────────────────
 
     def draw(self, tela):
-        self._draw_player_bars(tela)
-        self._draw_xp(tela)
-        self._draw_timer(tela)
-        self._draw_coletaveis(tela)
+        _draw_player_bars(tela, self.game.player)
+        _draw_xp(tela, self.game.player, self._font_xp)
+
+        if not self.game.boss_atual:
+            _draw_timer(tela, self.game.timer_jogo, self._font_timer)
+
+        _draw_coletaveis(tela, self.game.player.coletaveis, self._icones, self._font_hud)
 
         self._atualizar_boss_foco()
         draw_boss_hud(tela, self.game.boss_atual, self._font_boss, self._font_hud, largura_tela, altura_tela)

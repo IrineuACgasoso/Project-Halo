@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 from os.path import join
-from source.enemies.enemies import InimigoBase
+from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import LightRifle
@@ -11,7 +11,7 @@ from source.systems.entitymanager import entity_manager
 
 # (Aviso: certifique-se de que a classe PrometheanTeleport está importada aqui!)
 
-class Crawler(InimigoBase):
+class Crawler(BaseEnemy):
     def __init__(self, posicao, game):
         super().__init__(posicao, vida_base=20, dano_base=15, velocidade_base=120, game=game, sprite_key='crawler')
         
@@ -185,7 +185,7 @@ class Crawler(InimigoBase):
             self.posicao += direcao_final * self.velocidade * delta_time
 
         if paredes:
-            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+            self.aplicar_colisao_mapa(paredes)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
         if vetor_para_jogador.x < 0:

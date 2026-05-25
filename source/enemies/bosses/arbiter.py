@@ -1,13 +1,13 @@
 import pygame
 import random
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.feats.items import *
 from source.feats.projetil import Carabin
 from source.systems.entitymanager import entity_manager
 
 
 
-class BossArbiter(InimigoBase):
+class BossArbiter(BaseEnemy):
     def __init__(self, posicao, game, grupos):
         valor_vida = 4500
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
@@ -160,7 +160,7 @@ class BossArbiter(InimigoBase):
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
             if paredes:
-                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+                self.aplicar_colisao_mapa(paredes)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             self.hitbox.center = self.rect.center
 

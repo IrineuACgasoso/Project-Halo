@@ -1,59 +1,49 @@
 import pygame
 import random
-from os.path import join
-from source.enemies.enemies import InimigoBase
-from source.windows.settings import *
+
+from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.projetil import PlasmaGun, M50
-from source.feats.items import *
-from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 
 
-class Jackal(InimigoBase):
+class Jackal(BaseEnemy): 
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=15, dano_base=10, velocidade_base=50, game=game, sprite_key= 'jackal')
-
         # Sorteio do tipo
         escolhido = random.randint(1, 20)
         if escolhido < 20:
             self.tipo = random.choice(['blue', 'red'])
         else:
             self.tipo = 'sniper'
+        if self.tipo in ['blue', 'sniper']:
+            self.flip = True
+        else:
+            self.flip = False
+        super().__init__(posicao, vida_base=15, dano_base=10, velocidade_base=50, game=game, sprite_key= 'jackal', flip_sprite=self.flip, variante=self.tipo)
 
-        self.sprites_escolhidas = self.get_sprites(self.tipo)
-
-        #Animação
-        self.estado_animacao = 'right'
-        self.frame_atual = 0
-        self.velocidade_animacao = 400
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-
-        self.image = self.sprites_escolhidas[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=posicao)
+        self.setup_animation(
+            estado_inicial='right',
+            velocidade_animacao=400
+        )
 
         # Habilidades
         self.plasma_cooldown = 5000
         self.escudo_quebrado = False
         self.ultimo_tiro = pygame.time.get_ticks()
 
-        
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites_escolhidas[self.estado_animacao])
-            self.image = self.sprites_escolhidas[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.rect.center)
-
     def update(self, delta_time, paredes=None):
         direcao = (self.jogador.posicao - self.posicao)
-        if direcao.length() > 0:
-            if (direcao.length() > 400 and self.tipo == 'sniper') or not self.tipo == 'sniper':
-                direcao.normalize_ip()
-                self.posicao += direcao * self.velocidade * delta_time
-                if paredes:
-                    self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
-                self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        mover = (
+            direcao.length() > 400
+            if self.tipo == 'sniper'
+            else True
+        )
+
+        if mover:
+            self.mover(delta_time)
+            if paredes:
+                self.aplicar_colisao_mapa(paredes)
+
+        self.set_sprite_direction(direcao.x)
 
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
@@ -64,20 +54,15 @@ class Jackal(InimigoBase):
             else:
                 self.plasma()
             self.ultimo_tiro = agora
-        if direcao.x < 0:
-            self.estado_animacao = 'left'
-        elif direcao.x > 0:
-            self.estado_animacao = 'right'
-        
-        self.animar()
         
         if self.vida < 0.3 * self.vida_base and not self.escudo_quebrado:
             if self.tipo in ['blue', 'red']:
                 self.tipo = f"{self.tipo}_broken"
-                self.sprites_escolhidas = self.get_sprites(self.tipo)
-                self.frame_atual = 0
+                self.trocar_variante(self.tipo)
                 self.escudo_quebrado = True # Trava o IF para sempre
-            
+        self.sync_rect()
+        self.animar()
+        
     def plasma(self):
         direcao_tiro = self.jogador.posicao - self.posicao
         if direcao_tiro.length() > 0:

@@ -1,5 +1,5 @@
 from source.systems.entitymanager import entity_manager
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.feats.items import *
 from source.player.weapons import *
 from source.feats.assets import *

@@ -3,12 +3,12 @@ import random
 from source.feats.items import *
 from source.windows.settings import *
 from source.feats.projetil import LaserBeam, PlasmaGun
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.systems.entitymanager import entity_manager
 
 
 
-class Hunter(InimigoBase):
+class Hunter(BaseEnemy):
     def __init__(self, posicao, grupos, game):
         # 1. Base gerencia o Cache Global
         super().__init__(posicao, vida_base=750, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)

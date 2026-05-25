@@ -4,13 +4,13 @@ import math
 from source.feats.items import *
 from source.windows.settings import *
 from source.feats.projetil import LaserBeam
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.feats.effects import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
 
 
 
-class Knight(InimigoBase):
+class Knight(BaseEnemy):
     def __init__(self, posicao, grupos, game):
         super().__init__(posicao, vida_base=500, dano_base=60, velocidade_base=50, game=game, sprite_key='knight')
         self.game = game
@@ -206,7 +206,7 @@ class Knight(InimigoBase):
                 direcao.normalize_ip()
                 self.posicao += direcao * self.velocidade * delta_time
                 if paredes:
-                    self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+                    self.aplicar_colisao_mapa(paredes)
                 self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             self.hitbox.center = self.rect.center
 

@@ -1,12 +1,12 @@
 import pygame
 from source.feats.items import *
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.enemies.minibosses.knight import Knight
 import random
 import math
 from source.systems.entitymanager import entity_manager
 
-class WardenEternal(InimigoBase):
+class WardenEternal(BaseEnemy):
     def __init__(self, posicao, game, grupos, clone = False):
         if clone:
             valor_vida = 10000
@@ -128,7 +128,7 @@ class WardenEternal(InimigoBase):
             direcao.normalize_ip()
             self.posicao += direcao * self.velocidade * delta_time
             if paredes:
-                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+                self.aplicar_colisao_mapa(paredes)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         #invocacao de knights
         if not self.clone:

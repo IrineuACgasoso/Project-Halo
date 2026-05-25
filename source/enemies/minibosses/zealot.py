@@ -2,12 +2,12 @@ import pygame
 import random
 import math
 from os.path import join
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 
 
-class Zealot(InimigoBase):
+class Zealot(BaseEnemy):
     def __init__(self, posicao, game, grupos):
         valor_vida = 1800
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base=100, game=game, sprite_key='zealot')
@@ -134,7 +134,7 @@ class Zealot(InimigoBase):
 
         # Colisões Físicas Constantes (Impede atravessar paredes empurrado)
         if paredes and self.estado_habilidade != 'stealth_out':
-            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+            self.aplicar_colisao_mapa(paredes)
             
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         

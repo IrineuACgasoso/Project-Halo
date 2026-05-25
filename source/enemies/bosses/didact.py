@@ -2,14 +2,14 @@ import pygame
 import random
 from os.path import join
 from source.feats.items import Items
-from source.enemies.enemies import InimigoBase
+from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.projetil import LaserBeam
 from source.feats.skills import OndaEMP, ArtilhariaAviso
 from source.feats.effects import LaserWarning
 from source.systems.entitymanager import entity_manager
 
 
-class Didact(InimigoBase):
+class Didact(BaseEnemy):
     def __init__(self, posicao, game, grupos):
         valor_vida = 8000
         super().__init__(posicao, vida_base=valor_vida, dano_base=60, velocidade_base=50, game=game, sprite_key='didact', flip_sprite=True)
@@ -283,7 +283,7 @@ class Didact(InimigoBase):
         if self.velocidade > 0:
             self.posicao += direcao * self.velocidade * delta_time
             if paredes:
-                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+                self.aplicar_colisao_mapa(paredes)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             self.hitbox.center = self.rect.center
         

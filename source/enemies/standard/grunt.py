@@ -1,73 +1,39 @@
 import pygame
 import random
-from source.enemies.enemies import InimigoBase
-from os.path import join
-from source.windows.settings import *
+
+from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.projetil import PlasmaGun
-from source.feats.items import *
-from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 
 
-
-class Grunt(InimigoBase):
+class Grunt(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=4, dano_base=15, velocidade_base=90, game=game, sprite_key= 'grunt')
-        self.image = pygame.transform.scale(self.image, (100, 80))
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade = 70
-        self.vida = 2
-        self.dano = 15
-        #arma
+        super().__init__(posicao, vida_base=4, dano_base=10, velocidade_base=50, game=game, sprite_key= 'grunt')
+        
+        self.setup_animation(
+            estado_inicial='right',
+            velocidade_animacao=200
+            )
+        
+        # Plasma
         self.plasma_cooldown = 8000
         self.ultimo_tiro = pygame.time.get_ticks()
-        #pre animacao
-        self.sprites = {}
-        #add esquerda no dict
-        self.sprites['right'] = ASSETS['enemies']['grunt']
-        #Carrega direita
-        self.sprites['left'] = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.sprites['right']
-        ]
-        #framagem da sprite
-        self.frame_atual = 0  
-        self.estado_animacao = 'right'
-        self.indice_animacao = 0
-        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade_animacao = 200
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.posicao)
 
     def update(self, delta_time, paredes=None):
-        direcao = (self.jogador.posicao - self.posicao)
-        if direcao.length() > 0:
-            direcao.normalize_ip()
-            self.posicao += direcao * self.velocidade * delta_time
-            if paredes:
-                self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
-            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        super().update(delta_time, paredes)
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
             novo_cooldown = [8000, 9000, 10000, 11000]
             self.plasma_cooldown = random.choice(novo_cooldown)
             self.plasma()
             self.ultimo_tiro = agora
-        if direcao.x < 0:
-            self.estado_animacao = 'left'
-        elif direcao.x > 0:
-            self.estado_animacao = 'right'
+
+        direcao_x = self.jogador.posicao.x - self.posicao.x
+        self.set_sprite_direction(direcao_x)
         self.animar()
 
     def plasma(self):
-        direcao_tiro = self.calcular_direcao_tiro()
+        direcao_tiro = self.calcular_direcao_tiro(0.1)
 
         PlasmaGun(
             posicao_inicial=self.posicao,
@@ -77,7 +43,7 @@ class Grunt(InimigoBase):
             dono = 'INIMIGO',
             tamanho=(36, 36),
             dano=5,
-            velocidade=650,
+            velocidade=500,
             direcao_spread=direcao_tiro,
             vai_rotacionar = False
         )    

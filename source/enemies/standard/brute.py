@@ -1,7 +1,7 @@
 import pygame
 import random
 from os.path import join
-from source.enemies.enemies import InimigoBase
+from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.projetil import Dizimator
 from source.feats.items import *
@@ -9,7 +9,7 @@ from source.feats.assets import *
 from source.systems.entitymanager import entity_manager
 
 
-class Brute(InimigoBase):
+class Brute(BaseEnemy):
     def __init__(self, posicao, game):
         super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=75, game=game, sprite_key='brute')
         self.game
@@ -79,7 +79,7 @@ class Brute(InimigoBase):
             self.velocidade *= 3
             self.rage = True
         if paredes:
-            self.aplicar_colisao_mapa(paredes, self.raio_colisao_mapa)
+            self.aplicar_colisao_mapa(paredes)
         if direcao.x < 0:
             self.estado_animacao = 'left'
         elif direcao.x > 0:

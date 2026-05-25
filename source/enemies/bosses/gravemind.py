@@ -2,14 +2,14 @@ import pygame
 import random
 import math
 from source.feats.items import *
-from source.enemies.enemies import *
+from source.enemies.base.enemy_base import *
 from source.enemies.standard.infection import Infection
 from source.feats.projetil import AcidBreath
 from source.feats.effects import DustParticle
 from source.feats.assets import *
 from source.systems.entitymanager import entity_manager
 
-class Gravemind(InimigoBase):
+class Gravemind(BaseEnemy):
     def __init__(self, posicao, game, jogador=None, is_final_form=False, is_minion=False, grupos=None):
         # 1. Configuração de Atributos Base
         if is_final_form:

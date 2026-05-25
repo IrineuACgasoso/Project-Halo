@@ -1,30 +1,24 @@
 import pygame
-import random
 import math
-from os.path import join
-from source.enemies.enemies import InimigoBase
-from source.feats.effects import ContinuousBeam
-from source.feats.assets import ASSETS
-from source.systems.entitymanager import entity_manager
 
-class Sentinel(InimigoBase):
+from source.enemies.base.enemy_base import BaseEnemy
+from source.feats.effects import ContinuousBeam
+
+class Sentinel(BaseEnemy):
     def __init__(self, posicao, game):
         super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel')
-        self.game = game
+        self.setup_animation(
+            estado_inicial='left',
+            velocidade_animacao=200
+        )
+
+        self.indice_animacao = 0
+
         self.estado_ia = 'chase'
         
-        # Sprites
-        self.sprites = {}
-        # Right
-        self.sprites = self.get_sprites('default')
-        self.estado_animacao = 'left'
-        self.indice_animacao = 0
-        self.image = self.sprites[self.estado_animacao][self.indice_animacao]
-        self.rect = self.image.get_rect(center=self.posicao)
-
         # Configurações de Órbita
         self.distancia_gatilho_orbita = 350 
-        self.distancia_minima_seguranca = 300 # Se estiver mais perto que isso, ela se afasta
+        self.distancia_minima_seguranca = 300 # Se estiver mais perto que isso, ele se afasta
         self.raio_orbita_atual = 300
         self.angulo_atual = 0
         self.centro_orbita_fixo = pygame.math.Vector2(0, 0)
@@ -33,11 +27,14 @@ class Sentinel(InimigoBase):
         self.beam_ativo = False
         self.duracao_beam = 2000
         self.cooldown_pos_ataque = 2000 
+
         self.timer_estado = 0
         
         self.laser = ContinuousBeam(self, color=(255, 255, 180), largura_base=3, dano_por_segundo=10, suavizacao=0.05)
         self.velocidade_mira = 0.05
 
+    def animar(self):
+        self.set_image(self.sprites[self.estado_animacao][self.indice_animacao])
 
     def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
@@ -64,8 +61,10 @@ class Sentinel(InimigoBase):
                     self.indice_animacao = 1
                     self.centro_orbita_fixo = pygame.math.Vector2(self.jogador.posicao)
                     self.raio_orbita_atual = (self.posicao - self.centro_orbita_fixo).length()
-                    self.angulo_atual = math.atan2(self.posicao.y - self.centro_orbita_fixo.y, 
-                                                 self.posicao.x - self.centro_orbita_fixo.x)
+                    self.angulo_atual = math.atan2(
+                        self.posicao.y - self.centro_orbita_fixo.y, 
+                        self.posicao.x - self.centro_orbita_fixo.x
+                        )
 
         elif self.estado_ia == 'orbiting':
             self.angulo_atual += 0.3 * delta_time 
@@ -81,12 +80,15 @@ class Sentinel(InimigoBase):
                 self.beam_ativo = False
                 self.indice_animacao = 0
 
-        if (self.jogador.posicao.x - self.posicao.x) < 0: 
-            self.estado_animacao = 'left'
-        else: 
-            self.estado_animacao = 'right'
+        direcao_x = (self.jogador.posicao.x - self.posicao.x)
 
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        self.set_sprite_direction(direcao_x)
+
+        if paredes:
+            self.aplicar_colisao_mapa(paredes)
+        
+        self.sync_rect()
+
         self.animar()
 
     # MUDE o draw_laser para usar o objeto self.laser:
@@ -95,5 +97,3 @@ class Sentinel(InimigoBase):
             # Agora usa a classe nova, mantendo o padrão do Scarab
             self.laser.draw(superficie, deslocamento)
         
-    def animar(self):
-        self.image = self.sprites[self.estado_animacao][self.indice_animacao]

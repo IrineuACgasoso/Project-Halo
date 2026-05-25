@@ -1,7 +1,7 @@
 import pygame
 import random
 from os.path import join
-from source.enemies.enemies import InimigoBase
+from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import BurstRifle
@@ -10,49 +10,26 @@ from source.systems.entitymanager import entity_manager
 
 
 
-class Infection(InimigoBase):
+class Infection(BaseEnemy):
     def __init__(self, posicao, game):
-        # 1. A Base gerencia o cache e define self.posicao inicial
         super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=120, game=game, sprite_key='infection')
         
-        # 2. Busca os sprites já processados (Cache Global)
-        self.sprites = self.get_sprites('default')
-
-        # 3. Configuração de animação
-        self.frame_atual = 0  
-        self.estado_animacao = 'left'
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        
-        # Sincroniza o rect inicial com a posição arredondada
-        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        
-        self.velocidade_animacao = 150
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            
-            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        self.setup_animation(
+            estado_inicial='left',
+            velocidade_animacao=150
+        )
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
 
         direcao_x = self.jogador.posicao.x - self.posicao.x
         
-        if direcao_x < 0:
-            self.estado_animacao = 'left'
-        elif direcao_x > 0:
-            self.estado_animacao = 'right'
+        self.set_sprite_direction(direcao_x)
 
         self.animar()
 
 
-class FloodForms(InimigoBase):
+class FloodForms(BaseEnemy):
     def __init__(self, posicao, game):
         escolhido = random.randint(1, 20)
         if escolhido > 5:
@@ -60,34 +37,28 @@ class FloodForms(InimigoBase):
         else:
             self.forma = 'elite'
 
-        # Mantive a sprite_key='infection' assumindo que você usa o Cenário 1 (Tudo no mesmo dicionário)
-        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=100, game=game, sprite_key='infection')
+        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=100, game=game, sprite_key='infection', variante=self.forma)
 
-        # Sprites e animação            
-        self.sprites = self.get_sprites(self.forma)
-        self.estado_animacao = 'right'
-        self.frame_atual = 0
-        self.velocidade_animacao = 200
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.setup_animation(
+            estado_inicial='right',
+            velocidade_animacao=200
+        )
 
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=posicao)
-
-        # Atributos de cada Forma
         self.is_Carry = False
         self.is_Marine = False
 
+        # Atributos de cada Forma
         if self.forma == 'elite':
-            self.dano = 2 * self.dano_base
-            self.velocidade = 2 * self.velocidade_base
+            self.dano *= 2
+            self.velocidade *= 2
             self.velocidade_animacao = 120
             
         elif self.forma == 'carry':
-            self.vida = 5 * self.vida_base
+            self.vida *= 5
             if hasattr(self, 'vida_maxima'):
                 self.vida_maxima = self.vida # Previne bugs visuais na barra de vida
-            self.dano = self.dano_base / 2
-            self.velocidade = self.velocidade_base / 2
+            self.dano /= 2
+            self.velocidade /= 2
             self.is_Carry = True
             
         elif self.forma == 'marine':
@@ -95,10 +66,13 @@ class FloodForms(InimigoBase):
             # --- Variáveis da Habilidade de Tiro (Rajada) ---
             self.cooldown_ataque = 2500       # 2.5s entre as rajadas
             self.ultimo_ataque = pygame.time.get_ticks()
+
             self.tiros_por_rajada = 3         # Dá 3 tiros seguidos
             self.tiros_dados = 0              
+
             self.delay_entre_tiros = 150      # Tempo super rápido entre cada tiro da rajada
             self.ultimo_tiro_rajada = 0
+
             self.em_rajada = False
             self.distancia_tiro = 400         # Alcance da visão/tiro
 
@@ -143,9 +117,6 @@ class FloodForms(InimigoBase):
         )
 
     def morrer(self, grupos=None):
-        alvo_grupos = (entity_manager.all_sprites, entity_manager.items_grupo)
-        chance = random.randint(1, 1000)
-
         if self.is_Carry: 
             qtd_shards = 2
         else:
@@ -160,16 +131,7 @@ class FloodForms(InimigoBase):
                 pos_offset = self.posicao + pygame.math.Vector2(random.randint(-50, 50), random.randint(-50, 50))
                 DustParticle(posicao=pos_offset, grupos=entity_manager.all_sprites)
                 Infection(posicao=pos_offset, game=self.game)
-
         self.kill()
-
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
@@ -180,9 +142,6 @@ class FloodForms(InimigoBase):
 
         direcao_x = self.jogador.posicao.x - self.posicao.x
         
-        if direcao_x < 0:
-            self.estado_animacao = 'left'
-        elif direcao_x > 0:
-            self.estado_animacao = 'right'
+        self.set_sprite_direction(direcao_x)
 
         self.animar()
