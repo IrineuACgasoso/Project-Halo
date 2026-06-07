@@ -9,33 +9,26 @@ from source.feats.projetil import LightRifle
 from source.feats.effects import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
 
-# (Aviso: certifique-se de que a classe PrometheanTeleport está importada aqui!)
 
 class Crawler(BaseEnemy):
     def __init__(self, posicao, game):
         super().__init__(posicao, vida_base=20, dano_base=15, velocidade_base=120, game=game, sprite_key='crawler')
         
-        # Animação e Estados
-        self.sprites = self.get_sprites('default')
-        self.frame_atual = 0  
-        self.estado_animacao = 'left'
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=self.posicao)
+        self.setup_animation(
+            estado_inicial = 'left',
+            velocidade_animacao = 250
+            )
         
-        self.velocidade_animacao = 250
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-        
-        # --- NOVO: ESTADO DO TELEPORTE ---
+        # --- ESTADO DO TELEPORTE ---
         self.estado = 'normal' # Pode ser 'normal' ou 'teleportando'
         self.particula_teleporte = None
         self.alvo_teleporte = None
         self.ultimo_teleporte = pygame.time.get_ticks()
         # Cooldown gigante para imersão e performance (entre 12 e 20 segundos)
-        self.cooldown_teleporte = random.randint(12000, 20000) 
+        self.cooldown_teleporte = self.novo_cooldown(12000, 20000)
 
         # Combate (Rajada Tripla e Cooldown)
-        self.opcoes_cooldown = (5000, 6000, 7000, 8000)
-        self.cooldown_rifle = random.choice(self.opcoes_cooldown)
+        self.cooldown_rifle = self.novo_cooldown(5000, 9000)
         self.ultimo_tiro_principal = pygame.time.get_ticks()
         
         self.tiros_restantes_rajada = 0
@@ -144,7 +137,7 @@ class Crawler(BaseEnemy):
                 self.rect = self.image.get_rect(center=self.posicao)
                 
                 self.ultimo_teleporte = agora
-                self.cooldown_teleporte = random.randint(12000, 20000)
+                self.cooldown_teleporte = self.novo_cooldown(12000, 20000)
             return
         
         # Inicia o teleporte se o cooldown acabou e ele não está atirando a rajada
@@ -188,10 +181,8 @@ class Crawler(BaseEnemy):
             self.aplicar_colisao_mapa(paredes)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
-        if vetor_para_jogador.x < 0:
-            self.estado_animacao = 'left'
-        elif vetor_para_jogador.x > 0:
-            self.estado_animacao = 'right'
+        direcao_x = self.jogador.posicao.x - self.posicao.x
 
+        self.set_sprite_direction(direcao_x)
         self.gerenciar_rifle()
         self.animar()

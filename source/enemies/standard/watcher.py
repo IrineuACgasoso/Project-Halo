@@ -9,20 +9,12 @@ from source.systems.entitymanager import entity_manager
 
 class Watcher(BaseEnemy):
     def __init__(self, posicao, game):
-        # 1. A Base gerencia o cache e define self.posicao inicial
         super().__init__(posicao, vida_base=25, dano_base=5, velocidade_base=180, game=game, sprite_key='watcher')
         
-        # 2. Busca os sprites já processados (Cache Global)
-        self.sprites = self.get_sprites('default')
-
-        # 3. Configuração de animação
-        self.frame_atual = 0  
-        self.estado_animacao = 'left'
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        
-        self.velocidade_animacao = 300
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.setup_animation(
+            estado_inicial='left',
+            velocidade_animacao=300
+        )
 
         # --- NOVO: LÓGICA DE SUPORTE ---
         self.alvo_protegido = None
@@ -96,15 +88,6 @@ class Watcher(BaseEnemy):
                             cor=(255, 40, 0) 
                         )
 
-    def animar(self):
-        agora = pygame.time.get_ticks()
-        if agora - self.ultimo_update_animacao > self.velocidade_animacao:
-            self.ultimo_update_animacao = agora
-            
-            self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.image = self.sprites[self.estado_animacao][self.frame_atual]
-            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-
     def update(self, delta_time, paredes=None):
         # 1. Checa se precisa de um alvo novo (Se nasceu agora, morreu, ou se o ESCUDO ENCHEU)
         precisa_novo_alvo = False
@@ -157,12 +140,8 @@ class Watcher(BaseEnemy):
             
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
-        # 6. Atualiza pra que lado o sprite está olhando
-        if olhar_para_x < self.posicao.x:
-            self.estado_animacao = 'left'
-        elif olhar_para_x > self.posicao.x:
-            self.estado_animacao = 'right'
+        direcao_x = self.jogador.direcao.x - self.posicao.x
 
-        # 7. Dispara as ações finais
+        self.set_sprite_direction(direcao_x)
         self.aplicar_escudo()
         self.animar()

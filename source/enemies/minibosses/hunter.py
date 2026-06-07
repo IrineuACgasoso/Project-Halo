@@ -14,16 +14,11 @@ class Hunter(BaseEnemy):
         super().__init__(posicao, vida_base=750, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"
         
-        # 2. Sprites do Cache
-        self.sprites = self.get_sprites('default')
-        self.frame_atual = 0  
-        self.estado_animacao = 'left'
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        
-        self.velocidade_animacao = 900
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-        
+        self.setup_animation(
+            estado_inicial='left',
+            velocidade_animacao=900
+        )        
+
         # Hitbox (Inicia a mask)
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -124,7 +119,7 @@ class Hunter(BaseEnemy):
         # Burst logic
         if agora - self.tempo_ultimo_burst >= self.cooldown_burst:
             self.burst_restante = self.contagem_burst  
-            self.cooldown_burst = random.choice([5000, 5500, 6000, 6500])
+            self.cooldown_burst = self.novo_cooldown(5000, 7000)
             self.tempo_ultimo_burst = agora
 
         if self.burst_restante > 0:
@@ -137,17 +132,14 @@ class Hunter(BaseEnemy):
         # Cannon
         if agora - self.tempo_ultimo_cannon >= self.cooldown_cannon:
             self.tempo_ultimo_cannon = agora
-            self.cooldown_cannon = random.choice([7500, 8000, 8500, 9000])
+            self.cooldown_cannon = self.novo_cooldown(7500, 9500)
             self.cannon_beam()
 
         # --- MOVIMENTAÇÃO E ANIMAÇÃO ---
         # Deixa a Base fazer o movimento matemático e colisões
         super().update(delta_time, paredes)
 
-        # Atualiza o lado para onde ele olha baseado no jogador
-        if self.jogador.posicao.x < self.posicao.x:
-            self.estado_animacao = 'left'
-        else:
-            self.estado_animacao = 'right'
-
+        direcao_x = self.jogador.posicao.x - self.posicao.x 
+        
+        self.set_sprite_direction(direcao_x)
         self.animar()

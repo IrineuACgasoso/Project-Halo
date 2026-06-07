@@ -111,7 +111,7 @@ class Game:
                     entity_manager.inimigos_grupo),
             game=self
         )
-        self.player.armas['Rifle de Assalto'] = rifle
+        self.player.armas['rifle_assalto'] = rifle
 
         # Spawner — depois do player para não explodir no primeiro spawn
         self.spawner      = Spawner(self)

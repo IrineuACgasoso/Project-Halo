@@ -3,8 +3,9 @@ import math
 from abc import ABC, abstractmethod
 from source.windows.settings import *
 from source.feats.assets import ASSETS
-from source.feats.data import *
+from source.data.weapon_data import *
 
+# Fusão dos dicionários de Dataclasses
 ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA}
 
 
@@ -18,7 +19,6 @@ class Arma(ABC):
         self.ultimo_tiro = 0
         self.nome = ""
         self.descricao = ""
-
 
     # ── Core ────────────────────────────────────────────────────────────────────
 
@@ -39,64 +39,84 @@ class Arma(ABC):
 
     def aplicar_upgrades(self, nivel: int, nome_asset: str, target=None):
         """
-        Aplica os increases elegíveis do nivel atual.
-        target=None  → aplica em self (arma)
-        target=obj   → aplica no companion (ou lista de companions)
+        Aplica os upgrades elegíveis do nível atual acessando os atributos da Dataclass.
         """
         targets = target if isinstance(target, list) else ([target] if target else [self])
-        stats = ALL_DATA[nome_asset]['stats']
+        
+        profile = ALL_DATA.get(nome_asset)
+        if not profile:
+            return
+        
+        # Sintonizado: Acessa a propriedade .stats do WeaponProfile
+        stats = profile.stats
 
         for attr, meta in stats.items():
-            if attr.startswith('_') or not meta['increase'] or not meta['label']:
+            # Sintonizado: Acessa as propriedades usando ponto (.) do WeaponStats
+            if attr.startswith('_') or not meta.increase or not meta.label:
                 continue
-            if not self._deve_melhorar(meta['range'], nivel):
+            if not self._deve_melhorar(meta.range_val, nivel): # Ajustado para range_val
                 continue
+                
             for t in targets:
-                atual = getattr(t, attr)
-                novo  = atual + meta['increase']
-                if 'min' in meta:
-                    novo = max(meta['min'], novo)
+                atual = getattr(t, attr, meta.value)
+                novo  = atual + meta.increase
+                # Sintonizado: Verifica se existe min_val no objeto
+                if hasattr(meta, 'min_val') and meta.min_val is not None:
+                    novo = max(meta.min_val, novo)
                 setattr(t, attr, novo)
 
     def ver_proximos_upgrades(self, nivel_proximo: int, nome_asset: str, target=None) -> dict:
         """
-        Retorna {attr: {label, atual, proximo}} para todos os atributos com label.
-        target=None → lê de self
+        Retorna {attr: {label, atual, proximo}} sintonizado com as Dataclasses.
         """
         t = target if target and not isinstance(target, list) else (target[0] if target else self)
-        stats = ALL_DATA[nome_asset]['stats']
+        profile = ALL_DATA.get(nome_asset)
+        if not profile:
+            return {}
+        
+        stats = profile.stats
         resultado = {}
 
         for attr, meta in stats.items():
-            if not meta['label']:
-                continue
-            if attr.startswith('_'):
-                # atributo virtual — valor base do data, arma preenche depois
-                resultado[attr] = {'label': meta['label'], 'atual': 0, 'proximo': 0}
+            if not meta.label:
                 continue
 
-            atual = getattr(t, attr, meta['value'])
-            if self._deve_melhorar(meta['range'], nivel_proximo):
-                proximo = atual + meta['increase']
-                if 'min' in meta:
-                    proximo = max(meta['min'], proximo)
+            attr_real = attr[1:] if attr.startswith('_') else attr
+            atual = getattr(t, attr_real, meta.value)
+
+            if self._deve_melhorar(meta.range_val, nivel_proximo): # Ajustado para range_val
+                if atual is None:
+                    # Se o objeto não tem esse atributo em tempo de execução (ex: atributos com '_'),
+                    # usamos o valor base original da Dataclass. Se nem ele existir, assumimos 0.
+                    base_calculo = meta.value if meta.value is not None else 0
+                else:
+                    base_calculo = atual
+
+                # Segurança extra: se o aumento do upgrade for None, consideramos 0
+                incremento = meta.increase if meta.increase is not None else 0
+
+                proximo = base_calculo + incremento
+                
+                if hasattr(meta, 'min_val') and meta.min_val is not None: # Ajustado para min_val
+                    proximo = max(meta.min_val, proximo)
             else:
                 proximo = atual
 
-            resultado[attr] = {'label': meta['label'], 'atual': atual, 'proximo': proximo}
+            resultado[attr] = {'label': meta.label, 'atual': atual, 'proximo': proximo}
 
         return resultado
 
     def get_estatisticas_para_exibir(self, nivel_proximo: int, nome_asset: str, target=None) -> list[str]:
         """
-        Formata apenas o que muda no próximo nível.
+        Formata apenas as estatísticas modificadas para exibição na interface gráfica.
         """
         proximos = self.ver_proximos_upgrades(nivel_proximo, nome_asset, target)
         linhas = []
+        
+        fmt = lambda v: "0" if v is None else (f"{v:.1f}" if isinstance(v, float) and v % 1 != 0 and v != float('inf') else str(int(v)))        
         for info in proximos.values():
             if info['atual'] == info['proximo']:
                 continue
-            fmt = lambda v: str(int(v)) if isinstance(v, (int, float)) and v != float('inf') else str(v)
             linhas.append(f"{info['label']}: {fmt(info['atual'])} -> {fmt(info['proximo'])}")
         return linhas
     
@@ -104,19 +124,23 @@ class Arma(ABC):
 
     def inicializar_stats(self, nome_asset: str, target=None):
         """
-        Lê os 'value' do data e seta os atributos no target (ou self).
-        Chamado no __init__ de cada arma.
+        Lê os valores iniciais (.value) da Dataclass e injeta na arma instanciada.
         """
         t = target or self
-        stats = ALL_DATA[nome_asset]['stats']
+        profile = ALL_DATA.get(nome_asset)
+        if not profile:
+            return
+        
+        stats = profile.stats
         for attr, meta in stats.items():
-            if not attr.startswith('_') and meta['value'] is not None:
-                setattr(t, attr, meta['value'])
+            if not attr.startswith('_') and meta.value is not None:
+                setattr(t, attr, meta.value)
 
     # ── Interface obrigatória ────────────────────────────────────────────────────
 
     def encontrar_inimigo_mais_proximo(self, grupo_inimigos, raio_maximo=2000):
-        if not grupo_inimigos: return None
+        if not grupo_inimigos: 
+            return None
         menor_dist_sq = raio_maximo ** 2
         inimigo_mais_proximo = None
         for inimigo in grupo_inimigos:
@@ -126,23 +150,20 @@ class Arma(ABC):
                 inimigo_mais_proximo = inimigo
         return inimigo_mais_proximo
     
-
     def update(self, delta_time):
-        """Lógica de cooldown padronizada"""
+        """Lógica de cadência baseada no tick rate do pygame"""
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro > self.cooldown:
-            # O disparar() agora pode retornar True/False se de fato atirou
             if self.disparar():
                 self.ultimo_tiro = agora
     
-
     @abstractmethod
     def disparar(self) -> bool:
-        """Deve retornar True se o disparo foi realizado com sucesso"""
+        """Deve retornar True se o disparo foi realizado com sucesso para resetar o cooldown"""
         pass
     
-    def upgrade(self): self.nivel += 1 
+    def upgrade(self): 
+        self.nivel += 1 
 
-    def equipar(self): pass 
-
-
+    def equipar(self): 
+        pass

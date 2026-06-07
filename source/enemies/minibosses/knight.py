@@ -16,20 +16,10 @@ class Knight(BaseEnemy):
         self.game = game
         self.titulo = 'PROMETHEAN KNIGHT'
 
-        # Sprites
-        self.sprites = self.get_sprites('default')
-        
-        # Inicia a animação
-        self.frame_atual = 0
-        self.estado_animacao = 'right' 
-        self.velocidade_animacao = 300 # Milissegundos por frame
-        self.ultimo_update_animacao = pygame.time.get_ticks()
-        #rect
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=self.posicao)
-        # Cria a hitbox do knight
-        self.hitbox = pygame.Rect(0, 0, self.rect.width * 0.6, self.rect.height * 0.9)
-        self.hitbox.center = self.rect.center
+        self.setup_animation(
+            estado_inicial='right',
+            velocidade_animacao=300
+        )        
 
         # FSM
         self.estado_habilidade = 'idle' # Laser, Run, TP, Stun

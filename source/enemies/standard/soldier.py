@@ -13,11 +13,9 @@ from source.systems.entitymanager import entity_manager
 
 class Soldier(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=10, dano_base=10, velocidade_base=90, game=game, sprite_key='soldier')
-        
         # Sorteio do tipo
         escolhido = random.randint(1, 10)
-        if escolhido > 5:
+        if escolhido > 9:
             self.tipo = 'sniper'
             self.distancia_ideal = 600
             self.pente_rajada = 1
@@ -31,16 +29,13 @@ class Soldier(BaseEnemy):
             self.tamanho = (24, 24)
             self.dano_rifle = 5
             self.velocidade_rifle = 600
+
+        super().__init__(posicao, vida_base=10, dano_base=10, velocidade_base=90, game=game, sprite_key='soldier', variante=self.tipo)
         
-        # Animação e Estados
-        self.sprites = self.get_sprites(self.tipo)
-        self.frame_atual = 0  
-        self.estado_animacao = 'left'
-        self.image = self.sprites[self.estado_animacao][self.frame_atual]
-        self.rect = self.image.get_rect(center=self.posicao)
-        
-        self.velocidade_animacao = 250
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.setup_animation(
+            estado_inicial='left',
+            velocidade_animacao=250
+        )
         
         # --- NOVO: ESTADO DO TELEPORTE ---
         self.estado = 'normal' # Pode ser 'normal' ou 'teleportando'
@@ -48,11 +43,10 @@ class Soldier(BaseEnemy):
         self.alvo_teleporte = None
         self.ultimo_teleporte = pygame.time.get_ticks()
         # Cooldown gigante para imersão e performance (entre 12 e 20 segundos)
-        self.cooldown_teleporte = random.randint(12000, 20000) 
+        self.cooldown_teleporte = self.novo_cooldown(15000, 21000) 
 
         # Combate (Rajada Tripla e Cooldown)
-        self.opcoes_cooldown = (7000, 9000, 11000, 13000)
-        self.cooldown_rifle = random.choice(self.opcoes_cooldown)
+        self.cooldown_rifle = self.novo_cooldown(7000, 13000)
         self.ultimo_tiro_principal = pygame.time.get_ticks()
         
         self.tiros_restantes_rajada = 0
@@ -91,11 +85,7 @@ class Soldier(BaseEnemy):
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):
-        direcao_tiro = self.jogador.posicao - self.posicao
-        if direcao_tiro.length() > 0:
-            direcao_tiro = direcao_tiro.normalize()
-        else:
-            direcao_tiro = pygame.math.Vector2(1, 0)
+        direcao_tiro = self.calcular_direcao_tiro(0.05)
             
         LightRifle(
             posicao_inicial=self.posicao.copy(),
@@ -163,7 +153,7 @@ class Soldier(BaseEnemy):
                 self.rect = self.image.get_rect(center=self.posicao)
                 
                 self.ultimo_teleporte = agora
-                self.cooldown_teleporte = random.randint(12000, 20000)
+                self.cooldown_teleporte = self.novo_cooldown(15000, 21000)
             return
         
         # Inicia o teleporte se o cooldown acabou e ele não está atirando a rajada
@@ -206,10 +196,8 @@ class Soldier(BaseEnemy):
             self.aplicar_colisao_mapa(paredes)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
-        if vetor_para_jogador.x < 0:
-            self.estado_animacao = 'left'
-        elif vetor_para_jogador.x > 0:
-            self.estado_animacao = 'right'
-
+        direcao_x = self.jogador.posicao.x - self.posicao.x
+        
+        self.set_sprite_direction(direcao_x)
         self.gerenciar_rifle()
         self.animar()

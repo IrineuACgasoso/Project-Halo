@@ -1,11 +1,8 @@
 import pygame
 import math
 from source.windows.settings import *
-from source.feats.assets import ASSETS
-from source.feats.data import WEAPON_DATA
 from source.feats.baseweapon import *
 from source.feats.projetil import ProjetilUniversal, BurstRifle, ProjetilNeedler, Projetil_Lista, Projetil_PingPong, Aura
-
 
 class RifleAssalto(Arma):
     NOME_ASSET = 'rifle_assalto'
@@ -16,7 +13,6 @@ class RifleAssalto(Arma):
         self.nome = 'Rifle de Assalto'
         self.descricao = """Rifle UNSC de cadência elevada"""
         self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
-        # Status
         self.inicializar_stats(self.NOME_ASSET)
         
     def disparar(self):
@@ -24,11 +20,10 @@ class RifleAssalto(Arma):
         if inimigo_alvo and inimigo_alvo.alive():
             direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
             
-            # Dispara projéteis múltiplos, se o nível permitir
             for _ in range(self.projeteis_por_disparo):
                 BurstRifle(
                     posicao_inicial = self.jogador.posicao,
-                    grupos          = (self.all_sprites,), # Apenas o grupo visual
+                    grupos          = (self.all_sprites,), 
                     jogador         = self.jogador,
                     game            = self.game,
                     dono            ='PLAYER',
@@ -44,7 +39,6 @@ class RifleAssalto(Arma):
         super().upgrade()
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
 
-
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
 
@@ -53,7 +47,7 @@ class RifleAssalto(Arma):
     
 
 class Arma_Loop(Arma):
-    NOME_ASSET = 'bola_calderânica'
+    NOME_ASSET = 'bola_calderanica' # Removido o acento perigoso
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
@@ -104,15 +98,9 @@ class ArmaLista(Arma):
 
     def update(self, delta_time):
         agora = pygame.time.get_ticks()
-
         if agora >= self.tempo_fim_ciclo:
             self.disparar()
-
-            self.tempo_fim_ciclo = (
-                agora +
-                self.duracao +
-                self.cooldown
-            )
+            self.tempo_fim_ciclo = (agora + self.duracao + self.cooldown)
 
     def disparar(self):
         angulo_step = 360 / self.num_listas
@@ -151,15 +139,12 @@ class MK2_Shield(Arma):
         self.area_de_dano = None
         self.inicializar_stats(self.NOME_ASSET)
 
-
     def equipar(self):
         self.jogador.adicionar_escudo(self.escudo)
         self.jogador.shield_regen = self.shield_regen
-        self.jogador.velocidade_regen_escudo = (self.velocidade_regen_escudo)
+        self.jogador.velocidade_regen_escudo = self.velocidade_regen_escudo
 
-        # Cria aura
         if self.area_de_dano is None:
-
             self.area_de_dano = Aura(
                 jogador=self.jogador,
                 raio=self.raio,
@@ -167,7 +152,8 @@ class MK2_Shield(Arma):
                 grupos=(self.all_sprites, self.auras_grupos)
             )
 
-    def disparar(self): return False
+    def disparar(self): 
+        return False
     
     def upgrade(self):
         super().upgrade()
@@ -175,7 +161,7 @@ class MK2_Shield(Arma):
         if self.area_de_dano:
             self.area_de_dano.atualizar_stats(self.raio, self.dano_por_segundo)
         self.jogador.shield_regen = self.shield_regen
-        self.jogador.velocidade_regen_escudo = (self.velocidade_regen_escudo)
+        self.jogador.velocidade_regen_escudo = self.velocidade_regen_escudo
         self.jogador.escudo_maximo = self.escudo
 
     def ver_proximo_upgrade(self):
@@ -198,19 +184,14 @@ class Needler(Arma):
         self.tiros_restantes = 0
         self.ultimo_tiro_burst = 0
 
-
     def disparar(self) -> bool:
-        # Se não houver rajada em curso, inicia uma
         if self.tiros_restantes <= 0:
             self.tiros_restantes = self.burst_count
-            return True # Retorna True para resetar o cooldown principal da Arma
+            return True 
         return False
     
     def update(self, delta_time):
-        # Se o cooldown principal passou, ele chama disparar() que ativa a munição da rajada
         super().update(delta_time)
-
-        # Lógica da Rajada (Burst)
         agora = pygame.time.get_ticks()
         if self.tiros_restantes > 0:
             if agora - self.ultimo_tiro_burst > self.burst_interval:
@@ -220,25 +201,25 @@ class Needler(Arma):
                     self.tiros_restantes -= 1
                     self.ultimo_tiro_burst = agora
                 else:
-                    # Se não há inimigos, cancela a rajada para não atirar no nada
                     self.tiros_restantes = 0
 
     def _spawn_agulha(self, inimigo):
         if inimigo and inimigo.alive():
             direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
            
-        ProjetilNeedler(
-            posicao_inicial = self.jogador.posicao,
-            grupos          = (self.all_sprites,),
-            jogador         = self.jogador,
-            game            = self.game,
-            dono            = 'PLAYER',
-            tamanho         = (64, 32),
-            dano            = self.dano,
-            velocidade      = self.velocidade,
-            direcao_spread  = direcao_vetor,
-            alvo            = inimigo
-        )
+            # Movido para dentro do IF para evitar UnboundLocalError caso o inimigo morra
+            ProjetilNeedler(
+                posicao_inicial = self.jogador.posicao,
+                grupos          = (self.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'PLAYER',
+                tamanho         = (64, 32),
+                dano            = self.dano,
+                velocidade      = self.velocidade,
+                direcao_spread  = direcao_vetor,
+                alvo            = inimigo
+            )
 
     def upgrade(self):
         super().upgrade()
@@ -249,4 +230,3 @@ class Needler(Arma):
 
     def get_estatisticas_para_exibir(self):
         return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
-

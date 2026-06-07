@@ -75,18 +75,29 @@ class EventManager:
         g = self.game
         if not g.tela_de_upgrade_ativa:
             return
+            
         escolha_idx = g.tela_de_upgrade_ativa.handle_event(evento)
         if escolha_idx is None:
             return
 
-        nome_da_arma = g.tela_de_upgrade_ativa.nomes_das_opcoes[escolha_idx]
-
-        if nome_da_arma in g.player.armas:
-            g.player.armas[nome_da_arma].upgrade()
+        if isinstance(escolha_idx, str) and escolha_idx.isdigit():
+            escolha_idx = int(escolha_idx)
+        
+        # 2. Define o ID da arma com base no tipo de dado recebido
+        if isinstance(escolha_idx, int):
+            # Se for um número inteiro, busca a arma na lista de opções usando o índice
+            id_da_arma = g.tela_de_upgrade_ativa.ids_das_opcoes[escolha_idx]
         else:
-            dados = DADOS_ARMAS[nome_da_arma]
+            # Se já for um texto (ex: 'rifle_assalto'), significa que o evento já trouxe o ID pronto!
+            id_da_arma = escolha_idx
 
-            # Mapeia nome do grupo -> objeto real no entity_manager
+        # Verifica e aplica usando a chave ID no dicionário do Player
+        if id_da_arma in g.player.armas:
+            g.player.armas[id_da_arma].upgrade()
+        else:
+            dados = DADOS_ARMAS[id_da_arma]
+
+            # Mapeia nome do grupo para o objeto real do entity_manager
             _grupos_map = {
                 'all_sprites':               entity_manager.all_sprites,
                 'inimigos_grupo':            entity_manager.inimigos_grupo,
@@ -96,11 +107,16 @@ class EventManager:
                 'auras_grupo':               entity_manager.auras_grupo,
             }
             grupos = tuple(_grupos_map[ng] for ng in dados['grupos'])
+            
+            # Instancia o objeto dinamicamente
             nova_arma = dados['classe'](g.player, grupos, g, criar_sprite=True)
             if hasattr(nova_arma, 'equipar'):
                 nova_arma.equipar()
-            g.player.armas[nome_da_arma] = nova_arma
+                
+            # Salva no inventário do jogador usando o ID limpo como chave
+            g.player.armas[id_da_arma] = nova_arma
 
+        # Retorna o fluxo do gameplay
         g.estado_do_jogo = 'jogando'
         g.tela_de_upgrade_ativa = None
 

@@ -26,7 +26,7 @@ class Jackal(BaseEnemy):
         )
 
         # Habilidades
-        self.plasma_cooldown = 5000
+        self.plasma_cooldown = self.novo_cooldown(4500, 6000)
         self.escudo_quebrado = False
         self.ultimo_tiro = pygame.time.get_ticks()
 
@@ -43,12 +43,13 @@ class Jackal(BaseEnemy):
             if paredes:
                 self.aplicar_colisao_mapa(paredes)
 
-        self.set_sprite_direction(direcao.x)
+        direcao_x = self.jogador.posicao.x - self.posicao.x
+
+        self.set_sprite_direction(direcao_x)
 
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
-            novo_cooldown = [6000, 8000, 10000, 11000]
-            self.plasma_cooldown = random.choice(novo_cooldown)
+            self.plasma_cooldown = self.novo_cooldown(6000, 11000)
             if self.tipo == 'sniper':
                 self.sniper()
             else:

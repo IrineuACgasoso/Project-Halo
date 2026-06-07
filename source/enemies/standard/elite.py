@@ -61,8 +61,7 @@ class Elite(BaseEnemy):
         #Ativa carabina
         if agora - self.ultima_carabina >= self.cooldown_carabin:
             self.carabina_restante = self.contagem_carabina
-            novo_cooldown_carabina = [3000, 4000, 5000, 6000]
-            self.cooldown_carabin = random.choice(novo_cooldown_carabina)
+            self.cooldown_carabin = self.novo_cooldown(3000, 7000)
             self.ultima_carabina = agora
         #Atira carabina
         if self.carabina_restante > 0:
@@ -85,7 +84,7 @@ class Elite(BaseEnemy):
                 flashing=True
             )
 
-        if direcao.length() >= 350:
+        if direcao.length_squared() >= 122500:
             self.velocidade = self.velocidade_base
         else:
             self.velocidade = 0

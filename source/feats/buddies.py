@@ -3,7 +3,7 @@ import math
 import random
 from source.windows.settings import *
 from source.feats.assets import ASSETS
-from source.feats.data import COMPANION_DATA
+from source.data.weapon_data import COMPANION_DATA
 from source.feats.projetil import BurstRifle
 from source.feats.baseweapon import Arma
 
@@ -29,12 +29,12 @@ class Companheiro(pygame.sprite.Sprite):
     def configurar_atributos(self):
         """Busca no dicionário COMPANION_DATA e aplica os status"""
         config = COMPANION_DATA.get(self.nome_asset, COMPANION_DATA['marine'])
-        self.tipo = config['tipo']
+        self.tipo = config.tipo
 
         # Lê 'value' de cada stat — ignora atributos virtuais (_prefixo)
-        for attr, meta in config['stats'].items():
-            if not attr.startswith('_') and meta['value'] is not None:
-                setattr(self, attr, meta['value'])
+        for attr, meta in config.stats.items():
+            if not attr.startswith('_') and meta.value is not None:
+                setattr(self, attr, meta.value)
 
         if self.pode_atirar:
             self.ultimo_tiro = 0
@@ -429,7 +429,7 @@ class Marine(Arma):
         # Sincroniza com o primeiro para não nascer desatualizado
         if self.companions:
             ref = self.companions[0]
-            stats = COMPANION_DATA[self.NOME_ASSET]['stats']
+            stats = COMPANION_DATA[self.NOME_ASSET].stats
             for attr in stats:
                 if not attr.startswith('_') and hasattr(ref, attr):
                     setattr(novo_marine, attr, getattr(ref, attr))
@@ -443,27 +443,39 @@ class Marine(Arma):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.companions)
         self.dano = self.companions[0].dano if self.companions else self.dano
         if self._deve_melhorar(
-            COMPANION_DATA[self.NOME_ASSET]['stats']['_soldados']['range'],
+            COMPANION_DATA[self.NOME_ASSET].stats['_soldados'].range_val,
             self.nivel
         ):
             self.adicionar_soldado()            
 
 
     def ver_proximo_upgrade(self):
-        base = self.companions[0] if self.companions else None
-        proximos = self.ver_proximos_upgrades(base, self.nivel + 1, self.NOME_ASSET, target=self.companions)
+        proximos = self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.companions)
         proximos['_soldados']['atual'] = len(self.companions)
         proximos['_soldados']['proximo'] = len(self.companions) + (
             1 if self._deve_melhorar(
-                COMPANION_DATA[self.NOME_ASSET]['stats']['_soldados']['range'],
+                COMPANION_DATA[self.NOME_ASSET].stats['_soldados'].range_val,
                 self.nivel + 1
             ) else 0
         )
         return proximos
 
     def get_estatisticas_para_exibir(self):
-        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET, target=self.companions)
-
+        # 1. Puxamos o dicionário completo de upgrades que você já tratou no método acima
+        proximos = self.ver_proximo_upgrade()
+        linhas = []
+        
+        # 2. Nossa função de formatação segura contra None
+        fmt = lambda v: "0" if v is None else (f"{v:.1f}" if isinstance(v, float) and v % 1 != 0 and v != float('inf') else str(int(v)))
+        
+        # 3. Varremos os atributos gerando as linhas de texto para a tela
+        for info in proximos.values():
+            # Se o valor atual for igual ao próximo, não há motivo para mostrar na tela de upgrade
+            if info['atual'] == info['proximo']:
+                continue
+            linhas.append(f"{info['label']}: {fmt(info['atual'])} -> {fmt(info['proximo'])}")
+            
+        return linhas
     
     def disparar(self): pass
 

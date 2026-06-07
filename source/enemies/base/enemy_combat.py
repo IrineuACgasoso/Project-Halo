@@ -44,6 +44,10 @@ class EnemyCombat:
             # Se não tem escudo, toma dano direto na vida
             self.vida = max(0, self.vida - quantidade)
 
+    def novo_cooldown(self, minimal, maximum):
+        updated_cooldown = random.randint(minimal, maximum)
+        return updated_cooldown
+
     def morrer(self, grupos = None):
         Items.spawn_drop(self.posicao, grupos, 'exp_shard', 1, 100)
         Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)

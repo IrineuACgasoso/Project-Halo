@@ -15,14 +15,10 @@ class Zealot(BaseEnemy):
 
         self.posicao = pygame.math.Vector2(posicao)
 
-        # Sprites e Animação
-        self.sprites = self.get_sprites('default')
-        self.frame_atual = 0  
-        self.estado_animacao = 'right'
-        self.image = self.sprites[self.estado_animacao][0]
-        self.rect = self.image.get_rect(center=self.posicao)
-        self.velocidade_animacao = 200
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.setup_animation(
+            estado_inicial='right',
+            velocidade_animacao=200
+            )
         
         # FSM e Variáveis de Habilidade
         self.estado_habilidade = 'idle' 
@@ -32,7 +28,7 @@ class Zealot(BaseEnemy):
         self.last_stealth = pygame.time.get_ticks()
         
         # Cooldowns e Timers
-        self.cooldown_stealth = random.randint(3000, 6000) # Cooldown inicial aleatório
+        self.cooldown_stealth = self.novo_cooldown(3000, 6000) # Cooldown inicial aleatório
         self.tempo_invisivel_perseguindo = 2500 # Quanto tempo (ms) ele corre invisível após o TP
         self.inicio_perseguicao_invisivel = 0
 
@@ -139,7 +135,9 @@ class Zealot(BaseEnemy):
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         
         # Animação
-        self.estado_animacao = 'left' if (self.game.player.posicao.x < self.posicao.x) else 'right'
+        direcao_x = self.jogador.posicao.x - self.posicao.x
+
+        self.set_sprite_direction(direcao_x)
         self.animar()
     
     def morrer(self, grupos = None):

@@ -39,8 +39,7 @@ class Scarab(BaseEnemy):
         self.fase_critica = False 
 
         # 5. Armamento de Plasma (Torretas Laterais)
-        self.opcoes_cooldown = (4000, 6000, 8000, 10000)
-        self.cooldown_plasma = random.choice(self.opcoes_cooldown)
+        self.cooldown_plasma = self.novo_cooldown(4000, 10000)
         self.ultimo_tiro_plasma = pygame.time.get_ticks()
         
         self.tiros_restantes_rajada = 0
@@ -60,13 +59,12 @@ class Scarab(BaseEnemy):
         if not self.fase_desestabilizado and self.vida < self.vida_base * 0.6:
             self.fase_desestabilizado = True
             self.sprites = self.get_sprites('damaged')
-            self.cooldown_laser = 10000
+            self.cooldown_laser = self.novo_cooldown(9000, 11000)
         if not self.fase_critica and self.vida < self.vida_base * 0.4:
             self.fase_critica = True
             self.sprites = self.get_sprites('broken')
-            self.opcoes_cooldown = (2000, 3000, 4000, 5000)
-            self.cooldown_plasma = random.choice(self.opcoes_cooldown)
-            self.cooldown_laser = 8000
+            self.cooldown_plasma = self.novo_cooldown(2000, 5000)
+            self.cooldown_laser = self.novo_cooldown(7000, 9000)
             self.velocidade *= 2
             self.velocidade_animacao /= 2
             self.delay_entre_tiros /= 1.5

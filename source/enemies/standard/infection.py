@@ -97,8 +97,7 @@ class FloodForms(BaseEnemy):
                 if self.tiros_dados >= self.tiros_por_rajada:
                     self.em_rajada = False
                     self.ultimo_ataque = agora
-                    novo_cooldown = [4000, 4500, 5000, 6000]
-                    self.cooldown_ataque = random.choice(novo_cooldown)
+                    self.cooldown_ataque = self.novo_cooldown(4000, 9000)
 
     def disparar(self):
         # Calcula a direção para o jogador

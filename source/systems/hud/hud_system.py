@@ -17,8 +17,6 @@ from .hud_draw import (
 )
 
 
-
-
 class HUD:
     def __init__(self, game):
         self.game = game

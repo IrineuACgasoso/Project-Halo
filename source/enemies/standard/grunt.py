@@ -16,15 +16,14 @@ class Grunt(BaseEnemy):
             )
         
         # Plasma
-        self.plasma_cooldown = 8000
+        self.plasma_cooldown = self.novo_cooldown(8000, 12000)
         self.ultimo_tiro = pygame.time.get_ticks()
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
-            novo_cooldown = [8000, 9000, 10000, 11000]
-            self.plasma_cooldown = random.choice(novo_cooldown)
+            self.plasma_cooldown = self.novo_cooldown(8000, 12000)
             self.plasma()
             self.ultimo_tiro = agora
 
