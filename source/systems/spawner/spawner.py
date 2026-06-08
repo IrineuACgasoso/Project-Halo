@@ -29,7 +29,6 @@ class Spawner(SpawnerUtils):
             novo_boss = BOSS_CLASSES[tipo](
                 posicao=pos if tipo != 'gravemind' else entity_manager.player.posicao, 
                 game=self.game, 
-                grupos=entity_manager.all_sprites
             )
             self.game.boss_atual = novo_boss  # Envia para o Game quem é o boss
         # Inimigo comum

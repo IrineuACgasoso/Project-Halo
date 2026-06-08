@@ -11,7 +11,7 @@ from source.systems.entitymanager import entity_manager
 
 
 class Knight(BaseEnemy):
-    def __init__(self, posicao, grupos, game):
+    def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=500, dano_base=60, velocidade_base=50, game=game, sprite_key='knight')
         self.game = game
         self.titulo = 'PROMETHEAN KNIGHT'

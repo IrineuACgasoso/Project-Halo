@@ -38,32 +38,31 @@ class Arma(ABC):
     # ── Genéricos (weapon ou companion) ─────────────────────────────────────────
 
     def aplicar_upgrades(self, nivel: int, nome_asset: str, target=None):
-        """
-        Aplica os upgrades elegíveis do nível atual acessando os atributos da Dataclass.
-        """
         targets = target if isinstance(target, list) else ([target] if target else [self])
-        
         profile = ALL_DATA.get(nome_asset)
-        if not profile:
-            return
+        if not profile: return
         
-        # Sintonizado: Acessa a propriedade .stats do WeaponProfile
         stats = profile.stats
 
         for attr, meta in stats.items():
-            # Sintonizado: Acessa as propriedades usando ponto (.) do WeaponStats
-            if attr.startswith('_') or not meta.increase or not meta.label:
+            if not meta.increase or not meta.label:
                 continue
-            if not self._deve_melhorar(meta.range_val, nivel): # Ajustado para range_val
+            if not self._deve_melhorar(meta.range_val, nivel):
                 continue
                 
+            # Tratamos o nome real do atributo exatamente como no método de visualização
+            attr_real = attr[1:] if attr.startswith('_') else attr
+                
             for t in targets:
-                atual = getattr(t, attr, meta.value)
-                novo  = atual + meta.increase
-                # Sintonizado: Verifica se existe min_val no objeto
+                atual = getattr(t, attr_real, meta.value)
+                # Garante que se 'atual' for None, tratamos como 0 por segurança
+                base_calculo = atual if atual is not None else 0
+                novo = base_calculo + meta.increase
+                
                 if hasattr(meta, 'min_val') and meta.min_val is not None:
                     novo = max(meta.min_val, novo)
-                setattr(t, attr, novo)
+                setattr(t, attr_real, novo) # Modifica o atributo real (ex: 'cooldown' em vez de '_cooldown')
+
 
     def ver_proximos_upgrades(self, nivel_proximo: int, nome_asset: str, target=None) -> dict:
         """
@@ -141,9 +140,18 @@ class Arma(ABC):
     def encontrar_inimigo_mais_proximo(self, grupo_inimigos, raio_maximo=2000):
         if not grupo_inimigos: 
             return None
+        
         menor_dist_sq = raio_maximo ** 2
         inimigo_mais_proximo = None
+
         for inimigo in grupo_inimigos:
+            # TRAVA COMPLETA: Se estiver totalmente invisível OU sumindo/escondido, ignora!
+            alpha = getattr(inimigo, 'alpha_atual', 255)
+            fase_invis = getattr(inimigo, 'invis_phase', 'none')
+            
+            if alpha == 0 or fase_invis in ['fade_out', 'hold']:
+                continue
+
             dist_sq = self.jogador.posicao.distance_squared_to(inimigo.posicao)
             if dist_sq < menor_dist_sq:
                 menor_dist_sq = dist_sq

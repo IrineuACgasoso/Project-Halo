@@ -8,7 +8,7 @@ from source.enemies.base.enemy_base import *
 from source.systems.entitymanager import entity_manager
 
 class Scarab(BaseEnemy):
-    def __init__(self, posicao, grupos, game):
+    def __init__(self, posicao, game, **kwargs):
         # 1. Atributos Colossais
         super().__init__(posicao, vida_base=15000, dano_base=80, velocidade_base=35, 
                          game=game, sprite_key='scarab', flip_sprite=True)

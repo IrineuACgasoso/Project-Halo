@@ -9,7 +9,7 @@ from source.systems.entitymanager import entity_manager
 
 
 class Hunter(BaseEnemy):
-    def __init__(self, posicao, grupos, game):
+    def __init__(self, posicao, game, **kwargs):
         # 1. Base gerencia o Cache Global
         super().__init__(posicao, vida_base=750, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"

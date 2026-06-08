@@ -62,3 +62,4 @@ class BaseEnemy(
             self.aplicar_colisao_mapa(paredes)
 
         self.sync_rect()
+

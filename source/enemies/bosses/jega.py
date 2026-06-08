@@ -8,7 +8,7 @@ from source.systems.entitymanager import entity_manager
 
 
 class Jega(BaseEnemy):
-    def __init__(self, posicao, game, grupos):
+    def __init__(self, posicao, game, **kwargs):
         valor_vida = 5000
         super().__init__(posicao, vida_base=valor_vida, dano_base=100, velocidade_base=50, game=game, sprite_key='jega', flip_sprite=True)
 

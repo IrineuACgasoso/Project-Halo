@@ -8,6 +8,7 @@ class WeaponStats:
     increase: float = 0             # Quanto aumenta por nível
     range_val: Any = 0              # Multiplicador ou lista de limites [3, 5, 7]
     min_val: Optional[float] = None # Valor mínimo limite (útil para cooldowns)
+    
     # ── FALLBACK INTELIGENTE COM TRADUÇÃO DE CHAVES ──
     def __getitem__(self, key):
         # Se o código antigo pedir 'range', entrega o 'range_val'

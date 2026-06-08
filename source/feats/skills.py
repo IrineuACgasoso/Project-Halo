@@ -55,8 +55,15 @@ class OndaEMP(pygame.sprite.Sprite):
         distancia = (jogador.posicao - self.posicao).length()
         
         if not self.atingiu_jogador and abs(distancia - self.raio_atual) < 20: # Aumentei um pouco a tolerância da colisão da onda
-            jogador.tomar_dano_direto(self.dano)
-            self.atingiu_jogador = True
+            if hasattr(jogador, 'escudo_atual') and jogador.escudo_atual > 0:
+                jogador.escudo_atual = 0  # Derrete o escudo instantaneamente
+                
+                # Opcional: Você pode colocar um som de "Shield Break" aqui!
+                # if hasattr(self.game, 'sounds'): self.game.sounds['shield_break'].play()
+                
+            else:
+                # Se não tem escudo, a onda frita a vida do jogador
+                jogador.tomar_dano_direto(self.dano)
 
         if self.raio_atual >= self.raio_maximo:
             self.kill()
@@ -123,7 +130,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             if self.dono == 'PLAYER':
                 alvos = entity_manager.inimigos_grupo.sprites()
             else:
-                alvos = [self.game.jogador]
+                alvos = [entity_manager.player]
 
             for alvo in alvos:
                 distancia = (alvo.posicao - self.posicao).length()

@@ -7,7 +7,7 @@ import math
 from source.systems.entitymanager import entity_manager
 
 class WardenEternal(BaseEnemy):
-    def __init__(self, posicao, game, grupos, clone = False):
+    def __init__(self, posicao, game, clone = False, **kwargs):
         if clone:
             valor_vida = 10000
             velocidade_base = 100

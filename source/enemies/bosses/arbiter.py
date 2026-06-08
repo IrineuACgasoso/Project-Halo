@@ -8,7 +8,7 @@ from source.systems.entitymanager import entity_manager
 
 
 class BossArbiter(BaseEnemy):
-    def __init__(self, posicao, game):
+    def __init__(self, posicao, game, **kwargs):
         valor_vida = 4500
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
@@ -25,7 +25,7 @@ class BossArbiter(BaseEnemy):
 
         # Habilidade: Invisibilidade
         self.cooldown_invisibilidade = 8000
-        self.duracao_invisi = 3500
+        self.duracao_invisibilidade = 3500
         self.ultima_invisibi = pygame.time.get_ticks()
         
         # Habilidade: Burst Carabina
@@ -84,7 +84,7 @@ class BossArbiter(BaseEnemy):
                 # Inicia a máquina de estados de camuflagem oficial
                 self.iniciar_invisibilidade(
                     alpha_alvo=0, fade_out=600, fade_in=600, 
-                    duracao=self.duracao_invisi, flashing=False
+                    duracao=self.duracao_invisibilidade, flashing=False
                 )
         else:
             # Revelar parcialmente se tomar "trombada" do Player
