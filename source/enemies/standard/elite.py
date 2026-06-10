@@ -72,7 +72,7 @@ class Elite(BaseEnemy):
                 self.carabin()
 
         # Ativa invisibilidade
-        if self.vida <= self.vida_base / 1.1 and not self.vida_critica:
+        if self.vida <= self.vida_base / 2 and not self.vida_critica:
             self.vida_critica = True
             self.velocidade_base *= 2
 
@@ -80,7 +80,7 @@ class Elite(BaseEnemy):
                 alpha_alvo=0,
                 fade_out=800,
                 fade_in=800,
-                duracao=99000,
+                duracao=8000,
                 flashing=True
             )
 
