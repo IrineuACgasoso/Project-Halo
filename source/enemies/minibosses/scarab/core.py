@@ -12,6 +12,7 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
         super().__init__(posicao, vida_base=15000, dano_base=80, velocidade_base=35, 
                          game=game, sprite_key='scarab', flip_sprite=True)
         self.titulo = "SCARAB"
+        self.is_boss = True
         
         self.setup_animation(
             estado_inicial='left',

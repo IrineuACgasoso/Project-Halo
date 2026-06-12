@@ -13,6 +13,8 @@ class Jega(BaseEnemy):
         super().__init__(posicao, vida_base=valor_vida, dano_base=100, velocidade_base=50, game=game, sprite_key='jega', flip_sprite=True)
 
         self.titulo = "JEGA 'RDOMNAI, O Matador de Spartans"
+        self.is_boss = True
+
         self.game = game
         self.vida = valor_vida     
         self.vida_base = valor_vida

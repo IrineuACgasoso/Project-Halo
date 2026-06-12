@@ -38,9 +38,11 @@ class HUD:
             'cafe'     : pygame.transform.scale(ASSETS['items']['cafe'],      (_SZ, _SZ)),
         }
 
-        # Cache do boss
+        # Cache do boss e alvos
         self._ultimo_check_boss   = 0
         self._intervalo_check_boss = 500
+        
+        self.foco_barra_vida = None  # Controla estritamente o que aparece na tela
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -59,13 +61,15 @@ class HUD:
         if agora - self._ultimo_check_boss < self._intervalo_check_boss:
             return
         self._ultimo_check_boss = agora
-        bosses = [s for s in entity_manager.inimigos_grupo if hasattr(s, 'titulo')]
-        if bosses:
-            self.game.boss_atual = min(
-                bosses, key=lambda b: b.posicao.distance_to(self.game.player.posicao)
+        
+        # A HUD foca apenas em quem tem título para desenhar a barra de vida inferior
+        todos_com_titulo = [s for s in entity_manager.inimigos_grupo if hasattr(s, 'titulo')]
+        if todos_com_titulo:
+            self.foco_barra_vida = min(
+                todos_com_titulo, key=lambda b: b.posicao.distance_squared_to(self.game.player.posicao)
             )
         else:
-            self.game.boss_atual = None
+            self.foco_barra_vida = None
 
     
 
@@ -75,10 +79,13 @@ class HUD:
         _draw_player_bars(tela, self.game.player)
         _draw_xp(tela, self.game.player, self._font_xp)
 
+        # O timer do jogo só some se houver um chefe real na arena
         if not self.game.boss_atual:
             _draw_timer(tela, self.game.timer_jogo, self._font_timer)
 
         _draw_coletaveis(tela, self.game.player.coletaveis, self._icones, self._font_hud)
 
         self._atualizar_boss_foco()
-        draw_boss_hud(tela, self.game.boss_atual, self._font_boss, self._font_hud, largura_tela, altura_tela)
+        
+        # Passamos o 'foco_barra_vida' em vez de 'boss_atual'. 
+        draw_boss_hud(tela, self.foco_barra_vida, self._font_boss, self._font_hud, largura_tela, altura_tela)

@@ -12,6 +12,7 @@ class BossArbiter(BaseEnemy):
         valor_vida = 4500
         super().__init__(posicao, vida_base=valor_vida, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
+        self.is_boss = True
         
         self.setup_animation(
             estado_inicial='right',

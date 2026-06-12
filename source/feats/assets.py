@@ -124,6 +124,9 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp11.png')).convert_alpha(), (128, 160))
             ]
         },
+        'terminal' : [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'terminal.png')).convert_alpha(), (96, 130)),
+            ],
 
         'scarab' : {
             'default' : [
@@ -302,10 +305,16 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'brute', 'brute2.png')).convert_alpha(),(200,200))
            ],
         
-        'sentinel': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
-        ],
+        'sentinel': {
+            'default' : [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
+                ],
+            'major' : [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'super.png')).convert_alpha(), (192, 288)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'super.png')).convert_alpha(), (192, 288))
+                ],
+        },
 
         'crawler' : [
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw1.png')).convert_alpha(), (128, 128)),

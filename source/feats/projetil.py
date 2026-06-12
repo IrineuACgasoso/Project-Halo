@@ -313,7 +313,7 @@ class ProjetilNeedler(ProjetilUniversal):
 
     def ao_atingir_alvo(self, alvo):
         # Import Local
-        from source.feats.skills import ArtilhariaAviso
+        from source.feats.skills.artilharia import ArtilhariaAviso
         # 1. Checa invulnerabilidade antes de tudo
         if getattr(alvo, 'invulneravel', False):
             return # Atravessa sem contar agulha e sem morrer
@@ -332,12 +332,7 @@ class ProjetilNeedler(ProjetilUniversal):
                 grupos              = self.game.all_sprites,
                 game                = self.game, 
                 dono                = self.dono,
-                dano                = self.dano * 6,
-                cor_borda           = (255, 0, 255, 120),
-                cor_preenchimento   = (200, 0, 255, 30),
-                cor_explosao        = (230, 0, 255, 150),
-                raio_explosao       = 180,
-                duracao             = 500
+                preset='needler_supercombine'
                 )
             alvo.agulhas_presas = 0
             # spawn_explosion_effect(alvo.posicao) # Dica para o futuro

@@ -14,6 +14,8 @@ class Harbinger(BaseEnemy):
         valor_vida = 7500
         super().__init__(posicao, vida_base=valor_vida, dano_base=40, velocidade_base=50, game=game, sprite_key='harbinger')
         self.titulo = "HARBINGER, A Rainha Endless"
+        self.is_boss = True
+
         self.vida = valor_vida
         self.vida_base = valor_vida
         #sprites

@@ -15,6 +15,7 @@ class Didact(BaseEnemy, DidactSetup, DidactAI, DidactAttacks):
                          game=game, sprite_key='didact', flip_sprite=True)
         
         self.titulo = "DIDACT, O Forerunner Banido"
+        self.is_boss = True
         
         # --- Sprites e Animação Base ---
         self.setup_animation(estado_inicial='right', velocidade_animacao=350)

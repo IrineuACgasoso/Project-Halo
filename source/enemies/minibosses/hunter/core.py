@@ -11,7 +11,8 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=1000, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"
-        
+        self.is_boss = True
+
         self.setup_animation(
             estado_inicial='left',
             velocidade_animacao=900

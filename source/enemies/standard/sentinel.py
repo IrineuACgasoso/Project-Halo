@@ -3,10 +3,11 @@ import math
 
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.effects import ContinuousBeam
+from source.enemies.bosses.guilty.vfx import EnergyAura
 
 class Sentinel(BaseEnemy):
-    def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel')
+    def __init__(self, posicao, game, variante='default'):
+        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel', variante=variante)
         self.setup_animation(
             estado_inicial='left',
             velocidade_animacao=200
@@ -97,3 +98,31 @@ class Sentinel(BaseEnemy):
             # Agora usa a classe nova, mantendo o padrão do Scarab
             self.laser.draw(superficie, deslocamento)
         
+
+class SentinelMajor(Sentinel):
+    def __init__(self, posicao, game):
+        # Inicia como um Sentinel normal
+        super().__init__(posicao, game, variante='major')
+        self.titulo = "MAJOR SENTINEL"
+        # SOBRESCREVE OS ATRIBUTOS PARA A VERSÃO ELITE
+        self.laser.dano_por_segundo *= 2.5 # Laser do Major machuca mais!
+        self.adicionar_escudo(self.vida_base * 2)
+        
+        # AURA AMARELA (Não empurra, mas dá dano se encostar)
+        self.aura = EnergyAura(
+            owner=self, 
+            raio=60,               # Ajuste o tamanho da aura da sentinela aqui
+            dano_contato=5, 
+            game=self.game, 
+            cor_base=(255, 200, 0), # Amarelão dourado
+            impenetravel=False      # Permite que o jogador atravesse a aura
+        )
+
+    def update(self, delta_time, paredes=None):
+        super().update(delta_time, paredes)
+
+        # 2. Verifica se o escudo quebrou
+        if hasattr(self, 'escudo_atual') and self.escudo_atual <= 0:
+            # Se a aura ainda estiver viva no grupo de sprites, nós a destruímos
+            if self.aura and self.aura.alive():
+                self.aura.kill()

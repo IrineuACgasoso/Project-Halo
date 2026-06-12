@@ -30,7 +30,10 @@ class Spawner(SpawnerUtils):
                 posicao=pos if tipo != 'gravemind' else entity_manager.player.posicao, 
                 game=self.game, 
             )
+            # Define explicitamente a flag de boss real aqui no nascimento
+            novo_boss.is_boss = True 
             self.game.boss_atual = novo_boss  # Envia para o Game quem é o boss
+            
         # Inimigo comum
         else:
             # Pega os dados da fase atual ou o default
@@ -43,9 +46,18 @@ class Spawner(SpawnerUtils):
                 k=1 # Queremos apenas 1 inimigo
             )[0]
             
+            # Garante que inimigos normais NUNCA sejam confundidos com o Boss Principal
+            if not hasattr(inimigo_classe, 'is_boss'):
+                inimigo_classe.is_boss = False
+                
             inimigo_classe(posicao=pos, game=self.game)
 
     def update(self, delta_time):
+        # === TRAVA DE SEGURANÇA ===
+        # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente
+        if self.game.boss_atual and getattr(self.game.boss_atual, 'is_boss', False):
+            return
+
         self.tempo_proximo_spawn += delta_time
 
         tempo_atual = self.game.timer_jogo
@@ -63,18 +75,13 @@ class Spawner(SpawnerUtils):
         self.intervalo_spawn_atual = max(0.5, 2.5 - (tempo_atual * 0.002))
 
         # 3. Bosses Relativos à Fase
-        # Bosses
         if fase in PHASE_BOSSES:
-
             for boss in PHASE_BOSSES[fase]:
-
                 tempo_alvo = CRONOGRAMA_BOSSES[boss]
 
                 if (
                     tempo_atual >= tempo_alvo
                     and not self.boss_flags[boss]
                 ):
-
                     self.boss_flags[boss] = True
-
                     self.spawnar(boss)

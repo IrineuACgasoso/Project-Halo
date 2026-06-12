@@ -226,6 +226,9 @@ class Game:
                 # Verifica se o inimigo tem o método draw_laser (Sentinel e Scarab terão)
                 if hasattr(inimigo, 'draw_laser'):
                     inimigo.draw_laser(self.tela, deslocamento)
+                # Verifica se o inimigo (como o Boss) tem efeitos extras ou habilidades para desenhar
+                if hasattr(inimigo, 'draw_extras'):
+                    inimigo.draw_extras(self.tela, deslocamento)
                     
             self.hud.draw(self.tela)
 

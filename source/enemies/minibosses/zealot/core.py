@@ -10,6 +10,7 @@ class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=750, dano_base=80, velocidade_base=100, game=game, sprite_key='zealot')
         self.titulo = "ZEALOT, Soldado de Elite Covenant"
+        self.is_boss = True
 
         self.setup_animation(estado_inicial='right', velocidade_animacao=200)
         

@@ -2,7 +2,8 @@
 import pygame
 import random
 from source.feats.projetil import LaserBeam
-from source.feats.skills import OndaEMP, ArtilhariaAviso
+from source.feats.skills.skills import OndaEMP
+from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.effects import LaserWarning
 from source.systems.entitymanager import entity_manager
 

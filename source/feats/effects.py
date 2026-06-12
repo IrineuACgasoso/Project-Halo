@@ -226,7 +226,7 @@ class ContinuousBeam:
         self.game = owner.game
         self.color = color
         self.largura_base = largura_base
-        self.dps = dano_por_segundo
+        self.dano_por_segundo = dano_por_segundo
         self.mira_atual = pygame.math.Vector2(owner.posicao)
         # Agora o parâmetro é definido na criação da instância
         # 0.01 = Muito lento (estilo "mira pesada")
@@ -241,7 +241,7 @@ class ContinuousBeam:
         # Lógica de Dano (Área de impacto na ponta do laser)
         distancia_ponta = (self.mira_atual - self.game.player.posicao).length()
         if distancia_ponta < 50: # Raio de dano da ponta do feixe
-            self.game.player.tomar_dano_direto(self.dps * delta_time)
+            self.game.player.tomar_dano_direto(self.dano_por_segundo * delta_time)
 
     def draw(self, superficie, deslocamento, origem_offset=None):
         # Define o ponto de partida (se o inimigo tiver um canhão específico)

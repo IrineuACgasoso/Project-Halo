@@ -1,7 +1,7 @@
 import pygame
 import math
 from source.feats.projetil import ProjetilUniversal, PlasmaGun
-from source.feats.skills import ArtilhariaAviso 
+from source.feats.skills.artilharia import ArtilhariaAviso 
 from source.systems.entitymanager import entity_manager
 
 class HunterMortarProjectile(ProjetilUniversal):
@@ -52,16 +52,11 @@ class HunterMortarProjectile(ProjetilUniversal):
 
     def detonar_artilharia(self):
         aviso = ArtilhariaAviso(
-            posicao=self.target_pos, # Explode no ponto onde o player ESTAVA
-            grupos=(entity_manager.all_sprites,),
+            posicao=self.target_pos, 
+            grupos=(entity_manager.all_sprites,), 
             game=self.game,
             dono=self.dono,
-            dano=250,
-            raio_explosao=270,
-            duracao=600,
-            cor_borda=(20, 255, 20, 150),       # Alien Green
-            cor_preenchimento=(50, 255, 50, 50),
-            cor_explosao=(100, 255, 100, 220)
+            preset='hunter_cannon'
         )
         entity_manager.all_sprites.add(aviso)
         self.kill() 
@@ -132,7 +127,7 @@ class HunterAttacks:
             self.trava_global = agora + 1000 # <- A trava de 1000ms antes do próximo ataque!
 
     def processar_cannon(self, agora):
-        # Dispara o morteiro parabólico passando a posição atual dele e onde o player tá!
+        # Dispara o morteiro parabólico passando a posição atual dele e onde o player está
         HunterMortarProjectile(
             start_pos=self.posicao.copy(), 
             target_pos=self.jogador.posicao.copy(), 
