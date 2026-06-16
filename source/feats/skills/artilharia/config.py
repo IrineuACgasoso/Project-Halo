@@ -32,5 +32,23 @@ ARTILHARIA_PRESETS = {
         cor_borda=(255, 50, 255, 150), 
         cor_preenchimento=(255, 50, 255, 50), 
         cor_explosao=(255, 150, 255, 220)
+    ),
+
+    'flood_warning': ArtilhariaConfig(
+        dano=150,
+        raio_explosao=300, 
+        duracao=2500,
+        cor_borda=(255, 0, 0, 200),           # Borda vermelha
+        cor_preenchimento=(74, 93, 35, 100),  # Verde musgo
+        cor_explosao=(255, 140, 0, 220)       # Laranja (crescimento/impacto)
+    ),
+    
+    'grave_pit': ArtilhariaConfig(
+        dano=float('inf'), 
+        raio_explosao=400, 
+        duracao=2000,
+        cor_borda=(255, 0, 0, 200),           # Borda vermelha
+        cor_preenchimento=(30, 46, 17, 100),  # Verde escuro musgo
+        cor_explosao=(255, 140, 0, 220)       # Laranja (crescimento/impacto)
     )
 }

@@ -7,24 +7,12 @@ class CollisionManager:
     def __init__(self, game):
         self.game = game
 
-    @staticmethod
-    def inimigo_esta_oculto(inimigo):
-        """Centraliza a verificação de invisibilidade para evitar spoilers visual/físicos."""
-        # Se o alpha for 0 ou ele estiver marcado como invisível em fase oculta, ele NÃO pode ser mirado/atingido
-        alpha = getattr(inimigo, 'alpha_atual', 255)
-        phase = getattr(inimigo, 'invis_phase', 'none')
-        
-        # Durante o fade_out e hold ele fica totalmente coberto (invejável/imiraável)
-        if alpha == 0 or phase in ['fade_out', 'hold']:
-            return True
-        return False
-
     @classmethod
     def custom_collision(cls, sprite1, sprite2):
         """Lógica de colisão otimizada com suporte inteligente a Hitboxes Customizadas."""
         
-        # 1. Blindagem contra furtividade
-        if cls.inimigo_esta_oculto(sprite2):
+        # 1. Blindagem Total (Furtividade, Cutscenes, Dash)
+        if getattr(sprite2, 'invulneravel', False):
             return False
 
         # 2. Colisão Radial (Ultra rápida, excelente para auras/explosões)
@@ -54,7 +42,7 @@ class CollisionManager:
     @classmethod
     def aura_collision(cls, sprite_inimigo, sprite_aura):
         """Colisão customizada para auras não detectarem inimigos invisíveis."""
-        if cls.inimigo_esta_oculto(sprite_inimigo):
+        if getattr(sprite_inimigo, 'invulneravel', False):
             return False
         return pygame.sprite.collide_circle(sprite_inimigo, sprite_aura)
 

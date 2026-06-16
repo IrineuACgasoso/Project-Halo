@@ -69,9 +69,14 @@ PURGE_PRESETS = {
         cor_preenchimento=(255, 0, 200, 60) 
     ),
     
-    'snyper_direcional': PurgeConfig(
+    'tentaculos_perseguidores': PurgeConfig(
         modo='inimigo_player',
-        artilharias_por_eixo=12,
-        intervalo=50
-    )
+        artilharias_por_eixo=10,
+        espacamento=120,   # Distância entre um tentáculo e outro
+        intervalo=250,     # Ritmo em que eles brotam do chão (telegrafa o movimento do player)
+        raio_artilharia=80,
+        duracao_aviso=400, # Tempo curto de aviso para forçar o player a dar Dash
+        cor_preenchimento=(74, 93, 35, 100), # Verde Musgo do Flood
+        cor_explosao=(255, 140, 0, 220)      # Laranja do Gravemind
+    ),
 }

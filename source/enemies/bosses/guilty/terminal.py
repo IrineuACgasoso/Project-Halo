@@ -2,13 +2,13 @@ import pygame
 import random
 from .vfx import GuiltyTeleport
 from source.enemies.base import BaseEnemy
-from source.enemies.standard.sentinel import Sentinel
+from source.enemies.standard.sentinel import SentinelMajor
 from source.systems.entitymanager import entity_manager
 
 
 class ForerunnerTerminal(BaseEnemy):
     def __init__(self, posicao, game, monitor_pai):
-        super().__init__(posicao, vida_base=1, dano_base=30, velocidade_base=0, game=game, sprite_key='terminal', flip_sprite=False)
+        super().__init__(posicao, vida_base=200, dano_base=30, velocidade_base=0, game=game, sprite_key='terminal', flip_sprite=False)
         self.titulo = "TERMINAL FORERUNNER"
         self.monitor_pai = monitor_pai
         
@@ -52,9 +52,9 @@ class ForerunnerTerminal(BaseEnemy):
         offset = pygame.math.Vector2(random.choice([-60, 60]), random.choice([-60, 60]))
         pos_spawn = self.posicao + offset
         
-        if self.game.mapa.posicao_e_valida(pos_spawn):
+        if self.verificar_posicao_valida(pos_spawn):
             GuiltyTeleport((round(pos_spawn.x), round(pos_spawn.y)))
-            nova_sentinela = Sentinel(pos_spawn, self.game)
+            nova_sentinela = SentinelMajor(pos_spawn, self.game)
             entity_manager.all_sprites.add(nova_sentinela)
             entity_manager.inimigos_grupo.add(nova_sentinela)
 

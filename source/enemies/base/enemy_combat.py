@@ -62,7 +62,6 @@ class EnemyCombat:
         duracao,
         flashing=False
     ):
-        self.invisivel = True
         self.invis_phase = "fade_out"
 
         self.invis_alpha_base = 255
@@ -83,11 +82,9 @@ class EnemyCombat:
         self._aplicar_alpha(self.invis_alpha_base)
 
     def atualizar_invisibilidade(self, dt):
-        """
-        dt em milissegundos
-        """
+        """Atualiza os passos do efeito de camuflagem (dt em milissegundos)."""
 
-        if not self.invisivel:
+        if self.invis_phase is None:
             return
 
         self.invis_timer += dt
@@ -132,9 +129,7 @@ class EnemyCombat:
             )
 
             if t >= 1.0:
-                self.invisivel = False
                 self.invis_phase = None
-
                 alpha_final = self.invis_alpha_base
 
         # ============================================

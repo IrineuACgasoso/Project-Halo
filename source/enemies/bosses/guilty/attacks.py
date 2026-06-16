@@ -39,7 +39,7 @@ class GuiltyAttacks:
 
             for off_x, off_y in eixos:
                 pos_spawn = pygame.math.Vector2(self.posicao.x + off_x, self.posicao.y + off_y)
-                if self.game.mapa.posicao_e_valida(pos_spawn):
+                if self.verificar_posicao_valida(pos_spawn):
                     GuiltyTeleport((round(pos_spawn.x), round(pos_spawn.y)))
 
                     # Escolhe a Sentinela correspondente à fase
@@ -71,7 +71,7 @@ class GuiltyAttacks:
             target_y = self.jogador.posicao.y + distancia * math.sin(angulo)
             nova_pos.update(target_x, target_y)
             
-            if self.game.mapa.posicao_e_valida(nova_pos):
+            if self.verificar_posicao_valida(nova_pos):
                 posicao_valida = True
 
         if posicao_valida:

@@ -2,6 +2,7 @@ import pygame
 import math
 from source.feats.projetil import ProjetilUniversal, PlasmaGun
 from source.feats.skills.artilharia import ArtilhariaAviso 
+from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.entitymanager import entity_manager
 
 class HunterMortarProjectile(ProjetilUniversal):
@@ -128,11 +129,12 @@ class HunterAttacks:
 
     def processar_cannon(self, agora):
         # Dispara o morteiro parabólico passando a posição atual dele e onde o player está
-        HunterMortarProjectile(
+        CanhaoParabolico(
             start_pos=self.posicao.copy(), 
             target_pos=self.jogador.posicao.copy(), 
             game=self.game, 
-            dono='INIMIGO'
+            dono='INIMIGO',
+            preset_artilharia='hunter_cannon'
         )
         
         self.estado_habilidade = 'idle'

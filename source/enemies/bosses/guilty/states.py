@@ -1,5 +1,5 @@
 import pygame
-from .vfx import EnergyAura
+from source.feats.auras import EnergyAura
 
 class GuiltyAI:
     def verificar_fases(self, agora):

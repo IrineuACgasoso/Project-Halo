@@ -11,11 +11,11 @@ from source.systems.entitymanager import entity_manager
 
 class Elite(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=40, game=game, sprite_key='elite', flip_sprite=True)
+        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=40, game=game, sprite_key='elite', flip_sprite=False)
         
         self.setup_animation(
             estado_inicial='right',
-            velocidade_animacao=150
+            velocidade_animacao=200
         )
 
         #Carabin

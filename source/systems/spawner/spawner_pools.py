@@ -1,6 +1,6 @@
 # Inimigos Base
 from source.enemies.standard.grunt import Grunt
-from source.enemies.standard.jackal import Jackal
+from source.enemies.standard.jackal import Jackal, JackalSniper
 from source.enemies.standard.elite import Elite
 from source.enemies.standard.brute import Brute
 from source.enemies.standard.infection import Infection, FloodForms
@@ -13,16 +13,16 @@ from source.enemies.standard.soldier import Soldier
 # OTIMIZAÇÃO COM PESOS: { fase: { "classes": [], "pesos": [] } }
 PHASE_POOLS = {
     0: {
-        "classes": [Grunt, Jackal, Elite],
-        "pesos": [60, 30, 10]  # 60% Grunt, 30% Jackal, 10% Elite
+        "classes": [Grunt, Jackal, JackalSniper, Elite],
+        "pesos": [60, 29, 1, 10]  # 60% Grunt, 30% Jackal, 10% Elite
     },
     1: {
-        "classes": [Infection, Grunt, Jackal, Elite],
-        "pesos": [40, 30, 20, 10] # Muita Infection, pouco Elite
+        "classes": [Infection, Grunt, Jackal, JackalSniper, Elite],
+        "pesos": [40, 30, 19, 1, 10] # Muita Infection, pouco Elite
     },
     2: {
-        "classes": [Infection, FloodForms, Grunt, Jackal, Elite, Sentinel],
-        "pesos": [20, 20, 20, 20, 10, 10]
+        "classes": [Infection, FloodForms, Grunt, Jackal, JackalSniper, Elite, Sentinel],
+        "pesos": [20, 20, 20, 19, 1, 10, 10]
     },
     3: {
         "classes": [Grunt, Jackal, Elite, Brute],

@@ -1,8 +1,6 @@
 # No seu arquivo de setup do boss (ex: setup.py)
 import pygame
 from source.feats.effects import ContinuousBeam
-# CORRIGIDO: Apontando para o novo package otimizado
-from source.feats.skills.purge_grid import PurgeGrid 
 
 class GuiltySetup:
     def inicializar_habilidades(self):

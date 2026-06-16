@@ -3,7 +3,7 @@ import math
 
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.effects import ContinuousBeam
-from source.enemies.bosses.guilty.vfx import EnergyAura
+from source.feats.auras import EnergyAura
 
 class Sentinel(BaseEnemy):
     def __init__(self, posicao, game, variante='default'):
@@ -105,7 +105,7 @@ class SentinelMajor(Sentinel):
         super().__init__(posicao, game, variante='major')
         self.titulo = "MAJOR SENTINEL"
         # SOBRESCREVE OS ATRIBUTOS PARA A VERSÃO ELITE
-        self.laser.dano_por_segundo *= 2.5 # Laser do Major machuca mais!
+        self.laser.dano_por_segundo *= 4 # Laser do Major machuca mais!
         self.adicionar_escudo(self.vida_base * 2)
         
         # AURA AMARELA (Não empurra, mas dá dano se encostar)

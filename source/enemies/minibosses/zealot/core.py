@@ -20,24 +20,6 @@ class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
         self.hitbox = pygame.Rect(0, 0, self.rect.width / 2, self.rect.height)
         self.hitbox.center = self.rect.center
 
-
-    def animar(self):
-        # Salva o frame anterior para checar se a imagem realmente mudou
-        imagem_anterior = self.image 
-        
-        super().animar() 
-        
-        alpha = getattr(self, 'alpha_atual', 255)
-        self.image.set_alpha(alpha)
-        
-        # OTIMIZAÇÃO: Só reconstrói a mask se a imagem física mudou ou se estiver em fase de fade
-        if alpha > 0:
-            if imagem_anterior != self.image or self.estado_habilidade == 'stealth':
-                # threshold=50 garante colisão mesmo enquanto ele está meio transparente no fade
-                self.mask = pygame.mask.from_surface(self.image, threshold=50)
-        else:
-            self.mask.clear()
-
     def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)

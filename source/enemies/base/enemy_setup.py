@@ -2,9 +2,10 @@ import pygame
 from source.systems.entitymanager import entity_manager
 
 class EnemySetup:
-    def setup_core(self, game, sprite_key):
+    def setup_core(self, game, sprite_key, variante):
         self.game = game
         self.sprite_key = sprite_key
+        self.variante = variante
         self.jogador = self.game.player
         self.nome_completo = "INIMIGO"
 
@@ -40,7 +41,6 @@ class EnemySetup:
     
     def setup_invisibility(self):
         # Invisibilidade
-        self.invisivel = False
         self.invis_phase = None
 
         self.invis_alpha_base = 255

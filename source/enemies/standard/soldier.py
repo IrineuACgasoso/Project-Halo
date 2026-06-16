@@ -117,7 +117,7 @@ class Soldier(BaseEnemy):
             offset_y = math.sin(angulo) * self.distancia_ideal
             alvo_teste.update(self.jogador.posicao.x + offset_x, self.jogador.posicao.y + offset_y)
             
-            if self.game.mapa.posicao_e_valida(alvo_teste):
+            if self.verificar_posicao_valida(alvo_teste):
                 posicao_valida = True
                 
         # Se achou um lugar seguro, marca o alvo. Se não (corredor apertado), não sai do lugar.

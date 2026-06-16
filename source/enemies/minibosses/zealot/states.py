@@ -7,8 +7,15 @@ class ZealotAI:
             self.rage_mult *= 1.2
 
     def executar_estados(self, agora, delta_time, dist_sq):
-        if hasattr(self, 'invisivel') and self.invisivel:
+        # Atualiza as outras fases da invisibilidade (fade_out e hold)
+        if getattr(self, 'invis_phase', None) is not None:
             self.atualizar_invisibilidade(delta_time * 1000)
+
+        # TRAVA CRÍTICA: Se estiver reaparecendo, não processa mais nada e mantém o estado atual
+        if getattr(self, 'invis_phase', None) == 'fade_in':
+            self.velocidade = self.velocidade_base * self.rage_mult
+            self.velocidade_animacao = 80
+            return
         
         self.checar_anti_stuck(agora, dist_sq)
         
@@ -60,11 +67,7 @@ class ZealotAI:
             self.processar_dash(agora, delta_time, dist_sq)
             
         elif self.estado_habilidade == 'stealth':
-            # Se for a fase que ele reaparece correndo, acelera a animação!
-            if getattr(self, 'invis_phase', 'none') == 'fade_in':
-                self.velocidade_animacao = 80
-            else:
-                self.velocidade_animacao = 200
+            self.velocidade_animacao = 200
             self.processar_stealth(agora)
             
         elif self.estado_habilidade == 'sprint':

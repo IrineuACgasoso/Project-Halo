@@ -8,11 +8,11 @@ from source.systems.entitymanager import entity_manager
 
 class Grunt(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=4, dano_base=10, velocidade_base=50, game=game, sprite_key= 'grunt')
+        super().__init__(posicao, vida_base=2, dano_base=10, velocidade_base=50, game=game, sprite_key= 'grunt')
         
         self.setup_animation(
             estado_inicial='right',
-            velocidade_animacao=200
+            velocidade_animacao=150
             )
         
         # Plasma

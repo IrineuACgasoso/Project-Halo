@@ -8,7 +8,7 @@ from .attacks import GuiltyAttacks
 
 class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
     def __init__(self, posicao, game, grupos=None):
-        super().__init__(posicao, vida_base=1500, dano_base=80, velocidade_base=100, 
+        super().__init__(posicao, vida_base=2000, dano_base=80, velocidade_base=100, 
                         game=game, sprite_key='guilty', flip_sprite=True)
                          
         self.titulo = "343 GUILTY SPARK, Monitor da Instalação 04"

@@ -35,7 +35,7 @@ class BaseEnemy(
             ):
         super().__init__(entity_manager.all_sprites, entity_manager.inimigos_grupo)
 
-        self.setup_core(game, sprite_key)
+        self.setup_core(game, sprite_key, variante)
 
         self.setup_stats(vida_base, dano_base, velocidade_base)
         self.setup_shield()
@@ -54,6 +54,25 @@ class BaseEnemy(
         self.setup_visual(posicao, variante)
 
         self.aplicar_dificuldade()
+    
+    @property
+    def invisivel(self):
+        """Verifica se o inimigo está visualmente indetectável."""
+        alpha = getattr(self, 'alpha_atual', 255)
+        phase = getattr(self, 'invis_phase', 'none')
+        
+        return alpha == 0 or phase in ['fade_out', 'hold']
+
+    @property
+    def invulneravel(self):
+        """
+        Dita se o inimigo pode tomar dano ou colisões físicas.
+        Se ele tiver uma flag manual ativada OU estiver invisível, ele fica invulnerável.
+        """
+        flag_manual = getattr(self, 'is_invulneravel', False) 
+        protecao_spawn = getattr(self, 'invencivel', False)
+        
+        return flag_manual or self.invisivel or protecao_spawn
 
     def update(self, delta_time, paredes=None):
         self.mover(delta_time)
