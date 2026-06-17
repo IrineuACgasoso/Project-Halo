@@ -9,7 +9,8 @@ class FloodWarning(ArtilhariaAviso):
         
         # Inicia a artilharia com o preset do Flood
         super().__init__(posicao, grupos, game, dono='BOSS', preset='flood_warning')
-        
+        self.is_boss = False
+
         self.spawn_minion = spawn_minion
         self.spawn_realizado = False
 
@@ -20,15 +21,21 @@ class FloodWarning(ArtilhariaAviso):
         # Assim que explodir (duracao acabou), spawna o minion uma única vez
         if self.explodiu and not self.spawn_realizado:
             from .core import ProtoGravemind
-            ProtoGravemind(posicao=self.posicao, game=self.game, is_minion=self.spawn_minion)
-            self.spawn_realizado = True
+            proto = ProtoGravemind(posicao=self.posicao, game=self.game, is_minion=self.spawn_minion)
             
+            # Só passa o bastão se o Proto NÃO for um lacaio qualquer
+            if not self.spawn_minion:
+                self.game.boss_atual = proto
+
+            self.spawn_realizado = True
             # A classe pai já vai lidar com o self.kill() logo em seguida!
 
 class GravePit(ArtilhariaAviso):
     """Artilharia massiva que invoca o Gravemind Final."""
     def __init__(self, posicao, game, grupos=None):
         if grupos is None: grupos = (entity_manager.all_sprites,)
+
+        self.is_boss = False
         
         # Inicia a artilharia com o preset do Pit
         super().__init__(posicao, grupos, game, dono='BOSS', preset='grave_pit')
@@ -39,8 +46,8 @@ class GravePit(ArtilhariaAviso):
         
         if self.explodiu and not self.spawn_realizado:
             from .core import FinalGravemind
-            novo_boss = FinalGravemind(posicao=self.posicao, game=self.game)
-            self.game.boss_atual = novo_boss 
+            final_boss = FinalGravemind(posicao=self.posicao, game=self.game)
+            self.game.boss_atual = final_boss
             self.spawn_realizado = True
 
 

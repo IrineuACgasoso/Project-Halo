@@ -13,7 +13,8 @@ class GravemindSetup:
                 'cd_acido_base': (2000, 3000),
                 'cd_infeccao_base': (2500, 4000),
                 'cd_cabecas_base': (13000, 19000),
-                'cd_chuva_base': (8000, 12000),
+                'cd_tentaculos_base': (2000, 3500),
+                'cd_chuva_base': (2000, 4000),
                 'tiros_burst': 15,
                 'velocidade_baforada': 525,
                 'titulo': "GRAVEMIND, O Monumento de Todos os Pecados",
@@ -27,6 +28,7 @@ class GravemindSetup:
                 'cd_acido_base': (3000, 5000),
                 'cd_infeccao_base': (4000, 6500),
                 'cd_cabecas_base': (9999999, 10000000),
+                'cd_tentaculos_base': (10000, 14000),
                 'cd_chuva_base': (8000, 12000),
                 'tiros_burst': 8,
                 'velocidade_baforada': 400,
@@ -49,8 +51,10 @@ class GravemindSetup:
         self._inicializar_acid_breath()
         self._inicializar_infection()
         self._inicializar_heads()
+        self._inicializar_tentacles()
         self._inicializar_hell_rain()
-        
+
+    
     def _inicializar_respawn_animation(self):
         # === ANIMAÇÃO E RESPAWN ===
         self.estado_respawn = 'reaparecendo'
@@ -77,11 +81,22 @@ class GravemindSetup:
         self.spawns_restantes = 0
         self.ultimo_spawn_tick = 0
 
+        # Inicializadores seguros para a variante Infection Forms (Fase 2)
+        self.cooldown_infeccao_forms = 0
+        self.ultima_infeccao_forms = 0
+        self.forms_restantes = 0
+
     def _inicializar_heads(self):
         self.cooldown_cabecas = self.novo_cooldown(*self.cd_cabecas_base)
         self.ultima_cabeca = pygame.time.get_ticks()
         self.cabecas_restantes = 0
         self.intervalo_cabeca_tick = 0
+
+    def _inicializar_tentacles(self):
+        # === TENTÁCULOS PERSEGUIDORES ===
+        self.cooldown_tentaculos = self.novo_cooldown(*self.cd_tentaculos_base)
+        self.ultimos_tentaculos = 0  # 0 garante que ele pode usar logo no início se a IA escolher
+        
 
     def _inicializar_hell_rain(self):
         # No setup do Gravemind

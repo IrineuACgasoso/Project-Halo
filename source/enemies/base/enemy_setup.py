@@ -8,6 +8,7 @@ class EnemySetup:
         self.variante = variante
         self.jogador = self.game.player
         self.nome_completo = "INIMIGO"
+        self.is_boss = False
 
     def setup_stats(self, vida_base, dano_base, velocidade_base):
         # Base
@@ -16,6 +17,7 @@ class EnemySetup:
         self.velocidade_base = velocidade_base
 
         # Stats atuais
+        self.vida_maxima = vida_base
         self.vida = self.vida_base
         self.dano = self.dano_base
         self.velocidade = self.velocidade_base

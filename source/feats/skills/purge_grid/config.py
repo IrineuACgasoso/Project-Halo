@@ -20,8 +20,7 @@ class PurgeConfig:
     cor_explosao: Tuple[int, int, int, int] = (255, 100, 50, 220)
 
 
-# === SEU CARDÁPIO DE ATAQUES ===
-# Aqui você cria as variações do ataque mudando só o que precisa!
+# === CARDÁPIO DE ATAQUES ===
 PURGE_PRESETS = {
     'padrao': PurgeConfig(),
 
@@ -71,12 +70,13 @@ PURGE_PRESETS = {
     
     'tentaculos_perseguidores': PurgeConfig(
         modo='inimigo_player',
-        artilharias_por_eixo=10,
-        espacamento=120,   # Distância entre um tentáculo e outro
-        intervalo=250,     # Ritmo em que eles brotam do chão (telegrafa o movimento do player)
-        raio_artilharia=80,
-        duracao_aviso=400, # Tempo curto de aviso para forçar o player a dar Dash
-        cor_preenchimento=(74, 93, 35, 100), # Verde Musgo do Flood
-        cor_explosao=(255, 140, 0, 220)      # Laranja do Gravemind
+        artilharias_por_eixo=15,
+        espacamento=180,
+        dano=200,
+        intervalo=150,
+        raio_artilharia=160,
+        duracao_aviso=400,
+        cor_preenchimento=(132, 130, 101, 100), # Marrom Musgo do Flood
+        cor_explosao=(150, 100, 0, 220)      # Laranja do Gravemind
     ),
 }

@@ -30,9 +30,10 @@ class Spawner(SpawnerUtils):
                 posicao=pos if tipo != 'gravemind' else entity_manager.player.posicao, 
                 game=self.game, 
             )
-            # Define explicitamente a flag de boss real aqui no nascimento
-            novo_boss.is_boss = True 
-            self.game.boss_atual = novo_boss  # Envia para o Game quem é o boss
+            # Só define como True (para gerar portal) se a classe já não
+            # tiver definido explicitamente como False no __init__ dela!
+            if getattr(novo_boss, 'is_boss', None) is not False:
+                novo_boss.is_boss = True
             
         # Inimigo comum
         else:
@@ -40,22 +41,22 @@ class Spawner(SpawnerUtils):
             dados_fase = self.pools_por_fase.get(self.game.fase_atual, self.default_pool)
             
             # OTIMIZAÇÃO: random.choices escolhe baseado nos pesos
-            inimigo_classe = random.choices(
+            classe_escolhida = random.choices(
                 population=dados_fase["classes"],
                 weights=dados_fase["pesos"],
                 k=1 # Queremos apenas 1 inimigo
             )[0]
-            
-            # Garante que inimigos normais NUNCA sejam confundidos com o Boss Principal
-            if not hasattr(inimigo_classe, 'is_boss'):
-                inimigo_classe.is_boss = False
                 
-            inimigo_classe(posicao=pos, game=self.game)
+            # Crie a instância PRIMEIRO
+            inimigo_instancia = classe_escolhida(posicao=pos, game=self.game)
+            
+            # AGORA defina o atributo na instância, não na classe
+            inimigo_instancia.is_boss = False
 
     def update(self, delta_time):
         # === TRAVA DE SEGURANÇA ===
         # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente
-        if self.game.boss_atual and getattr(self.game.boss_atual, 'is_boss', False):
+        if self.game.boss_atual and self.game.boss_atual.alive():
             return
 
         self.tempo_proximo_spawn += delta_time

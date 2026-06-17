@@ -50,5 +50,14 @@ ARTILHARIA_PRESETS = {
         cor_borda=(255, 0, 0, 200),           # Borda vermelha
         cor_preenchimento=(30, 46, 17, 100),  # Verde escuro musgo
         cor_explosao=(255, 140, 0, 220)       # Laranja (crescimento/impacto)
-    )
+    ),
+
+    'acid_rain': ArtilhariaConfig(
+        dano=250,
+        raio_explosao=200, 
+        duracao=1000,
+        cor_borda=(255, 0, 0, 200),           # Borda vermelha
+        cor_preenchimento=(74, 120, 35, 100),  # Verde musgo
+        cor_explosao=(255, 140, 0, 220)       # Laranja (crescimento/impacto)
+    ),
 }
