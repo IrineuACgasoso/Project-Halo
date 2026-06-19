@@ -1,6 +1,7 @@
 # Bosses
 from source.enemies.bosses.guilty import GuiltySpark
 from source.enemies.bosses.arbiter import BossArbiter
+from source.enemies.bosses.tartarus import Tartarus
 from source.enemies.bosses.gravemind import FloodWarning
 from source.enemies.bosses.didact import Didact
 from source.enemies.bosses.warden import WardenEternal
@@ -20,10 +21,11 @@ PHASE_BOSSES = {
     2: ['guilty'], 
     3: ['scarab'],           
     4: ['arbiter'],
-    5: ['gravemind'],
-    6: ['knight'],
-    7: ['didact'],
-    8: ['jega'],
+    5: ['tartarus'],
+    6: ['gravemind'],
+    7: ['knight'],
+    8: ['didact'],
+    9: ['jega'],
 }
 
 
@@ -34,6 +36,7 @@ BOSS_CLASSES = {
     'guilty': GuiltySpark, 
     'scarab': Scarab, 
     'arbiter': BossArbiter,
+    'tartarus': Tartarus,
     'gravemind': FloodWarning, 
     'knight' : Knight, 
     'didact': Didact, 
@@ -49,6 +52,7 @@ CRONOGRAMA_BOSSES = {
     'guilty': 180,
     'scarab': 240,
     'arbiter': 300,
+    'tartarus': 360,
     'gravemind': 500,
     'knight': 600,
     'didact': 700,

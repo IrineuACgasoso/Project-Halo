@@ -30,8 +30,11 @@ class Spawner(SpawnerUtils):
                 posicao=pos if tipo != 'gravemind' else entity_manager.player.posicao, 
                 game=self.game, 
             )
-            # Só define como True (para gerar portal) se a classe já não
-            # tiver definido explicitamente como False no __init__ dela!
+
+            # Salva a referência no jogo para a trava do Spawner funcionar!
+            self.game.boss_atual = novo_boss
+
+            # Só define como True se a classe não tiver definido explicitamente como False
             if getattr(novo_boss, 'is_boss', None) is not False:
                 novo_boss.is_boss = True
             

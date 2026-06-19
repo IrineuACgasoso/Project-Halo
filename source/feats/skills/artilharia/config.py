@@ -34,6 +34,24 @@ ARTILHARIA_PRESETS = {
         cor_explosao=(255, 150, 255, 220)
     ),
 
+    'tartarus_run': ArtilhariaConfig(
+        dano=200,
+        raio_explosao=300,
+        duracao=300, 
+        cor_borda=(255, 100, 0, 200),
+        cor_preenchimento=(255, 50, 0, 80),
+        cor_explosao=(255, 255, 255, 250) # Clarão branco
+        ),
+
+    'tartarus_leap': ArtilhariaConfig(
+        dano=20,
+        raio_explosao=120,
+        duracao=100, 
+        cor_borda=(255, 100, 0, 200),
+        cor_preenchimento=(255, 50, 0, 80),
+        cor_explosao=(255, 255, 255, 250) # Clarão branco
+        ),
+
     'flood_warning': ArtilhariaConfig(
         dano=150,
         raio_explosao=300, 

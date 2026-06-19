@@ -157,10 +157,10 @@ ASSETS = {
         ],
 
         'tartarus': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus1.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus2.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus3.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus4.png')).convert_alpha(), (128, 192))
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus1.png')).convert_alpha(), (192, 288)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus2.png')).convert_alpha(), (192, 288)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus3.png')).convert_alpha(), (192, 288)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus4.png')).convert_alpha(), (192, 288))
         ],
 
         'gravemind': {

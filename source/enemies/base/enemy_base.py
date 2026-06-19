@@ -73,6 +73,14 @@ class BaseEnemy(
         protecao_spawn = getattr(self, 'invencivel', False)
         
         return flag_manual or self.invisivel or protecao_spawn
+    
+    @property
+    def inofensivo(self):
+        """
+        Dita se o inimigo perde temporariamente a capacidade de causar dano de contato.
+        Ideal para quando estão no ar (eixo Z falso), atordoados, etc.
+        """
+        return getattr(self, 'is_inofensivo', False)
 
     def update(self, delta_time, paredes=None):
         self.mover(delta_time)

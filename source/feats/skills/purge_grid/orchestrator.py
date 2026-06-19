@@ -36,7 +36,8 @@ class PurgeGrid(pygame.sprite.Sprite):
         elif modo == 'eixos_inimigo':
             self.fila_spawn = generate_radial_pattern(
                 caster_pos, self.cfg.qtd_eixos, self.cfg.artilharias_por_eixo,
-                self.cfg.espacamento, self.cfg.direcao.lower(), self.cfg.intervalo, agora
+                self.cfg.espacamento, self.cfg.direcao.lower(), self.cfg.intervalo, agora,
+                self.cfg.offset_angulo
             )
         elif modo == 'inimigo_player':
             self.fila_spawn = generate_directional_pattern(

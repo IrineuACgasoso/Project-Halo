@@ -44,10 +44,10 @@ def generate_grid_pattern(player_pos, modo, direcao_inicio, artilharias_por_eixo
     return fila
 
 
-def generate_radial_pattern(caster_pos, qtd_eixos, artilharias_por_eixo, espacamento, direcao, intervalo, agora):
+def generate_radial_pattern(caster_pos, qtd_eixos, artilharias_por_eixo, espacamento, direcao, intervalo, agora, offset_angulo=0.0):
     fila = []
     for j in range(qtd_eixos):
-        angulo = j * (2 * math.pi / qtd_eixos)
+        angulo = j * (2 * math.pi / qtd_eixos) + offset_angulo
         vetor_direcao = pygame.math.Vector2(math.cos(angulo), math.sin(angulo))
 
         for i in range(artilharias_por_eixo):

@@ -79,6 +79,9 @@ class CollisionManager:
             self.custom_collision
         )
         for inimigo in inimigos_contato:
+            # Se o inimigo estiver inofensivo (ex: no ar), ignora o dano
+            if getattr(inimigo, 'inofensivo', False):
+                continue
             if not getattr(inimigo, 'invulneravel', False):
                 player.tomar_dano(inimigo)
 

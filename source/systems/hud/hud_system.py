@@ -89,3 +89,8 @@ class HUD:
         
         # Passamos o 'foco_barra_vida' em vez de 'boss_atual'. 
         draw_boss_hud(tela, self.foco_barra_vida, self._font_boss, self._font_hud, largura_tela, altura_tela)
+
+        # Varre os sprites para desenhar elementos extras na interface (como o timer do Halo)
+        for sprite in entity_manager.all_sprites:
+            if hasattr(sprite, 'hud_draw'):
+                sprite.hud_draw(tela)

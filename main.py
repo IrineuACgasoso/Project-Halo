@@ -2,9 +2,6 @@ import pygame
 from source.windows.settings import *
 from source.game import Game
 
-
-
-
 def main():
     pygame.init()
     pygame.mixer.init()

@@ -1,10 +1,10 @@
 # source/feats/skills/purge_grid/config.py
 from dataclasses import dataclass
 from typing import Tuple
+import math
 
 @dataclass
 class PurgeConfig:
-    # Valores padrão (o que era o seu init antigo)
     modo: str = 'grid'
     qtd_eixos: int = 1
     artilharias_por_eixo: int = 5
@@ -15,6 +15,7 @@ class PurgeConfig:
     direcao_inicio: str = 'north'
     direcao: str = 'exit'
     duracao_aviso: int = 300
+    offset_angulo: float = 0.0      # Permite girar o ataque inteiro
     cor_borda: Tuple[int, int, int, int] = (255, 50, 0, 150)
     cor_preenchimento: Tuple[int, int, int, int] = (255, 50, 0, 50)
     cor_explosao: Tuple[int, int, int, int] = (255, 100, 50, 220)
@@ -51,6 +52,39 @@ PURGE_PRESETS = {
         cor_preenchimento=(255, 0, 0, 80),
         cor_explosao=(200, 200, 255, 120)
     ),
+
+    # Fase 1: (Para Cima, Baixo-Direita, Baixo-Esquerda)
+    'tartarus_smash_1': PurgeConfig(
+        modo='eixos_inimigo',
+        qtd_eixos=3,
+        artilharias_por_eixo=10,
+        espacamento=150,
+        raio_artilharia=150,
+        dano=150,
+        intervalo=80, 
+        duracao_aviso=500,
+        offset_angulo=-math.pi / 2, # -90 graus (Aponta pro Norte)
+        cor_borda=(0, 150, 255, 150),       # Azul Halo
+        cor_preenchimento=(0, 50, 255, 60),
+        cor_explosao=(50, 200, 255, 220)
+    ),
+    
+    # Fase 2: Invertido (Para Baixo, Cima-Esquerda, Cima-Direita)
+    'tartarus_smash_2': PurgeConfig(
+        modo='eixos_inimigo',
+        qtd_eixos=3,
+        artilharias_por_eixo=10,
+        espacamento=150,
+        raio_artilharia=150,
+        dano=150,
+        intervalo=80, 
+        duracao_aviso=500,
+        offset_angulo=math.pi / 2,  # +90 graus (Aponta pro Sul)
+        cor_borda=(0, 150, 255, 150),
+        cor_preenchimento=(0, 50, 255, 60),
+        cor_explosao=(50, 200, 255, 220)
+    ),
+
     
     'grid_fechado_rapido': PurgeConfig(
         modo='grid',

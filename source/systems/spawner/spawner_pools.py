@@ -14,11 +14,11 @@ from source.enemies.standard.soldier import Soldier
 PHASE_POOLS = {
     0: {
         "classes": [Grunt, Jackal, JackalSniper, Elite],
-        "pesos": [60, 29, 1, 10]  # 60% Grunt, 30% Jackal, 10% Elite
+        "pesos": [80, 14, 1, 5]  # 80% Grunt, 15% Jackal, 5% Elite
     },
     1: {
         "classes": [Infection, Grunt, Jackal, JackalSniper, Elite],
-        "pesos": [40, 30, 19, 1, 10] # Muita Infection, pouco Elite
+        "pesos": [40, 30, 19, 1, 10]
     },
     2: {
         "classes": [Infection, FloodElite, FloodMarine, FloodCarry, Grunt, Jackal, JackalSniper, Elite, Sentinel],
