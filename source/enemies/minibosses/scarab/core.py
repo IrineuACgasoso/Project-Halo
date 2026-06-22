@@ -56,6 +56,7 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
     def iniciar_stun(self):
         """Congela o Scarab e o deixa vulnerável"""
         self.estado_combate = 'STUNNED'
+        self.is_inofensivo = True
         self.tempo_inicio_stun = pygame.time.get_ticks()
 
     def animar(self):

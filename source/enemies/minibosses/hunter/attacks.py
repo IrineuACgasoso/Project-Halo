@@ -88,6 +88,7 @@ class HunterAttacks:
             self.aplicar_colisao_mapa(paredes)
         
         if agora - self.tempo_inicio_run >= self.duracao_run:
+            self.is_inofensivo = True
             self.estado_habilidade = 'stun'
             self.tempo_inicio_stun = agora
             self.velocidade_animacao = 900 
@@ -97,6 +98,7 @@ class HunterAttacks:
         self.velocidade = 0 # Fica estático
         
         if agora - getattr(self, 'tempo_inicio_stun', 0) >= self.duracao_stun:
+            self.is_inofensivo = False
             self.estado_habilidade = 'idle'
             self.velocidade = self.velocidade_base
             self.cooldown_run = self.novo_cooldown(8000, 14000)

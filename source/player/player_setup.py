@@ -26,8 +26,9 @@ class PlayerSetup:
 
     def setup_hitbox(self):
         self.mask = pygame.mask.from_surface(self.image) 
-        self.tamanho_hitbox = self.rect.width / 1.5
-        self.hitbox = pygame.Rect(0, 0, self.tamanho_hitbox, self.rect.height)
+        largura = self.rect.width / 1.5
+        altura = self.rect.height / 1.6
+        self.hitbox = pygame.Rect(0, 0, largura, altura)
         self.hitbox.center = self.rect.center
     
     def setup_armas(self):

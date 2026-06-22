@@ -50,7 +50,6 @@ class StageManager:
         # Criamos uma lista de quem DEVE sobreviver
         sobreviventes = [game.player]
         
-        # Adicionamos os companheiros (Cortana/Árbitro) à lista de sobreviventes
         for arma in game.player.armas.values():
             # Suporte para armas com múltiplos companions (Marine)
             if hasattr(arma, 'companions'):
@@ -59,6 +58,10 @@ class StageManager:
             # Suporte para Árbitro e Cortana (companion único)
             elif hasattr(arma, 'sprite_companion') and arma.sprite_companion:
                 sobreviventes.append(arma.sprite_companion)
+            
+            # Salva a Aura/Área de Dano do Escudo
+            if hasattr(arma, 'area_de_dano') and arma.area_de_dano:
+                sobreviventes.append(arma.area_de_dano)
 
         # Limpeza: Só mata quem NÃO está na lista de sobreviventes
         for sprite in list(entity_manager.all_sprites):

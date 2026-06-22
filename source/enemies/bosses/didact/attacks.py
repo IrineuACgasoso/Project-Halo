@@ -80,9 +80,9 @@ class DidactAttacks:
         alvo = self.jogador.posicao + offset
 
         ArtilhariaAviso(
-            posicao=alvo, 
-            grupos=self.game.all_sprites, 
-            game=self.game, 
-            dono='INIMIGO', 
-            dano=200
+            posicao=alvo,
+            grupos=[entity_manager.all_sprites],
+            game=self.game,
+            dono='INIMIGO',    
+            preset='didact_collapse'
             )

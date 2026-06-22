@@ -78,4 +78,13 @@ ARTILHARIA_PRESETS = {
         cor_preenchimento=(74, 120, 35, 100),  # Verde musgo
         cor_explosao=(255, 140, 0, 220)       # Laranja (crescimento/impacto)
     ),
+
+    'didact_collapse': ArtilhariaConfig(
+        dano=200,                             
+        raio_explosao=260,                   
+        duracao=1200,                         
+        cor_borda=(255, 100, 0, 220),         # Laranja Promethean bem definido
+        cor_preenchimento=(255, 100, 0, 60),  # Laranja translúcido preenchendo a área
+        cor_explosao=(255, 255, 180, 240)     # Explosão em Amarelo Bem Claro / Brilhante
+    ),
 }

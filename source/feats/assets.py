@@ -327,12 +327,20 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw4.png')).convert_alpha(), (128, 128)),
             ],
         
-        'watcher' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (96, 96)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (96, 96)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (96, 96)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (96, 96)),
-        ],
+        'watcher' : {
+            'default' : [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (96, 96)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (96, 96)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (96, 96)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (96, 96)),
+                ],
+            'omega' : [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (144, 144)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (144, 144)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (144, 144)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (144, 144)),
+                ]
+            },
 
         'soldier' : {
             'default' : [

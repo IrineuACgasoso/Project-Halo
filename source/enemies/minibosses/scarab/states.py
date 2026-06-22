@@ -22,6 +22,7 @@ class ScarabAI:
         if getattr(self, 'estado_combate', '') == 'STUNNED':
             if agora - getattr(self, 'tempo_inicio_stun', 0) >= getattr(self, 'duracao_stun', 6000):
                 # Fim do Stun: Reseta escudo e volta ao combate
+                self.is_inofensivo = False
                 self.estado_combate = 'MOVENDO'
                 self.adicionar_escudo(self.escudo_maximo)
                 

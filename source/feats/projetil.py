@@ -49,6 +49,10 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.posicao)
         self.mask = pygame.mask.from_surface(self.image)
 
+        # Ativa a colisão circular
+        self.usar_circulo = True
+        self.radius = min(self.tamanho) * 0.35
+
     def obter_imagem_base(self, sprite_key, tamanho):
         base_key = f"base_{sprite_key}_{tamanho[0]}x{tamanho[1]}"
         if base_key not in ProjetilUniversal.GLOBAL_CACHE:
@@ -120,12 +124,20 @@ class Aura(pygame.sprite.Sprite):
         self.desenhar_aura()
 
     def desenhar_aura(self):
-        """Desenha o efeito visual da aura"""
-        self.image.fill((0, 0, 0, 0)) # Limpa
-        # Desenha um círculo amarelo suave
-        pygame.draw.circle(self.image, (255, 255, 0, 45), (self.raio, self.raio), self.raio)
-        # Desenha uma borda leve para dar definição
-        pygame.draw.circle(self.image, (255, 255, 0, 100), (self.raio, self.raio), self.raio, 2)
+        """Gera o visual dinâmico em anéis idêntico ao da EnergyAura"""
+        self.image.fill((0, 0, 0, 0)) # Limpa a superfície anterior
+        r, g, b = (255, 192, 0) 
+        
+        # Renderiza os anéis concêntricos com fade de opacidade (Alpha) nas bordas
+        for raio_atual in range(self.raio - 20, self.raio + 10, 4):
+            alpha = max(0, 60 - abs(self.raio - raio_atual) * 3)
+            pygame.draw.circle(self.image, (r, g, b, alpha), (self.raio, self.raio), raio_atual, 3)
+            
+        # Brilho de contenção central (clareia e define a borda principal)
+        r_claro = min(r + 50, 255)
+        g_claro = min(g + 50, 255)
+        b_claro = min(b + 50, 255)
+        pygame.draw.circle(self.image, (r_claro, g_claro, b_claro, 180), (self.raio, self.raio), self.raio, 2)
 
     def atualizar_stats(self, novo_raio, novo_dano):
         """Chamado pelo upgrade da Arma"""

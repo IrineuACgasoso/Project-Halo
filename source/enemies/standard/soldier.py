@@ -6,7 +6,7 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import LightRifle
-from source.feats.effects import PrometheanTeleport
+from source.feats.skills.promethean_tp import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
 
 # (Aviso: certifique-se de que a classe PrometheanTeleport está importada aqui!)
