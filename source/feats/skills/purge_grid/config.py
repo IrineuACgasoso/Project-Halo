@@ -113,4 +113,19 @@ PURGE_PRESETS = {
         cor_preenchimento=(132, 130, 101, 100), # Marrom Musgo do Flood
         cor_explosao=(150, 100, 0, 220)      # Laranja do Gravemind
     ),
+
+    'assassino_cross': PurgeConfig(
+        modo='eixos_inimigo',
+        qtd_eixos=4,               # 4 linhas formando um X
+        artilharias_por_eixo=7,    # Tamanho das linhas
+        espacamento=100,
+        raio_artilharia=70,        # Mais estreito e fatal
+        dano=180,
+        intervalo=70,              # Rápido!
+        duracao_aviso=450,
+        offset_angulo=math.pi / 4, # Gira 45 graus (pi/4) para formar o "X"
+        cor_borda=(230, 150, 100, 200),     # Roxo Veneno/Sombra
+        cor_preenchimento=(255, 210, 0, 80),
+        cor_explosao=(218, 190, 214, 250)
+    ),
 }

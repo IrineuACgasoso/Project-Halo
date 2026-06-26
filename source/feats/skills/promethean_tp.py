@@ -45,7 +45,7 @@ class PrometheanTeleport(pygame.sprite.Sprite):
         # Em vez de atrelar ao pixel_size de uma instância específica, 
         # criamos de 1 a 20 pixels para servir QUALQUER habilidade no jogo todo.
         for nome_cor, rgb in cores.items():
-            for tam in range(1, 21): 
+            for tam in range(1, 61): 
                 surf = pygame.Surface((tam, tam), pygame.SRCALPHA)
                 surf.fill(rgb)
                 cls._surface_cache[(nome_cor, tam)] = surf

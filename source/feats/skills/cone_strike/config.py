@@ -34,5 +34,15 @@ CONE_STRIKE_PRESETS = {
         cor_borda=(255, 0, 0, 200),
         cor_preenchimento=(255, 60, 0, 80),
         cor_explosao=(255, 150, 0, 250)
-    )
+    ),
+
+    'warden_chop': ConeStrikeConfig(
+        dano=300,                   # Dano massivo
+        raio=600,                   # Alcance longo da espada gigantesca dele
+        angulo_spray=45,            # Mais fechado que o cleave, focando a energia num ponto mais denso
+        duracao=500,                # Telegraph rápido e perigoso
+        cor_borda=(255, 80, 0, 220),       # Laranja/Vermelho Promethean vibrante
+        cor_preenchimento=(200, 50, 0, 90),# Preenchimento denso e quente
+        cor_explosao=(255, 230, 150, 250)  # Clarão branco/dourado no impacto
+    ),
 }

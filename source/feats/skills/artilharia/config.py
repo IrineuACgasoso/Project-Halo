@@ -31,7 +31,7 @@ ARTILHARIA_PRESETS = {
         duracao=300,
         cor_borda=(255, 50, 255, 150), 
         cor_preenchimento=(255, 50, 255, 50), 
-        cor_explosao=(255, 150, 255, 220)
+        cor_explosao=(255, 220, 255, 220)
     ),
 
     'tartarus_run': ArtilhariaConfig(
@@ -84,7 +84,16 @@ ARTILHARIA_PRESETS = {
         raio_explosao=260,                   
         duracao=1200,                         
         cor_borda=(255, 100, 0, 220),         # Laranja Promethean bem definido
-        cor_preenchimento=(255, 100, 0, 60),  # Laranja translúcido preenchendo a área
+        cor_preenchimento=(255, 120, 0, 60),  # Laranja translúcido preenchendo a área
         cor_explosao=(255, 255, 180, 240)     # Explosão em Amarelo Bem Claro / Brilhante
+    ),
+
+    'warden_bruiser_leap': ArtilhariaConfig(
+        dano=220,
+        raio_explosao=300,
+        duracao=250,
+        cor_borda=(255, 140, 0, 230),
+        cor_preenchimento=(255, 100, 0, 55),
+        cor_explosao=(255, 230, 120, 255)
     ),
 }
