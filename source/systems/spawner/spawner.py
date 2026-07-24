@@ -58,8 +58,11 @@ class Spawner(SpawnerUtils):
 
     def update(self, delta_time):
         # === TRAVA DE SEGURANÇA ===
-        # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente
-        if self.game.boss_atual and self.game.boss_atual.alive():
+        # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente.
+        # Exceção: a própria boss pode liberar spawns comuns (ex.: Harbinger em 'recharging'),
+        # sinalizando isso via atributo `permitir_spawns_normais`.
+        if self.game.boss_atual and self.game.boss_atual.alive() \
+                and not getattr(self.game.boss_atual, 'permitir_spawns_normais', False):
             return
 
         self.tempo_proximo_spawn += delta_time

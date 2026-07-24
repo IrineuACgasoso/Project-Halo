@@ -222,13 +222,25 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
         ],
 
-        'harbinger' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb1.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb2.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb3.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb4.png')).convert_alpha(), (200,300)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb5.png')).convert_alpha(), (200,300))
-        ],
+        'harbinger' : {
+            'default': [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb1.png')).convert_alpha(), (200,300)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb2.png')).convert_alpha(), (200,300)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb3.png')).convert_alpha(), (200,300)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb4.png')).convert_alpha(), (200,300)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb5.png')).convert_alpha(), (200,300))
+            ],
+            'teleport': [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp1.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp2.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp3.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp4.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp5.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp6.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp7.png')).convert_alpha(), (100,100)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp8.png')).convert_alpha(), (100,100)),
+            ]
+        },
 
         'grunt': [
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt1.png')).convert_alpha(), (80, 120)),

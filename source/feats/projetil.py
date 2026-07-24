@@ -183,11 +183,23 @@ class PlasmaGun(ProjetilUniversal):
             direcao_custom=direcao_spread, 
             rotacionar=vai_rotacionar
             )
+
+    def obter_imagem_base(self, sprite_key, tamanho):
+        """Desenha o glow verde-limão neon uma única vez e cacheia no
+        GLOBAL_CACHE compartilhado, substituindo o asset original de 'plasma'."""
+        base_key = f"base_{sprite_key}_{tamanho[0]}x{tamanho[1]}"
+        if base_key not in ProjetilUniversal.GLOBAL_CACHE:
+            surf = pygame.Surface(tamanho, pygame.SRCALPHA)
+            centro = (tamanho[0] // 2, tamanho[1] // 2)
+            pygame.draw.circle(surf, (170, 255, 0, 235), centro, tamanho[0] // 2)   # verde-limão neon
+            pygame.draw.circle(surf, (255, 255, 255, 255), centro, tamanho[0] // 4)  # núcleo branco
+            ProjetilUniversal.GLOBAL_CACHE[base_key] = surf
+        return ProjetilUniversal.GLOBAL_CACHE[base_key]
         
 class Carabin(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, duracao=2000, is_Banished=False):
         s_key = 'bcarabin' if is_Banished else 'carabin'
-        # Tiros de carabina são projéteis alongados, precisam de rotação
+        # Agora é um projétil circular (glow), não precisa mais de rotação
         super().__init__(
             posicao_inicial = posicao_inicial,
             grupos = grupos,
@@ -199,7 +211,20 @@ class Carabin(ProjetilUniversal):
             velocidade = velocidade,
             duracao = duracao,
             direcao_custom = direcao_spread, # Garanta que 'direcao' seja passado aqui
-            rotacionar = True)
+            rotacionar = False)
+
+    def obter_imagem_base(self, sprite_key, tamanho):
+        """Desenha o glow azul-claro/branco uma única vez e cacheia no
+        GLOBAL_CACHE compartilhado, substituindo o asset original de
+        'carabin'/'bcarabin'."""
+        base_key = f"base_{sprite_key}_{tamanho[0]}x{tamanho[1]}"
+        if base_key not in ProjetilUniversal.GLOBAL_CACHE:
+            surf = pygame.Surface(tamanho, pygame.SRCALPHA)
+            centro = (tamanho[0] // 2, tamanho[1] // 2)
+            pygame.draw.circle(surf, (120, 200, 255, 235), centro, tamanho[0] // 2)   # azul-claro
+            pygame.draw.circle(surf, (255, 255, 255, 255), centro, tamanho[0] // 4)   # núcleo branco
+            ProjetilUniversal.GLOBAL_CACHE[base_key] = surf
+        return ProjetilUniversal.GLOBAL_CACHE[base_key]
         
 class M50(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):

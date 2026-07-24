@@ -43,7 +43,7 @@ class Elite(BaseEnemy):
             jogador=self.jogador,
             game=self.game,
             dono = 'INIMIGO',
-            tamanho=(16, 16), 
+            tamanho=(32, 32), 
             dano=10,
             velocidade=600,
             direcao_spread=direcao_tiro

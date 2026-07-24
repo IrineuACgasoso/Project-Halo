@@ -40,9 +40,9 @@ class Grunt(BaseEnemy):
             jogador=self.jogador,
             game=self.game,
             dono = 'INIMIGO',
-            tamanho=(36, 36),
+            tamanho=(24, 24),
             dano=5,
-            velocidade=500,
+            velocidade=450,
             direcao_spread=direcao_tiro,
             vai_rotacionar = False
         )    

@@ -96,4 +96,13 @@ ARTILHARIA_PRESETS = {
         cor_preenchimento=(255, 100, 0, 55),
         cor_explosao=(255, 230, 120, 255)
     ),
+
+    'harbinger_energy_blast': ArtilhariaConfig(
+        dano=140,
+        raio_explosao=180,
+        duracao=300,
+        cor_borda=(30, 100, 255, 200),
+        cor_preenchimento=(30, 120, 255, 70),
+        cor_explosao=(150, 200, 255, 240)
+    ),
 }

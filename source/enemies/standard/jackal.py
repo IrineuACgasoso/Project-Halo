@@ -51,8 +51,8 @@ class Jackal(BaseEnemy):
             game=self.game,
             dono='INIMIGO',
             tamanho=(28, 28),
-            dano=4,
-            velocidade=250,
+            dano=5,
+            velocidade=500,
             direcao_spread=direcao_tiro,
             vai_rotacionar=False
         )

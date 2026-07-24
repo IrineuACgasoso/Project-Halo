@@ -2,7 +2,7 @@
 import pygame
 import random
 from source.feats.projetil import LaserBeam
-from source.feats.skills.skills import OndaEMP
+from source.feats.skills.onda_emp import OndaEMP
 from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.effects import LaserWarning
 from source.systems.entitymanager import entity_manager
@@ -70,8 +70,9 @@ class DidactAttacks:
             posicao=self.posicao.copy(), 
             grupos=self.game.all_sprites, 
             game=self.game, 
-            atacante=self
-            )
+            atacante=self,
+            preset='didact_shockwave' # Informando o preset profissionalizado
+        )
 
     def disparar_artilharia(self):
         self.cooldown_artilharia = self.novo_cooldown(600, 1200)
