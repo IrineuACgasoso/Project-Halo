@@ -4,24 +4,36 @@ from source.systems.entitymanager import entity_manager
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos, game, dono='BOSS', preset='padrao', custom_config: ArtilhariaConfig = None):
+    def __init__(self, posicao, grupos, game, dono='BOSS', preset='padrao', custom_config: ArtilhariaConfig = None,
+                 grude=False, alvo=None):
         super().__init__(grupos)
         self.game = game
         self.dono = dono
         self.posicao = pygame.math.Vector2(posicao)
-        
+
         # Carrega a configuração (A customizada tem prioridade, útil para o PurgeGrid)
         self.cfg = custom_config if custom_config else ARTILHARIA_PRESETS.get(preset, ARTILHARIA_PRESETS['padrao'])
-        
+
         self.tempo_criacao = pygame.time.get_ticks()
         self.explodiu = False
+
+        # --- DoT: controla o ciclo de tick de dano contínuo pós-explosão ---
+        self.dot_ativo = False
+        self.dot_inicio = 0
+        self.dot_ultimo_tick = 0
+
+        # --- Grude: quando True, a artilharia acompanha `alvo` a cada frame
+        # (ex: um Spike que fisicamente acertou o jogador) em vez de ficar
+        # estática na posição de criação.
+        self.grude = grude
+        self.alvo = alvo
 
         # --- Requisito para o pygame.sprite lidar com desenho ---
         self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
         self.rect = self.image.get_rect(center=self.posicao)
-        
+
         # FIX: Atributo falso para enganar a física/colisão padrão da engine
-        self.hitbox = self.rect.copy() 
+        self.hitbox = self.rect.copy()
 
     def ao_atingir_alvo(self, alvo):
         """ 
@@ -34,46 +46,78 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
     def draw(self, surface, offset):
         pos_ajustada = self.posicao - offset
         agora = pygame.time.get_ticks()
-        
+
         # Otimização: Criar uma superfície do tamanho da explosão, e não da tela toda
         tamanho_surf = self.cfg.raio_explosao * 2
         temp_surface = pygame.Surface((tamanho_surf, tamanho_surf), pygame.SRCALPHA)
         centro_local = (self.cfg.raio_explosao, self.cfg.raio_explosao)
-        
+
         if not self.explodiu:
             progresso = min((agora - self.tempo_criacao) / self.cfg.duracao, 1)
             raio_interno = int(self.cfg.raio_explosao * progresso)
-            
+
             # Borda do círculo
             pygame.draw.circle(temp_surface, self.cfg.cor_borda, centro_local, self.cfg.raio_explosao, 4)
             # Preenchimento crescendo
             if raio_interno > 0:
                 pygame.draw.circle(temp_surface, self.cfg.cor_preenchimento, centro_local, raio_interno)
+        elif self.dot_ativo:
+            # Nuvem residual do DoT: fica com o preenchimento visível (pulsando
+            # com a borda) enquanto os ticks de dano continuam acontecendo.
+            pygame.draw.circle(temp_surface, self.cfg.cor_borda, centro_local, self.cfg.raio_explosao, 3)
+            pygame.draw.circle(temp_surface, self.cfg.cor_preenchimento, centro_local, self.cfg.raio_explosao)
         else:
-            # Impacto da explosão
+            # Impacto da explosão (sem DoT, ou já terminou o DoT)
             pygame.draw.circle(temp_surface, self.cfg.cor_explosao, centro_local, self.cfg.raio_explosao)
 
         # Desenha a superfície temporária na tela, centralizada na posição real
         surface.blit(temp_surface, (pos_ajustada.x - self.cfg.raio_explosao, pos_ajustada.y - self.cfg.raio_explosao))
 
+    def _aplicar_dano_em_area(self, dano):
+        """Aplica `dano` a todos os alvos dentro do raio, uma vez."""
+        alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
+
+        for alvo in alvos:
+            distancia = (alvo.posicao - self.posicao).length()
+            if distancia <= self.cfg.raio_explosao:
+                if hasattr(alvo, 'tomar_dano_direto'):
+                    alvo.tomar_dano_direto(dano)
+                elif hasattr(alvo, 'receber_dano'):
+                    alvo.receber_dano(dano)
+
     def update(self, delta_time, paredes=None):
+        # Se estiver grudada em um alvo (ex: Spike que acertou o jogador),
+        # acompanha a posição dele a cada frame antes de qualquer outra lógica.
+        if self.grude and self.alvo is not None:
+            self.posicao = pygame.math.Vector2(self.alvo.posicao)
+            self.rect.center = self.posicao
+            self.hitbox.center = self.rect.center
+
         agora = pygame.time.get_ticks()
-        
+
+        # --- Explosão inicial (telegraph terminou) ---
         if not self.explodiu and agora - self.tempo_criacao >= self.cfg.duracao:
             self.explodiu = True
-            self.tempo_criacao = agora 
-            
-            # --- Lógica de Dano em Área (AoE) ---
-            alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
+            self.tempo_criacao = agora
 
-            for alvo in alvos:
-                distancia = (alvo.posicao - self.posicao).length()
-                if distancia <= self.cfg.raio_explosao:
-                    # Aplica o dano se o alvo estiver na área
-                    if hasattr(alvo, 'tomar_dano_direto'):
-                        alvo.tomar_dano_direto(self.cfg.dano)
-                    elif hasattr(alvo, 'receber_dano'):
-                        alvo.receber_dano(self.cfg.dano)
-                
+            if self.cfg.dot:
+                # Não aplica o `dano` de impacto: só liga o ciclo de ticks
+                self.dot_ativo = True
+                self.dot_inicio = agora
+                self.dot_ultimo_tick = agora
+            else:
+                self._aplicar_dano_em_area(self.cfg.dano)
+
+        # --- Ciclo de DoT (tick a cada 1s, durante duracao_dot) ---
+        elif self.dot_ativo:
+            if agora - self.dot_ultimo_tick >= 1000:
+                self.dot_ultimo_tick = agora
+                self._aplicar_dano_em_area(self.cfg.dano_por_segundo)
+
+            if agora - self.dot_inicio >= self.cfg.duracao_dot:
+                self.dot_ativo = False
+                self.kill()
+
+        # --- Fim de vida normal (sem DoT) ---
         elif self.explodiu and agora - self.tempo_criacao >= 150:
             self.kill()

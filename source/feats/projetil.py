@@ -211,7 +211,8 @@ class Carabin(ProjetilUniversal):
             velocidade = velocidade,
             duracao = duracao,
             direcao_custom = direcao_spread, # Garanta que 'direcao' seja passado aqui
-            rotacionar = False)
+            rotacionar = False,
+            )
 
     def obter_imagem_base(self, sprite_key, tamanho):
         """Desenha o glow azul-claro/branco uma única vez e cacheia no
@@ -219,10 +220,17 @@ class Carabin(ProjetilUniversal):
         'carabin'/'bcarabin'."""
         base_key = f"base_{sprite_key}_{tamanho[0]}x{tamanho[1]}"
         if base_key not in ProjetilUniversal.GLOBAL_CACHE:
+            if sprite_key == 'bcarabin':
+                cor_glow = (255, 45, 50, 240)
+                cor_nucleo = (255, 225, 225, 255)
+            else:
+                cor_glow = (120, 200, 255, 235)   # azul-claro
+                cor_nucleo = (255, 255, 255, 255)
+
             surf = pygame.Surface(tamanho, pygame.SRCALPHA)
             centro = (tamanho[0] // 2, tamanho[1] // 2)
-            pygame.draw.circle(surf, (120, 200, 255, 235), centro, tamanho[0] // 2)   # azul-claro
-            pygame.draw.circle(surf, (255, 255, 255, 255), centro, tamanho[0] // 4)   # núcleo branco
+            pygame.draw.circle(surf, cor_glow, centro, tamanho[0] // 2)   # azul-claro
+            pygame.draw.circle(surf, cor_nucleo, centro, tamanho[0] // 4)   # núcleo branco
             ProjetilUniversal.GLOBAL_CACHE[base_key] = surf
         return ProjetilUniversal.GLOBAL_CACHE[base_key]
         
@@ -472,3 +480,127 @@ class Projetil_PingPong(ProjetilUniversal):
             self.kill()
 
 
+class Spike(ProjetilUniversal):
+    """Projétil parabólico. Voa em arco (mesma lógica do HunterMortarProjectile)
+    até a posição alvo travada no disparo.
+ 
+    - Se TOCAR fisicamente no jogador durante o voo, gruda nele: a
+      artilharia de aviso (`grude=True`) passa a seguir o jogador em tempo
+      real até detonar.
+    - Se NÃO tocar (a maioria dos casos, já que só o spike central do leque
+      mira direto no jogador), explode parado no ponto exato onde caiu, sem
+      seguir ninguém — evitando dano indevido de spikes que erraram.
+    """
+ 
+    def __init__(self, posicao_inicial, posicao_alvo, grupos, jogador, game, dono, preset):
+        self.preset = preset
+        self.jogador = jogador
+ 
+        # --- Arco Parabólico (mesma lógica do HunterMortarProjectile) ---
+        self.start_pos = pygame.math.Vector2(posicao_inicial)
+        self.target_pos = pygame.math.Vector2(posicao_alvo)  # travado no instante do disparo
+        self.total_dist = self.start_pos.distance_to(self.target_pos)
+        self.max_height = 250
+ 
+        # Margem de contato considerada "grude" quando não há hitbox do jogador disponível
+        self.raio_contato_sq = 40 ** 2
+ 
+        dir_vec = self.target_pos - self.start_pos
+        if dir_vec.length_squared() > 0:
+            direcao = dir_vec.normalize()
+        else:
+            direcao = pygame.math.Vector2(1, 0)
+ 
+        super().__init__(
+            posicao_inicial=posicao_inicial,
+            grupos=grupos,
+            game=game,
+            dono=dono,
+            sprite_key='spike',
+            tamanho=(96, 48),
+            dano=0,           # o dano de fato vem da ArtilhariaAviso, não do impacto do projétil
+            velocidade=600,
+            duracao=8000,     # vida útil maior: pode ficar grudado até a artilharia explodir
+            direcao_custom=direcao,
+            piercing=float('inf'),  # atravessa o jogador durante o voo em vez de morrer nele
+            rotacionar=True
+        )
+ 
+        self.grudado = False
+        self.aviso = None
+ 
+    def update(self, delta_time):
+        if self.grudado:
+            self._atualizar_grudado()
+        else:
+            self._atualizar_voo(delta_time)
+ 
+    # ------------------------------------------------------------------
+    # Fase 1: voo em arco até a posição travada no disparo
+    # ------------------------------------------------------------------
+    def _atualizar_voo(self, delta_time):
+        self.posicao += self.direcao * self.velocidade * delta_time
+        distancia_percorrida = self.start_pos.distance_to(self.posicao)
+ 
+        # Checa contato real com o jogador a cada frame do voo (não só ao final do arco)
+        if self._tocou_no_jogador():
+            self._grudar()
+            return
+ 
+        if distancia_percorrida >= self.total_dist:
+            self._explodir_sem_grude()
+            return
+ 
+        # Arco parabólico: sobe e desce ao longo do trajeto (igual ao Hunter)
+        progresso = distancia_percorrida / self.total_dist
+        altura = math.sin(progresso * math.pi) * self.max_height
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y - altura))
+ 
+    def _tocou_no_jogador(self):
+        if hasattr(self.jogador, 'hitbox'):
+            return self.rect.colliderect(self.jogador.hitbox)
+        return self.posicao.distance_squared_to(self.jogador.posicao) <= self.raio_contato_sq
+ 
+    # ------------------------------------------------------------------
+    # Grudou de verdade no jogador: artilharia segue ele
+    # ------------------------------------------------------------------
+    def _grudar(self):
+        from source.feats.skills.artilharia import ArtilhariaAviso
+        self.grudado = True
+        self.velocidade = 0
+ 
+        self.posicao = pygame.math.Vector2(self.jogador.posicao)
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+ 
+        self.aviso = ArtilhariaAviso(
+            posicao=self.posicao,
+            grupos=(entity_manager.all_sprites,),
+            game=self.game,
+            dono=self.dono,
+            preset=self.preset,
+            grude=True,
+            alvo=self.jogador
+        )
+ 
+    def _atualizar_grudado(self):
+        self.posicao = pygame.math.Vector2(self.jogador.posicao)
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+ 
+        if self.aviso is not None and not self.aviso.alive():
+            self.kill()
+ 
+    # ------------------------------------------------------------------
+    # Não tocou em ninguém: explode estático no ponto onde o arco terminou
+    # ------------------------------------------------------------------
+    def _explodir_sem_grude(self):
+        from source.feats.skills.artilharia import ArtilhariaAviso
+
+        ArtilhariaAviso(
+            posicao=self.target_pos,
+            grupos=(entity_manager.all_sprites,),
+            game=self.game,
+            dono=self.dono,
+            preset=self.preset,
+            grude=False
+        )
+        self.kill()

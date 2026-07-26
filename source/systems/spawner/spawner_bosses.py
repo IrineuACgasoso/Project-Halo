@@ -17,7 +17,7 @@ from source.enemies.minibosses.knight import Knight
 # Bosses respectivos de cada fase
 PHASE_BOSSES = {
     1: ['hunter'],
-    0: ['harbinger'],
+    0: ['jega'],
     1: ['zealot'],
     2: ['guilty'], 
     3: ['scarab'],           
@@ -28,6 +28,7 @@ PHASE_BOSSES = {
     8: ['didact'],
     9: ['warden'],
     10:['jega'],
+    11:['harbinger']
 }
 
 

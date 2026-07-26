@@ -10,6 +10,9 @@ class ArtilhariaConfig:
     cor_borda: Tuple[int, int, int, int] = (255, 0, 0, 150)
     cor_preenchimento: Tuple[int, int, int, int] = (255, 0, 0, 50)
     cor_explosao: Tuple[int, int, int, int] = (255, 100, 50, 220)
+    dot: bool = False
+    dano_por_segundo: int = 0
+    duracao_dot: int = 3000
 
 # === PRESETS DA ARTILHARIA ===
 ARTILHARIA_PRESETS = {
@@ -97,6 +100,27 @@ ARTILHARIA_PRESETS = {
         cor_explosao=(255, 230, 120, 255)
     ),
 
+    'jega_spike': ArtilhariaConfig(
+        dano=90,
+        raio_explosao=120,                    # raio médio
+        duracao=850,                          # tempo de telegraph antes de explodir
+        cor_borda=(255, 170, 60, 220),        # borda laranja viva
+        cor_preenchimento=(255, 140, 0, 140), # laranja translúcido (telegraph)
+        cor_explosao=(255, 230, 190, 230)     # explosão clara/quente
+    ),
+
+    'jega_decoy_explosion': ArtilhariaConfig(
+        dano=100,
+        raio_explosao=250,                    # raio pequeno/médio, é uma nuvem localizada
+        duracao=400,                          # quase sem telegraph: o "estouro" é quase instantâneo
+        cor_borda=(255, 60, 60, 200),        # roxo-plasma
+        cor_preenchimento=(255, 69, 0, 90), # nuvem roxa translúcida
+        cor_explosao=(230, 200, 200, 220),    # vermelho
+        dot=True,
+        dano_por_segundo=50,
+        duracao_dot=5000
+    ),
+    
     'harbinger_energy_blast': ArtilhariaConfig(
         dano=140,
         raio_explosao=180,
@@ -104,5 +128,5 @@ ARTILHARIA_PRESETS = {
         cor_borda=(30, 100, 255, 200),
         cor_preenchimento=(30, 120, 255, 70),
         cor_explosao=(150, 200, 255, 240)
-    ),
+    )
 }
