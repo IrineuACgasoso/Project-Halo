@@ -15,6 +15,7 @@ from source.systems.stagemanager import StageManager
 from source.systems.spawner import Spawner
 from source.systems.entitymanager import entity_manager
 from source.systems.eventmanager import EventManager
+from source.systems.renderer import Renderer
 # FEATS
 from source.feats.buddies import *
 from source.feats.effects import Portal
@@ -57,6 +58,7 @@ class Game:
         self.tela_configuracoes = Settings(self)
         self.hud                = HUD(self)
         self.collision_manager  = CollisionManager(self)
+        self.renderer           = Renderer(self)
 
         # Mapa inicial (fase 0) — só para o construtor não explodir
         caminho = path('assets', 'img', 'map', '0', 'm0.tmj')
@@ -205,59 +207,7 @@ class Game:
 
 
     def draw(self):
-        self.tela.fill('black')
-        if self.estado_do_jogo == "menu_principal":
-            self.menu_principal.draw(self.tela)
-
-        elif self.estado_do_jogo == 'jogando':
-            deslocamento = self.camera.offset + self.camera.shake_offset
-            self.mapa.draw(self.tela, deslocamento)
-            # Função para Debug de Tiled
-            self.mapa.draw_debug(self.tela, deslocamento)
-            # Itera por todos os sprites e desenha cada um
-            for sprite in sorted(entity_manager.all_sprites, key=lambda s: s.rect.centery):
-                if hasattr(sprite, 'draw'):
-                    sprite.draw(self.tela, deslocamento)
-                else:
-                    self.tela.blit(sprite.image, pygame.math.Vector2(sprite.rect.topleft) - deslocamento)
-            
-            # Desenha lasers por cima dos sprites
-            for inimigo in entity_manager.inimigos_grupo:
-                # Verifica se o inimigo tem o método draw_laser (Sentinel e Scarab terão)
-                if hasattr(inimigo, 'draw_laser'):
-                    inimigo.draw_laser(self.tela, deslocamento)
-                # Verifica se o inimigo (como o Boss) tem efeitos extras ou habilidades para desenhar
-                if hasattr(inimigo, 'draw_extras'):
-                    inimigo.draw_extras(self.tela, deslocamento)
-                    
-            self.hud.draw(self.tela)
-
-            self.stage_manager.draw()
-            
-
-        elif self.estado_do_jogo == 'pausa':
-            
-            entity_manager.all_sprites.draw(self.tela)
-            self.menu_pausa.draw(self.tela)
-
-        elif self.estado_do_jogo == 'colaboradores':
-            self.tela_colaboradores.draw(self.tela)
-
-        elif self.estado_do_jogo == 'ranking':
-            self.ranking.draw(self.tela)
-
-        elif self.estado_do_jogo == 'configuracoes':
-            self.tela_configuracoes.draw(self.tela)
-
-        elif self.estado_do_jogo == "game_over":
-            self.tela_game_over.draw(self.tela)
-
-        elif self.estado_do_jogo == "level_up":
-            entity_manager.all_sprites.draw(self.tela)
-            self.hud.draw(self.tela)
-            self.tela_de_upgrade_ativa.draw(self.tela)
-
-        pygame.display.update()
+        self.renderer.draw()
 
     def boss_derrotado(self):
         print(f"Boss da fase {self.fase_atual} derrotado!")

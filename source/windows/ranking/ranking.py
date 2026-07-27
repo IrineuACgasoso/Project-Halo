@@ -5,12 +5,14 @@ from os.path import join
 
 from .ranking_draw import RankingDraw
 from .ranking_constants import *
+from .ranking_data import RankingData
 
 
 class Ranking(RankingDraw):
     def __init__(self, game):
         self.game   = game
-        self.scores = []
+        self._data  = RankingData()
+        self.scores = self._data.carregar()
         self.timer  = 0
 
         # ── Estado de input ────────────────────────────────────────────────────
@@ -63,6 +65,13 @@ class Ranking(RankingDraw):
         self.scores.append({'name': nome.upper(), 'score': self.current_score})
         self.scores = sorted(self.scores, key=lambda x: x['score'], reverse=True)[:10]
         self.input_mode = False
+
+        sucesso = self._data.salvar(self.scores)
+        if not sucesso:
+            # Não trava o jogo se o save falhar (disco cheio, permissão, etc);
+            # o score fica valendo só para esta sessão e o erro já foi logado
+            # dentro de RankingData.
+            print("[Ranking] Aviso: pontuação não foi persistida em disco.")
 
     def handle_event(self, evento):
         if self.input_mode:

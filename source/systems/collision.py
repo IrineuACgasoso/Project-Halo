@@ -88,7 +88,7 @@ class CollisionManager:
         # 4. Coleta de itens
         itens_coletados = pygame.sprite.spritecollide(player, entity_manager.items_grupo, True)
         for item in itens_coletados:
-            player.coletar_item(item)
+           item.coletar(player)
 
         # 5. Dano de Área (Auras) -> CORRIGIDO para usar aura_collision!
         if entity_manager.auras_grupo:

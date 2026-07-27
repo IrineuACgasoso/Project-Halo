@@ -228,3 +228,111 @@ def _draw_coletaveis(tela, coletaveis_player, icones, font_hud):
         surf = font_hud.render(str(qtd), True, (230, 230, 230))
         tela.blit(surf, (48, y + 6))
         y += 34
+
+# No final de source/feats/hud_draw.py
+
+def _draw_weapon_slots(surface, player, fonte):
+    """Desenha 6 slots de armas futuristas chanfrados no lado esquerdo da tela (Estilo Halo)."""
+    slots_max = 6
+    slot_w, slot_h = 52, 52
+    start_x = 24
+    start_y = 185  # Posicionado perfeitamente abaixo dos contadores de coletáveis
+    gap = 10
+
+    # Coleta a lista de armas instanciadas atualmente no jogador
+    armas_lista = list(player.armas.values()) if hasattr(player, 'armas') else []
+
+    for i in range(slots_max):
+        rx = start_x
+        ry = start_y + i * (slot_h + gap)
+        rect = pygame.Rect(rx, ry, slot_w, slot_h)
+
+        # Identifica se o slot está ativo ou vazio
+        tem_arma = i < len(armas_lista)
+
+        # Definição de cores com opacidade (Alpha) na vibe do HUD clássico do Master Chief
+        if tem_arma:
+            cor_fundo = (10, 40, 75, 140)     # Azul preenchido semi-transparente
+            cor_borda = (0, 190, 255, 200)    # Ciano/Azul elétrico vivo
+        else:
+            cor_fundo = (5, 15, 25, 60)       # Slot vazio bem discreto
+            cor_borda = (0, 100, 150, 60)     # Linha apagada simulando espaço vago
+
+        # 1. Renderiza o fundo com chanfro poligonal nativo
+        slot_surf = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
+        poly_local = _chanfrado(pygame.Rect(0, 0, slot_w, slot_h), corte=6)
+        pygame.draw.polygon(slot_surf, cor_fundo, poly_local)
+        surface.blit(slot_surf, rect.topleft)
+
+        # 2. Desenha o contorno linear do slot
+        poly_global = _chanfrado(rect, corte=6)
+        pygame.draw.polygon(surface, cor_borda[:3], poly_global, 2 if tem_arma else 1)
+
+        # 3. Preenche as informações se houver uma arma equipada
+        if tem_arma:
+            arma = armas_lista[i]
+            
+            # --- PLACEHOLDER VETORIAL GERAL DA ARMA (Minimalista e Otimizado) ---
+            cor_placeholder = (120, 230, 255, 180)
+            # Corpo central / cano
+            pygame.draw.line(surface, cor_placeholder, (rx + 12, ry + 26), (rx + 40, ry + 26), 2)
+            # Coronha / Carregador inclinado tático
+            pygame.draw.polygon(surface, cor_placeholder, [
+                (rx + 15, ry + 26), (rx + 19, ry + 35), (rx + 24, ry + 35), (rx + 22, ry + 26)
+            ])
+            # Mira superior integrada
+            pygame.draw.rect(surface, cor_placeholder, (rx + 23, ry + 20, 7, 3))
+
+            # --- CORNER LEVEL DESIGN (Nível no Canto Inferior Direito) ---
+            # Cor muda para dourado se a arma estiver altamente upada para dar destaque visual
+            cor_lvl = (255, 215, 0) if arma.nivel > 3 else (160, 220, 255)
+            txt_nivel = fonte.render(f"L{arma.nivel}", True, cor_lvl)
+            
+            # Fixa o texto no canto inferior direito compensando o corte chanfrado
+            txt_rect = txt_nivel.get_rect(bottomright=(rx + slot_w - 5, ry + slot_h - 3))
+            surface.blit(txt_nivel, txt_rect)
+
+
+def _draw_score_box(surface, game, fonte):
+    """Desenha a box de pontuação geral no estilo do display do Assault Rifle de Halo (Top Right)."""
+    # Coleta de forma segura a pontuação do motor do jogo ou do player
+    pontuacao = getattr(game, 'pontuacao', 0)
+    if not hasattr(game, 'pontuacao') and hasattr(game, 'player'):
+        pontuacao = getattr(game.player, 'pontuacao', getattr(game.player, 'score', 0))
+
+    # Dimensões calibradas para a fonte grande e alinhamento
+    box_w = 135
+    box_h = 42
+    
+    # Posicionado perfeitamente à esquerda das barras de vida/escudo
+    rx = 24
+    ry = 28
+
+    # Geometria Chanfrada Assimétrica (Estilo o topo angulado do display do AR)
+    pts_fundo = [
+        (rx, ry),                               # Superior Esquerdo
+        (rx + box_w - 16, ry),                  # Início do corte inclinado
+        (rx + box_w, ry + 14),                  # Fim do corte inclinado
+        (rx + box_w, ry + box_h),               # Inferior Direito
+        (rx, ry + box_h)                        # Inferior Esquerdo
+    ]
+
+    # 1. Fundo da Box - Cinza Metálico Tático com Alpha (Transparência)
+    surf_box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
+    pts_local = [(p[0] - rx, p[1] - ry) for p in pts_fundo]
+    pygame.draw.polygon(surf_box, (30, 35, 40, 215), pts_local)
+    surface.blit(surf_box, (rx, ry))
+
+    # 2. Bordas Externas - Azul Neon/Ciano Puro
+    pygame.draw.polygon(surface, (0, 200, 255), pts_fundo, 2)
+
+    # 3. Detalhe estético interno (Linha inferior de calibragem de interface digital)
+    pygame.draw.line(surface, (0, 240, 255, 80), (rx + 6, ry + box_h - 5), (rx + box_w - 6, ry + box_h - 5), 1)
+
+    # 4. Texto da Pontuação formatado (Formatado com zeros à esquerda para a vibe de contador militar: 00340)
+    txt_score = f"{int(pontuacao):05d}"
+    surf_txt = fonte.render(txt_score, True, (0, 245, 255))
+    
+    # Centralização interna perfeita
+    txt_rect = surf_txt.get_rect(center=(rx + box_w // 2 - 2, ry + box_h // 2 + 1))
+    surface.blit(surf_txt, txt_rect)
