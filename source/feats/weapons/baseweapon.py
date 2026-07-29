@@ -157,6 +157,34 @@ class Arma(ABC):
                 menor_dist_sq = dist_sq
                 inimigo_mais_proximo = inimigo
         return inimigo_mais_proximo
+
+    def encontrar_inimigo_mais_forte(self, grupo_inimigos, raio_maximo=2000):
+        """Busca, dentro do raio, o inimigo com maior vida atual — ideal
+        para armas de precisão/execução como o Spartan Laser, que não
+        fazem sentido perseguindo o alvo mais próximo."""
+        if not grupo_inimigos:
+            return None
+
+        raio_maximo_sq = raio_maximo ** 2
+        alvo_mais_forte = None
+        maior_vida = -1
+
+        for inimigo in grupo_inimigos:
+            alpha = getattr(inimigo, 'alpha_atual', 255)
+            fase_invis = getattr(inimigo, 'invis_phase', 'none')
+            if alpha == 0 or fase_invis in ['fade_out', 'hold']:
+                continue
+
+            dist_sq = self.jogador.posicao.distance_squared_to(inimigo.posicao)
+            if dist_sq > raio_maximo_sq:
+                continue
+
+            vida_atual = getattr(inimigo, 'vida_atual', getattr(inimigo, 'vida', 0))
+            if vida_atual > maior_vida:
+                maior_vida = vida_atual
+                alvo_mais_forte = inimigo
+
+        return alvo_mais_forte
     
     def update(self, delta_time):
         """Lógica de cadência baseada no tick rate do pygame"""

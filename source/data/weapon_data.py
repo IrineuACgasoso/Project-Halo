@@ -88,6 +88,34 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'velocidade':     WeaponStats(value=650,  label=None,     increase=0, range_val=0),
         }
     ),
+
+    'shotgun': WeaponProfile(
+        stats={
+            'dano':                     WeaponStats(value=1,    label='Dano',                  increase=1, range_val=2),
+            'cooldown':                 WeaponStats(value=3000, label='Cooldown',              increase=-50, range_val=1, min_val=2000),
+            'projeteis_por_disparo':    WeaponStats(value=6,    label='N° de Projéteis',       increase=1, range_val=3),
+            'velocidade_projetil':      WeaponStats(value=600,  label='Velocidade',            increase=25),
+            'spread':                   WeaponStats(value=14,   label='Espalhamento',          increase=2, range_val=1),
+        }
+    ),
+
+    'spartan_laser': WeaponProfile(
+        stats={
+            'dano':               WeaponStats(value=20,   label='Dano',          increase=5,   range_val=1),
+            'cooldown':           WeaponStats(value=8000, label='Cadência (ms)', increase=-200, range_val=2, min_val=5000),
+            'velocidade_projetil':WeaponStats(value=2800, label=None,            increase=0,    range_val=0),
+            'raio_maximo':        WeaponStats(value=800,  label='Alcance',       increase=50,  range_val=1),
+            'piercing':           WeaponStats(value=1,    label='Perfuração',    increase=1,    range_val=3),
+        }
+    ),
+
+    'grenade_launcher': WeaponProfile(
+        stats={
+            'dano':         WeaponStats(value=20,   label='Dano',          increase=5,  range_val=1),
+            'cooldown':     WeaponStats(value=10000, label='Cadência (ms)', increase=-100, range_val=1, min_val=7500),
+            'raio_maximo':  WeaponStats(value=650,  label='Alcance',       increase=25,  range_val=1),
+        }
+    ),
 }
 
 # ===== COMPANION =======================

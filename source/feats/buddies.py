@@ -5,7 +5,7 @@ from source.windows.settings import *
 from source.feats.assets import ASSETS
 from source.data.weapon_data import COMPANION_DATA
 from source.feats.projetil import BurstRifle
-from source.feats.baseweapon import Arma
+from source.feats.weapons import Arma
 
 
 class Companheiro(pygame.sprite.Sprite):

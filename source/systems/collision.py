@@ -1,6 +1,6 @@
 import pygame
 from source.systems.entitymanager import entity_manager
-from source.player.weapons import *
+from source.feats.weapons import *
 from source.feats.projetil import *
 
 class CollisionManager:

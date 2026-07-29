@@ -1,7 +1,7 @@
 import pygame
 import random
 from source.windows.settings import *
-from source.player.weapons import *
+from source.feats.weapons import *
 from source.feats.buddies import *
 
 MAX_ARMAS = 6
@@ -54,7 +54,25 @@ DADOS_ARMAS = {
         "classe": Needler,
         "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
         "descricao": "Dispara agulhas teleguiadas que explodem ao acumular."
-    }
+    },
+    "shotgun": {
+        "nome": "Shotgun",
+        "classe": Shotgun,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Arma de disparo próximo de alta letalidade."
+    },
+    "spartanlaser": {
+        "nome": "Spartan Laser",
+        "classe": SpartanLaser,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Canhão de energia especializado em destruir inimigos fortes."
+        },
+    "grenade_launcher": {
+        "nome": "Grenade Laucher",
+        "classe": GrenadeLauncher,
+        "grupos": ["all_sprites", "projeteis_jogador_grupo", "inimigos_grupo"],
+        "descricao": "Lança poderosas granadas de plasma de dissolvem grandes hordas."
+        }
 }
 
 

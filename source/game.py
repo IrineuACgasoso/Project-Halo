@@ -21,7 +21,7 @@ from source.feats.buddies import *
 from source.feats.effects import Portal
 from source.feats.assets import path
 # PLAYER
-from source.player.weapons import *
+from source.feats.weapons import *
 from source.player.levelup import *
 from source.player.player import Player 
 

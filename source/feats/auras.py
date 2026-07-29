@@ -73,3 +73,65 @@ class EnergyAura(pygame.sprite.Sprite):
                     player.tomar_dano(self)
                 else:
                     player.vida_atual -= self.dano_contato
+
+
+class PlayerAura(pygame.sprite.Sprite):
+    def __init__(self, jogador, raio, dano_por_segundo, grupos):
+        super().__init__(grupos)
+        self.jogador = jogador
+        self.ativa = True
+        
+        # Atributos exigidos pelo seu CollisionManager (Item 5)
+        self.dono = 'PLAYER'
+        self.raio = raio
+        self.radius = raio # Para collide_circle
+        self.dano_por_segundo = dano_por_segundo
+        
+        # Visual: Criamos a superfície e a máscara de colisão radial
+        self.image = pygame.Surface((self.raio * 2, self.raio * 2), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=self.jogador.posicao)
+        
+        # O Pygame usa o atributo 'radius' para o collide_circle
+        self.radius = self.raio 
+        self.desenhar_aura()
+
+    def desenhar_aura(self):
+        """Gera o visual dinâmico em anéis idêntico ao da EnergyAura"""
+        self.image.fill((0, 0, 0, 0)) # Limpa a superfície anterior
+        r, g, b = (255, 192, 0) 
+        
+        # Renderiza os anéis concêntricos com fade de opacidade (Alpha) nas bordas
+        for raio_atual in range(self.raio - 20, self.raio + 10, 4):
+            alpha = max(0, 60 - abs(self.raio - raio_atual) * 3)
+            pygame.draw.circle(self.image, (r, g, b, alpha), (self.raio, self.raio), raio_atual, 3)
+            
+        # Brilho de contenção central (clareia e define a borda principal)
+        r_claro = min(r + 50, 255)
+        g_claro = min(g + 50, 255)
+        b_claro = min(b + 50, 255)
+        pygame.draw.circle(self.image, (r_claro, g_claro, b_claro, 180), (self.raio, self.raio), self.raio, 2)
+
+    def atualizar_stats(self, novo_raio, novo_dano):
+        """Chamado pelo upgrade da Arma"""
+        self.raio = novo_raio
+        self.radius = self.raio # Atualiza para o motor de colisão
+        self.dano_por_segundo = novo_dano
+        
+        # Redimensiona a imagem
+        self.image = pygame.Surface((self.raio * 2, self.raio * 2), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=self.jogador.posicao)
+        self.desenhar_aura()
+
+    def update(self, delta_time):
+        self.rect.center = self.jogador.posicao
+
+        # Shield quebrado
+        if self.jogador.escudo_atual <= 0:
+
+            self.ativa = False
+            self.image.set_alpha(0)
+            return
+
+        # Shield ativo
+        self.ativa = True
+        self.image.set_alpha(120)

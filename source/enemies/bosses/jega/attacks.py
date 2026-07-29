@@ -3,7 +3,8 @@ import random
 
 import pygame
 
-from source.feats.projetil import Carabin, Spike
+from source.feats.projetil import Carabin
+from source.feats.grenades import Spike
 from source.systems.entitymanager import entity_manager
 
 from .vfx import JegaClone

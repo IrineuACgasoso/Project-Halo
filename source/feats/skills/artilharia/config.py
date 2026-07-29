@@ -37,6 +37,15 @@ ARTILHARIA_PRESETS = {
         cor_explosao=(255, 220, 255, 220)
     ),
 
+    'spartan_laser': ArtilhariaConfig(
+        dano=10,  # o dano já foi aplicado pelo próprio feixe, isso aqui é só o "boom" residual
+        raio_explosao=200,
+        duracao=250,  # telegraph quase instantâneo, é o rastro da explosão do impacto
+        cor_borda=(255, 0, 0, 255),            # vermelho puríssimo, bem vivo
+        cor_preenchimento=(255, 60, 60, 40),    # preenchimento bem claro/translúcido
+        cor_explosao=(255, 140, 0, 245)         # clarão laranja forte
+    ),
+
     'tartarus_run': ArtilhariaConfig(
         dano=200,
         raio_explosao=300,
@@ -107,6 +116,15 @@ ARTILHARIA_PRESETS = {
         cor_borda=(255, 170, 60, 220),        # borda laranja viva
         cor_preenchimento=(255, 140, 0, 140), # laranja translúcido (telegraph)
         cor_explosao=(255, 230, 190, 230)     # explosão clara/quente
+    ),
+
+    'plasma_grenade': ArtilhariaConfig(
+        dano=50,
+        raio_explosao=150,
+        duracao=1500,  # tempo grudado antes de estourar (fidedigno ao Halo)
+        cor_borda=(120, 150, 255, 200),
+        cor_preenchimento=(200, 200, 255, 60),
+        cor_explosao=(240, 255, 240, 240)
     ),
 
     'jega_decoy_explosion': ArtilhariaConfig(
