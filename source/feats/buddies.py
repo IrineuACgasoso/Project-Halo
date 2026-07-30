@@ -255,10 +255,9 @@ class Companheiro(pygame.sprite.Sprite):
                 # Invalida ponto de vagabundeio para sortear um novo logo após coletar
                 self.ponto_vagabundeio = None
 
-                # 3. Agora sim, pedimos ao jogador para processar a coleta do ITEM
+                # 3. Agora sim, pedimos a classe para processar a coleta do ITEM
                 if item_para_coletar != self.jogador:
-                    self.jogador.coletar_item(item_para_coletar)
-                    item_para_coletar.kill()
+                    item_para_coletar.coletar(self.jogador)
 
         # Update de Posição
         if self.direcao_movimento.magnitude() > 0:

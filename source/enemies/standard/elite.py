@@ -53,6 +53,7 @@ class Elite(BaseEnemy):
         Items.spawn_drop(self.posicao, grupos, 'exp_shard', 3, 100)
         Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
         Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
+        Items.spawn_drop(self.posicao, grupos, 'upgrade', 1, 100)
         self.kill()
 
     def update(self, delta_time, paredes=None):

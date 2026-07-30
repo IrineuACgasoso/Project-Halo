@@ -4,8 +4,8 @@ import math
 
 class ZealotAttacks:
     def realizar_teleporte(self):
-        raio_min = 550
-        raio_max = 600
+        raio_min = 600
+        raio_max = 650
         tentativas = 40  
         
         for _ in range(tentativas):
@@ -20,13 +20,6 @@ class ZealotAttacks:
                 self.posicao = pos_candidata
                 return True 
         return False 
-
-    def processar_melee(self, agora, dist_sq):
-        self.velocidade = 0 
-        if agora - getattr(self, 'tempo_ataque', 0) > 500: 
-            if dist_sq < 5000: 
-                self.jogador.receber_dano(self.dano_base)
-            self.estado_habilidade = 'idle' 
 
     def processar_dash_prep(self, agora):
         self.velocidade = 0 

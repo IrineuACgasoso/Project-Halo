@@ -55,6 +55,15 @@ ASSETS = {
         
     },
 
+    'icons': {
+        'rifle_assalto': pygame.image.load(path('assets', 'img', 'icons', 'ar.png')).convert_alpha(),
+        'grenade_launcher': pygame.image.load(path('assets', 'img', 'icons', 'plasma_grenade.png')).convert_alpha(),
+        'needler': pygame.image.load(path('assets', 'img', 'icons', 'needler.png')).convert_alpha(),
+        'spartan_laser': pygame.image.load(path('assets', 'img', 'icons', 'spartan_laser.png')).convert_alpha(),
+        'shotgun': pygame.image.load(path('assets', 'img', 'icons', 'shotgun.png')).convert_alpha(),
+        'cortana': pygame.image.load(path('assets', 'img', 'icons', 'cortana.png')).convert_alpha(),
+        },
+
     'items': {
         'exp_shard': pygame.image.load(path('assets', 'img', 'items', 'expshard.png')).convert_alpha(),
         'big_shard': pygame.image.load(path('assets', 'img', 'items', 'bigshard.png')).convert_alpha(),

@@ -1,27 +1,8 @@
+import random
 import pygame
-from .levelup import TelaDeUpgrade
+from source.systems.levelup import TelaDeUpgrade
 
 class PlayerScaling:
-    def coletar_item(self, item):
-        houve_level_up = False
-        
-        if item.tipo in self.coletaveis:
-            self.coletaveis[item.tipo] += 1
-
-        # efeitos
-        if item.tipo == 'exp_shard':
-            if self.ganhar_xp(10): 
-                houve_level_up = True
-        elif item.tipo == 'big_shard':
-            if self.ganhar_xp(50):
-                houve_level_up = True
-        elif item.tipo == 'life_orb':
-            self.curar(self.vida_maxima)
-        elif item.tipo == 'cafe':
-            self.vida_atual = self.vida_maxima
-            self.adicionar_tempo_buff(10)
-        
-        return houve_level_up
     def ganhar_xp(self, quantidade):
         self.experiencia_atual += quantidade
         if self.experiencia_atual >= self.experiencia_level_up:
@@ -38,8 +19,24 @@ class PlayerScaling:
 
         self.game.estado_do_jogo = 'level_up'
         self.game.tela_de_upgrade_ativa = TelaDeUpgrade(self.game.tela, self, self.game)
-        
+
         self.experiencia_level_up = self.experiencia_level_up_base + 10 * self.contador_niveis
+
+    def ativar_upgrade_forcado(self, id_forcado=None):
+        """Abre a tela de upgrade mostrando UMA única arma. Se `id_forcado`
+        vier preenchido (o item já sabia qual arma era desde o spawn), usa
+        ele direto. Caso contrário, sorteia entre as armas já possuídas
+        (fallback pra drops antigos/manuais sem id definido)."""
+        if not self.armas:
+            self.level_up()
+            return
+
+        id_escolhido = id_forcado if id_forcado in self.armas else random.choice(sorted(self.armas.keys()))
+
+        self.game.estado_do_jogo = 'level_up'
+        self.game.tela_de_upgrade_ativa = TelaDeUpgrade(
+            self.game.tela, self, self.game, id_arma_forcada=id_escolhido
+        )
 
     def adicionar_tempo_buff(self, segundos):
         self.buff_timer += segundos

@@ -229,66 +229,83 @@ def _draw_coletaveis(tela, coletaveis_player, icones, font_hud):
         tela.blit(surf, (48, y + 6))
         y += 34
 
-# No final de source/feats/hud_draw.py
+
+_ICONE_ARMA_CACHE = {}
+
+def _obter_icone_arma(id_arma, tamanho):
+    """Busca (e cacheia) o ícone próprio de uma arma em
+    ASSETS['weapon_icons'][id_arma], se existir. Retorna None quando não
+    há ícone registrado — nesse caso o slot cai automaticamente no
+    desenho vetorial de fallback, sem quebrar nada."""
+    if id_arma is None:
+        return None
+
+    chave_cache = f"{id_arma}_{tamanho[0]}x{tamanho[1]}"
+    if chave_cache not in _ICONE_ARMA_CACHE:
+        from source.feats.assets import ASSETS
+        img = ASSETS.get('icons', {}).get(id_arma)
+        _ICONE_ARMA_CACHE[chave_cache] = pygame.transform.scale(img, tamanho) if img else None
+
+    return _ICONE_ARMA_CACHE[chave_cache]
+
+
+def _draw_placeholder_arma(surface, rx, ry, cor_placeholder):
+    """Fallback vetorial genérico (o que antes era desenhado sempre) —
+    agora só roda quando a arma NÃO tem ícone próprio cadastrado."""
+    pygame.draw.line(surface, cor_placeholder, (rx + 12, ry + 26), (rx + 40, ry + 26), 2)
+    pygame.draw.polygon(surface, cor_placeholder, [
+        (rx + 15, ry + 26), (rx + 19, ry + 35), (rx + 24, ry + 35), (rx + 22, ry + 26)
+    ])
+    pygame.draw.rect(surface, cor_placeholder, (rx + 23, ry + 20, 7, 3))
+
 
 def _draw_weapon_slots(surface, player, fonte):
-    """Desenha 6 slots de armas futuristas chanfrados no lado esquerdo da tela (Estilo Halo)."""
+    """Desenha 6 slots de armas chanfrados no lado esquerdo da tela.
+    Usa o ícone próprio da arma (via ASSETS['weapon_icons']) quando
+    disponível; caso contrário, cai no placeholder vetorial genérico."""
     slots_max = 6
     slot_w, slot_h = 52, 52
     start_x = 24
-    start_y = 185  # Posicionado perfeitamente abaixo dos contadores de coletáveis
+    start_y = 185
     gap = 10
 
-    # Coleta a lista de armas instanciadas atualmente no jogador
-    armas_lista = list(player.armas.values()) if hasattr(player, 'armas') else []
+    # .items() em vez de .values(): agora precisamos do ID pra buscar o ícone certo
+    armas_lista = list(player.armas.items()) if hasattr(player, 'armas') else []
 
     for i in range(slots_max):
         rx = start_x
         ry = start_y + i * (slot_h + gap)
         rect = pygame.Rect(rx, ry, slot_w, slot_h)
 
-        # Identifica se o slot está ativo ou vazio
         tem_arma = i < len(armas_lista)
 
-        # Definição de cores com opacidade (Alpha) na vibe do HUD clássico do Master Chief
         if tem_arma:
-            cor_fundo = (10, 40, 75, 140)     # Azul preenchido semi-transparente
-            cor_borda = (0, 190, 255, 200)    # Ciano/Azul elétrico vivo
+            cor_fundo = (10, 40, 75, 140)
+            cor_borda = (0, 190, 255, 200)
         else:
-            cor_fundo = (5, 15, 25, 60)       # Slot vazio bem discreto
-            cor_borda = (0, 100, 150, 60)     # Linha apagada simulando espaço vago
+            cor_fundo = (5, 15, 25, 60)
+            cor_borda = (0, 100, 150, 60)
 
-        # 1. Renderiza o fundo com chanfro poligonal nativo
         slot_surf = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
         poly_local = _chanfrado(pygame.Rect(0, 0, slot_w, slot_h), corte=6)
         pygame.draw.polygon(slot_surf, cor_fundo, poly_local)
         surface.blit(slot_surf, rect.topleft)
 
-        # 2. Desenha o contorno linear do slot
         poly_global = _chanfrado(rect, corte=6)
         pygame.draw.polygon(surface, cor_borda[:3], poly_global, 2 if tem_arma else 1)
 
-        # 3. Preenche as informações se houver uma arma equipada
         if tem_arma:
-            arma = armas_lista[i]
-            
-            # --- PLACEHOLDER VETORIAL GERAL DA ARMA (Minimalista e Otimizado) ---
-            cor_placeholder = (120, 230, 255, 180)
-            # Corpo central / cano
-            pygame.draw.line(surface, cor_placeholder, (rx + 12, ry + 26), (rx + 40, ry + 26), 2)
-            # Coronha / Carregador inclinado tático
-            pygame.draw.polygon(surface, cor_placeholder, [
-                (rx + 15, ry + 26), (rx + 19, ry + 35), (rx + 24, ry + 35), (rx + 22, ry + 26)
-            ])
-            # Mira superior integrada
-            pygame.draw.rect(surface, cor_placeholder, (rx + 23, ry + 20, 7, 3))
+            id_arma, arma = armas_lista[i]
 
-            # --- CORNER LEVEL DESIGN (Nível no Canto Inferior Direito) ---
-            # Cor muda para dourado se a arma estiver altamente upada para dar destaque visual
+            icone = _obter_icone_arma(id_arma, (32, 32))
+            if icone is not None:
+                icone_rect = icone.get_rect(center=(rx + slot_w // 2, ry + slot_h // 2 - 3))
+                surface.blit(icone, icone_rect)
+            else:
+                _draw_placeholder_arma(surface, rx, ry, (120, 230, 255, 180))
+
             cor_lvl = (255, 215, 0) if arma.nivel > 3 else (160, 220, 255)
             txt_nivel = fonte.render(f"L{arma.nivel}", True, cor_lvl)
-            
-            # Fixa o texto no canto inferior direito compensando o corte chanfrado
             txt_rect = txt_nivel.get_rect(bottomright=(rx + slot_w - 5, ry + slot_h - 3))
             surface.blit(txt_nivel, txt_rect)
 

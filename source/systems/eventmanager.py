@@ -1,5 +1,5 @@
 import pygame
-from source.player.levelup import DADOS_ARMAS
+from source.systems.levelup import ARMAS_REGISTRO
 from source.systems.entitymanager import entity_manager
 
 
@@ -95,7 +95,7 @@ class EventManager:
         if id_da_arma in g.player.armas:
             g.player.armas[id_da_arma].upgrade()
         else:
-            dados = DADOS_ARMAS[id_da_arma]
+            dados = ARMAS_REGISTRO[id_da_arma]
 
             # Mapeia nome do grupo para o objeto real do entity_manager
             _grupos_map = {
@@ -106,10 +106,10 @@ class EventManager:
                 'items_grupo':               entity_manager.items_grupo,
                 'auras_grupo':               entity_manager.auras_grupo,
             }
-            grupos = tuple(_grupos_map[ng] for ng in dados['grupos'])
+            grupos = tuple(_grupos_map[ng] for ng in dados.grupos)
             
             # Instancia o objeto dinamicamente
-            nova_arma = dados['classe'](g.player, grupos, g, criar_sprite=True)
+            nova_arma = dados.classe(g.player, grupos, g, criar_sprite=True)
             if hasattr(nova_arma, 'equipar'):
                 nova_arma.equipar()
                 

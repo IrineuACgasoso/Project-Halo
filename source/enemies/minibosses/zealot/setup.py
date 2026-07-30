@@ -11,7 +11,7 @@ class ZealotSetup:
         self._setup_antistuck() 
 
     def _setup_rage(self):
-        self.rage_mult = 4.2
+        self.rage_mult = 3.5
         self.enrage = False
     
     def _setup_invisibility(self):
@@ -23,7 +23,7 @@ class ZealotSetup:
     def _setup_dash(self):
         self.last_dash = 0
         self.cooldown_dash = self.novo_cooldown(2000, 3000)                   
-        self.dash_speed = self.velocidade_base * 6  # 6x mais rápido que o normal!
+        self.dash_speed = self.velocidade_base * 5  # 5x mais rápido que o normal!
         self.dash_direcao = pygame.math.Vector2(0, 0)
         self.tempo_inicio_dash = 0
         self.duracao_prep = 500                     # Meio segundo parado "mirando" antes do bote

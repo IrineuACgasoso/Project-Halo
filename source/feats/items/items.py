@@ -15,29 +15,28 @@ import random
 import pygame
 
 from . import draw
+from source.systems.entitymanager import entity_manager
 
 
 class Items(pygame.sprite.Sprite):
-    """
-    Coletáveis do jogo.
-
-    - A imagem é gerada e cacheada em draw.py, uma vez por tipo+tamanho
-      (mesmo espírito do ProjetilUniversal: desenha uma vez, guarda, reusa).
-    - Cada tipo sabe aplicar seu PRÓPRIO efeito no player (`_aplicar_efeito`).
-      O PlayerScaling não decide mais "o que cada item faz" — só recebe
-      o resultado (se houve level up ou não).
-    """
-
     TIPOS_XP = draw.TIPOS_XP
     TAMANHOS = draw.TAMANHOS
 
-    def __init__(self, posicao, tipo, grupos):
+    def __init__(self, posicao, tipo, grupos, id_arma_alvo=None):
         super().__init__(grupos)
 
         self.tipo = tipo
         self.tamanho = self.TAMANHOS.get(tipo, (16, 16))
 
-        entrada_cache, self._chave_cache = draw.obter_imagem(tipo, self.tamanho)
+        # Se for upgrade e ninguém especificou qual arma, sorteia aqui mesmo,
+        # na criação do item — assim quem chama spawn_drop não precisa saber
+        # nada sobre isso, é 100% automático.
+        if tipo == 'upgrade' and id_arma_alvo is None:
+            id_arma_alvo = self._sortear_arma_do_jogador()
+
+        self.id_arma_alvo = id_arma_alvo
+
+        entrada_cache, self._chave_cache = draw.obter_imagem(tipo, self.tamanho, id_arma=id_arma_alvo)
         self.image = draw.frame_inicial(entrada_cache)
 
         self.rect = self.image.get_rect(center=posicao)
@@ -49,22 +48,32 @@ class Items(pygame.sprite.Sprite):
         self.dropping = True
 
         self.coletado = False
-        # Fase aleatória pra o brilho de cada item não pulsar tudo sincronizado
         self._fase_glow = random.uniform(0, 6.283)
+
+    @staticmethod
+    def _sortear_arma_do_jogador():
+        """Escolhe aleatoriamente uma arma dentre as que o jogador já possui,
+        pra saber qual ícone mostrar no drop e qual arma upar na coleta.
+        Retorna None se o jogador ainda não tiver nenhuma arma (nesse caso
+        o item cai no ícone de fallback e, na coleta, vira um level_up comum)."""
+        from source.systems.entitymanager import entity_manager
+        player = entity_manager.player
+        if not player or not player.armas:
+            return None
+        return random.choice(sorted(player.armas.keys()))
 
     # ------------------------------------------------------------------ #
     # SPAWN
     # ------------------------------------------------------------------ #
     @classmethod
-    def spawn_drop(cls, posicao, grupos, tipo, qtd, probabilidade):
-        """
-        Método estático para gerenciar a criação de drops.
-        Inimigo chama: Items.spawn_drop(pos, grupos, 'item', qtd, %)
-        """
+    def spawn_drop(cls, posicao, grupos, tipo, qtd, probabilidade, id_arma_alvo=None):
+        """Inimigo só chama: Items.spawn_drop(pos, grupos, 'upgrade', qtd, %)
+        — sem se preocupar com qual arma vai upar, isso é decidido sozinho
+        dentro do __init__ quando tipo == 'upgrade'."""
         if random.randint(1, 100) <= probabilidade:
             for _ in range(qtd):
                 offset = pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-                cls(posicao + offset, tipo, grupos)
+                cls(posicao + offset, tipo, grupos, id_arma_alvo=id_arma_alvo)
 
     # ------------------------------------------------------------------ #
     # UPDATE
@@ -101,7 +110,7 @@ class Items(pygame.sprite.Sprite):
         self.coletado = True
 
         houve_level_up = self._aplicar_efeito(player)
-        draw.emitir_particulas_coleta(self.rect.center, self.tipo, self.groups())
+        draw.emitir_particulas_coleta(self.rect.center, self.tipo, entity_manager.all_sprites)
         self.kill()
 
         return houve_level_up
@@ -133,9 +142,9 @@ class Items(pygame.sprite.Sprite):
             player.curar(player.vida_maxima)
             player.pontuacao += 100  # +250 pontos por Kit Médico/Biofoam
             
-        elif self.tipo == 'cafe':
-            player.vida_atual = player.vida_maxima
-            player.adicionar_tempo_buff(10)
-            player.pontuacao += 200  # +300 pontos pelo Buff de Café
+        elif self.tipo == 'upgrade':
+            player.pontuacao += 200
+            # Repassa o id específico que o item já carregava desde o spawn.
+            player.ativar_upgrade_forcado(id_forcado=self.id_arma_alvo)
 
         return houve_level_up

@@ -4,7 +4,7 @@ from source.feats.auras import EnergyAura
 class GuiltyAI:
     def verificar_fases(self, agora):
         # 1. Gatilho para iniciar a Transição (Apenas uma vez)
-        if self.estado_fase == 'FASE1' and self.vida <= self.vida_base * 0.999999:
+        if self.estado_fase == 'FASE1' and self.vida <= self.vida_base * 0.3:
             self.iniciar_transicao()
 
         # 2. Monitoramento durante a Transição

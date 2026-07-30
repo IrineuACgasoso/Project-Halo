@@ -55,9 +55,6 @@ class ZealotAI:
         # --------------------------------------------------
         # 2. EXECUTOR (Chama os ataques do attacks.py)
         # --------------------------------------------------
-        elif self.estado_habilidade == 'melee':
-            self.processar_melee(agora, dist_sq)
-            
         elif self.estado_habilidade == 'dash_prep':
             self.velocidade_animacao = 300
             self.processar_dash_prep(agora)

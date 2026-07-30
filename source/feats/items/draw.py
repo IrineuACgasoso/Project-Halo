@@ -24,7 +24,7 @@ TAMANHOS = {
     'exp_shard': (16, 16),
     'big_shard': (24, 24),
     'life_orb':  (14, 24),
-    'cafe':      (14, 24),
+    'upgrade':      (14, 24),
 }
 
 # Espaço extra ao redor do corpo pra caber o halo sem cortar nas bordas.
@@ -34,30 +34,35 @@ PADDING_GLOW = 18
 # Cores do halo por categoria
 COR_GLOW_XP    = (60, 190, 255)   # azul neon — dados/holograma
 COR_GLOW_SAUDE = (255, 30, 50)    # vermelho neon — vida/suporte médico
+COR_GLOW_UPG   = (40, 255, 60)
 
 
 # ------------------------------------------------------------------------ #
 # CACHE / DISPATCH
 # ------------------------------------------------------------------------ #
 
-def obter_imagem(tipo, tamanho_corpo):
+def obter_imagem(tipo, tamanho_corpo, id_arma=None):
     """Retorna (e cacheia) o dict {'base':.., 'glow':..} pra esse tipo+tamanho,
-    junto com a chave de cache usada. A sprite só é desenhada uma vez por
-    combinação tipo+tamanho; depois disso é só reaproveitar."""
-    chave = f"{tipo}_{tamanho_corpo[0]}x{tamanho_corpo[1]}"
+    junto com a chave de cache usada. Para 'upgrade', o `id_arma` entra na
+    própria chave de cache — cada arma tem seu ícone próprio cacheado
+    separadamente, já que a sprite muda dependendo de qual arma o item vai upar."""
+    sufixo_arma = f"_{id_arma}" if id_arma else ""
+    chave = f"{tipo}_{tamanho_corpo[0]}x{tamanho_corpo[1]}{sufixo_arma}"
     if chave not in GLOBAL_CACHE:
-        GLOBAL_CACHE[chave] = _desenhar_sprite(tipo, tamanho_corpo)
+        GLOBAL_CACHE[chave] = _desenhar_sprite(tipo, tamanho_corpo, id_arma)
     return GLOBAL_CACHE[chave], chave
 
 
-def _desenhar_sprite(tipo, tamanho_corpo):
+def _desenhar_sprite(tipo, tamanho_corpo, id_arma=None):
     pad = PADDING_GLOW
     canvas_tamanho = (tamanho_corpo[0] + pad * 2, tamanho_corpo[1] + pad * 2)
 
     if tipo in ('exp_shard', 'big_shard'):
         return _desenhar_chip(tamanho_corpo, canvas_tamanho, grande=(tipo == 'big_shard'))
-    elif tipo in ('life_orb', 'cafe'):
-        return _desenhar_bandagem(tamanho_corpo, canvas_tamanho, cafe=(tipo == 'cafe'))
+    elif tipo == 'life_orb':
+        return _desenhar_bandagem(tamanho_corpo, canvas_tamanho)
+    elif tipo == 'upgrade':
+        return _desenhar_upgrade(tamanho_corpo, canvas_tamanho, id_arma)
     else:
         return _desenhar_fallback(tipo, canvas_tamanho)
 
@@ -184,10 +189,10 @@ def _desenhar_chip(tamanho_corpo, canvas_tamanho, grande):
     return {'base': base, 'glow': glow}
 
 
-def _desenhar_bandagem(tamanho_corpo, canvas_tamanho, cafe):
+def _desenhar_bandagem(tamanho_corpo, canvas_tamanho):
     """Item de vida redesenhado: tubo BRANCO estilo bandagem/curativo, com
     uma cruz vermelha grande e bem definida no centro — alto contraste, feito
-    de propósito pra chamar atenção. 'cafe' ganha um pingo dourado no topo
+    de propósito pra chamar atenção. 'upgrade' ganha um pingo dourado no topo
     pra diferenciar do life_orb comum sem perder a leitura."""
     w, h = tamanho_corpo
     pad = PADDING_GLOW
@@ -219,10 +224,6 @@ def _desenhar_bandagem(tamanho_corpo, canvas_tamanho, cafe):
         pygame.draw.rect(base, cor_cruz, r, border_radius=1)
         pygame.draw.rect(base, cor_cruz_borda, r, 1, border_radius=1)
 
-    if cafe:
-        pygame.draw.circle(base, (255, 205, 70), (corpo_rect.centerx, corpo_rect.y + 2), 2)
-        pygame.draw.circle(base, (150, 110, 20), (corpo_rect.centerx, corpo_rect.y + 2), 2, 1)
-
     glow = _desenhar_halo_externo(
         canvas_tamanho, corpo_rect, COR_GLOW_SAUDE,
         camadas=7, raio_extra=15
@@ -230,6 +231,65 @@ def _desenhar_bandagem(tamanho_corpo, canvas_tamanho, cafe):
 
     return {'base': base, 'glow': glow}
 
+
+def _desenhar_upgrade(tamanho_corpo, canvas_tamanho, id_arma=None):
+    """Item de upgrade forçado de UMA arma específica. Busca o ícone dessa
+    arma em ASSETS['icons'][id_arma] — o mesmo usado no slot equipado.
+    Só cai no desenho vetorial (seta verde) quando não existir ícone
+    cadastrado pra essa arma (ou quando não sabemos qual arma é ainda)."""
+    from source.feats.assets import ASSETS
+
+    w, h = tamanho_corpo
+    pad = PADDING_GLOW
+    base = pygame.Surface(canvas_tamanho, pygame.SRCALPHA)
+    corpo_rect = pygame.Rect(pad + int(w * 0.12), pad, int(w * 0.76), h)
+
+    sprite_real = ASSETS.get('icons', {}).get(id_arma) if id_arma else None
+
+    if sprite_real:
+        escalada = pygame.transform.scale(sprite_real, corpo_rect.size)
+        base.blit(escalada, corpo_rect.topleft)
+    else:
+        # Fallback: o tubo + seta verde desenhados por código
+        cor_corpo = (10, 25, 10)
+        pygame.draw.rect(base, cor_corpo, corpo_rect, border_radius=6)
+        pygame.draw.rect(base, (130, 190, 135), corpo_rect, 1, border_radius=5)
+
+        cor_faixa = (40, 40, 40)
+        for y in range(corpo_rect.y + 4, corpo_rect.bottom - 3, 5):
+            pygame.draw.line(base, cor_faixa, (corpo_rect.x + 1, y), (corpo_rect.right - 1, y), 1)
+
+        cx, cy = corpo_rect.center
+        largura_seta = max(6, int(corpo_rect.width * 0.55))
+        altura_seta = max(8, int(h * 0.6))
+        largura_haste = max(3, int(largura_seta * 0.4))
+        altura_cabeca = int(altura_seta * 0.55)
+
+        topo_y = cy - altura_seta // 2
+        base_y = topo_y + altura_seta
+        quebra_y = topo_y + altura_cabeca
+
+        pontos_seta = [
+            (cx, topo_y),
+            (cx + largura_seta // 2, quebra_y),
+            (cx + largura_haste // 2, quebra_y),
+            (cx + largura_haste // 2, base_y),
+            (cx - largura_haste // 2, base_y),
+            (cx - largura_haste // 2, quebra_y),
+            (cx - largura_seta // 2, quebra_y),
+        ]
+
+        cor_seta = (25, 220, 35)
+        cor_seta_borda = (210, 255, 230)
+        pygame.draw.polygon(base, cor_seta, pontos_seta)
+        pygame.draw.polygon(base, cor_seta_borda, pontos_seta, 1)
+
+    glow = _desenhar_halo_externo(
+        canvas_tamanho, corpo_rect, COR_GLOW_UPG,
+        camadas=7, raio_extra=15
+    )
+
+    return {'base': base, 'glow': glow}
 
 # ------------------------------------------------------------------------ #
 # PARTÍCULA DE COLETA
