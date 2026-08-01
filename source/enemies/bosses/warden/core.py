@@ -166,9 +166,11 @@ class DomainConsciousness(BaseEnemy):
         # Captura onde o último Warden caiu, ou usa o centro do spawn como última alternativa (fallback)
         pos_drop = getattr(self, 'ultima_posicao_corpo', self.posicao)
         # Quando todos os corpos caem, a Consciência gera a recompensa unificada
-        Items.spawn_drop(pos_drop, grupos, 'big_shard', 12, 100)
-        Items.spawn_drop(pos_drop, grupos, 'life_orb', 2, 100)
-        Items.spawn_drop(pos_drop, grupos, 'cafe', 1, 5)
-        
-        # self.kill() desativa o status de is_boss, liberando o portal da fase
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((12, 14, 16, 20), (70, 28, 1.9, 0.1), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((3, 4, 5, 8), (80, 19, 0.99, 0.01), 100)       
+        )
         self.kill()

@@ -1,6 +1,7 @@
 import pygame
 from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.entitymanager import entity_manager
+from source.feats.items import Items
 
 from .setup import TartarusSetup
 from .states import TartarusAI
@@ -24,7 +25,16 @@ class Tartarus(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
         # Executa as preparações dos Mixins
         self.setup_animation(estado_inicial='left', velocidade_animacao=400)
         self.inicializar_habilidades()
-        
+
+    def morrer(self, grupos=None):
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((6, 8, 10), (70, 28, 2), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
+        self.kill()
 
     def update(self, delta_time, paredes=None):
         agora = pygame.time.get_ticks()

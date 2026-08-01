@@ -43,10 +43,14 @@ class FloodForm(BaseEnemy):
         self.animar()
 
     def morrer(self, grupos=None):
-        """Drop de itens padrão para as formas comuns (Elite e Marine)."""
-        Items.spawn_drop(self.posicao, grupos, 'exp_shard', 1, 100)
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            exp_shard=(1, 100, 100),       # 100% de chance de dropar 1
+            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
+            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
+            upgrade=(1, 0.1, 100)          # 0.1% de chance de dropar 1
+        )
         self.kill()
 
 
@@ -62,9 +66,14 @@ class FloodCarry(FloodForm):
     def morrer(self, grupos=None):
         """Sobrescreve a morte para dropar o dobro e estourar em Infection Forms."""
         # Drop aprimorado
-        Items.spawn_drop(self.posicao, grupos, 'exp_shard', 2, 100)
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            exp_shard=(2, 100, 100),       # 100% de chance de dropar 1
+            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
+            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
+            upgrade=(1, 0.1, 100)          # 0.1% de chance de dropar 1
+        )
         
         # Liberação das Infection Forms
         for _ in range(4):

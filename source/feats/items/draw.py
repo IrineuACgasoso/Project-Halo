@@ -244,10 +244,25 @@ def _desenhar_upgrade(tamanho_corpo, canvas_tamanho, id_arma=None):
     base = pygame.Surface(canvas_tamanho, pygame.SRCALPHA)
     corpo_rect = pygame.Rect(pad + int(w * 0.12), pad, int(w * 0.76), h)
 
-    sprite_real = ASSETS.get('icons', {}).get(id_arma) if id_arma else None
+    sprite_real = None
+    if id_arma is not None:
+        candidato = ASSETS.get('icons', {}).get(id_arma)
+        if isinstance(candidato, pygame.Surface):
+            sprite_real = candidato
+        elif candidato is not None:
+            # Existe algo na chave, mas não é uma Surface válida — avisa
+            # em vez de falhar silenciosamente pro fallback sem pista nenhuma.
+            print(f"[AVISO] ASSETS['icons']['{id_arma}'] não é uma Surface válida: {type(candidato)}")
 
-    if sprite_real:
-        escalada = pygame.transform.scale(sprite_real, corpo_rect.size)
+    if sprite_real is not None:
+        # Sprite disponível: usa ela mesma, escalada pro tamanho do corpo.
+        # ESCALA COM ALPHA: usa smoothscale se a imagem tiver per-pixel alpha
+        # (ícones de arma normalmente têm fundo transparente).
+        try:
+            escalada = pygame.transform.smoothscale(sprite_real, corpo_rect.size)
+        except (ValueError, pygame.error):
+            # smoothscale exige 32bpp com alpha; se falhar, cai pro scale comum
+            escalada = pygame.transform.scale(sprite_real, corpo_rect.size)
         base.blit(escalada, corpo_rect.topleft)
     else:
         # Fallback: o tubo + seta verde desenhados por código

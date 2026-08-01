@@ -42,7 +42,11 @@ class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
 
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 3, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((3, 4), (70, 30), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()

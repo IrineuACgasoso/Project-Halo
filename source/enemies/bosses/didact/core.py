@@ -71,7 +71,11 @@ class Didact(BaseEnemy, DidactSetup, DidactAI, DidactAttacks):
         self.mask = pygame.mask.from_surface(self.image)
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 8, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 80)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((8, 10, 12), (80, 18, 2), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2, 3), (99, 0.9, 0.1), 100)       
+        )
         self.kill()

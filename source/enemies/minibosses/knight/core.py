@@ -26,10 +26,14 @@ class Knight(BaseEnemy, KnightSetup, KnightAI, KnightAttacks):
         # Começa sem aura ativa (ela será instanciada dinamicamente quando receber escudo)
         self.aura = None
 
-    def morrer(self, grupos):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
-        Items.spawn_drop(self.posicao, grupos, 'health', 1, 50)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+    def morrer(self, grupos=None):
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((5, 6, 8), (80, 18, 2), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()
     
     def update(self, delta_time, paredes=None):

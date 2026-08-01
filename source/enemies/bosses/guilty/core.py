@@ -71,7 +71,11 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
             self.beam_principal.draw(superficie, deslocamento)
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 4, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((4, 5, 6, 8), (50, 35, 14, 1), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2, 3, 4), (99, 0.9, 0.09, 0.01), 100)       
+        )
         self.kill()

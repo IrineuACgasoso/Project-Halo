@@ -62,6 +62,8 @@ ASSETS = {
         'spartan_laser': pygame.image.load(path('assets', 'img', 'icons', 'spartan_laser.png')).convert_alpha(),
         'shotgun': pygame.image.load(path('assets', 'img', 'icons', 'shotgun.png')).convert_alpha(),
         'cortana': pygame.image.load(path('assets', 'img', 'icons', 'cortana.png')).convert_alpha(),
+        'mk2_shield': pygame.image.load(path('assets', 'img', 'icons', 'mk2.png')).convert_alpha(),
+        'arbiter': pygame.image.load(path('assets', 'img', 'icons', 'arbiter.png')).convert_alpha(),
         },
 
     'items': {

@@ -1,5 +1,6 @@
 import pygame
 
+from .constants import PALETA_RARIDADE, ARMAS_REGISTRO
 from source.windows.settings import largura_tela, altura_tela
 
 
@@ -47,17 +48,23 @@ def draw_tela_upgrade(surface, tela_upgrade):
 
 
 def draw_opcao(surface, opcao, esta_selecionada):
+    
+    # Coleta as especificações de dados estáticos da arma registrada
+    dados_estaticos = ARMAS_REGISTRO.get(opcao.id)
+    raridade = dados_estaticos.raridade if dados_estaticos else 'comum'
+    cor_fundo = PALETA_RARIDADE[raridade]['fundo']
+    cor_borda = PALETA_RARIDADE[raridade]['borda']
+    COR_SELECAO = (255, 200, 0)
     COR_FUNDO = (15, 20, 30)
     COR_BORDA = (0, 150, 255)
-    COR_SELECAO = (255, 200, 0)
 
     if esta_selecionada:
-        pygame.draw.rect(surface, (25, 35, 50), opcao.rect, border_radius=10)
-        cor_borda_atual = COR_SELECAO
+        pygame.draw.rect(surface, cor_fundo, opcao.rect, border_radius=12)
+        cor_borda_atual = cor_borda
         espessura = 4
     else:
         pygame.draw.rect(surface, COR_FUNDO, opcao.rect, border_radius=10)
-        cor_borda_atual = COR_BORDA
+        cor_borda_atual = cor_borda
         espessura = 2
 
     pygame.draw.rect(surface, cor_borda_atual, opcao.rect, espessura, border_radius=10)
@@ -66,10 +73,10 @@ def draw_opcao(surface, opcao, esta_selecionada):
 
     if arma_adquirida:
         texto_titulo = f"{opcao.dados.nome} (Nv. {arma_adquirida.nivel + 1})"
-        cor_titulo = (50, 255, 150)
+        cor_titulo = cor_borda
     else:
         texto_titulo = f"{opcao.dados.nome} (NOVA!)"
-        cor_titulo = (255, 255, 255)
+        cor_titulo = (255, 255, 0)
 
     desenhar_texto(surface, texto_titulo, (opcao.rect.x + 15, opcao.rect.y + 15), opcao.fonte_titulo, cor_titulo)
 

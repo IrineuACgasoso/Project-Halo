@@ -260,16 +260,15 @@ def _draw_placeholder_arma(surface, rx, ry, cor_placeholder):
 
 
 def _draw_weapon_slots(surface, player, fonte):
-    """Desenha 6 slots de armas chanfrados no lado esquerdo da tela.
-    Usa o ícone próprio da arma (via ASSETS['weapon_icons']) quando
-    disponível; caso contrário, cai no placeholder vetorial genérico."""
+    """Desenha os slots de armas aplicando as cores temáticas baseadas na sua raridade."""
+    from source.systems.levelup import ARMAS_REGISTRO, PALETA_RARIDADE
+    
     slots_max = 6
     slot_w, slot_h = 52, 52
     start_x = 24
     start_y = 185
     gap = 10
 
-    # .items() em vez de .values(): agora precisamos do ID pra buscar o ícone certo
     armas_lista = list(player.armas.items()) if hasattr(player, 'armas') else []
 
     for i in range(slots_max):
@@ -280,29 +279,36 @@ def _draw_weapon_slots(surface, player, fonte):
         tem_arma = i < len(armas_lista)
 
         if tem_arma:
-            cor_fundo = (10, 40, 75, 140)
-            cor_borda = (0, 190, 255, 200)
+            id_arma, arma = armas_lista[i]
+            # Coleta as especificações de dados estáticos da arma registrada
+            dados_estaticos = ARMAS_REGISTRO.get(id_arma)
+            raridade = dados_estaticos.raridade if dados_estaticos else 'comum'
+            
+            # Aplica a paleta de cores configurada para a raridade da arma
+            cor_fundo = PALETA_RARIDADE[raridade]['fundo']
+            cor_borda = PALETA_RARIDADE[raridade]['borda']
         else:
+            # Cores padrão neutras para slots vazios
             cor_fundo = (5, 15, 25, 60)
             cor_borda = (0, 100, 150, 60)
 
+        # Desenha o fundo transparente
         slot_surf = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
         poly_local = _chanfrado(pygame.Rect(0, 0, slot_w, slot_h), corte=6)
         pygame.draw.polygon(slot_surf, cor_fundo, poly_local)
         surface.blit(slot_surf, rect.topleft)
 
+        # Desenha o contorno/borda
         poly_global = _chanfrado(rect, corte=6)
-        pygame.draw.polygon(surface, cor_borda[:3], poly_global, 2 if tem_arma else 1)
+        pygame.draw.polygon(surface, cor_borda, poly_global, 2 if tem_arma else 1)
 
         if tem_arma:
-            id_arma, arma = armas_lista[i]
-
             icone = _obter_icone_arma(id_arma, (32, 32))
             if icone is not None:
                 icone_rect = icone.get_rect(center=(rx + slot_w // 2, ry + slot_h // 2 - 3))
                 surface.blit(icone, icone_rect)
             else:
-                _draw_placeholder_arma(surface, rx, ry, (120, 230, 255, 180))
+                _draw_placeholder_arma(surface, rx, ry, (*cor_borda, 180))
 
             cor_lvl = (255, 215, 0) if arma.nivel > 3 else (160, 220, 255)
             txt_nivel = fonte.render(f"L{arma.nivel}", True, cor_lvl)

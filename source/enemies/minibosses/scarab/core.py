@@ -77,9 +77,13 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
             self.game.camera.shake(intensidade=self.intensidade_shake)
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 5, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((5, 6, 8, 10), (70, 28, 1.5, 0.5), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()
 
     def update(self, delta_time, paredes=None):

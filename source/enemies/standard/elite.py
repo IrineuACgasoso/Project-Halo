@@ -49,11 +49,15 @@ class Elite(BaseEnemy):
             direcao_spread=direcao_tiro
         )
 
-    def morrer(self, grupos = None):
-        Items.spawn_drop(self.posicao, grupos, 'exp_shard', 3, 100)
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 1, 2)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 1)
-        Items.spawn_drop(self.posicao, grupos, 'upgrade', 1, 100)
+    def morrer(self, grupos=None):
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            exp_shard=(3, 100, 100),       # 100% de chance de dropar 1
+            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
+            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
+            upgrade=(1, 0.5, 100)          # 0.1% de chance de dropar 1
+        )
         self.kill()
 
     def update(self, delta_time, paredes=None):

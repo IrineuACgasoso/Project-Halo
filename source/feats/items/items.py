@@ -1,7 +1,3 @@
-
-
-
-
 """
 items/items.py
 
@@ -11,7 +7,6 @@ esse arquivo não desenha nada, só orquestra.
 """
 
 import random
-
 import pygame
 
 from . import draw
@@ -52,10 +47,7 @@ class Items(pygame.sprite.Sprite):
 
     @staticmethod
     def _sortear_arma_do_jogador():
-        """Escolhe aleatoriamente uma arma dentre as que o jogador já possui,
-        pra saber qual ícone mostrar no drop e qual arma upar na coleta.
-        Retorna None se o jogador ainda não tiver nenhuma arma (nesse caso
-        o item cai no ícone de fallback e, na coleta, vira um level_up comum)."""
+        """Escolhe aleatoriamente uma arma dentre as que o jogador já possui."""
         from source.systems.entitymanager import entity_manager
         player = entity_manager.player
         if not player or not player.armas:
@@ -63,17 +55,63 @@ class Items(pygame.sprite.Sprite):
         return random.choice(sorted(player.armas.keys()))
 
     # ------------------------------------------------------------------ #
-    # SPAWN
+    # SPAWN INTELIGENTE POR KWARGS
     # ------------------------------------------------------------------ #
     @classmethod
-    def spawn_drop(cls, posicao, grupos, tipo, qtd, probabilidade, id_arma_alvo=None):
-        """Inimigo só chama: Items.spawn_drop(pos, grupos, 'upgrade', qtd, %)
-        — sem se preocupar com qual arma vai upar, isso é decidido sozinho
-        dentro do __init__ quando tipo == 'upgrade'."""
-        if random.randint(1, 100) <= probabilidade:
-            for _ in range(qtd):
-                offset = pygame.math.Vector2(random.randint(-30, 30), random.randint(-30, 30))
-                cls(posicao + offset, tipo, grupos, id_arma_alvo=id_arma_alvo)
+    def spawn_drop(cls, posicao, grupos, id_arma_alvo=None, **kwargs):
+        """
+        Gera drops dinamicamente processando múltiplos tipos de itens via kwargs.
+        
+        Exemplos de assinaturas aceitas:
+            Quantidade Fixa:    exp_shard = (1, 100, 100)
+            Quantidade Variável: big_shard = ((1, 2, 3), (70, 20, 10), 100)
+        """
+        for tipo, config in kwargs.items():
+            # Garante que recebemos uma estrutura válida de configuração
+            if not isinstance(config, (tuple, list)) or len(config) < 3:
+                continue
+
+            qtd_final = 0
+
+            # ─── CASO 1: QUANTIDADE VARIÁVEL — ex: ((1, 2), (90, 10), 100) ───
+            if isinstance(config[0], (tuple, list)):
+                qtds = list(config[0])
+                probs = [float(p) for p in config[1]]
+                escala = float(config[2])
+
+                # Sistema Inteligente: Se a soma das chances for menor que a escala,
+                # a diferença é injetada na opção de maior probabilidade (o primeiro/maior).
+                soma_probs = sum(probs)
+                if soma_probs < escala:
+                    sobra = escala - soma_probs
+                    idx_max = probs.index(max(probs))
+                    probs[idx_max] += sobra
+
+                # Sorteio por distribuição cumulativa (Roleta)
+                roll = random.uniform(0, escala)
+                acumulado = 0
+                for qtd, prob in zip(qtds, probs):
+                    acumulado += prob
+                    if roll <= acumulado:
+                        qtd_final = qtd
+                        break
+
+            # ─── CASO 2: QUANTIDADE FIXA — ex: (1, 0.1, 100) ───
+            else:
+                qtd_base = config[0]
+                prob = float(config[1])
+                escala = float(config[2])
+
+                roll = random.uniform(0, escala)
+                if roll <= prob:
+                    qtd_final = qtd_base
+
+            # ─── EXECUÇÃO DO SPAWN FÍSICO ───
+            if qtd_final > 0:
+                for _ in range(int(qtd_final)):
+                    # Aplica um pequeno espalhamento circular para os itens não nascerem colados
+                    offset = pygame.math.Vector2(random.randint(-25, 25), random.randint(-25, 25))
+                    cls(posicao + offset, tipo, grupos, id_arma_alvo=id_arma_alvo)
 
     # ------------------------------------------------------------------ #
     # UPDATE
@@ -95,16 +133,9 @@ class Items(pygame.sprite.Sprite):
             self.image = novo_frame
 
     # ------------------------------------------------------------------ #
-    # COLETA — Items decide o que fazer consigo mesma; o Player só recebe o resultado
+    # COLETA
     # ------------------------------------------------------------------ #
     def coletar(self, player):
-        """
-        Chamado quando o player pega o item (ex: pelo CollisionManager).
-        Aplica o efeito correspondente no player, dispara as partículas
-        de despawn e se remove do jogo.
-
-        Retorna True se a coleta causou level up.
-        """
         if self.coletado:
             return False
         self.coletado = True
@@ -115,36 +146,29 @@ class Items(pygame.sprite.Sprite):
 
         return houve_level_up
 
-    # Dentro da classe Items em source/items/items.py
-
     def _aplicar_efeito(self, player):
-        """Toda a lógica de 'o que cada tipo de item faz' vive aqui. 
-        Suporte para contagem de pontuação oficial ativo."""
         houve_level_up = False
 
         if self.tipo in player.coletaveis:
             player.coletaveis[self.tipo] += 1
 
-        # Garante que a variável de pontuação exista no objeto do jogador
         if not hasattr(player, 'pontuacao'):
             player.pontuacao = 0
 
-        # Distribuição de pontos baseada no valor/raridade do item
         if self.tipo == 'exp_shard':
             houve_level_up = bool(player.ganhar_xp(10))
-            player.pontuacao += 10  # +100 pontos por Fragmento de XP comum
+            player.pontuacao += 10
             
         elif self.tipo == 'big_shard':
             houve_level_up = bool(player.ganhar_xp(50))
-            player.pontuacao += 50  # +500 pontos por Núcleo de XP Grande
+            player.pontuacao += 50
             
         elif self.tipo == 'life_orb':
             player.curar(player.vida_maxima)
-            player.pontuacao += 100  # +250 pontos por Kit Médico/Biofoam
+            player.pontuacao += 100
             
         elif self.tipo == 'upgrade':
             player.pontuacao += 200
-            # Repassa o id específico que o item já carregava desde o spawn.
             player.ativar_upgrade_forcado(id_forcado=self.id_arma_alvo)
 
         return houve_level_up

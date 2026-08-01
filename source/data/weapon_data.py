@@ -94,7 +94,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano':                     WeaponStats(value=1,    label='Dano',                  increase=1, range_val=2),
             'cooldown':                 WeaponStats(value=3000, label='Cooldown',              increase=-50, range_val=1, min_val=2000),
             'projeteis_por_disparo':    WeaponStats(value=6,    label='N° de Projéteis',       increase=1, range_val=2),
-            'velocidade_projetil':      WeaponStats(value=600,  label='Velocidade',            increase=25),
+            'velocidade_projetil':      WeaponStats(value=1000,  label='Velocidade',            increase=50),
             'spread':                   WeaponStats(value=10,   label='Espalhamento',          increase=2, range_val=2),
         }
     ),
@@ -114,6 +114,23 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano':         WeaponStats(value=26,   label='Dano',          increase=5,  range_val=1),
             'cooldown':     WeaponStats(value=8000, label='Cadência (ms)', increase=-100, range_val=1, min_val=5000),
             'raio_maximo':  WeaponStats(value=650,  label='Alcance',       increase=50,  range_val=1),
+        }
+    ),
+
+    'sniper_rifle': WeaponProfile(
+        stats={
+            'dano':               WeaponStats(value=120,  label='Dano',           increase=30,   range_val=1),
+            'cooldown':           WeaponStats(value=12000, label='Cadência (ms)', increase=-150, range_val=2, min_val=9000),
+            'velocidade_projetil':WeaponStats(value=3000, label=None,             increase=0,    range_val=0),
+            'piercing':           WeaponStats(value=1,    label='Perfuração',     increase=1,    range_val=3),
+        }
+    ),
+
+    'sidekick_pistol': WeaponProfile(
+        stats={
+            'dano':               WeaponStats(value=4,    label='Dano',          increase=2,    range_val=2),
+            'cooldown':           WeaponStats(value=1200, label='Cadência (ms)', increase=-30,  range_val=1, min_val=900),
+            'velocidade_projetil':WeaponStats(value=1800, label='Velocidade',     increase=100, range_val=1),
         }
     ),
 }

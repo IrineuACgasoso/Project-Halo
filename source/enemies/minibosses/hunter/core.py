@@ -55,9 +55,13 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
         self.receber_dano(quantidade)
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 2, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 50)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((2, 3, 4), (70, 20, 10), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()
 
     def update(self, delta_time, paredes=None):

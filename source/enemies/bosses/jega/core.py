@@ -39,9 +39,13 @@ class Jega(BaseEnemy, JegaSetup, JegaAI, JegaAttacks):
         return self.estado in ('orbitando', 'ilusao')
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 80)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((6, 8, 10), (70, 28, 2), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()
 
     def animar(self):

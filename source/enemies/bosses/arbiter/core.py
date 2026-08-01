@@ -41,7 +41,11 @@ class BossArbiter(BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks):
         self.hitbox.center = self.rect.center
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(self.posicao, grupos, 'big_shard', 6, 100)
-        Items.spawn_drop(self.posicao, grupos, 'life_orb', 1, 75)
-        Items.spawn_drop(self.posicao, grupos, 'cafe', 1, 1)
+        Items.spawn_drop(
+            self.posicao, 
+            grupos, 
+            big_shard=((6, 7, 8, 10), (60, 30, 9, 1), 100), 
+            life_orb=(1, 100, 100),              
+            upgrade=((1, 2), (99, 1), 100)       
+        )
         self.kill()
