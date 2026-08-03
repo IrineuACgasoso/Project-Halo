@@ -32,7 +32,7 @@ TAMANHOS = {
 PADDING_GLOW = 18
 
 # Cores do halo por categoria
-COR_GLOW_XP    = (60, 190, 255)   # azul neon — dados/holograma
+COR_GLOW_XP    = (160, 190, 255)   # azul neon — dados/holograma
 COR_GLOW_SAUDE = (255, 30, 50)    # vermelho neon — vida/suporte médico
 COR_GLOW_UPG   = (40, 255, 60)
 
@@ -109,7 +109,7 @@ def _desenhar_halo_externo(canvas_tamanho, rect_corpo, cor, camadas=7, raio_extr
     # intenso do letreiro de neon fica sempre perto da fonte.
     cor_nucleo = tuple(min(255, c + 140) for c in cor)
     pygame.draw.rect(
-        glow, (*cor_nucleo, 235), rect_corpo.inflate(3, 3),
+        glow, (*cor_nucleo, 235), rect_corpo.inflate(8, 8),
         width=3, border_radius=max(3, rect_corpo.height // 2)
     )
 
@@ -317,15 +317,15 @@ class ItemParticulaColeta(pygame.sprite.Sprite):
     def __init__(self, posicao, cor, grupos):
         super().__init__(grupos)
 
-        tamanho = random.randint(2, 4)
+        tamanho = random.randint(3, 6)
         self.image = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
         self.image.fill(cor)
         self.rect = self.image.get_rect(center=posicao)
 
         self.posicao = pygame.math.Vector2(posicao)
-        self.velocidade = pygame.math.Vector2(random.uniform(-25, 25), random.uniform(-95, -55))
+        self.velocidade = pygame.math.Vector2(random.uniform(-50, 50), random.uniform(-95, -55))
 
-        self.duracao_ms = random.randint(300, 450)
+        self.duracao_ms = random.randint(400, 500)
         self.spawn_time = pygame.time.get_ticks()
 
     def update(self, delta_time):
@@ -349,5 +349,5 @@ def emitir_particulas_coleta(posicao, tipo, grupos):
     if not grupos:
         return
     cor = COR_GLOW_XP if tipo in TIPOS_XP else COR_GLOW_SAUDE
-    for _ in range(random.randint(3, 4)):
+    for _ in range(random.randint(6, 9)):
         ItemParticulaColeta(posicao, cor, grupos)

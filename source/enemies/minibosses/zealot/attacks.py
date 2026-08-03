@@ -37,7 +37,7 @@ class ZealotAttacks:
             self.last_dash = agora
             
         elif agora - self.tempo_inicio_dash > self.duracao_dash: 
-            self.cooldown_dash = self.novo_cooldown(300, 900)
+            self.cooldown_dash = self.novo_cooldown(250, 600)
             self.estado_habilidade = 'idle'
             self.last_dash = agora
 
@@ -62,7 +62,7 @@ class ZealotAttacks:
             self.estado_habilidade = 'idle'
 
     def checar_anti_stuck(self, agora, dist_sq):
-        if agora - getattr(self, 'ultimo_check_posicao', 0) > 1600:
+        if agora - getattr(self, 'ultimo_check_posicao', 0) > 1200:
             pos_anterior = getattr(self, 'posicao_anterior', self.posicao)
             dist_movida_sq = self.posicao.distance_squared_to(pos_anterior)
             

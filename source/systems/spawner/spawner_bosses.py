@@ -5,8 +5,11 @@ from source.enemies.bosses.tartarus import Tartarus
 from source.enemies.bosses.gravemind import FloodWarning
 from source.enemies.bosses.didact import Didact
 from source.enemies.bosses.warden import DomainConsciousness
-from source.enemies.bosses.harbinger import Harbinger
+from source.enemies.bosses.guardian import Guardian
 from source.enemies.bosses.jega import Jega
+from source.enemies.bosses.escharum import Escharum
+from source.enemies.bosses.harbinger import Harbinger
+from source.enemies.bosses.atriox import Atriox
 
 # Minibosses
 from source.enemies.minibosses.hunter import Hunter
@@ -16,7 +19,8 @@ from source.enemies.minibosses.knight import Knight
 
 # Bosses respectivos de cada fase
 PHASE_BOSSES = {
-    0: ['hunter'],
+    0:['atriox'],
+    1: ['hunter'],
     1: ['zealot'],
     2: ['guilty'], 
     3: ['scarab'],           
@@ -26,8 +30,12 @@ PHASE_BOSSES = {
     7: ['knight'],
     8: ['didact'],
     9: ['warden'],
-    10:['jega'],
-    11:['harbinger']
+    10:['guardian'],
+    11:['jega'],
+    12:['escharum'],
+    13:['harbinger'],
+    14:['atriox'],
+
 }
 
 
@@ -43,8 +51,11 @@ BOSS_CLASSES = {
     'knight' : Knight, 
     'didact': Didact, 
     'warden': DomainConsciousness,
+    'guardian': Guardian,
+    'jega': Jega,
+    'escharum': Escharum,
     'harbinger': Harbinger, 
-    'jega': Jega
+    'atriox': Atriox,
 }
 
 # Hardcode do momento de spawn de cada boss
@@ -59,6 +70,9 @@ CRONOGRAMA_BOSSES = {
     'knight': 600,
     'didact': 700,
     'warden': 840,
+    'guardian': 900,
     'jega': 1080,
-    'harbinger': 1200
+    'escharum': 1140,
+    'harbinger': 1200,
+    'atriox': 1260
 }

@@ -9,14 +9,19 @@ from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 
 
-class Elite(BaseEnemy):
-    def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=40, game=game, sprite_key='elite', flip_sprite=False)
-        
-        self.setup_animation(
-            estado_inicial='right',
-            velocidade_animacao=200
+class EliteBase(BaseEnemy):
+    """Classe base que dita o comportamento padrão, movimento e drops de um Flood."""
+    def __init__(self, posicao, game, vida, dano, velocidade, variante, vel_animacao=200):
+        super().__init__(
+            posicao=posicao, 
+            vida_base=vida, 
+            dano_base=dano, 
+            velocidade_base=velocidade, 
+            game=game, 
+            sprite_key='elite', # Mantém seu padrão de sprite key
+            variante=variante
         )
+        self.setup_animation(estado_inicial='right', velocidade_animacao=vel_animacao)
 
         #Carabin
         self.cooldown_carabin = 4000
@@ -104,5 +109,20 @@ class Elite(BaseEnemy):
 
         if self.velocidade > 0:
             self.animar()
+
+
+class Elite(EliteBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=20, dano=20, velocidade=40, variante='default', vel_animacao=200)
+
+
+class ReachElite(EliteBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=45, dano=35, velocidade=80, variante='reach', vel_animacao=120)
+
+
+class Halo4Elite(EliteBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=30, dano=15, velocidade=60, variante='h4', vel_animacao=180)
 
 

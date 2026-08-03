@@ -73,9 +73,9 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano_por_segundo':        WeaponStats(value=1,           label='Dano/s',       increase=1,   range_val=2),
             'raio':                    WeaponStats(value=120,         label='Raio',         increase=20,  range_val=1),
             'cooldown':                WeaponStats(value=float('inf'),label=None,           increase=0,   range_val=0),
-            'escudo':                  WeaponStats(value=50,          label='Escudo',       increase=25,  range_val=1),
-            'shield_regen':            WeaponStats(value=5000,        label='Delay Regen',  increase=-75, range_val=1, min_val=2000),
-            'velocidade_regen_escudo': WeaponStats(value=25,          label='Shield Regen', increase=5,   range_val=1),
+            'escudo':                  WeaponStats(value=100,          label='Escudo',       increase=50,  range_val=1),
+            'shield_regen':            WeaponStats(value=5000,        label='Delay Regen',  increase=-100, range_val=1, min_val=2000),
+            'velocidade_regen_escudo': WeaponStats(value=40,          label='Shield Regen', increase=20,   range_val=1),
         }
     ),
 

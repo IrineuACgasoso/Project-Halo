@@ -416,7 +416,7 @@ class SniperRifle(Arma):
 
 
 class SidekickPistol(Arma):
-    NOME_ASSET = 'sniper_rifle'
+    NOME_ASSET = 'sidekick_pistol'
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)

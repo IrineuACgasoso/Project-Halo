@@ -24,7 +24,7 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
 
         # INTERCEPTAÇÃO: DEFESA DAS SENTINELAS MAJORS (Fase 2)
         if self.estado_fase == 'RAGE_F2' and len(self.sentinelas_majors) > 0:
-            quantidade *= 0.05
+            quantidade *= 0.40
 
         # Se estiver na transição, ele ignora completamente o dano (Terminais ativos)
         if self.estado_fase == 'TRANSICAO':

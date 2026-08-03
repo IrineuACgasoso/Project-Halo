@@ -66,7 +66,7 @@ class GuiltyAttacks:
         while not posicao_valida and tentativas < 30:
             tentativas += 1
             angulo = random.uniform(0, 2 * math.pi)
-            distancia = random.uniform(200, 450)
+            distancia = random.uniform(350, 450)
             target_x = self.jogador.posicao.x + distancia * math.cos(angulo)
             target_y = self.jogador.posicao.y + distancia * math.sin(angulo)
             nova_pos.update(target_x, target_y)

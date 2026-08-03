@@ -221,9 +221,9 @@ class PlasmaGrenade(GrenadeBase):
 
             # Camadas concêntricas com alpha decrescente nas bordas do anel,
             # pra simular um leve blur em vez de um traço duro
-            pygame.draw.circle(glow, (170, 225, 255, 90), centro, self.RAIO_EXTERNO, espessura_total)
-            pygame.draw.circle(glow, (190, 235, 255, 160), centro, self.RAIO_EXTERNO - 1, max(1, espessura_total - 3))
-            pygame.draw.circle(glow, (220, 245, 255, 220), centro, self.RAIO_EXTERNO - 3, max(1, espessura_total - 6))
+            pygame.draw.circle(glow, (80, 110, 255, 90), centro, self.RAIO_EXTERNO, espessura_total)
+            pygame.draw.circle(glow, (120, 160, 255, 160), centro, self.RAIO_EXTERNO - 1, max(1, espessura_total - 3))
+            pygame.draw.circle(glow, (180, 220, 255, 220), centro, self.RAIO_EXTERNO - 3, max(1, espessura_total - 6))
 
             ProjetilUniversal.GLOBAL_CACHE[glow_key] = glow
         return ProjetilUniversal.GLOBAL_CACHE[glow_key]

@@ -225,6 +225,10 @@ ASSETS = {
             ]
         },
 
+        'guardian': [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guardian', 'guardian1.png')).convert_alpha(), (1500,3000)),
+        ],
+
         'jega' : [
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega1.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega2.png')).convert_alpha(), (256, 256)),
@@ -233,6 +237,13 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega5.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega6.png')).convert_alpha(), (256, 256)),
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
+        ],
+
+        'escharum': [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha1.png')).convert_alpha(), (250, 375)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha2.png')).convert_alpha(), (250, 375)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha3.png')).convert_alpha(), (250, 375)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha4.png')).convert_alpha(), (250, 375))
         ],
 
         'harbinger' : {
@@ -254,6 +265,13 @@ ASSETS = {
                 pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp8.png')).convert_alpha(), (100,100)),
             ]
         },
+
+        'atriox': [
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox1.png')).convert_alpha(), (300, 450)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox2.png')).convert_alpha(), (300, 450)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox3.png')).convert_alpha(), (300, 450)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox4.png')).convert_alpha(), (300, 450))
+        ],
 
         'grunt': [
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'grunt1.png')).convert_alpha(), (80, 120)),
@@ -322,12 +340,26 @@ ASSETS = {
                 ]
         },
 
-        'elite': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite1.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite2.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite3.png')).convert_alpha(),(120,180)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite4.png')).convert_alpha(),(120,180))
-        ],
+        'elite': {
+            'default': [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite1.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite2.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite3.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite4.png')).convert_alpha(),(120,180))
+                ],
+            'reach': [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot1.png')).convert_alpha(),(150, 180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot2.png')).convert_alpha(),(150, 180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot3.png')).convert_alpha(),(150, 180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot4.png')).convert_alpha(),(150, 180))
+                ],
+            'h4': [
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot1.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot2.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot3.png')).convert_alpha(),(120,180)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot4.png')).convert_alpha(),(120,180))
+                ],
+            },
 
         'brute': [ 
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'brute', 'brute.png')).convert_alpha(),(200,200)),

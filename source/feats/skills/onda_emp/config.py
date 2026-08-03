@@ -37,5 +37,15 @@ EMP_PRESETS = {
         cor_externa=(255, 255, 130, 40),  
         cor_central=(255, 215, 0, 200), 
         cor_interna=(255, 255, 180, 80)
+    ),
+
+    'guardian_emp': EMPConfig(
+        dano=40,
+        raio_maximo=2557,
+        velocidade_expansao=1500.0,
+        espessura_borda=6,
+        cor_externa=(255, 255, 255, 90),  
+        cor_central=(215, 215, 255, 200), 
+        cor_interna=(180, 190, 255, 80)
     )
 }

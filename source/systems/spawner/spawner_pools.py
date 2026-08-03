@@ -1,7 +1,7 @@
 # Inimigos Base
 from source.enemies.standard.grunt import Grunt
 from source.enemies.standard.jackal import Jackal, JackalSniper
-from source.enemies.standard.elite import Elite
+from source.enemies.standard.elite import Elite, ReachElite, Halo4Elite
 from source.enemies.standard.brute import Brute
 from source.enemies.standard.infection import Infection, FloodElite, FloodMarine, FloodCarry
 from source.enemies.standard.sentinel import Sentinel
@@ -14,7 +14,7 @@ from source.enemies.standard.soldier import Soldier
 PHASE_POOLS = {
     0: {
         "classes": [Grunt, Jackal, JackalSniper, Elite],
-        "pesos": [80, 14, 1, 5]  # 80% Grunt, 15% Jackal, 5% Elite
+        "pesos": [85, 9, 1, 5]  # 85% Grunt, 10% Jackal, 5% Elite
     },
     1: {
         "classes": [Infection, Grunt, Jackal, JackalSniper, Elite],
