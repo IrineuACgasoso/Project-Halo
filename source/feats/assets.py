@@ -45,7 +45,7 @@ ASSETS = {
         'ar': pygame.image.load(path('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
         'pingpong' : pygame.image.load(path('assets', 'img', 'projectiles', 'bola_pingpong.png')),
         'lista' : pygame.image.load(path('assets', 'img', 'projectiles','listas.png')).convert_alpha(),
-        'lightrifle': pygame.image.load(path('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
+        'light_bullet': pygame.image.load(path('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
         'dizimator': pygame.image.load(path('assets', 'img', 'projectiles', 'dizimator.png')).convert_alpha(),
         'spike' : pygame.image.load(path('assets', 'img', 'projectiles', 'spike.png')).convert_alpha(),
         'acid_breath': pygame.image.load(path('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha(),

@@ -5,3 +5,4 @@ from .laserblast import LaserBlast
 from .needler import ProjetilNeedler
 from .shotgun import ProjetilShotgun
 from .heavyburst import HeavyBurst
+from .brick import Brick

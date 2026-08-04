@@ -19,8 +19,7 @@ from source.enemies.minibosses.knight import Knight
 
 # Bosses respectivos de cada fase
 PHASE_BOSSES = {
-    0:['atriox'],
-    1: ['hunter'],
+    0: ['hunter'],
     1: ['zealot'],
     2: ['guilty'], 
     3: ['scarab'],           

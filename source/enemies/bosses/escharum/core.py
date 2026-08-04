@@ -4,7 +4,7 @@ from source.systems.entitymanager import entity_manager
 from source.feats.items import Items
 
 from .setup import TartarusSetup
-from .states import TartarusAI
+from .ia import TartarusAI
 from .attacks import TartarusAttacks
 from .vfx import ProtocoloHalo
 
@@ -47,10 +47,12 @@ class Escharum(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
             self.processar_salto(agora, delta_time)
         elif self.estado_habilidade == 'hammer_run':
             self.processar_hammer_run(agora, delta_time, paredes)
+        elif self.estado_habilidade == 'spike':
+            self.processar_spike(agora, delta_time)
         elif self.estado_habilidade == 'energy_smash':
             self.processar_smash_energia(agora)
-        elif self.estado_habilidade == 'summon_brutes':
-            self.processar_invocacao(agora)
+        elif self.estado_habilidade == 'burst':
+            self.processar_burst(agora, delta_time)
         else:
             super().update(delta_time, paredes)
 

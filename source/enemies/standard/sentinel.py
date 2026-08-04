@@ -7,7 +7,7 @@ from source.feats.auras import EnergyAura
 
 class Sentinel(BaseEnemy):
     def __init__(self, posicao, game, variante='default'):
-        super().__init__(posicao, vida_base=20, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel', variante=variante)
+        super().__init__(posicao, vida_base=15, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel', variante=variante)
         self.setup_animation(
             estado_inicial='left',
             velocidade_animacao=200

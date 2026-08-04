@@ -4,7 +4,7 @@ import random
 from source.systems.entitymanager import entity_manager
 from source.feats.skills.cone_strike import ConeStrikeAviso
 from source.feats.skills.artilharia import ArtilhariaAviso
-from source.feats.projetil import LightRifle
+from source.feats.projetil import LightBullet
 from source.feats.effects import LaserWarning
 from source.feats.skills.promethean_tp import PrometheanTeleport # Importe o TP!
 
@@ -168,7 +168,7 @@ class WardenAttacks:
             LaserWarning(owner=self, alvo=alvo_congelado, grupos=[entity_manager.all_sprites], game=self.game, duracao=self.wait_heavy_rifle)
             
         if agora - self.start_heavy_rifle >= self.wait_heavy_rifle:
-            LightRifle(
+            LightBullet(
                 posicao_inicial=self.posicao.copy(),
                 grupos=[entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo],
                 jogador=self.jogador,

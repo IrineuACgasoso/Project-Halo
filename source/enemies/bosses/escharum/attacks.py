@@ -1,6 +1,8 @@
 import pygame
 import math
 from source.systems.entitymanager import entity_manager
+from source.feats.projetil import BurstRifle
+from source.feats.grenades import Spike
 from source.feats.skills.artilharia.core import ArtilhariaAviso
 from source.feats.skills.purge_grid import PurgeGrid
 from source.enemies.standard.brute import Brute
@@ -23,7 +25,7 @@ class TartarusAttacks:
             self.ultimo_hammer = agora
             self.estado_habilidade = 'idle'
             self.cooldown_hammer = self.novo_cooldown(4000, 8000)
-            self.wait = agora + 1000
+            self.wait = agora + 3000
             
             # Invoca impacto
             ArtilhariaAviso(
@@ -73,7 +75,7 @@ class TartarusAttacks:
             # Lógica de Pouso
             self.estado_habilidade = 'idle'
             self.ultimo_pulo = agora
-            self.cooldown_pulo = self.novo_cooldown(4000, 6000)
+            self.cooldown_pulo = self.novo_cooldown(8000, 12000)
             self.wait = agora + 800 # Tempo de recuperação do impacto
 
             # --- LIGA O DANO DE CONTATO NOVAMENTE ---
@@ -96,6 +98,8 @@ class TartarusAttacks:
         # Efeito visual de subida (similar ao Hunter)
         altura = math.sin(progresso * math.pi) * 300
         self.rect.center = (round(self.posicao.x), round(self.posicao.y - altura))
+        self.wait = agora + 1500
+
 
     def iniciar_smash_energia(self, agora):
         self.estado_habilidade = 'energy_smash'
@@ -126,33 +130,61 @@ class TartarusAttacks:
             self.ultimo_smash = agora
             self.estado_habilidade = 'idle'
             self.cooldown_smash = self.novo_cooldown(8000, 12000)
-            self.wait = agora + 500
+            self.wait = agora + 2000
 
-    def iniciar_invocacao(self, agora):
-        """Ativa o estado de invocação e imobiliza o boss."""
-        self.estado_habilidade = 'summon_brutes'
-        self.velocidade = 0  # Trava o movimento durante o rugido/canalização
-        self.tempo_inicio_summon = agora
+    def burst(self):
+        direcao_tiro = self.calcular_direcao_tiro(0.15)
 
-    def processar_invocacao(self, agora):
-        """Aguarda 1 segundo canalizando e spawna os Brutes nas laterais se o mapa permitir."""
-        # Checa se já passou 1 segundo de canalização
-        if agora - self.tempo_inicio_summon >= self.duracao_summon:
-            # Define os offsets (60 pixels para a direita e 60 para a esquerda)
-            offsets = [pygame.math.Vector2(60, 0), pygame.math.Vector2(-60, 0)]
-            
-            for offset in offsets:
-                pos_spawn = self.posicao + offset
-                
-                # Só spawna se a posição for válida (não estiver dentro de paredes)
-                if self.verificar_posicao_valida(pos_spawn):
-                    novo_brute = Brute(pos_spawn, game=self.game)
+        BurstRifle(
+            posicao_inicial=self.posicao,
+            grupos=(entity_manager.all_sprites,),
+            jogador=self.jogador,
+            game=self.game,
+            dono='INIMIGO',
+            tamanho=(32, 32),
+            dano=20,
+            velocidade=800,
+            direcao_spread=direcao_tiro,
+        )
 
-                    entity_manager.all_sprites.add(novo_brute)
-                    entity_manager.inimigos_grupo.add(novo_brute)
+    def processar_burst(self, agora, delta_time):
+        """Controla o disparo do burst, respeitando o cooldown randomizado."""
+        if agora - self.ultimo_burst >= self.cooldown_burst:
+            self.burst_restante = self.contagem_burst
+            self.cooldown_burst = self.novo_cooldown(10000, 15000)
+            self.ultimo_burst = agora
 
-            # Finaliza a habilidade e coloca o boss em recuperação
-            self.ultimo_summon = agora
-            self.estado_habilidade = 'idle'
-            self.cooldown_invocacao = self.novo_cooldown(12000, 18000)
-            self.wait = agora + 1200  # 1.2s parado se recuperando após o esforço de invocar
+        if self.burst_restante > 0:
+            self.cronometro_burst += delta_time * 1000
+            if self.cronometro_burst >= self.intervalo_burst:
+                self.cronometro_burst = 0
+                self.burst_restante -= 1
+                self.burst()
+
+                # Só trava o "wait" UMA VEZ, no exato frame em que o burst termina
+                if self.burst_restante == 0:
+                    self.estado_habilidade = 'idle'
+                    self.wait = agora + 2500
+
+    def lancar_spike(self, agora):
+        """Lança 1 Spike: mira direto no jogador."""
+        direcao_tiro = self.calcular_direcao_tiro(0.0)
+
+        Spike(
+            posicao_inicial=self.posicao,
+            posicao_alvo=direcao_tiro,
+            grupos=(entity_manager.all_sprites,),
+            jogador=self.jogador,
+            game=self.game,
+            dono='INIMIGO',
+            preset='jega_spike'
+        )
+
+        self.wait = agora + 800
+
+    def processar_spike(self, agora, delta_time):
+        """Dispara o Spike periodicamente."""
+        if agora - self.ultimo_spike >= self.cooldown_spike:
+            self.lancar_spike(agora)
+            self.ultimo_spike = agora
+            self.cooldown_spike = self.novo_cooldown(3000, 10000)

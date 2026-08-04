@@ -152,14 +152,14 @@ class BurstRifle(ProjetilUniversal):
             rotacionar=True
         )
 
-class LightRifle(ProjetilUniversal):
+class LightBullet(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
         # Projétil de luz sólida: precisa de rotação para alinhar a "lâmina" de luz
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
             dono=dono, 
-            sprite_key='lightrifle', 
+            sprite_key='light_bullet', 
             tamanho=tamanho, 
             dano=dano, 
             velocidade=velocidade, 
@@ -235,65 +235,5 @@ class Projetil_Lista(ProjetilUniversal):
 
         if pygame.time.get_ticks() - self.tempo_criacao > self.duracao:
             self.kill()
-
-
-class Projetil_PingPong(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, game, direcao, dano, velocidade, rebatidas):
-        super().__init__(
-            posicao_inicial=posicao_inicial, 
-            grupos=grupos, 
-            game=game, 
-            dono='PLAYER', 
-            sprite_key='pingpong', 
-            tamanho=(80,80), 
-            dano=dano, 
-            velocidade=velocidade, 
-            direcao_custom=direcao, 
-            piercing=float('inf'),
-            rotacionar=False # Bola não precisa girar imagem
-        ) 
-        
-        self.rebatidas = rebatidas
-        self.inimigos_atingidos = set() # Para não dar dano múltiplo no mesmo frame
-
-    def update(self, delta_time):
-        super().update(delta_time)
-
-        # Definimos as bordas
-        margem = 10 # Pequena margem de segurança baseada no tamanho da sprite
-        borda_esq = self.jogador.posicao.x - (largura_tela / 2) + margem
-        borda_dir = self.jogador.posicao.x + (largura_tela / 2) - margem
-        borda_topo = self.jogador.posicao.y - (altura_tela / 2) + margem
-        borda_baixo = self.jogador.posicao.y + (altura_tela / 2) - margem
-
-        # Checa colisão Eixo X
-        if self.posicao.x <= borda_esq:
-            self.posicao.x = borda_esq # FORÇA POSIÇÃO
-            self.direcao.x *= -1
-            self.rebatidas -= 1
-            self.inimigos_atingidos.clear() # Limpa para dar dano de novo após rebater
-
-        elif self.posicao.x >= borda_dir:
-            self.posicao.x = borda_dir # FORÇA POSIÇÃO
-            self.direcao.x *= -1
-            self.rebatidas -= 1
-            self.inimigos_atingidos.clear()
-
-        # Checa colisão Eixo Y
-        if self.posicao.y <= borda_topo:
-            self.posicao.y = borda_topo # FORÇA POSIÇÃO
-            self.direcao.y *= -1
-            self.rebatidas -= 1
-            self.inimigos_atingidos.clear()
-
-        elif self.posicao.y >= borda_baixo:
-            self.posicao.y = borda_baixo # FORÇA POSIÇÃO
-            self.direcao.y *= -1
-            self.rebatidas -= 1
-            self.inimigos_atingidos.clear()
-
-        if self.rebatidas < 0: # < 0 para garantir que a última rebatida ainda viaje
-            self.kill()
-
 
 

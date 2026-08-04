@@ -30,8 +30,14 @@ class TartarusSetup:
         self.fase_smash = 0
         self.tempo_proximo_smash = 0
 
-        # === CONFIGURAÇÃO DA INVOCAÇÃO DE BRUTES ===
-        self.cooldown_summon = 16000     # 16 segundos para não entupir a tela de inimigos
-        self.ultimo_summon = 0
-        self.tempo_inicio_summon = 0
-        self.duracao_summon = 1000
+        # Habilidade: Burst burst
+        self.cooldown_burst = 6000
+        self.intervalo_burst = 50
+        self.cronometro_burst = 0
+        self.ultimo_burst = 0
+        self.burst_restante = 0
+        self.contagem_burst = 100
+
+        # Habilidade: Spike (artilharia de aviso)
+        self.ultimo_spike = 0
+        self.cooldown_spike = 6000

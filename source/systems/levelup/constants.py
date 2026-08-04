@@ -2,9 +2,9 @@ from dataclasses import dataclass, field
 from typing import Type, List
 
 from source.feats.weapons import (
-    RifleAssalto, Arma_Loop, ArmaLista, MK2_Shield,
+    RifleAssalto, BrickLauch, ArmaLista, MK2_Shield,
     Needler, Shotgun, SpartanLaser, GrenadeLauncher,
-    SniperRifle, SidekickPistol
+    SniperRifle, SidekickPistol, LightRifle
 )
 from source.feats.buddies import Arbitro, Cortana, Marine
 
@@ -46,9 +46,9 @@ ARMAS_REGISTRO = _registro(
         descricao='Dispara agulhas teleguiadas que explodem ao acumular.', raridade='incomum'
     ),
     ArmaInfo(
-        id='bola_calderanica', nome='Bola Calderânica', classe=Arma_Loop,
+        id='brick', nome='Tijolo', classe=BrickLauch,
         grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
-        descricao='Uma esfera de energia que orbita o jogador.', raridade='comum'
+        descricao='Arma canônicamente associada ao Master Chief.', raridade='lendaria'
     ),
     ArmaInfo(
         id='ciclo_de_laminas', nome='Ciclo de Lâminas', classe=ArmaLista,
@@ -99,5 +99,10 @@ ARMAS_REGISTRO = _registro(
         id='sidekick_pistol', nome='Sidekick Pistol', classe=SidekickPistol,
         grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
         descricao='Pistola padrão de elite, causa um grande dano com uma frequência alta.', raridade='comum'
+    ),
+    ArmaInfo(
+        id='light_rifle', nome='Light Rifle', classe=LightRifle,
+        grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
+        descricao='Rifle de supressão contínua, perfeito para destruir inimigos fortes.', raridade='lendaria'
     ),
 )

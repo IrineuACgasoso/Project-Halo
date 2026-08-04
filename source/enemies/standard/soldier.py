@@ -5,7 +5,7 @@ from os.path import join
 from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
-from source.feats.projetil import LightRifle
+from source.feats.projetil import LightBullet
 from source.feats.skills.promethean_tp import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
 
@@ -87,7 +87,7 @@ class Soldier(BaseEnemy):
     def atirar_lightrifle(self):
         direcao_tiro = self.calcular_direcao_tiro(0.05)
             
-        LightRifle(
+        LightBullet(
             posicao_inicial=self.posicao.copy(),
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,

@@ -61,7 +61,7 @@ class FloodElite(FloodForm):
 
 class FloodCarry(FloodForm):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=100, dano=5, velocidade=50, variante='carry')
+        super().__init__(posicao, game, vida=80, dano=5, velocidade=50, variante='carry')
 
     def morrer(self, grupos=None):
         """Sobrescreve a morte para dropar o dobro e estourar em Infection Forms."""

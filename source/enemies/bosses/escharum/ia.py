@@ -17,12 +17,6 @@ class TartarusAI:
             if self.checar_se_travou(agora, distancia_sq):
                 return
 
-            # Só invoca se o cooldown estiver pronto E se houver menos de 4 inimigos na tela
-            inimigos_vivos = len(entity_manager.inimigos_grupo)
-            if (agora - getattr(self, 'ultimo_summon', 0) >= self.cooldown_summon) and inimigos_vivos < 4:
-                self.iniciar_invocacao(agora)
-                return
-            
             # Prioridade 1: Salto padrão se estiver muito longe
             elif distancia_sq > 640000 and (agora - getattr(self, 'ultimo_pulo', 0) >= self.cooldown_pulo):
                 self.iniciar_pulo(agora)
@@ -37,7 +31,17 @@ class TartarusAI:
                 vetor = self.hammer_target - self.posicao
                 self.direcao = vetor.normalize() if vetor.length() > 0 else pygame.math.Vector2(1, 0)
 
-            # Prioridade 3: Energy Smash (Alcance médio)
+            # Prioridade 3: Spike
+            elif (agora - getattr(self, 'ultimo_spike', 0) >= self.cooldown_spike):
+                self.estado_habilidade = 'spike'
+
+            # Prioridade 4: Machine Gun
+            elif (agora - getattr(self, 'ultimo_burst', 0) >= self.cooldown_burst):
+                self.estado_habilidade = 'burst'
+
+            # Prioridade 5: Energy Smash (Alcance médio)
             elif 160000 < distancia_sq < 490000 and (agora - getattr(self, 'ultimo_smash', 0) >= self.cooldown_smash):
                 self.iniciar_smash_energia(agora)
+
+            
 
