@@ -7,7 +7,7 @@ from source.windows.settings import *
 from .baseweapon import *
 from source.feats.projetil import (
     BurstRifle, ProjetilNeedler, Projetil_Lista, Brick, ProjetilShotgun, 
-    LaserBlast, HeavyBurst, LightBullet)
+    LaserBlast, HeavyBurst, LightBullet, Carabin, DizimatorBullet)
 from source.feats.auras import PlayerAura
 from source.feats.grenades import PlasmaGrenade
 
@@ -92,14 +92,14 @@ class BrickLauch(Arma):
         return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
     
 
-class ArmaLista(Arma):
-    NOME_ASSET = 'ciclo_de_laminas'
+class EnergySword(Arma):
+    NOME_ASSET = 'energy_sword'
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
-        self.nome = "Ciclo de Lâminas"
-        self.descricao = "Protegem o jogador!"
+        self.nome = "Energy Sword"
+        self.descricao = "Lâminas de energia para ataques de curta distância."
         self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
         self.tempo_fim_ciclo = 0
@@ -227,6 +227,66 @@ class Needler(Arma):
                 velocidade      = self.velocidade,
                 direcao_spread  = direcao_vetor,
                 alvo            = inimigo
+            )
+
+    def upgrade(self):
+        super().upgrade()
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
+
+    def ver_proximo_upgrade(self):
+        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
+
+    def get_estatisticas_para_exibir(self):
+        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
+
+
+class CarabinRifle(Arma):
+    NOME_ASSET = 'carabin_rifle'
+
+    def __init__(self, jogador, grupos, game, **kwargs):
+        super().__init__(jogador=jogador, **kwargs)
+        self.game = game
+        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
+        self.nome = "Carabin Rifle"
+        self.descricao = "Dispara projéteis de plasma muito eficientes contra escudos."
+        self.inicializar_stats(self.NOME_ASSET)
+        self.tiros_restantes = 0
+        self.ultimo_tiro_burst = 0
+
+    def disparar(self) -> bool:
+        if self.tiros_restantes <= 0:
+            self.tiros_restantes = self.burst_count
+            return True 
+        return False
+    
+    def update(self, delta_time):
+        super().update(delta_time)
+        agora = pygame.time.get_ticks()
+        if self.tiros_restantes > 0:
+            if agora - self.ultimo_tiro_burst > self.burst_interval:
+                inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=650)
+                if inimigo:
+                    self._spawn_carabin(inimigo)
+                    self.tiros_restantes -= 1
+                    self.ultimo_tiro_burst = agora
+                else:
+                    self.tiros_restantes = 0
+
+    def _spawn_carabin(self, inimigo):
+        if inimigo and inimigo.alive():
+            direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
+           
+            # Movido para dentro do IF para evitar UnboundLocalError caso o inimigo morra
+            Carabin(
+                posicao_inicial = self.jogador.posicao,
+                grupos          = (self.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'PLAYER',
+                tamanho         = (32, 32),
+                dano            = self.dano,
+                velocidade      = self.velocidade,
+                direcao_spread  = direcao_vetor,
             )
 
     def upgrade(self):
@@ -517,3 +577,162 @@ class LightRifle(Arma):
 
     def get_estatisticas_para_exibir(self):
         return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
+
+
+class MachineGun(Arma):
+    NOME_ASSET = 'machine_gun'
+
+    def __init__(self, jogador, grupos, game, **kwargs):
+        super().__init__(jogador=jogador, **kwargs)
+        self.game = game
+        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
+        self.nome = "Machine Gun"
+        self.descricao = "Altíssima cadência e um dano constante. Cuidado com o superaquecimento!"
+        self.inicializar_stats(self.NOME_ASSET)
+        self.tiros_restantes = 0
+        self.ultimo_tiro_burst = 0
+
+    def disparar(self) -> bool:
+        if self.tiros_restantes <= 0:
+            self.tiros_restantes = self.burst_count
+            return True 
+        return False
+    
+    def update(self, delta_time):
+        super().update(delta_time)
+        agora = pygame.time.get_ticks()
+        if self.tiros_restantes > 0:
+            if agora - self.ultimo_tiro_burst > self.burst_interval:
+                inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=850)
+                if inimigo:
+                    self._spawn_bullet(inimigo)
+                    self.tiros_restantes -= 1
+                    self.ultimo_tiro_burst = agora
+                else:
+                    self.tiros_restantes = 0
+
+    def _spawn_bullet(self, inimigo):
+        if inimigo and inimigo.alive():
+            direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
+           
+            # Movido para dentro do IF para evitar UnboundLocalError caso o inimigo morra
+            BurstRifle(
+                posicao_inicial = self.jogador.posicao,
+                grupos          = (self.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'PLAYER',
+                tamanho         = (32, 36),
+                dano            = self.dano,
+                velocidade      = self.velocidade,
+                direcao_spread  = direcao_vetor,
+            )
+
+    def upgrade(self):
+        super().upgrade()
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
+
+    def ver_proximo_upgrade(self):
+        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
+
+    def get_estatisticas_para_exibir(self):
+        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
+
+
+class MjolnirPunch(Arma):
+    NOME_ASSET = 'mjolnir_punch'
+
+    def __init__(self, jogador, grupos, game, **kwargs):
+        super().__init__(jogador=jogador, **kwargs)
+        self.game = game
+        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
+        self.nome = "Mjolnir Punch"
+        self.descricao = "Contra-ataque Spartan rápido que neutraliza rapidamente pequenas ameaças."
+        self.inicializar_stats(self.NOME_ASSET)
+        self.ultimo_punch = 0
+
+        if not hasattr(self.jogador, 'espinhos'):
+            self.jogador.espinhos = self.espinhos
+
+    def disparar(self):
+        return False
+
+    def update(self, delta_time):
+        agora = pygame.time.get_ticks()
+
+        if agora - self.ultimo_punch >= self.cooldown:
+            self.jogador.espinho_disponivel = True
+            self.ultimo_punch = agora
+            
+    def upgrade(self):
+        super().upgrade()
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
+        self.jogador.espinhos = self.espinhos
+
+    def ver_proximo_upgrade(self):
+        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
+
+    def get_estatisticas_para_exibir(self):
+        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
+
+
+class Dizimator(Arma):
+    NOME_ASSET = 'dizimator'
+
+    def __init__(self, jogador, grupos, game, **kwargs):
+        super().__init__(jogador=jogador, **kwargs)
+        self.game = game
+        self.nome = 'Dizimator'
+        self.descricao = """Arma de alto calibre que atira rajadas poderosas a curtas distâncias."""
+        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
+        self.inicializar_stats(self.NOME_ASSET)
+        self.tiros_restantes = 0
+        self.ultimo_tiro_burst = 0
+        
+    def disparar(self) -> bool:
+        if self.tiros_restantes <= 0:
+            self.tiros_restantes = self.burst_count
+            return True 
+        return False
+    
+    def update(self, delta_time):
+        super().update(delta_time)
+        agora = pygame.time.get_ticks()
+        if self.tiros_restantes > 0:
+            if agora - self.ultimo_tiro_burst > self.burst_interval:
+                inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=550)
+                if inimigo:
+                    self._spawn_light(inimigo)
+                    self.tiros_restantes -= 1
+                    self.ultimo_tiro_burst = agora
+                else:
+                    self.tiros_restantes = 0
+
+    def _spawn_light(self, inimigo):
+        if inimigo and inimigo.alive():
+            direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
+
+            DizimatorBullet(
+                posicao_inicial = self.jogador.posicao,
+                grupos          = (self.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'PLAYER',
+                tamanho         = (32, 32),
+                dano            = self.dano,
+                velocidade      = self.velocidade_projetil,
+                direcao_spread  = direcao_vetor,
+            )
+            return True
+        return False
+
+    def upgrade(self):
+        super().upgrade()
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
+
+    def ver_proximo_upgrade(self):
+        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
+
+    def get_estatisticas_para_exibir(self):
+        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
+

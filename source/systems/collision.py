@@ -83,7 +83,7 @@ class CollisionManager:
             if getattr(inimigo, 'inofensivo', False):
                 continue
             if not getattr(inimigo, 'invulneravel', False):
-                player.tomar_dano(inimigo)
+                player.tomar_dano(inimigo, colisao = True)
 
         # 4. Coleta de itens
         itens_coletados = pygame.sprite.spritecollide(player, entity_manager.items_grupo, True)

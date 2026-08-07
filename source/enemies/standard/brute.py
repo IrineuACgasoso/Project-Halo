@@ -3,7 +3,7 @@ import random
 from os.path import join
 from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
-from source.feats.projetil import Dizimator
+from source.feats.projetil import DizimatorBullet
 from source.feats.items import *
 from source.feats.assets import *
 from source.systems.entitymanager import entity_manager
@@ -29,7 +29,7 @@ class Brute(BaseEnemy):
     def dizim(self):
         direcao_tiro = self.calcular_direcao_tiro(0.1)
 
-        Dizimator(
+        DizimatorBullet(
             posicao_inicial     = self.posicao,
             grupos              = (entity_manager.all_sprites,),
             jogador             = self.jogador,

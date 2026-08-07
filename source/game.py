@@ -106,7 +106,7 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        rifle = RifleAssalto(
+        rifle = Dizimator(
             jogador=self.player,
             grupos=(entity_manager.all_sprites,
                     entity_manager.projeteis_jogador_grupo,

@@ -65,12 +65,17 @@ class PlayerCombat:
         # Morte
         if self.vida_atual <= 0:
             self.kill()
+            
 
-    def tomar_dano(self, inimigo):
+    def tomar_dano(self, inimigo, colisao=False):
         """
         Compatibilidade com projéteis/inimigos antigos.
         """
         self.receber_dano(inimigo.dano)
+        if colisao and getattr(self, 'espinhos', 0) and self.espinho_disponivel:
+            inimigo.receber_dano(self.espinhos)
+            self.espinho_disponivel = False
+
 
 
     def tomar_dano_direto(self, dano):

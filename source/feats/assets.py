@@ -315,8 +315,9 @@ ASSETS = {
 
         'infection': {
             'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection1.png')).convert_alpha(), (75, 75)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection2.png')).convert_alpha(), (75, 75))
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection1.png')).convert_alpha(), (72, 48)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection2.png')).convert_alpha(), (72, 48)),
+                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection3.png')).convert_alpha(), (72, 48))
                 ],
 
             'elite' : [

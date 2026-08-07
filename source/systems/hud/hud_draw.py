@@ -261,7 +261,7 @@ def _draw_placeholder_arma(surface, rx, ry, cor_placeholder):
 
 def _draw_weapon_slots(surface, player, fonte):
     """Desenha os slots de armas aplicando as cores temáticas baseadas na sua raridade."""
-    from source.systems.levelup import ARMAS_REGISTRO, PALETA_RARIDADE
+    from source.systems.levelup import ARMAS_REGISTRO, PALETA_RARIDADE, PALETA_NIVEL
     
     slots_max = 6
     slot_w, slot_h = 52, 52
@@ -310,7 +310,12 @@ def _draw_weapon_slots(surface, player, fonte):
             else:
                 _draw_placeholder_arma(surface, rx, ry, (*cor_borda, 180))
 
-            cor_lvl = (255, 215, 0) if arma.nivel > 3 else (160, 220, 255)
+            for faixa in PALETA_NIVEL.keys():
+                if arma.nivel - faixa >= 0:
+                    escolhida = faixa
+
+            cor_lvl = PALETA_NIVEL[escolhida]
+
             txt_nivel = fonte.render(f"L{arma.nivel}", True, cor_lvl)
             txt_rect = txt_nivel.get_rect(bottomright=(rx + slot_w - 5, ry + slot_h - 3))
             surface.blit(txt_nivel, txt_rect)

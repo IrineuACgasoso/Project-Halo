@@ -38,3 +38,17 @@ class Carabin(ProjetilUniversal):
             pygame.draw.circle(surf, cor_nucleo, centro, tamanho[0] // 4)   # núcleo branco
             ProjetilUniversal.GLOBAL_CACHE[base_key] = surf
         return ProjetilUniversal.GLOBAL_CACHE[base_key]
+
+    def ao_atingir_alvo(self, alvo):
+        qtd = self.dano
+        # Checa se o alvo existe e se NÃO está invulnerável
+        if alvo and not getattr(alvo, 'invulneravel', False):
+            if hasattr(alvo, 'escudo_atual') and alvo.escudo_atual > 0:
+                qtd *= 3
+            if hasattr(alvo, 'receber_dano'):
+                alvo.receber_dano(qtd)
+            # Tenta o padrão que você usa no Player
+            elif hasattr(alvo, 'tomar_dano'):
+                alvo.tomar_dano(self)
+        self.kill()
+        

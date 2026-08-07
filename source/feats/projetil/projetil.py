@@ -120,7 +120,7 @@ class M50(ProjetilUniversal):
             direcao_custom=direcao_spread, 
             rotacionar=False)
         
-class Dizimator(ProjetilUniversal):
+class DizimatorBullet(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
         # O Dizimator geralmente é uma esfera de energia pesada
         super().__init__(

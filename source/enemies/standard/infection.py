@@ -11,7 +11,7 @@ from source.systems.entitymanager import entity_manager
 
 class Infection(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=120, game=game, sprite_key='infection')
+        super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=120, game=game, sprite_key='infection', flip_sprite=True)
         
         self.setup_animation(estado_inicial='left', velocidade_animacao=150)
 

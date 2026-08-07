@@ -57,7 +57,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
         }
     ),
 
-    'ciclo_de_laminas': WeaponProfile(
+    'energy_sword': WeaponProfile(
         stats={
             'dano':               WeaponStats(value=5,    label='Dano',              increase=3,   range_val=1),
             'velocidade_rotacao': WeaponStats(value=120,  label='Velocidade Angular',increase=10,  range_val=1),
@@ -88,6 +88,16 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'velocidade':     WeaponStats(value=650,  label=None,       increase=0,     range_val=0),
         }
     ),
+
+    'carabin_rifle': WeaponProfile(
+            stats={
+                'dano':           WeaponStats(value=1,    label='Dano',     increase=1,     range_val=1),
+                'burst_count':    WeaponStats(value=5,    label='Rajada',   increase=1,     range_val=[1, 2, 3, 4]),
+                'cooldown':       WeaponStats(value=3500, label='Cooldown', increase=-100,  range_val=1, min_val=2500),
+                'burst_interval': WeaponStats(value=90,   label=None,       increase=0,     range_val=0),
+                'velocidade':     WeaponStats(value=650,  label=None,       increase=0,     range_val=0),
+            }
+        ),
 
     'shotgun': WeaponProfile(
         stats={
@@ -135,15 +145,42 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
     ),
 
     'light_rifle': WeaponProfile(
-            stats={
-                'dano':                 WeaponStats(value=1,     label='Dano',          increase=1,     range_val=2),
-                'cooldown':             WeaponStats(value=7500,  label='Cadência (ms)', increase=-250,  range_val=1, min_val=5000),
-                'velocidade_projetil':  WeaponStats(value=1800,  label=None,            increase=0,     range_val=0),
-                'raio_maximo':          WeaponStats(value=1000,  label='Alcance',       increase=50,    range_val=1),
-                'burst_count':          WeaponStats(value=10,    label='Rajada',        increase=1,     range_val=1),
-                'burst_interval':       WeaponStats(value=100,   label=None,            increase=0,     range_val=0),
-                }
-        ),
+        stats={
+            'dano':                 WeaponStats(value=1,     label='Dano',          increase=1,     range_val=2),
+            'cooldown':             WeaponStats(value=7500,  label='Cadência (ms)', increase=-250,  range_val=1, min_val=5000),
+            'velocidade_projetil':  WeaponStats(value=1800,  label=None,            increase=0,     range_val=0),
+            'raio_maximo':          WeaponStats(value=1000,  label='Alcance',       increase=50,    range_val=1),
+            'burst_count':          WeaponStats(value=10,    label='Rajada',        increase=1,     range_val=1),
+            'burst_interval':       WeaponStats(value=100,   label=None,            increase=0,     range_val=0),
+            }
+    ),
+
+    'machine_gun': WeaponProfile(
+        stats={
+            'dano':           WeaponStats(value=1,    label='Dano',     increase=1,     range_val=3),
+            'burst_count':    WeaponStats(value=50,   label='Rajada',   increase=10,    range_val=1),
+            'cooldown':       WeaponStats(value=20000,label='Cooldown', increase=-500,  range_val=1, min_val=15000),
+            'burst_interval': WeaponStats(value=60,   label=None,       increase=0,     range_val=0),
+            'velocidade':     WeaponStats(value=950,  label=None,       increase=0,     range_val=0),
+        }
+    ),
+
+    'mjolnir_punch': WeaponProfile(
+        stats={
+            'espinhos':           WeaponStats(value=5,    label='Dano de Espinhos', increase=5,     range_val=1),
+            'espinho_disponivel': WeaponStats(value=0,    label=None,               increase=0,     range_val=0),
+            'cooldown':           WeaponStats(value=1500, label='Cooldown',         increase=-100,  range_val=1, min_val=500),
+        }
+    ),
+    'dizimator': WeaponProfile(
+        stats={
+            'dano':                 WeaponStats(value=4,     label='Dano',          increase=1,     range_val=1),
+            'cooldown':             WeaponStats(value=5000,  label='Cadência (ms)', increase=-250,  range_val=1, min_val=2500),
+            'velocidade_projetil':  WeaponStats(value=1200,  label=None,            increase=0,     range_val=0),
+            'burst_count':          WeaponStats(value=3,    label='Rajada',        increase=1,     range_val=[3, 5]),
+            'burst_interval':       WeaponStats(value=300,   label=None,            increase=0,     range_val=0),
+        }
+    ),
 }
 
 # ===== COMPANION =======================
