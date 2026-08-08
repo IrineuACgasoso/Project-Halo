@@ -2,22 +2,22 @@ from dataclasses import dataclass, field
 from typing import Type, List
 
 from source.feats.weapons import (
-    RifleAssalto, BrickLauch, EnergySword, MK2_Shield,
+    AssaultRifle, BrickLauch, EnergySword, MK2_Shield,
     Needler, Shotgun, SpartanLaser, GrenadeLauncher,
     SniperRifle, SidekickPistol, LightRifle, CarabinRifle,
     MachineGun, MjolnirPunch, Dizimator
 )
-from source.feats.buddies import Arbitro, Cortana, Marine
+from source.feats.buddies import Arbitro, Cortana, Marine, NobleVI
 
 MAX_ARMAS = 6
 
 # ─── PALETA DE CORES POR RARIDADE (Borda RGB, Fundo RGBA) ───
 PALETA_RARIDADE = {
-    'comum':     {'borda': (210, 215, 220),       'fundo': (35, 37, 40, 140)},
-    'incomum':   {'borda': (46, 204, 113),        'fundo': (10, 45, 20, 140)},
-    'rara':      {'borda': (52, 152, 219),        'fundo': (10, 35, 70, 140)},
-    'epica':     {'borda': (155, 89, 182),        'fundo': (35, 15, 60, 140)},
-    'lendaria':  {'borda': (241, 196, 15),        'fundo': (60, 45, 10, 140)}
+    'comum':     {'borda': (210, 215, 220),       'fundo': (35, 37, 40, 140),  'decoracao': (255, 255, 255)},
+    'incomum':   {'borda': (46, 204, 113),        'fundo': (10, 45, 20, 140),  'decoracao': (100, 255, 170)},
+    'rara':      {'borda': (70, 180, 255),        'fundo': (10, 55, 130, 140), 'decoracao': (150, 255, 255)},
+    'epica':     {'borda': (155, 89, 182),        'fundo': (35, 15, 60, 140),  'decoracao': (210, 140, 255)},
+    'lendaria':  {'borda': (241, 196, 15),        'fundo': (60, 45, 10, 140),  'decoracao': (255, 235, 85)}
 }
 
 PALETA_NIVEL = {
@@ -45,7 +45,7 @@ def _registro(*infos: ArmaInfo) -> dict:
 # Adicione as raridades correspondentes que desejar para o seu arsenal
 ARMAS_REGISTRO = _registro(
     ArmaInfo(
-        id='rifle_assalto', nome='Rifle de Assalto', classe=RifleAssalto,
+        id='assault_rifle', nome='Rifle de Assalto', classe=AssaultRifle,
         grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
         descricao='Rifle padrão do UNSC de cadência elevada.', raridade='comum'
     ),
@@ -133,5 +133,10 @@ ARMAS_REGISTRO = _registro(
         id='dizimator', nome='Dizimator', classe=Dizimator,
         grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
         descricao='Arma de alto calibre que atira rajadas poderosas a curtas distâncias.', raridade='incomum'
+    ),
+    ArmaInfo(
+        id='noble', nome='Noble VI', classe=NobleVI,
+        grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
+        descricao='Soldado Spartan legendário na Queda de Reach.', raridade='lendaria'
     ),
 )

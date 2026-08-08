@@ -88,7 +88,7 @@ class EventManager:
             # Se for um número inteiro, busca a arma na lista de opções usando o índice
             id_da_arma = g.tela_de_upgrade_ativa.ids_das_opcoes[escolha_idx]
         else:
-            # Se já for um texto (ex: 'rifle_assalto'), significa que o evento já trouxe o ID pronto!
+            # Se já for um texto (ex: 'assault_rifle'), significa que o evento já trouxe o ID pronto!
             id_da_arma = escolha_idx
 
         # Verifica e aplica usando a chave ID no dicionário do Player

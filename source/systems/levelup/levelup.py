@@ -1,9 +1,12 @@
 import random
 import pygame
+from os.path import join
 
 from source.windows.settings import largura_tela, altura_tela
 from .constants import ARMAS_REGISTRO, MAX_ARMAS
 from . import draw
+import pygame
+import os
 
 
 class TelaDeUpgrade:
@@ -22,15 +25,24 @@ class TelaDeUpgrade:
         self.game = game
         self.opcao_selecionada = 0
 
-        self.fonte_grande = pygame.font.Font(None, 32)
-        self.fonte_pequena = pygame.font.Font(None, 18)
-
         self.modo_unico = id_arma_forcada is not None
         self.ids_das_opcoes = (
             [id_arma_forcada] if self.modo_unico else self.gerar_opcoes_aleatorias()
         )
-
-        largura_painel, altura_painel = 850, 400
+        # --- CARREGAMENTO DA FONTE ---
+        self.font_path = join('assets', 'fonts', 'cinzel', 'Cinzel-Bold.otf')
+        try:
+            if os.path.exists(self.font_path):
+                self.fonte_grande = pygame.font.Font(self.font_path, 24)
+                self.fonte_pequena = pygame.font.Font(self.font_path, 12)
+            else:
+                self.fonte_grande = pygame.font.SysFont('Consolas', 28, bold=True)
+                self.fonte_grande = pygame.font.SysFont('Consolas', 20, bold=True)
+        except:
+            self.fonte_grande = pygame.font.SysFont('Consolas', 28, bold=True)
+            self.fonte_pequena = pygame.font.SysFont('Consolas', 20, bold=True)
+        
+        largura_painel, altura_painel = 1000, 500
         self.painel_rect = pygame.Rect(
             (largura_tela - largura_painel) // 2,
             (altura_tela - altura_painel) // 2,
@@ -43,9 +55,9 @@ class TelaDeUpgrade:
         ]
 
     def _calcular_rects_opcoes(self):
-        padding = 20
+        padding = 15
         num_opcoes = len(self.ids_das_opcoes)
-        altura_opcao = self.painel_rect.height - padding * 3 - 50
+        altura_opcao = self.painel_rect.height - padding * 3 - 40
         pos_y = self.painel_rect.y + 70
 
         if num_opcoes == 1:
@@ -116,5 +128,18 @@ class OpcaoDeUpgrade:
         self.jogador = jogador
         self.dados = ARMAS_REGISTRO[id_arma]
 
-        self.fonte_titulo = pygame.font.Font(None, 24)
-        self.fonte_texto = pygame.font.Font(None, 18)
+        self.font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-ExtraBold.ttf')
+        self.font_path2 = join('assets', 'fonts', 'orbitron', 'Orbitron-Medium.ttf')
+        try:
+            if os.path.exists(self.font_path):
+                self.font_title = pygame.font.Font(self.font_path, 20)
+                self.font_text = pygame.font.Font(self.font_path2, 14)
+            else:
+                self.font = pygame.font.SysFont('Consolas', 20, bold=True)
+                self.font_text = pygame.font.Font('Consolas', 18)
+        except:
+            self.font_title = pygame.font.SysFont('Consolas', 18, bold=True)
+            self.font_text = pygame.font.Font('Consolas', 18)
+
+        self.fonte_titulo = self.font_title
+        self.fonte_texto = self.font_text

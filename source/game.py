@@ -106,14 +106,14 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        rifle = Dizimator(
+        rifle = AssaultRifle(
             jogador=self.player,
             grupos=(entity_manager.all_sprites,
                     entity_manager.projeteis_jogador_grupo,
                     entity_manager.inimigos_grupo),
             game=self
         )
-        self.player.armas['rifle_assalto'] = rifle
+        self.player.armas['assault_rifle'] = rifle
 
         # Spawner — depois do player para não explodir no primeiro spawn
         self.spawner      = Spawner(self)

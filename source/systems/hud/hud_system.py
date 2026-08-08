@@ -24,11 +24,16 @@ class HUD:
 
         # Fontes
         self._font_hud   = pygame.font.SysFont("Consolas", 13, bold=True)
-        self._font_timer = pygame.font.SysFont("Arial",    34, bold=True)
-        self._font_boss  = self._carregar_fonte(
-            join('assets', 'fonts', 'cinzel', 'Cinzel-Regular.otf'), 22
-        )
         self._font_xp    = pygame.font.SysFont("Consolas", 11)
+        self._font_boss  = self._carregar_fonte(
+            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 22)
+        self._font_boss  = self._carregar_fonte(
+            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 22)
+        self._font_score  = self._carregar_fonte(
+            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 32)
+        self._font_timer  = self._carregar_fonte(
+            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 40)
+        
 
         # Ícones de coletáveis (escalonados)
         _SZ = 26
@@ -84,7 +89,7 @@ class HUD:
         if not self.game.boss_atual:
             _draw_timer(tela, self.game.timer_jogo, self._font_timer)
 
-        _draw_score_box(tela, self.game, self._font_timer) # Usa a fonte grande e negritada do timer
+        _draw_score_box(tela, self.game, self._font_score) # Usa a fonte grande e negritada do timer
         
         _draw_weapon_slots(tela, self.game.player, self._font_hud)
 

@@ -11,8 +11,8 @@ from source.feats.projetil import (
 from source.feats.auras import PlayerAura
 from source.feats.grenades import PlasmaGrenade
 
-class RifleAssalto(Arma):
-    NOME_ASSET = 'rifle_assalto'
+class AssaultRifle(Arma):
+    NOME_ASSET = 'assault_rifle'
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)

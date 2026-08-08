@@ -62,10 +62,10 @@ def draw_barra_escudo(surface, rect, pct, cor=(80, 160, 255), cor_borda=(180, 22
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 2)
 
     # Ícone de escudo à esquerda (cruz pequena — símbolo médico/escudo Halo)
-    ix = rect.x - 18
-    iy = rect.centery
-    pygame.draw.rect(surface, cor_borda, (ix - 1, iy - 5, 3, 11))
-    pygame.draw.rect(surface, cor_borda, (ix - 5, iy - 1, 11, 3))
+    ix = rect.x - 20
+    iy = rect.centery - 9
+    pygame.draw.rect(surface, cor_borda, (ix + 2, iy + 6, 10, 14))
+    pygame.draw.rect(surface, cor_borda, (ix - 0, iy + 3, 15, 10))
 
 
 def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 140, 140)):
@@ -82,6 +82,12 @@ def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 140, 
         surface.blit(fill_surf, rect.topleft)
 
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 1)
+
+    # Ícone de escudo à esquerda (cruz pequena — símbolo médico/escudo Halo)
+    ix = rect.x - 15
+    iy = rect.centery
+    pygame.draw.rect(surface, cor_borda, (ix - 1, iy - 5, 3, 11))
+    pygame.draw.rect(surface, cor_borda, (ix - 5, iy - 1, 11, 3))
 
 
 def draw_barra_xp(surface, rect, pct, nivel, xp_atual, xp_max,
@@ -352,14 +358,11 @@ def _draw_score_box(surface, game, fonte):
     surface.blit(surf_box, (rx, ry))
 
     # 2. Bordas Externas - Azul Neon/Ciano Puro
-    pygame.draw.polygon(surface, (0, 200, 255), pts_fundo, 2)
+    pygame.draw.polygon(surface, (0, 245, 255), pts_fundo, 2)
 
-    # 3. Detalhe estético interno (Linha inferior de calibragem de interface digital)
-    pygame.draw.line(surface, (0, 240, 255, 80), (rx + 6, ry + box_h - 5), (rx + box_w - 6, ry + box_h - 5), 1)
-
-    # 4. Texto da Pontuação formatado (Formatado com zeros à esquerda para a vibe de contador militar: 00340)
+    # 3. Texto da Pontuação formatado (Formatado com zeros à esquerda para a vibe de contador militar: 00340)
     txt_score = f"{int(pontuacao):05d}"
-    surf_txt = fonte.render(txt_score, True, (0, 245, 255))
+    surf_txt = fonte.render(txt_score, True, (0, 225, 255))
     
     # Centralização interna perfeita
     txt_rect = surf_txt.get_rect(center=(rx + box_w // 2 - 2, ry + box_h // 2 + 1))

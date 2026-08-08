@@ -4,8 +4,7 @@ import random
 from source.windows.settings import *
 from source.feats.assets import ASSETS
 from source.data.weapon_data import COMPANION_DATA
-from source.feats.projetil import BurstRifle
-from source.feats.weapons import Arma
+from source.feats.projetil import BurstRifle, HeavyBurst
 
 
 class Companheiro(pygame.sprite.Sprite):
@@ -37,7 +36,8 @@ class Companheiro(pygame.sprite.Sprite):
                 setattr(self, attr, meta.value)
 
         if self.pode_atirar:
-            self.ultimo_tiro = 0
+            self.ultimo_tiro_burst = 0
+            self.ultimo_tiro_sniper = 0
 
         self.estado_logico  = 'SEGUINDO'
         self.alvo           = None
@@ -208,9 +208,12 @@ class Companheiro(pygame.sprite.Sprite):
                 if dist_sq < self.range_tiro**2:
                     self.direcao_movimento = pygame.math.Vector2(0,0) # Fica parado
 
-                    if agora - self.ultimo_tiro > self.cooldown_tiro:
+                    if agora - self.ultimo_tiro_burst > self.cooldown_tiro_burst and dist_sq < self.range_rifle**2:
                         self.atirar()
-                        self.ultimo_tiro = agora
+                        self.ultimo_tiro_burst = agora
+                    elif agora - self.ultimo_tiro_sniper > self.cooldown_tiro_sniper and dist_sq < self.range_sniper**2:
+                            self.atirar(weapon='sniper')
+                            self.ultimo_tiro_sniper = agora
                 else:
                     # 2. Se o inimigo fugir do range, ele caminha em direção a ele
                     self.direcao_movimento = (self.alvo.posicao - self.posicao).normalize()
@@ -269,21 +272,34 @@ class Companheiro(pygame.sprite.Sprite):
         if self.direcao_movimento.x > 0.1: self.estado_animacao = 'right'
         elif self.direcao_movimento.x < -0.1: self.estado_animacao = 'left'
 
-    def atirar(self):
+    def atirar(self, weapon = 'burst'):
         direcao = (self.alvo.posicao - self.posicao).normalize()
-        
-        # Criando o tiro como se fosse do jogador, mas saindo do Marine
-        BurstRifle(
-            posicao_inicial=self.posicao.copy(),
-            grupos=(self.jogador.game.all_sprites,), # Usa o primeiro grupo que ele pertence
-            jogador=self.jogador,
-            game=self.jogador.game,
-            dono='PLAYER', # Importante para não acertar o mestre!
-            tamanho=(24, 24),
-            dano=self.dano,
-            velocidade=700,
-            direcao_spread=direcao
-        )
+
+        if weapon == 'burst':
+            # Criando o tiro como se fosse do jogador, mas saindo do Marine
+            BurstRifle(
+                posicao_inicial=self.posicao.copy(),
+                grupos=(self.jogador.game.all_sprites,), # Usa o primeiro grupo que ele pertence
+                jogador=self.jogador,
+                game=self.jogador.game,
+                dono='PLAYER', # Importante para não acertar o mestre!
+                tamanho=(24, 24),
+                dano=self.dano_burst,
+                velocidade=700,
+                direcao_spread=direcao
+            )
+        elif weapon == 'sniper':
+            HeavyBurst(
+                posicao_inicial = self.jogador.posicao,
+                grupos          = (self.all_sprites,),
+                jogador         = self.jogador,
+                game            = self.game,
+                dono            = 'PLAYER',
+                tamanho         = (96, 28),
+                dano            = self.dano_sniper,
+                velocidade      = 1500,
+                direcao_spread  = direcao,
+            )
 
     def animar(self):
         agora = pygame.time.get_ticks()
@@ -298,188 +314,3 @@ class Companheiro(pygame.sprite.Sprite):
         self.logica_de_decisao()
         self.executar_comportamento(delta_time)
         self.animar()
-
-
-#==================================================================================================
-
-class Arbitro(Arma):
-    NOME_ASSET = 'arbiter'
-
-    def __init__(self, jogador, grupos, game, **kwargs):
-        super().__init__(jogador=jogador, **kwargs)
-        deve_criar = kwargs.get('criar_sprite', True)
-        self.game = game
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
-        self.nome = "Árbitro"
-        self.descricao = "Um elite aliado que caça inimigos próximos."
-        self.dano = 10
-        self.sprite_companion = None 
-        if deve_criar: # Só cria se for solicitado
-            self.equipar()
-
-    def equipar(self):
-        if not self.sprite_companion:
-            # Passamos 'arbiter' para ele buscar na pasta assets/img/arbiter
-            self.sprite_companion = Companheiro(
-                self.jogador, self.all_sprites, 
-                self.inimigos_grupo, self.item_grupo, 
-                'arbiter' 
-            )
-            self.sprite_companion.dano = self.dano
-            self.sprite_companion.arma_parent = self
-
-    def upgrade(self):
-        super().upgrade()
-        self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
-
-    def ver_proximo_upgrade(self):
-        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)
-
-    def get_estatisticas_para_exibir(self):
-        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)
-
-    
-    def disparar(self): pass
-    def update(self, delta_time): pass
-
-
-#===========================================================================================================
-    
-class Cortana(Arma):
-    NOME_ASSET = 'cortana'
-
-    def __init__(self, jogador, grupos, game, **kwargs):
-        super().__init__(jogador=jogador, **kwargs)
-        self.game = game
-        deve_criar = kwargs.get('criar_sprite', True)
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
-        self.nome = "Cortana"
-        self.descricao = "Busca itens e XP próximos a você, além de conceder um bônus de velocidade."
-
-        self.sprite_companion = None
-        self.itens_reservados = set()
-        if deve_criar: # Só cria se for solicitado
-            self.equipar()
-
-    def equipar(self):
-        if not self.sprite_companion:
-            # Passamos 'cortana' para ele buscar na pasta assets/img/cortana
-            self.sprite_companion = Companheiro(
-                self.jogador, self.all_sprites, 
-                self.inimigos_grupo, self.item_grupo, 
-                'cortana'
-            )
-            self.sprite_companion.arma_parent = self
-
-    def upgrade(self):
-        super().upgrade()
-        self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
-        self.jogador.velocidade += 10
-
-    def ver_proximo_upgrade(self):
-        return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)
-
-    def get_estatisticas_para_exibir(self):
-        return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)
-
-
-
-    
-    def disparar(self): pass
-    def update(self, delta_time): pass
-
-
-#===========================================================================================================
-
-class Marine(Arma):
-    NOME_ASSET = 'marine'
-
-    def __init__(self, jogador, grupos, game, **kwargs):
-        super().__init__(jogador=jogador, **kwargs)
-        self.game = game
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
-        self.sprite_companion = None
-
-        self.itens_reservados = set() # Itens que já têm um Marine indo buscar
-        self.companions = [] # Lista para guardar todos os marines
-        self.nome = "UNSC Marine"
-        self.descricao = "Leal soldado que auxilia coletando itens e atacando inimigos."
-        self.dano = 1
-
-        if kwargs.get('criar_sprite', True):
-            self.adicionar_soldado()
-
-    def equipar(self):
-        if not self.companions:
-            self.adicionar_soldado()
-            
-    def adicionar_soldado(self):
-        novo_marine = Companheiro(
-            self.jogador, self.all_sprites, 
-            self.inimigos_grupo, self.item_grupo, 
-            'marine' 
-        )
-        novo_marine.arma_parent = self # Referência para gerenciar reservas
-        novo_marine.pode_atirar = True
-        novo_marine.dano = self.dano
-        # Dá um offset para eles não ficarem um em cima do outro
-        novo_marine.angulo_orbita = len(self.companions) * (math.pi / 2)
-
-        # Sincroniza com o primeiro para não nascer desatualizado
-        if self.companions:
-            ref = self.companions[0]
-            stats = COMPANION_DATA[self.NOME_ASSET].stats
-            for attr in stats:
-                if not attr.startswith('_') and hasattr(ref, attr):
-                    setattr(novo_marine, attr, getattr(ref, attr))
-
-        self.companions.append(novo_marine)
-        if self.sprite_companion is None:
-            self.sprite_companion = novo_marine
-
-    def upgrade(self):
-        super().upgrade()
-        self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.companions)
-        self.dano = self.companions[0].dano if self.companions else self.dano
-        if self._deve_melhorar(
-            COMPANION_DATA[self.NOME_ASSET].stats['_soldados'].range_val,
-            self.nivel
-        ):
-            self.adicionar_soldado()            
-
-
-    def ver_proximo_upgrade(self):
-        proximos = self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.companions)
-        proximos['_soldados']['atual'] = len(self.companions)
-        proximos['_soldados']['proximo'] = len(self.companions) + (
-            1 if self._deve_melhorar(
-                COMPANION_DATA[self.NOME_ASSET].stats['_soldados'].range_val,
-                self.nivel + 1
-            ) else 0
-        )
-        return proximos
-
-    def get_estatisticas_para_exibir(self):
-        # 1. Puxamos o dicionário completo de upgrades que você já tratou no método acima
-        proximos = self.ver_proximo_upgrade()
-        linhas = []
-        
-        # 2. Nossa função de formatação segura contra None
-        fmt = lambda v: "0" if v is None else (f"{v:.1f}" if isinstance(v, float) and v % 1 != 0 and v != float('inf') else str(int(v)))
-        
-        # 3. Varremos os atributos gerando as linhas de texto para a tela
-        for info in proximos.values():
-            # Se o valor atual for igual ao próximo, não há motivo para mostrar na tela de upgrade
-            if info['atual'] == info['proximo']:
-                continue
-            linhas.append(f"{info['label']}: {fmt(info['atual'])} -> {fmt(info['proximo'])}")
-            
-        return linhas
-    
-    def disparar(self): pass
-
-    def update(self, delta_time): pass
-
-
-
-
