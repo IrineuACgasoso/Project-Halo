@@ -9,6 +9,8 @@ _ESCUDO_W  = 260
 _ESCUDO_H  = 16
 _VIDA_W    = 200
 _VIDA_H    = 11
+_VEICULE_W = 120
+_VEICULE_H = 9
 _MARGEM_X  = 24
 _MARGEM_Y  = 28
 _GAP       = 6          # espaço entre barra de escudo e vida
@@ -35,7 +37,7 @@ def _chanfrado(rect, corte=8):
     ]
 
 
-def draw_barra_escudo(surface, rect, pct, cor=(80, 160, 255), cor_borda=(180, 220, 255), brilho=True):
+def draw_barra_escudo(surface, rect, pct, cor=(80, 160, 255), cor_borda=(180, 220, 255), cor_icon = (0, 150, 255), brilho=True):
     """Barra de escudo azul estilo Halo com cortes nos cantos."""
     corte = 7
     # Fundo escuro
@@ -61,14 +63,68 @@ def draw_barra_escudo(surface, rect, pct, cor=(80, 160, 255), cor_borda=(180, 22
     # Borda chanfrada
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 2)
 
-    # Ícone de escudo à esquerda (cruz pequena — símbolo médico/escudo Halo)
-    ix = rect.x - 20
-    iy = rect.centery - 9
-    pygame.draw.rect(surface, cor_borda, (ix + 2, iy + 6, 10, 14))
-    pygame.draw.rect(surface, cor_borda, (ix - 0, iy + 3, 15, 10))
+    size = 8
+    # Ícone de escudo à esquerda (escudo Halo)
+    ix = rect.x - 12
+    iy = rect.centery - 16
+    pts = [(ix - 5, iy + 18 - size), (ix - 5 + size, iy + 18), 
+          (ix - 5, iy + 18 + size), (ix - 5 - size, iy + 18)]
+    pygame.draw.polygon(surface, cor_icon, pts)
+    pygame.draw.rect(surface, cor_icon, (ix - 13, iy + 8, 16, 10))
 
 
-def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 140, 140)):
+def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 80, 80), cor_icon=(255, 50, 50)):
+    """Barra de vida vermelha fina, estilo Halo."""
+    corte = 5
+    fundo_poly = _chanfrado(rect, corte)
+    pygame.draw.polygon(surface, (30, 5, 5, 180), fundo_poly)
+
+    if pct > 0:
+        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+        fill_w = max(1, int(rect.width * pct))
+        fill_poly_local = _chanfrado(pygame.Rect(0, 0, fill_w, rect.height), corte)
+        pygame.draw.polygon(fill_surf, (*cor, 230), fill_poly_local)
+        surface.blit(fill_surf, rect.topleft)
+
+    pygame.draw.polygon(surface, cor_borda, fundo_poly, 1)
+
+    # Ícone de vida à esquerda (cruz pequena — símbolo médico/escudo Halo)
+    ix = rect.x - 15
+    iy = rect.centery
+    pygame.draw.rect(surface, cor_icon, (ix, iy - 5, 5, 15))
+    pygame.draw.rect(surface, cor_icon, (ix - 5, iy, 15, 5))
+
+
+def draw_barra_xp(surface, rect, pct, nivel, xp_atual, xp_max,
+                  cor=(255, 90, 0), fonte=None):
+    """Barra de XP estilo Halo: fina, central, com valores e nível."""
+    corte = 4
+    # Fundo
+    fundo_poly = _chanfrado(rect, corte)
+    pygame.draw.polygon(surface, (5, 15, 30, 200), fundo_poly)
+
+    # Fill
+    if pct > 0:
+        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+        fw = max(1, int(rect.width * pct))
+        fp = _chanfrado(pygame.Rect(0, 0, fw, rect.height), corte)
+        pygame.draw.polygon(fill_surf, (*cor, 200), fp)
+        # Reflexo
+        pygame.draw.line(fill_surf, (230, 120, 80, 120), (corte, 1), (fw - corte, 1), 1)
+        surface.blit(fill_surf, rect.topleft)
+
+    pygame.draw.polygon(surface, (255, 190, 30, 180), fundo_poly, 1)
+
+    if fonte:
+        # Nível à esquerda
+        txt_nivel = fonte.render(f"LVL {nivel}", True, (180, 230, 255))
+        surface.blit(txt_nivel, (rect.x - txt_nivel.get_width() - 8, rect.centery - txt_nivel.get_height() // 2))
+        # XP à direita
+        txt_xp = fonte.render(f"{int(xp_atual)}/{int(xp_max)}", True, (120, 190, 220))
+        surface.blit(txt_xp, (rect.right + 6, rect.centery - txt_xp.get_height() // 2))
+
+
+def draw_barra_veiculo(surface, rect, pct, cor=(40, 200, 40), cor_borda=(0, 255, 200), cor_icon =(0, 255, 100)):
     """Barra de vida vermelha fina, estilo Halo."""
     corte = 5
     fundo_poly = _chanfrado(rect, corte)
@@ -84,39 +140,11 @@ def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 140, 
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 1)
 
     # Ícone de escudo à esquerda (cruz pequena — símbolo médico/escudo Halo)
-    ix = rect.x - 15
+    ix = rect.x - 18
     iy = rect.centery
-    pygame.draw.rect(surface, cor_borda, (ix - 1, iy - 5, 3, 11))
-    pygame.draw.rect(surface, cor_borda, (ix - 5, iy - 1, 11, 3))
-
-
-def draw_barra_xp(surface, rect, pct, nivel, xp_atual, xp_max,
-                  cor=(0, 200, 255), fonte=None):
-    """Barra de XP estilo Halo: fina, central, com valores e nível."""
-    corte = 4
-    # Fundo
-    fundo_poly = _chanfrado(rect, corte)
-    pygame.draw.polygon(surface, (5, 15, 30, 200), fundo_poly)
-
-    # Fill
-    if pct > 0:
-        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-        fw = max(1, int(rect.width * pct))
-        fp = _chanfrado(pygame.Rect(0, 0, fw, rect.height), corte)
-        pygame.draw.polygon(fill_surf, (*cor, 200), fp)
-        # Reflexo
-        pygame.draw.line(fill_surf, (180, 240, 255, 120), (corte, 1), (fw - corte, 1), 1)
-        surface.blit(fill_surf, rect.topleft)
-
-    pygame.draw.polygon(surface, (100, 200, 255, 180), fundo_poly, 1)
-
-    if fonte:
-        # Nível à esquerda
-        txt_nivel = fonte.render(f"LVL {nivel}", True, (180, 230, 255))
-        surface.blit(txt_nivel, (rect.x - txt_nivel.get_width() - 8, rect.centery - txt_nivel.get_height() // 2))
-        # XP à direita
-        txt_xp = fonte.render(f"{int(xp_atual)}/{int(xp_max)}", True, (120, 190, 220))
-        surface.blit(txt_xp, (rect.right + 6, rect.centery - txt_xp.get_height() // 2))
+    pygame.draw.rect(surface, cor_icon, (ix - 1, iy - 3, 14, 7))
+    pygame.draw.circle(surface, cor_icon, (ix + 3, iy + 5), 2, 2)
+    pygame.draw.circle(surface, cor_icon, (ix + 9, iy + 5), 2, 2)
 
 
 def draw_boss_hud(surface, boss, font_titulo, font_barra, largura_tela, altura_tela):
@@ -172,7 +200,7 @@ def draw_boss_hud(surface, boss, font_titulo, font_barra, largura_tela, altura_t
 
 def _draw_corner_ornaments(surface, rect, cor, corte):
     """Pequenos losangos/diamantes nos 4 cantos da barra."""
-    size = 5
+    size = 6
     pontos = [
         (rect.x, rect.centery),                 # esquerda
         (rect.right, rect.centery),              # direita
@@ -192,6 +220,7 @@ def _draw_player_bars(tela, player):
 
     pct_escudo = max(0.0, min(1.0, p.escudo_atual / p.escudo_maximo)) if getattr(p, 'escudo_maximo', 0) > 0 else 0.0
     pct_vida   = max(0.0, min(1.0, p.vida_atual / p.vida_maxima))
+    pct_veiculo = max(0.0, min(1.0, p.vida_veiculo_atual / p.vida_veiculo_maxima)) if getattr(p, 'vida_veiculo_maxima', 0) > 0 else 0.0
 
     draw_barra_escudo(tela, pygame.Rect(rx, ry, _ESCUDO_W, _ESCUDO_H), pct_escudo)
 
@@ -199,6 +228,13 @@ def _draw_player_bars(tela, player):
     vx = largura_tela - _MARGEM_X - _VIDA_W
     vy = ry + _ESCUDO_H + _GAP
     draw_barra_vida(tela, pygame.Rect(vx, vy, _VIDA_W, _VIDA_H), pct_vida)
+
+    # Barra de vida do veículo — só aparece enquanto o jogador está embarcado
+    if getattr(p, 'in_veicule', False):
+        tx = largura_tela - _MARGEM_X - _VEICULE_W
+        ty = vy + _VIDA_H + _GAP
+        draw_barra_veiculo(tela, pygame.Rect(tx, ty, _VEICULE_W, _VEICULE_H), pct_veiculo)
+
 
 def _draw_xp(tela, player, font_xp):
     p  = player

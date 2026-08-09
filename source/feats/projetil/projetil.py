@@ -201,15 +201,15 @@ class LaserBeam(ProjetilUniversal):
         )
     
 
-class Projetil_Lista(ProjetilUniversal):
+class EnergySwordProj(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, game, dano, angulo_inicial, duracao, velocidade_rotacao, distancia_orbita):
         super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
             dono='PLAYER', 
-            sprite_key='lista', 
-            tamanho=(45, 80), 
+            sprite_key='energy_sword', 
+            tamanho=(80, 80), 
             dano=dano, 
             velocidade=0, # Ela orbita, não tem velocidade linear
             duracao=duracao, 

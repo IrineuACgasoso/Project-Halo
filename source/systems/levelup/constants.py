@@ -8,6 +8,7 @@ from source.feats.weapons import (
     MachineGun, MjolnirPunch, Dizimator
 )
 from source.feats.buddies import Arbitro, Cortana, Marine, NobleVI
+from source.feats.vehicles.warhog import Warhog
 
 MAX_ARMAS = 6
 
@@ -55,7 +56,7 @@ ARMAS_REGISTRO = _registro(
         descricao='Dispara agulhas teleguiadas que explodem ao acumular.', raridade='incomum'
     ),
     ArmaInfo(
-        id='carabin_rifle', nome='Carabin Rifle', classe=CarabinRifle,
+        id='carabin', nome='Carabin Rifle', classe=CarabinRifle,
         grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
         descricao='Dispara plasma teleguiados eficiente contra escudos.', raridade='rara'
     ),
@@ -138,5 +139,10 @@ ARMAS_REGISTRO = _registro(
         id='noble', nome='Noble VI', classe=NobleVI,
         grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
         descricao='Soldado Spartan legendário na Queda de Reach.', raridade='lendaria'
+    ),
+    ArmaInfo(
+        id='warhog', nome='Warhog', classe=Warhog,
+        grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
+        descricao='Camburão militar do UNSC destinado a operações especiais.', raridade='incomum'
     ),
 )

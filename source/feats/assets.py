@@ -43,8 +43,7 @@ ASSETS = {
         'plasma_grenade': pygame.image.load(path('assets', 'img', 'projectiles', 'plasma_grenade.png')).convert_alpha(),
         'm50': pygame.image.load(path('assets', 'img', 'projectiles', 'm50.png')).convert_alpha(),
         'ar': pygame.image.load(path('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
-        'pingpong' : pygame.image.load(path('assets', 'img', 'projectiles', 'bola_pingpong.png')),
-        'lista' : pygame.image.load(path('assets', 'img', 'projectiles','listas.png')).convert_alpha(),
+        'energy_sword' : pygame.image.load(path('assets', 'img', 'projectiles','energysword.png')).convert_alpha(),
         'light_bullet': pygame.image.load(path('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
         'dizimator': pygame.image.load(path('assets', 'img', 'projectiles', 'dizimator.png')).convert_alpha(),
         'spike' : pygame.image.load(path('assets', 'img', 'projectiles', 'spike.png')).convert_alpha(),
@@ -59,11 +58,13 @@ ASSETS = {
         'assault_rifle': pygame.image.load(path('assets', 'img', 'icons', 'ar.png')).convert_alpha(),
         'grenade_launcher': pygame.image.load(path('assets', 'img', 'icons', 'plasma_grenade.png')).convert_alpha(),
         'needler': pygame.image.load(path('assets', 'img', 'icons', 'needler.png')).convert_alpha(),
+        'carabin': pygame.image.load(path('assets', 'img', 'icons', 'carabin.png')).convert_alpha(),
         'spartan_laser': pygame.image.load(path('assets', 'img', 'icons', 'spartan_laser.png')).convert_alpha(),
         'shotgun': pygame.image.load(path('assets', 'img', 'icons', 'shotgun.png')).convert_alpha(),
         'cortana': pygame.image.load(path('assets', 'img', 'icons', 'cortana.png')).convert_alpha(),
         'mk2_shield': pygame.image.load(path('assets', 'img', 'icons', 'mk2.png')).convert_alpha(),
         'arbiter': pygame.image.load(path('assets', 'img', 'icons', 'arbiter.png')).convert_alpha(),
+        'light_rifle': pygame.image.load(path('assets', 'img', 'icons', 'light_rifle.png')).convert_alpha(),
         },
 
     'items': {
@@ -97,10 +98,10 @@ ASSETS = {
             pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine4.png')).convert_alpha(), (96, 144)),
         ],
         'noble' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine1.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine2.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine3.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine4.png')).convert_alpha(), (96, 144)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble1.png')).convert_alpha(), (144, 216)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble2.png')).convert_alpha(), (144, 216)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble3.png')).convert_alpha(), (144, 216)),
+            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble4.png')).convert_alpha(), (144, 216)),
         ],
     },
 

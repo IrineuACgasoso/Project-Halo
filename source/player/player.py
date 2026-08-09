@@ -35,7 +35,11 @@ class Player(
 
         self.setup_armas()
 
+        self.setup_espinhos()
+
         self.setup_shield()
+
+        self.setup_veicule()
 
         self.setup_status()
 
@@ -48,6 +52,8 @@ class Player(
     def update(self, delta_time, paredes=None):
 
         self.input()
+
+        self.atualizar_veiculo(delta_time)
 
         self.atualizar_escudo(delta_time)
 

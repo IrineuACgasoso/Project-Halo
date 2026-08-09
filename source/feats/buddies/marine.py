@@ -2,6 +2,22 @@ import math
 from source.feats.weapons import Arma
 from source.data.weapon_data import COMPANION_DATA
 from .companion import Companheiro
+from source.feats.projetil import BurstRifle
+
+
+class CompanheiroMarine(Companheiro):
+    """Companheiro do Marine: usa somente o rifle de rajada, nunca a sniper."""
+
+    def decidir_disparo(self, dist_sq, agora):
+        if agora - self.ultimo_tiro_burst > self.cooldown_tiro_burst and dist_sq < self.range_rifle ** 2:
+            self.ultimo_tiro_burst = agora
+            return dict(
+                projetil_cls=BurstRifle,
+                dano=self.dano_burst,
+                velocidade=700,
+                tamanho=(24, 24),
+            )
+        return None
 
 
 class Marine(Arma):
@@ -27,7 +43,7 @@ class Marine(Arma):
             self.adicionar_soldado()
             
     def adicionar_soldado(self):
-        novo_marine = Companheiro(
+        novo_marine = CompanheiroMarine(
             self.jogador, self.all_sprites, 
             self.inimigos_grupo, self.item_grupo, 
             'marine' 
@@ -92,7 +108,3 @@ class Marine(Arma):
     def disparar(self): pass
 
     def update(self, delta_time): pass
-
-
-
-

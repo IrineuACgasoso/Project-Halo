@@ -198,3 +198,52 @@ class ContinuousBeam:
         
         # Brilho na ponta (impacto)
         pygame.draw.circle(superficie, self.color, p2, 8 + oscilacao)
+
+
+class EfeitoFaiscas(pygame.sprite.Sprite):
+    """
+    Pequeno estouro de faíscas, usado no contra-ataque dos espinhos
+    (e reaproveitável em qualquer outro impacto/reflexo de dano).
+    Não depende de nenhum asset — desenha tudo proceduralmente e some
+    sozinho depois de `duracao` ms.
+    """
+
+    def __init__(self, posicao, grupos, cor=(255, 210, 90), quantidade=10, duracao=280):
+        super().__init__(grupos)
+        self.posicao = pygame.math.Vector2(posicao)
+        self.cor = cor
+        self.duracao = duracao
+        self.criado_em = pygame.time.get_ticks()
+
+        self.particulas = [
+            {
+                'dir': pygame.math.Vector2(1, 0).rotate(random.uniform(0, 360)),
+                'vel': random.uniform(120, 260),
+                'tam': random.uniform(2, 5),
+            }
+            for _ in range(quantidade)
+        ]
+
+        tam_canvas = 240
+        self.image = pygame.Surface((tam_canvas, tam_canvas), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=self.posicao)
+        self._centro_local = pygame.math.Vector2(tam_canvas / 2, tam_canvas / 2)
+
+    def update(self, delta_time):
+        agora = pygame.time.get_ticks()
+        decorrido = agora - self.criado_em
+        if decorrido >= self.duracao:
+            self.kill()
+            return
+
+        progresso = decorrido / self.duracao
+        alpha = max(0, int(255 * (1 - progresso)))
+
+        self.image.fill((0, 0, 0, 0))
+        for p in self.particulas:
+            offset = p['dir'] * p['vel'] * (decorrido / 1000)
+            pos = self._centro_local + offset
+            raio = max(0.5, p['tam'] * (1 - progresso))
+            pygame.draw.circle(self.image, (*self.cor, alpha), pos, raio)
+
+        self.rect.center = self.posicao

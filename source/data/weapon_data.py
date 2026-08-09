@@ -226,7 +226,6 @@ COMPANION_DATA: Dict[str, CompanionProfile] = {
             'raio_deteccao_item':        WeaponStats(value=250,     label='Detecção de Itens',   increase=25,  range_val=1),
             'range_tiro':                WeaponStats(value=400,     label='Alcance do Disparo',  increase=40,  range_val=1),
             'range_rifle':               WeaponStats(value=400,     label='Alcance do Disparo',  increase=40,  range_val=1),
-            'cooldown_tiro_sniper':      WeaponStats(value=99999999,label=None,                  increase=0, range_val=1),
             'cooldown_tiro_burst':       WeaponStats(value=1000,    label='Vel. de Ataque (ms)', increase=-50, range_val=1, min_val=500),
             'dano_burst':                WeaponStats(value=1,       label='Dano',                increase=1,   range_val=1),
             'pode_atirar':               WeaponStats(value=True,    label=None,                  increase=0,   range_val=0),
@@ -244,12 +243,12 @@ COMPANION_DATA: Dict[str, CompanionProfile] = {
             'velocidade_correr':         WeaponStats(value=280,   label='Vel. Corrida',         increase=30,  range_val=1),
             'raio_deteccao_inimigo':     WeaponStats(value=900,   label='Raio de Caça',         increase=50,  range_val=1),
             'dano_burst':                WeaponStats(value=3,     label='Dano do Rifle',        increase=2,   range_val=1),
-            'dano_rifle':                WeaponStats(value=30,    label='Dano da Sniper',       increase=10,   range_val=1),
+            'dano_sniper':               WeaponStats(value=30,    label='Dano da Sniper',       increase=10,   range_val=1),
             'range_tiro':                WeaponStats(value=1200,  label=None,   increase=40,  range_val=1),
             'cooldown_tiro_burst':       WeaponStats(value=1000,  label='Vel. de Ataque Rifle (ms)',  increase=-50, range_val=1, min_val=500),
             'range_sniper':              WeaponStats(value=1200,  label='Alcance do Disparo Sniper',   increase=100,  range_val=1),
             'cooldown_tiro_sniper':      WeaponStats(value=10000, label='Vel. de Ataque Sniper(ms)',  increase=-50, range_val=1, min_val=5000),
-            'range_rifle':               WeaponStats(value=600,   label='Alcance do Disparo Sniper',   increase=50,  range_val=1),
+            'range_rifle':               WeaponStats(value=600,   label='Alcance do Disparo Rifle',   increase=50,  range_val=[2, 3, 4]),
             'pode_atirar':               WeaponStats(value=True,  label=None,                   increase=0,   range_val=0),
             'velocidade_animacao':       WeaponStats(value=120,   label=None,                   increase=0,   range_val=0),
             'distancia_maxima_retorno':  WeaponStats(value=1000,  label=None,                   increase=0,   range_val=0),
@@ -257,3 +256,22 @@ COMPANION_DATA: Dict[str, CompanionProfile] = {
     ),
 }
 
+
+# ===== VEHICLES =========================
+
+VEHICLES_DATA: Dict[str, CompanionProfile] = {
+    'warhog': CompanionProfile(
+        tipo='VEICULO',
+        stats={
+            'vida_maxima':             WeaponStats(value=200,   label='Vida do Veículo',              increase=40,   range_val=1),
+            'dano_burst':              WeaponStats(value=1,     label='Dano da Metralhadora',         increase=1,    range_val=2),
+            'cooldown_tiro_burst':     WeaponStats(value=300,   label='Cadência (ms)',                increase=-15,  range_val=1, min_val=150),
+            'raio_deteccao_inimigo':   WeaponStats(value=650,   label='Raio de Mira',                 increase=50,   range_val=1),
+            'dano_atropelamento':      WeaponStats(value=15,    label='Dano de Atropelamento',        increase=5,    range_val=1),
+            'raio_atropelamento':      WeaponStats(value=70,    label=None,                           increase=0,    range_val=0),
+            'cooldown_atropelamento':  WeaponStats(value=400,   label=None,                           increase=0,    range_val=0),
+            'cooldown_destruicao':     WeaponStats(value=50000, label='Cooldown p/ Reutilizar (ms)',  increase=-1000,range_val=1, min_val=40000),
+            'velocidade_animacao':     WeaponStats(value=150,   label=None,                           increase=0,    range_val=0),
+        }
+    ),
+}

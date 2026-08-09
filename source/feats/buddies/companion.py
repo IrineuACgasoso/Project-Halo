@@ -204,16 +204,13 @@ class Companheiro(pygame.sprite.Sprite):
             # LÓGICA DO ATIRADOR
             if self.pode_atirar:
                 agora = pygame.time.get_ticks()
-                
+
                 if dist_sq < self.range_tiro**2:
                     self.direcao_movimento = pygame.math.Vector2(0,0) # Fica parado
 
-                    if agora - self.ultimo_tiro_burst > self.cooldown_tiro_burst and dist_sq < self.range_rifle**2:
-                        self.atirar()
-                        self.ultimo_tiro_burst = agora
-                    elif agora - self.ultimo_tiro_sniper > self.cooldown_tiro_sniper and dist_sq < self.range_sniper**2:
-                            self.atirar(weapon='sniper')
-                            self.ultimo_tiro_sniper = agora
+                    disparo = self.decidir_disparo(dist_sq, agora)
+                    if disparo:
+                        self.atirar(**disparo)
                 else:
                     # 2. Se o inimigo fugir do range, ele caminha em direção a ele
                     self.direcao_movimento = (self.alvo.posicao - self.posicao).normalize()
@@ -272,34 +269,56 @@ class Companheiro(pygame.sprite.Sprite):
         if self.direcao_movimento.x > 0.1: self.estado_animacao = 'right'
         elif self.direcao_movimento.x < -0.1: self.estado_animacao = 'left'
 
-    def atirar(self, weapon = 'burst'):
-        direcao = (self.alvo.posicao - self.posicao).normalize()
-
-        if weapon == 'burst':
-            # Criando o tiro como se fosse do jogador, mas saindo do Marine
-            BurstRifle(
-                posicao_inicial=self.posicao.copy(),
-                grupos=(self.jogador.game.all_sprites,), # Usa o primeiro grupo que ele pertence
-                jogador=self.jogador,
-                game=self.jogador.game,
-                dono='PLAYER', # Importante para não acertar o mestre!
-                tamanho=(24, 24),
+    def decidir_disparo(self, dist_sq, agora):
+        """
+        Decide o que atirar com base em cooldown/alcance.
+        Retorna um dict de kwargs para atirar(), ou None se não deve atirar agora.
+        Comportamento padrão: rajada de perto, sniper de longe (usado pelo Marine).
+        Subclasses (ex: CompanheiroNoble) podem sobrescrever para ter mecânicas próprias.
+        """
+        if agora - self.ultimo_tiro_burst > self.cooldown_tiro_burst and dist_sq < self.range_rifle**2:
+            self.ultimo_tiro_burst = agora
+            return dict(
+                projetil_cls=BurstRifle,
                 dano=self.dano_burst,
                 velocidade=700,
-                direcao_spread=direcao
+                tamanho=(24, 24),
             )
-        elif weapon == 'sniper':
-            HeavyBurst(
-                posicao_inicial = self.jogador.posicao,
-                grupos          = (self.all_sprites,),
-                jogador         = self.jogador,
-                game            = self.game,
-                dono            = 'PLAYER',
-                tamanho         = (96, 28),
-                dano            = self.dano_sniper,
-                velocidade      = 1500,
-                direcao_spread  = direcao,
+
+        if agora - self.ultimo_tiro_sniper > self.cooldown_tiro_sniper and dist_sq < self.range_sniper**2:
+            self.ultimo_tiro_sniper = agora
+            return dict(
+                projetil_cls=HeavyBurst,
+                dano=self.dano_sniper,
+                velocidade=1500,
+                tamanho=(96, 28),
             )
+
+        return None
+
+    def atirar(self, projetil_cls, dano, velocidade, tamanho, direcao=None, posicao_inicial=None, **extra_kwargs):
+        """
+        Dispara um projétil genérico a partir do companheiro.
+        projetil_cls: a classe do projétil a instanciar (BurstRifle, HeavyBurst, etc.)
+        extra_kwargs: qualquer parâmetro adicional aceito pela classe do projétil.
+        """
+        if direcao is None:
+            direcao = (self.alvo.posicao - self.posicao).normalize()
+        if posicao_inicial is None:
+            posicao_inicial = self.posicao.copy()
+
+        projetil_cls(
+            posicao_inicial=posicao_inicial,
+            grupos=(self.jogador.game.all_sprites,), # Usa o primeiro grupo que ele pertence
+            jogador=self.jogador,
+            game=self.jogador.game,
+            dono='PLAYER', # Importante para não acertar o mestre!
+            tamanho=tamanho,
+            dano=dano,
+            velocidade=velocidade,
+            direcao_spread=direcao,
+            **extra_kwargs
+        )
 
     def animar(self):
         agora = pygame.time.get_ticks()

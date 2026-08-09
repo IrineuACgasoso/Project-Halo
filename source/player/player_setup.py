@@ -45,6 +45,21 @@ class PlayerSetup:
         self.ultimo_dano_sofrido = 0
         self.regenerando_escudo = False
 
+    def setup_espinhos(self):
+        # --- SISTEMA DE ESPINHOS (contra-ataque, ex: Mjolnir Punch) ---
+        # Sempre inicializado, mesmo sem a arma equipada, para nunca faltar atributo.
+        self.dano_espinhos = 0
+        self.espinho_cooldown = 0
+        self.espinho_disponivel = False
+        self.ultimo_espinho_carregado = 0
+
+    def setup_veicule(self):
+        self.in_veicule = False
+        self.has_entered = False
+        self.vida_veiculo_maxima = 0
+        self.vida_veiculo_atual = 0
+        self.veiculo_atual = None          # referência ao Vehicle embarcado
+
     def setup_status(self):
         self.vida_maxima = 500
         self.vida_atual = self.vida_maxima

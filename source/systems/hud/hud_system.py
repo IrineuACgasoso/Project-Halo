@@ -7,6 +7,7 @@ from source.feats.assets import ASSETS
 from .hud_draw import (
     draw_barra_escudo,
     draw_barra_vida,
+    draw_barra_veiculo,
     draw_barra_xp,
     draw_boss_hud,
     _draw_player_bars,

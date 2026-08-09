@@ -6,7 +6,7 @@ from source.feats.skills.artilharia.config import ARTILHARIA_PRESETS
 from source.windows.settings import *
 from .baseweapon import *
 from source.feats.projetil import (
-    BurstRifle, ProjetilNeedler, Projetil_Lista, Brick, ProjetilShotgun, 
+    BurstRifle, ProjetilNeedler, EnergySwordProj, Brick, ProjetilShotgun, 
     LaserBlast, HeavyBurst, LightBullet, Carabin, DizimatorBullet)
 from source.feats.auras import PlayerAura
 from source.feats.grenades import PlasmaGrenade
@@ -113,7 +113,7 @@ class EnergySword(Arma):
     def disparar(self):
         angulo_step = 360 / self.num_listas
         for i in range(self.num_listas):
-            Projetil_Lista(
+            EnergySwordProj(
                 posicao_inicial=self.jogador.posicao,
                 grupos=(self.all_sprites,),
                 game=self.game,
@@ -649,25 +649,18 @@ class MjolnirPunch(Arma):
         self.nome = "Mjolnir Punch"
         self.descricao = "Contra-ataque Spartan rápido que neutraliza rapidamente pequenas ameaças."
         self.inicializar_stats(self.NOME_ASSET)
-        self.ultimo_punch = 0
-
-        if not hasattr(self.jogador, 'espinhos'):
-            self.jogador.espinhos = self.espinhos
+        self.jogador.configurar_espinhos(dano=self.espinhos, cooldown=self.cooldown)
 
     def disparar(self):
         return False
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        self.jogador.atualizar_espinhos()
 
-        if agora - self.ultimo_punch >= self.cooldown:
-            self.jogador.espinho_disponivel = True
-            self.ultimo_punch = agora
-            
     def upgrade(self):
         super().upgrade()
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
-        self.jogador.espinhos = self.espinhos
+        self.jogador.configurar_espinhos(dano=self.espinhos, cooldown=self.cooldown)
 
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
@@ -735,4 +728,3 @@ class Dizimator(Arma):
 
     def get_estatisticas_para_exibir(self):
         return super().get_estatisticas_para_exibir(self.nivel + 1, self.NOME_ASSET)
-
