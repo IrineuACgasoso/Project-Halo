@@ -5,7 +5,7 @@ from source.systems.entitymanager import entity_manager
 from source.feats.skills.cone_strike import ConeStrikeAviso
 from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.projetil import LightBullet
-from source.feats.effects import LaserWarning
+from source.feats.skills.laserwarning import LaserWarning
 from source.feats.skills.promethean_tp import PrometheanTeleport # Importe o TP!
 
 

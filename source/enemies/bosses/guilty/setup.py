@@ -1,6 +1,6 @@
 # No seu arquivo de setup do boss (ex: setup.py)
 import pygame
-from source.feats.effects import ContinuousBeam
+from source.feats.skills.continuousbeam import ContinuousBeam
 
 class GuiltySetup:
     def inicializar_habilidades(self):

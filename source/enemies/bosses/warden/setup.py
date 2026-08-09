@@ -37,7 +37,7 @@ class WardenSetup:
         self.ultimo_heavy_rifle = agora
 
     def _inicializar_hardlight_laser(self, agora):
-        from source.feats.effects import ContinuousBeam
+        from source.feats.skills.continuousbeam import ContinuousBeam
 
         self.beam_principal = ContinuousBeam(
             owner=self,

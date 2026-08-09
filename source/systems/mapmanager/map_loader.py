@@ -8,9 +8,7 @@ class MapLoader:
             dados = json.load(f)
 
         for camada in dados['layers']:
-
             # PAREDES 
-
             if camada['type'] == 'objectgroup' and camada['name'] == 'Colisoes':
                 for obj in camada['objects']:
                     base_x = obj['x']

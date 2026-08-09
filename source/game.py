@@ -18,10 +18,11 @@ from source.systems.eventmanager import EventManager
 from source.systems.renderer import Renderer
 # FEATS
 from source.feats.buddies import *
+from source.feats.weapons import *
+from source.feats.vehicles import *
 from source.feats.effects import Portal
 from source.feats.assets import path
 # PLAYER
-from source.feats.weapons import *
 from source.systems.levelup import *
 from source.player.player import Player 
 
@@ -106,7 +107,7 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        rifle = AssaultRifle(
+        rifle = Pelican(
             jogador=self.player,
             grupos=(entity_manager.all_sprites,
                     entity_manager.projeteis_jogador_grupo,

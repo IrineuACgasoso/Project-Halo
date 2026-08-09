@@ -8,7 +8,7 @@ from source.feats.weapons import (
     MachineGun, MjolnirPunch, Dizimator
 )
 from source.feats.buddies import Arbitro, Cortana, Marine, NobleVI
-from source.feats.vehicles.warhog import Warhog
+from source.feats.vehicles import Warhog, Pelican
 
 MAX_ARMAS = 6
 
@@ -144,5 +144,10 @@ ARMAS_REGISTRO = _registro(
         id='warhog', nome='Warhog', classe=Warhog,
         grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
         descricao='Camburão militar do UNSC destinado a operações especiais.', raridade='incomum'
+    ),
+    ArmaInfo(
+        id='pelican', nome='Pelican', classe=Pelican,
+        grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
+        descricao='Aeronave.', raridade='epica'
     ),
 )

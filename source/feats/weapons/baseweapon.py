@@ -6,7 +6,7 @@ from source.feats.assets import ASSETS
 from source.data.weapon_data import *
 
 # Fusão dos dicionários de Dataclasses
-ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA}
+ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA, **VEHICLES_DATA}
 
 
 class Arma(ABC):

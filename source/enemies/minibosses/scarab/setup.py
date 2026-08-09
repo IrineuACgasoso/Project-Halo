@@ -1,5 +1,5 @@
 import pygame
-from source.feats.effects import ContinuousBeam
+from source.feats.skills.continuousbeam import ContinuousBeam
 
 class ScarabSetup:
     def inicializar_sistemas(self):

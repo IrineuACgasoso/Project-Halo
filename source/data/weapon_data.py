@@ -61,10 +61,10 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
         stats={
             'dano':               WeaponStats(value=5,    label='Dano',              increase=3,   range_val=1),
             'velocidade_rotacao': WeaponStats(value=120,  label='Velocidade Angular',increase=10,  range_val=1),
-            'distancia_orbita':   WeaponStats(value=140,  label='Raio da Órbita',    increase=10,  range_val=1),
-            'num_listas':         WeaponStats(value=1,    label='Num. Listas',       increase=1,   range_val=2),
+            'distancia_orbita':   WeaponStats(value=130,  label=None,                increase=0,  range_val=0),
+            'num_listas':         WeaponStats(value=1,    label='Num. Listas',       increase=1,   range_val=[2, 3, 4]),
             'duracao':            WeaponStats(value=5000, label=None,                increase=0,   range_val=0),
-            'cooldown':           WeaponStats(value=3000, label='Cooldown',          increase=-50, range_val=1, min_val=0),
+            'cooldown':           WeaponStats(value=7000, label='Cooldown',          increase=-200, range_val=1, min_val=5000),
         }
     ),
 
@@ -274,4 +274,19 @@ VEHICLES_DATA: Dict[str, CompanionProfile] = {
             'velocidade_animacao':     WeaponStats(value=150,   label=None,                           increase=0,    range_val=0),
         }
     ),
+
+    'pelican': CompanionProfile(
+            tipo='VEICULO',
+            stats={
+                'vida_maxima':             WeaponStats(value=400,   label='Vida do Veículo',              increase=40,   range_val=1),
+                'dano_burst':              WeaponStats(value=4,     label='Dano da Metralhadora',         increase=1,    range_val=2),
+                'cooldown_tiro_burst':     WeaponStats(value=300,   label='Cadência (ms)',                increase=-15,  range_val=1, min_val=150),
+                'raio_deteccao_inimigo':   WeaponStats(value=650,   label='Raio de Mira',                 increase=50,   range_val=1),
+                'dano_atropelamento':      WeaponStats(value=15,    label='Dano de Atropelamento',        increase=5,    range_val=1),
+                'raio_atropelamento':      WeaponStats(value=70,    label=None,                           increase=0,    range_val=0),
+                'cooldown_atropelamento':  WeaponStats(value=400,   label=None,                           increase=0,    range_val=0),
+                'cooldown_destruicao':     WeaponStats(value=50000, label='Cooldown p/ Reutilizar (ms)',  increase=-1000,range_val=1, min_val=40000),
+                'velocidade_animacao':     WeaponStats(value=150,   label=None,                           increase=0,    range_val=0),
+            }
+        ),
 }

@@ -2,7 +2,7 @@ import pygame
 import math
 
 from source.enemies.base.enemy_base import BaseEnemy
-from source.feats.effects import ContinuousBeam
+from source.feats.skills.continuousbeam import ContinuousBeam
 from source.feats.auras import EnergyAura
 
 class Sentinel(BaseEnemy):

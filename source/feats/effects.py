@@ -1,7 +1,5 @@
 import pygame
 import random
-import math
-from random import randint
 from source.feats.assets import *
 
 class DustParticle(pygame.sprite.Sprite):
@@ -43,70 +41,6 @@ class Portal(pygame.sprite.Sprite):
         # Desenha um círculo ciano para debug ou visualização
         self.rect = self.image.get_rect(center=pos)
 
-
-class LaserWarning(pygame.sprite.Sprite):
-    def __init__(self, owner, alvo, grupos, game, 
-                 cor_laser=(250, 0, 0, 30), 
-                 largura=300, duracao=1500):
-        
-        super().__init__(grupos)
-        self.game = game
-        self.owner = owner  # Inimigo que está mirando
-        self.alvo = alvo    # Geralmente o jogador
-        
-        self.duracao = duracao
-        self.largura = largura
-        self.cor_laser = cor_laser
-        self.tempo_criacao = pygame.time.get_ticks()
-
-        # Posições iniciais
-        self.start_pos = pygame.math.Vector2(owner.posicao)
-        self.end_pos = pygame.math.Vector2(alvo.posicao)
-        
-        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
-        self.rect = self.image.get_rect()
-
-    def update(self, delta_time):
-        agora = pygame.time.get_ticks()
-        
-        # Se o tempo acabou ou quem disparou morreu, remove o aviso
-        if agora - self.tempo_criacao >= self.duracao or not self.owner.alive():
-            self.kill()
-            return
-
-        # 1. Atualiza a posição de origem (caso o inimigo se mova)
-        self.start_pos = pygame.math.Vector2(self.owner.posicao)
-
-        # 2. Calcula a direção em direção ao alvo
-        direcao = self.alvo.posicao - self.start_pos
-        
-        if direcao.length() > 0:
-            direcao = direcao.normalize()
-        else:
-            direcao = pygame.math.Vector2(1, 0)
-
-        # 3. Projeta o laser para bem longe na direção do alvo (ex: 3000 pixels)
-        self.end_pos = self.start_pos + direcao * 3000
-
-    def draw(self, surface, offset):
-        # O desenho acontece em uma surface temporária para suportar o Alpha da linha
-        temp_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
-        
-        start_pos_ajustada = self.start_pos - offset
-        end_pos_ajustada = self.end_pos - offset
-        
-        # Efeito opcional: fazer o laser "piscar" ou ficar mais forte perto do disparo
-        tempo_passado = pygame.time.get_ticks() - self.tempo_criacao
-        progresso = tempo_passado / self.duracao
-        alpha = int(30 + (progresso * 90)) # Fica levemente mais visível com o tempo
-        
-        cor_com_alpha = (*self.cor_laser[:3], alpha)
-
-        # Desenha a linha de aviso
-        pygame.draw.line(temp_surface, cor_com_alpha, start_pos_ajustada, end_pos_ajustada, self.largura)
-        
-        # Cola na superfície principal
-        surface.blit(temp_surface, (0, 0))
 
 class RaioEscudo(pygame.sprite.Sprite):
     def __init__(self, fonte, alvo, grupos, cor=(255, 40, 0)):
@@ -159,45 +93,6 @@ class RaioEscudo(pygame.sprite.Sprite):
         else:
             self.gerar_imagem()
 
-
-class ContinuousBeam:
-    def __init__(self, owner, color=(255, 0, 0), largura_base=4, dano_por_segundo=50, suavizacao=0.1):
-        self.owner = owner  # O inimigo que disparou
-        self.game = owner.game
-        self.color = color
-        self.largura_base = largura_base
-        self.dano_por_segundo = dano_por_segundo
-        self.mira_atual = pygame.math.Vector2(owner.posicao)
-        # Agora o parâmetro é definido na criação da instância
-        # 0.01 = Muito lento (estilo "mira pesada")
-        # 0.1  = Padrão
-        # 1.0  = Instantâneo (colado no jogador)
-        self.suavizacao = suavizacao
-
-    def update(self, delta_time, alvo_pos):
-        # Persegue a posição do jogador suavemente
-        self.mira_atual = self.mira_atual.lerp(alvo_pos, self.suavizacao)
-        
-        # Lógica de Dano (Área de impacto na ponta do laser)
-        distancia_ponta = (self.mira_atual - self.game.player.posicao).length()
-        if distancia_ponta < 50: # Raio de dano da ponta do feixe
-            self.game.player.tomar_dano_direto(self.dano_por_segundo * delta_time)
-
-    def draw(self, superficie, deslocamento, origem_offset=None):
-        # Define o ponto de partida (se o inimigo tiver um canhão específico)
-        p1 = (self.owner.posicao + origem_offset if origem_offset else self.owner.posicao) - deslocamento
-        p2 = self.mira_atual - deslocamento
-        
-        # Efeito visual de "pulsação"
-        oscilacao = math.sin(pygame.time.get_ticks() * 0.02) * 2
-        largura_final = max(1, int(self.largura_base + oscilacao))
-        
-        # Desenha o rastro (brilho externo e centro branco)
-        pygame.draw.line(superficie, self.color, p1, p2, largura_final + 4)
-        pygame.draw.line(superficie, (255, 255, 255), p1, p2, max(1, largura_final // 2))
-        
-        # Brilho na ponta (impacto)
-        pygame.draw.circle(superficie, self.color, p2, 8 + oscilacao)
 
 
 class EfeitoFaiscas(pygame.sprite.Sprite):

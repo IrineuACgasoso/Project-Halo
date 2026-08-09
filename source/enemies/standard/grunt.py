@@ -6,15 +6,19 @@ from source.feats.projetil import PlasmaGun
 from source.systems.entitymanager import entity_manager
 
 
-class Grunt(BaseEnemy):
-    def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=2, dano_base=10, velocidade_base=50, game=game, sprite_key= 'grunt')
-        
-        self.setup_animation(
-            estado_inicial='right',
-            velocidade_animacao=150
-            )
-        
+class GruntBase(BaseEnemy):
+    def __init__(self, posicao, game, vida, dano, velocidade, variante, vel_animacao=150):
+        super().__init__(
+            posicao=posicao, 
+            vida_base=vida, 
+            dano_base=dano, 
+            velocidade_base=velocidade, 
+            game=game, 
+            sprite_key='grunt', # Mantém seu padrão de sprite key
+            variante=variante
+        )
+        self.setup_animation(estado_inicial='right', velocidade_animacao=vel_animacao)
+
         # Plasma
         self.plasma_cooldown = self.novo_cooldown(8000, 12000)
         self.ultimo_tiro = pygame.time.get_ticks()
@@ -46,3 +50,16 @@ class Grunt(BaseEnemy):
             direcao_spread=direcao_tiro,
             vai_rotacionar = False
         )    
+
+
+class GruntRed(GruntBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=2, dano=10, velocidade=50, variante='red', vel_animacao=200)
+
+class GruntBlue(GruntBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=2, dano=5, velocidade=65, variante='blue', vel_animacao=200)
+
+class SpaceGrunt(GruntBase):
+    def __init__(self, posicao, game):
+        super().__init__(posicao, game, vida=5, dano=10, velocidade=35, variante='space', vel_animacao=200)

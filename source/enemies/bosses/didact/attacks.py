@@ -4,7 +4,7 @@ import random
 from source.feats.projetil import LaserBeam
 from source.feats.skills.onda_emp import OndaEMP
 from source.feats.skills.artilharia import ArtilhariaAviso
-from source.feats.effects import LaserWarning
+from source.feats.skills.laserwarning import LaserWarning
 from source.systems.entitymanager import entity_manager
 
 class DidactAttacks:
