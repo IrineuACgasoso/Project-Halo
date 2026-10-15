@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
 
 # Seta todo o init do Player
@@ -22,7 +23,7 @@ class PlayerSetup:
         self.rect = self.image.get_rect(center = posicao_inicial)
         self.posicao = pygame.math.Vector2(self.rect.center)
         self.velocidade_animacao = 150
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.ultimo_update_animacao = relogio.agora()
 
     def setup_hitbox(self):
         self.mask = pygame.mask.from_surface(self.image) 
@@ -71,6 +72,7 @@ class PlayerSetup:
         self.experiencia_level_up_base = 100 
         self.experiencia_level_up = self.experiencia_level_up_base 
         self.experiencia_atual = 0
+        self.fila_upgrades = []   # telas de upgrade pendentes (None = sorteio normal, str = arma forçada)
         # Em %
         self.aumento_xp = 1
 

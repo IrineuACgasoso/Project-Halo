@@ -5,7 +5,7 @@ from source.feats.weapons import (
     AssaultRifle, BrickLauch, EnergySword, MK2_Shield,
     Needler, Shotgun, SpartanLaser, GrenadeLauncher,
     SniperRifle, SidekickPistol, LightRifle, CarabinRifle,
-    MachineGun, MjolnirPunch, Dizimator
+    MachineGun, MjolnirPunch, Dizimator, FuelRod
 )
 from source.feats.buddies import Arbitro, Cortana, Marine, NobleVI
 from source.feats.vehicles import Warhog, Pelican
@@ -149,5 +149,10 @@ ARMAS_REGISTRO = _registro(
         id='pelican', nome='Pelican', classe=Pelican,
         grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
         descricao='Aeronave.', raridade='epica'
+    ),
+    ArmaInfo(
+        id='fuel_rod', nome='Fuel Rod', classe=FuelRod,
+        grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
+        descricao='Canhão de combustível que envenena tudo que tocar.', raridade='epica'
     ),
 )

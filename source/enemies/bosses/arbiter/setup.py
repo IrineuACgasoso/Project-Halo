@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class ArbiterSetup:
     def inicializar_habilidades(self):
@@ -13,13 +14,13 @@ class ArbiterSetup:
         
     def _inicializar_invisibilidade(self):
         # 1. Habilidade: Sprint Invisível (Camuflagem Ativa)
-        self.ultima_invisibi = pygame.time.get_ticks()
+        self.ultima_invisibi = relogio.agora()
         self.cooldown_invisibilidade = 10000
         self.duracao_invisibilidade = 3500
 
     def _inicializar_carabina(self):
         # 2. Habilidade: Rajada de Carabina Comum
-        self.ultima_carabina = pygame.time.get_ticks()
+        self.ultima_carabina = relogio.agora()
         self.cooldown_carabin = 4000
         self.intervalo_carabina = 80
         self.cronometro_carabina = 0
@@ -28,7 +29,7 @@ class ArbiterSetup:
 
     def _inicializar_antistuck(self):
         # 3. Mecanismo Dependente: Anti-Stuck de Contra-Ataque (Spray Oculto)
-        self.ultimo_check_posicao = pygame.time.get_ticks()
+        self.ultimo_check_posicao = relogio.agora()
         self.posicao_anterior = pygame.math.Vector2(self.posicao.x, self.posicao.y)
         self.ja_teleportou_stuck = False
         self.spray_iniciado = False
@@ -39,7 +40,7 @@ class ArbiterSetup:
 
     def _inicializar_invocacao(self):
         # 4. Habilidade: Invocação de Elites
-        self.ultima_invocacao = pygame.time.get_ticks()
+        self.ultima_invocacao = relogio.agora()
         self.cooldown_invocacao = 16000
         self.tempo_inicio_summon = 0
         self.duracao_summon = 1000  # Tempo parado invocando (1 segundo)

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class ZealotSetup:
     def inicializar_habilidades(self):
@@ -15,7 +16,7 @@ class ZealotSetup:
         self.enrage = False
     
     def _setup_invisibility(self):
-        self.last_stealth = pygame.time.get_ticks()
+        self.last_stealth = relogio.agora()
         self.cooldown_stealth = self.novo_cooldown(3000, 4000) 
         self.ja_teleportou = False 
 
@@ -30,5 +31,5 @@ class ZealotSetup:
         self.duracao_dash = 600                     # Tempo máximo de corrida do dash
 
     def _setup_antistuck(self):
-        self.ultimo_check_posicao = pygame.time.get_ticks()
+        self.ultimo_check_posicao = relogio.agora()
         self.posicao_anterior = pygame.math.Vector2(self.posicao.x, self.posicao.y)

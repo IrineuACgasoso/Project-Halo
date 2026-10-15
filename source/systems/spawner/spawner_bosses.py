@@ -65,13 +65,13 @@ CRONOGRAMA_BOSSES = {
     'scarab': 240,
     'arbiter': 300,
     'tartarus': 360,
-    'gravemind': 500,
-    'knight': 600,
-    'didact': 700,
-    'warden': 840,
-    'guardian': 900,
-    'jega': 1080,
-    'escharum': 1140,
-    'harbinger': 1200,
-    'atriox': 1260
+    'gravemind': 420,
+    'knight': 480,
+    'didact': 560,
+    'warden': 640,
+    'guardian': 720,
+    'jega': 800,
+    'escharum': 880,
+    'harbinger': 960,
+    'atriox': 1040
 }

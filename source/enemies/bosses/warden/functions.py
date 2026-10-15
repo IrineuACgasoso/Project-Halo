@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 from .behaviors import SniperBehavior, BruiserBehavior, AssassinBehavior
 
@@ -55,7 +56,7 @@ class WardenFunctions(SniperBehavior, BruiserBehavior, AssassinBehavior):
 
     def aplicar_comportamento_da_funcao(self, delta_time):
         """Despacha para o behavior correto baseado na função atual."""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         if self.funcao_atual == 'ATIRADOR':
             self._comportamento_atirador(delta_time)

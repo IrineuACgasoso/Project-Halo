@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 
 from source.enemies.base.enemy_base import BaseEnemy
@@ -38,7 +39,7 @@ class Sentinel(BaseEnemy):
         self.set_image(self.sprites[self.estado_animacao][self.indice_animacao])
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         vetor_player = self.jogador.posicao - self.posicao
         distancia = vetor_player.length()
         

@@ -55,9 +55,7 @@ def draw_opcao(surface, opcao, esta_selecionada):
     cor_fundo = PALETA_RARIDADE[raridade]['fundo']
     cor_borda = PALETA_RARIDADE[raridade]['borda']
     cor_decoracao = PALETA_RARIDADE[raridade]['decoracao']
-    COR_SELECAO = (255, 200, 0)
     COR_FUNDO = (0, 5, 30)
-    COR_BORDA = (0, 150, 255)
 
     if esta_selecionada:
         pygame.draw.rect(surface, cor_fundo, opcao.rect, border_radius=15)

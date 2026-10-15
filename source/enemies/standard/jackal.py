@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 
 from source.enemies.base.enemy_base import BaseEnemy
@@ -30,7 +31,7 @@ class Jackal(BaseEnemy):
         # Habilidades
         self.plasma_cooldown = self.novo_cooldown(4500, 6000)
         self.escudo_quebrado = False
-        self.ultimo_tiro = pygame.time.get_ticks()
+        self.ultimo_tiro = relogio.agora()
 
     def deve_mover(self):
         direcao = self.jogador.posicao - self.posicao
@@ -76,7 +77,7 @@ class Jackal(BaseEnemy):
         self.set_sprite_direction(direcao_x)
 
         # Controle de Cadência de Tiro
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
             self.plasma_cooldown = self.novo_cooldown(6000, 11000)
             self.executar_ataque()

@@ -8,6 +8,7 @@ esse arquivo não desenha nada, só orquestra.
 
 import random
 import pygame
+from source.systems.gameclock import relogio
 
 from . import draw
 from source.systems.entitymanager import entity_manager
@@ -127,7 +128,7 @@ class Items(pygame.sprite.Sprite):
 
             self.rect.centery = round(self.posicao.y)
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         novo_frame = draw.atualizar_frame_pulsando(self._chave_cache, self._fase_glow, agora)
         if novo_frame is not None:
             self.image = novo_frame

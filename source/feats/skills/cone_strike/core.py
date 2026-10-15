@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 from source.systems.entitymanager import entity_manager
 from .config import CONE_STRIKE_PRESETS, ConeStrikeConfig
@@ -21,7 +22,7 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         # Carrega a configuração do Preset ou Customizada
         self.cfg = custom_config if custom_config else CONE_STRIKE_PRESETS.get(preset, CONE_STRIKE_PRESETS['padrao'])
         
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
         self.explodiu = False
 
         # Requisitos do Sprite do Pygame
@@ -69,7 +70,7 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
 
     def draw(self, surface, offset):
         pos_ajustada = self.posicao - offset
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Cria uma superfície local otimizada quadrada para caber o cone inteiro
         tamanho_surf = self.cfg.raio * 2
@@ -93,7 +94,7 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         surface.blit(temp_surface, (pos_ajustada.x - self.cfg.raio, pos_ajustada.y - self.cfg.raio))
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         if not self.explodiu and agora - self.tempo_criacao >= self.cfg.duracao:
             self.explodiu = True

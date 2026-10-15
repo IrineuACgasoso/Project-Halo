@@ -73,52 +73,36 @@ class EventManager:
 
     def _level_up(self, evento):
         g = self.game
-        if not g.tela_de_upgrade_ativa:
-            return
-            
-        escolha_idx = g.tela_de_upgrade_ativa.handle_event(evento)
-        if escolha_idx is None:
+        tela = g.tela_de_upgrade_ativa
+        if not tela:
             return
 
-        if isinstance(escolha_idx, str) and escolha_idx.isdigit():
-            escolha_idx = int(escolha_idx)
-        
-        # 2. Define o ID da arma com base no tipo de dado recebido
-        if isinstance(escolha_idx, int):
-            # Se for um número inteiro, busca a arma na lista de opções usando o índice
-            id_da_arma = g.tela_de_upgrade_ativa.ids_das_opcoes[escolha_idx]
-        else:
-            # Se já for um texto (ex: 'assault_rifle'), significa que o evento já trouxe o ID pronto!
-            id_da_arma = escolha_idx
+        # handle_event devolve sempre o ID da arma (str) — os ramos "índice inteiro" antigos eram código morto.
+        id_da_arma = tela.handle_event(evento)
+        if id_da_arma is None:
+            return
 
-        # Verifica e aplica usando a chave ID no dicionário do Player
-        if id_da_arma in g.player.armas:
-            g.player.armas[id_da_arma].upgrade()
-        else:
-            dados = ARMAS_REGISTRO[id_da_arma]
+        self._aplicar_escolha_de_upgrade(id_da_arma)
 
-            # Mapeia nome do grupo para o objeto real do entity_manager
-            _grupos_map = {
-                'all_sprites':               entity_manager.all_sprites,
-                'inimigos_grupo':            entity_manager.inimigos_grupo,
-                'projeteis_jogador_grupo':   entity_manager.projeteis_jogador_grupo,
-                'projeteis_inimigos_grupo':  entity_manager.projeteis_inimigos_grupo,
-                'items_grupo':               entity_manager.items_grupo,
-                'auras_grupo':               entity_manager.auras_grupo,
-            }
-            grupos = tuple(_grupos_map[ng] for ng in dados.grupos)
-            
-            # Instancia o objeto dinamicamente
-            nova_arma = dados.classe(g.player, grupos, g, criar_sprite=True)
-            if hasattr(nova_arma, 'equipar'):
-                nova_arma.equipar()
-                
-            # Salva no inventário do jogador usando o ID limpo como chave
-            g.player.armas[id_da_arma] = nova_arma
-
-        # Retorna o fluxo do gameplay
+        # Retorna o fluxo do gameplay e, se houver level-ups acumulados, abre a próxima tela.
         g.estado_do_jogo = 'jogando'
         g.tela_de_upgrade_ativa = None
+        g.player.abrir_proxima_tela_de_upgrade()
+
+    def _aplicar_escolha_de_upgrade(self, id_da_arma):
+        g = self.game
+        if id_da_arma in g.player.armas:
+            g.player.armas[id_da_arma].upgrade()
+            return
+
+        dados = ARMAS_REGISTRO[id_da_arma]
+        # Nome do grupo -> grupo real do entity_manager
+        grupos = tuple(getattr(entity_manager, nome) for nome in dados.grupos)
+
+        nova_arma = dados.classe(g.player, grupos, g, criar_sprite=True)
+        if hasattr(nova_arma, 'equipar'):
+            nova_arma.equipar()
+        g.player.armas[id_da_arma] = nova_arma
 
     def _colaboradores(self, evento):
         g = self.game

@@ -15,7 +15,7 @@ class BrickLauch(Arma):
     def disparar(self):
         inimigo = self.encontrar_inimigo_mais_proximo(self.grupo_inimigos, raio_maximo=1200)        
         if inimigo:
-            direcao_tiro = (inimigo.posicao - self.jogador.posicao).normalize()
+            direcao_tiro = self.direcao_para(inimigo)
             Brick(
                 posicao_inicial=self.jogador.posicao,
                 grupos=(self.all_sprites,),

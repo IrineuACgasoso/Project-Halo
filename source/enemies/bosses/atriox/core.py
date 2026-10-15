@@ -1,12 +1,14 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.entitymanager import entity_manager
 from source.feats.items import Items
 
-from .setup import TartarusSetup
-from .states import TartarusAI
-from .attacks import TartarusAttacks
-from .vfx import ProtocoloHalo
+# Atriox reutiliza 100% do kit do Tartarus (os 4 arquivos locais eram cópias byte a byte).
+from source.enemies.bosses.tartarus.setup import TartarusSetup
+from source.enemies.bosses.tartarus.states import TartarusAI
+from source.enemies.bosses.tartarus.attacks import TartarusAttacks
+from source.enemies.bosses.tartarus.vfx import ProtocoloHalo
 
 class Atriox(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
     """Classe principal do Boss Atriox."""
@@ -37,7 +39,7 @@ class Atriox(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
         self.kill()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # 1. Executa a IA (decide o estado)
         self.executar_estados(agora, delta_time)

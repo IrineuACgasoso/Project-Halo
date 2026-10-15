@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from os.path import join
 from source.enemies.base.enemy_base import BaseEnemy
@@ -90,7 +91,7 @@ class FloodMarine(FloodForm):
         
         # Propriedades da Arma
         self.cooldown_ataque = 2500       
-        self.ultimo_ataque = pygame.time.get_ticks()
+        self.ultimo_ataque = relogio.agora()
         self.tiros_por_rajada = 3         
         self.tiros_dados = 0              
         self.delay_entre_tiros = 150      
@@ -103,7 +104,7 @@ class FloodMarine(FloodForm):
         self.marine_burst()
 
     def marine_burst(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         distancia = (self.jogador.posicao - self.posicao).length()
 
         if not self.em_rajada and distancia < self.distancia_tiro and agora - self.ultimo_ataque > self.cooldown_ataque:

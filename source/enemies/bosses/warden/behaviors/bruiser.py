@@ -1,5 +1,6 @@
 import math
 import pygame
+from source.systems.gameclock import relogio
 
 
 class BruiserBehavior:
@@ -32,7 +33,7 @@ class BruiserBehavior:
     # Entry point chamado pelo roteador em functions.py
     # ------------------------------------------------------------------
     def _comportamento_combatente(self, delta_time):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # Desliga o pursuit nativo do BaseEnemy — movimento é 100% manual aqui
         self.velocidade = 0

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 
@@ -22,7 +23,7 @@ class Guardian(BaseEnemy, GuardianSetup, GuardianAI, GuardianAttacks):
         self.inicializar_habilidades()
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         if agora - getattr(self, 'ultimo_update_animacao', 0) > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
@@ -43,7 +44,7 @@ class Guardian(BaseEnemy, GuardianSetup, GuardianAI, GuardianAttacks):
         self.kill()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
 
         self.executar_estados(agora, delta_time, dist_sq)

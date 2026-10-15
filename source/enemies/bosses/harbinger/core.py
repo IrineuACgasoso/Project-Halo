@@ -1,5 +1,6 @@
 # source/enemies/bosses/harbinger/core.py
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 from source.systems.entitymanager import entity_manager
@@ -36,7 +37,7 @@ class Harbinger(BaseEnemy, HarbingerSetup, HarbingerIA, HarbingerAttacks):
         self.hitbox.center = self.rect.center
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Delega todo o processamento lógico para a Mixin de IA
         self.executar_ia_harbinger(agora, delta_time, paredes)

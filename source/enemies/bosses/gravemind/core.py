@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.entitymanager import entity_manager
 
@@ -33,7 +34,7 @@ class BaseGravemind(BaseEnemy, GravemindSetup, GravemindAI, GravemindAttacks, Gr
         return self.is_animating_respawn
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.executar_estados(agora, delta_time)
 
         if not self.is_animating_respawn and self.estado_habilidade != 'acid':

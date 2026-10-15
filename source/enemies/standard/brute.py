@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from os.path import join
 from source.enemies.base.enemy_base import BaseEnemy
@@ -54,7 +55,7 @@ class Brute(BaseEnemy):
 
     def update(self, delta_time, paredes = None):
         super().update(delta_time, paredes)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         if agora - self.ultimo_shot >= self.cooldown_shot:
             self.ultimo_shot = agora

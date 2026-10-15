@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 
 class Camera:
@@ -15,7 +16,7 @@ class Camera:
 
     def shake(self, intensidade, duracao=200):
         self.shake_intensidade = intensidade
-        self.shake_timer = pygame.time.get_ticks() + duracao
+        self.shake_timer = relogio.agora() + duracao
 
     def update(self, player_pos):
         # 1. Seguir o Jogador (centralizar)
@@ -27,7 +28,7 @@ class Camera:
         self.offset.y = max(0, min(self.offset.y, self.mapa.altura_mapa_pixels - self.altura_tela))
 
         # 3. Aplicar o Shake se estiver ativo
-        if pygame.time.get_ticks() < self.shake_timer:
+        if relogio.agora() < self.shake_timer:
             self.shake_offset.x = random.uniform(-self.shake_intensidade, self.shake_intensidade)
             self.shake_offset.y = random.uniform(-self.shake_intensidade, self.shake_intensidade)
         else:

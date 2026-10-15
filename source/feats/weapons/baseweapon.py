@@ -1,9 +1,11 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 from abc import ABC, abstractmethod
 from source.windows.settings import *
 from source.feats.assets import ASSETS
 from source.data.weapon_data import *
+from source.utils.vetores import direcao_segura
 
 # Fusão dos dicionários de Dataclasses
 ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA, **VEHICLES_DATA}
@@ -17,6 +19,7 @@ class Arma(ABC):
         self.velocidade = 0
         self.cooldown = 0
         self.ultimo_tiro = 0
+        self._proxima_busca = 0   # throttle da busca de alvo quando não há inimigo no alcance
         self.nome = ""
         self.descricao = ""
 
@@ -137,6 +140,11 @@ class Arma(ABC):
 
     # ── Interface obrigatória ────────────────────────────────────────────────────
 
+    def direcao_para(self, alvo):
+        """Direção unitária jogador -> alvo. Centraliza a conta que 11 armas repetiam e que
+        lançava ValueError (crash) quando inimigo e jogador ocupavam o mesmo ponto."""
+        return direcao_segura(self.jogador.posicao, alvo.posicao)
+
     def encontrar_inimigo_mais_proximo(self, grupo_inimigos, raio_maximo=2000):
         if not grupo_inimigos: 
             return None
@@ -188,10 +196,15 @@ class Arma(ABC):
     
     def update(self, delta_time):
         """Lógica de cadência baseada no tick rate do pygame"""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
+        # Sem alvo, disparar() varria TODOS os inimigos a cada frame (por arma). Agora só a cada 100 ms.
+        if agora < getattr(self, '_proxima_busca', 0):
+            return
         if agora - self.ultimo_tiro > self.cooldown:
             if self.disparar():
                 self.ultimo_tiro = agora
+            else:
+                self._proxima_busca = agora + 100
     
     @abstractmethod
     def disparar(self) -> bool:

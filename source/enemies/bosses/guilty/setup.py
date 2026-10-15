@@ -1,5 +1,6 @@
 # No seu arquivo de setup do boss (ex: setup.py)
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.skills.continuousbeam import ContinuousBeam
 
 class GuiltySetup:
@@ -22,22 +23,22 @@ class GuiltySetup:
         self.duracao_laser_rastreavel = 4000
         self.tempo_inicio_laser = 0
         self.cooldown_laser = self.novo_cooldown(4000, 8000)
-        self.ultimo_laser = pygame.time.get_ticks()
+        self.ultimo_laser = relogio.agora()
 
         # === CONFIGURAÇÃO DA GRADE DE PURGA (BULLET HELL) ===
         self.purge_cooldown = 3000
-        self.ultimo_purge = pygame.time.get_ticks()
+        self.ultimo_purge = relogio.agora()
         self.ataque_purga = None  # Receberá o Worker lógico invisível
 
         self._setup_sentinels()
         self._setup_tp()
 
     def _setup_sentinels(self):
-        self.start_sentinel = pygame.time.get_ticks()
+        self.start_sentinel = relogio.agora()
         self.cooldown_invocacao = self.novo_cooldown(4000, 9000)
-        self.ultima_invocacao = pygame.time.get_ticks()
+        self.ultima_invocacao = relogio.agora()
         self.offset_invocacao = 180
 
     def _setup_tp(self):
         self.cooldown_tp = 2500
-        self.ultimo_tp = pygame.time.get_ticks()
+        self.ultimo_tp = relogio.agora()

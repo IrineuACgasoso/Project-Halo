@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.entitymanager import entity_manager
 from source.feats.items import Items
@@ -6,7 +7,7 @@ from source.feats.items import Items
 from .setup import TartarusSetup
 from .ia import TartarusAI
 from .attacks import TartarusAttacks
-from .vfx import ProtocoloHalo
+from source.enemies.bosses.tartarus.vfx import ProtocoloHalo
 
 class Escharum(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
     """Classe principal do Boss Escharum"""
@@ -37,7 +38,7 @@ class Escharum(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
         self.kill()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # 1. Executa a IA (decide o estado)
         self.executar_estados(agora, delta_time)

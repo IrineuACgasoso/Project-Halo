@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 
 class EnergyAura(pygame.sprite.Sprite):
@@ -64,7 +65,7 @@ class EnergyAura(pygame.sprite.Sprite):
                 player.rect.center = (round(player.posicao.x), round(player.posicao.y))
                 
             # O TICK DE DANO ACONTECE DE QUALQUER FORMA
-            agora = pygame.time.get_ticks()
+            agora = relogio.agora()
             if agora - self.ultimo_dano >= self.cooldown_dano:
                 self.ultimo_dano = agora
                 if hasattr(player, 'receber_dano'):

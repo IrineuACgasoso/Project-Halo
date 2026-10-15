@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.feats.skills.artilharia.core import ArtilhariaAviso
 
@@ -65,14 +66,14 @@ class MiasmaGas(pygame.sprite.Sprite):
         self.image.fill((50, 120, 50, 150)) 
         pygame.draw.circle(self.image, (0, 0, 0, 0), (tamanho//2, tamanho//2), self.raio_seguro)
         self.rect = self.image.get_rect(center=self.posicao_boss)
-        self.ultimo_dano_tick = pygame.time.get_ticks()
+        self.ultimo_dano_tick = relogio.agora()
 
     def update(self, delta_time):
         if not self.boss.alive(): 
             self.kill()
             return
         
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if self.game.player.posicao.distance_to(self.posicao_boss) > self.raio_seguro:
             if agora - self.ultimo_dano_tick >= 1000:
                 self.game.player.vida_atual -= self.dano_por_segundo

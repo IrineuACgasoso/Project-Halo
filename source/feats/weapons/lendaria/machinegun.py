@@ -1,6 +1,7 @@
 from ..baseweapon import Arma
 from ...projetil import BurstRifle
 import pygame
+from source.systems.gameclock import relogio
 
 class MachineGun(Arma):
     NOME_ASSET = 'machine_gun'
@@ -23,7 +24,7 @@ class MachineGun(Arma):
     
     def update(self, delta_time):
         super().update(delta_time)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if self.tiros_restantes > 0:
             if agora - self.ultimo_tiro_burst > self.burst_interval:
                 inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=850)
@@ -36,7 +37,7 @@ class MachineGun(Arma):
 
     def _spawn_bullet(self, inimigo):
         if inimigo and inimigo.alive():
-            direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
+            direcao_vetor = self.direcao_para(inimigo)
            
             # Movido para dentro do IF para evitar UnboundLocalError caso o inimigo morra
             BurstRifle(

@@ -1,4 +1,5 @@
 import pygame
+from source.utils.paths import path
 import math
 import os
 from os.path import join
@@ -14,7 +15,7 @@ class Settings(SettingsDraw):
         self.timer = 0
 
         # ── Fontes ─────────────────────────────────────────────────────────────
-        font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
+        font_path = path('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
         try:
             if os.path.exists(font_path):
                 self.font_titulo  = pygame.font.Font(font_path, 52)

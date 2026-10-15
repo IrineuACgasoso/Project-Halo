@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 
@@ -22,7 +23,7 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
         self.inicializar_habilidades()
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # TRAVA DA ANIMAÇÃO: Se ele estiver atordoado, não avança o frame (Fica congelado)
         if self.estado_habilidade == 'stun':
@@ -65,7 +66,7 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
         self.kill()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
 
         self.executar_estados(agora, delta_time, dist_sq)

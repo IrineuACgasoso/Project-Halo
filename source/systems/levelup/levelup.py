@@ -1,12 +1,14 @@
 import random
 import pygame
-from os.path import join
 
 from source.windows.settings import largura_tela, altura_tela
 from .constants import ARMAS_REGISTRO, MAX_ARMAS
 from . import draw
-import pygame
-import os
+from source.utils.fonts import carregar_fonte
+
+FONTE_TITULO_TELA = ('assets', 'fonts', 'cinzel', 'Cinzel-Bold.otf')
+FONTE_OPCAO_TITULO = ('assets', 'fonts', 'orbitron', 'Orbitron-ExtraBold.ttf')
+FONTE_OPCAO_TEXTO = ('assets', 'fonts', 'orbitron', 'Orbitron-Medium.ttf')
 
 
 class TelaDeUpgrade:
@@ -29,19 +31,11 @@ class TelaDeUpgrade:
         self.ids_das_opcoes = (
             [id_arma_forcada] if self.modo_unico else self.gerar_opcoes_aleatorias()
         )
-        # --- CARREGAMENTO DA FONTE ---
-        self.font_path = join('assets', 'fonts', 'cinzel', 'Cinzel-Bold.otf')
-        try:
-            if os.path.exists(self.font_path):
-                self.fonte_grande = pygame.font.Font(self.font_path, 24)
-                self.fonte_pequena = pygame.font.Font(self.font_path, 12)
-            else:
-                self.fonte_grande = pygame.font.SysFont('Consolas', 28, bold=True)
-                self.fonte_grande = pygame.font.SysFont('Consolas', 20, bold=True)
-        except:
-            self.fonte_grande = pygame.font.SysFont('Consolas', 28, bold=True)
-            self.fonte_pequena = pygame.font.SysFont('Consolas', 20, bold=True)
-        
+        # Fontes em cache (antes: 5 leituras de .otf/.ttf do disco a CADA level-up, e atributos
+        # inexistentes quando o arquivo de fonte faltava -> AttributeError no meio do jogo).
+        self.fonte_grande = carregar_fonte(FONTE_TITULO_TELA, 24, fallback_tamanho=28)
+        self.fonte_pequena = carregar_fonte(FONTE_TITULO_TELA, 12, fallback_tamanho=20)
+
         largura_painel, altura_painel = 1000, 500
         self.painel_rect = pygame.Rect(
             (largura_tela - largura_painel) // 2,
@@ -128,18 +122,8 @@ class OpcaoDeUpgrade:
         self.jogador = jogador
         self.dados = ARMAS_REGISTRO[id_arma]
 
-        self.font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-ExtraBold.ttf')
-        self.font_path2 = join('assets', 'fonts', 'orbitron', 'Orbitron-Medium.ttf')
-        try:
-            if os.path.exists(self.font_path):
-                self.font_title = pygame.font.Font(self.font_path, 20)
-                self.font_text = pygame.font.Font(self.font_path2, 14)
-            else:
-                self.font = pygame.font.SysFont('Consolas', 20, bold=True)
-                self.font_text = pygame.font.Font('Consolas', 18)
-        except:
-            self.font_title = pygame.font.SysFont('Consolas', 18, bold=True)
-            self.font_text = pygame.font.Font('Consolas', 18)
-
-        self.fonte_titulo = self.font_title
-        self.fonte_texto = self.font_text
+        self.fonte_titulo = carregar_fonte(FONTE_OPCAO_TITULO, 20, fallback_tamanho=18)
+        self.fonte_texto = carregar_fonte(FONTE_OPCAO_TEXTO, 14, fallback_tamanho=18, bold=False)
+        # nomes antigos mantidos por compatibilidade
+        self.font_title = self.fonte_titulo
+        self.font_text = self.fonte_texto

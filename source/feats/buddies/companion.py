@@ -1,4 +1,6 @@
 import pygame
+from source.utils.vetores import direcao_segura
+from source.systems.gameclock import relogio
 import math
 import random
 from source.windows.settings import *
@@ -43,7 +45,7 @@ class Companheiro(pygame.sprite.Sprite):
         self.alvo           = None
         self.direcao_movimento = pygame.math.Vector2()
         self.frame_atual    = 0
-        self.ultimo_update_anim = pygame.time.get_ticks()
+        self.ultimo_update_anim = relogio.agora()
         self.raio_vaga      = self.distancia_maxima_retorno * 0.75
         self.ponto_vagabundeio = None
         self.tempo_proximo_vagabundeio = 0
@@ -179,7 +181,7 @@ class Companheiro(pygame.sprite.Sprite):
         # LÓGICA DE AÇÕES
         if self.estado_logico == 'SEGUINDO':
             vel = self.velocidade_andar
-            agora = pygame.time.get_ticks()
+            agora = relogio.agora()
 
             # Sorteia novo ponto se: não tem ponto, chegou perto o suficiente,
             # o timer expirou, ou o ponto ficou fora do raio (jogador se moveu)
@@ -203,7 +205,7 @@ class Companheiro(pygame.sprite.Sprite):
             vel = self.velocidade_correr
             # LÓGICA DO ATIRADOR
             if self.pode_atirar:
-                agora = pygame.time.get_ticks()
+                agora = relogio.agora()
 
                 if dist_sq < self.range_tiro**2:
                     self.direcao_movimento = pygame.math.Vector2(0,0) # Fica parado
@@ -213,7 +215,7 @@ class Companheiro(pygame.sprite.Sprite):
                         self.atirar(**disparo)
                 else:
                     # 2. Se o inimigo fugir do range, ele caminha em direção a ele
-                    self.direcao_movimento = (self.alvo.posicao - self.posicao).normalize()
+                    self.direcao_movimento = direcao_segura(self.posicao, self.alvo.posicao)
 
             else:
                 # Lógica de órbita para lutadores corpo a corpo
@@ -229,7 +231,7 @@ class Companheiro(pygame.sprite.Sprite):
                 
                 # Dano
                 if dist_sq < 60**2:  # Dist ao quadrado
-                    agora = pygame.time.get_ticks()
+                    agora = relogio.agora()
                     if agora - self.ultimo_dano_tempo > self.cooldown:
                         if hasattr(self.alvo, 'receber_dano'):
                             self.alvo.receber_dano(self.dano)
@@ -243,7 +245,7 @@ class Companheiro(pygame.sprite.Sprite):
                 self.ponto_vagabundeio = None
                 return
             vel = self.velocidade_correr
-            self.direcao_movimento = (self.alvo.posicao - self.posicao).normalize()
+            self.direcao_movimento = direcao_segura(self.posicao, self.alvo.posicao)
             if dist_sq < 30**2:  # Dist ao quadrado
                 # 1. Guardamos a referência do item
                 item_para_coletar = self.alvo 
@@ -303,7 +305,7 @@ class Companheiro(pygame.sprite.Sprite):
         extra_kwargs: qualquer parâmetro adicional aceito pela classe do projétil.
         """
         if direcao is None:
-            direcao = (self.alvo.posicao - self.posicao).normalize()
+            direcao = direcao_segura(self.posicao, self.alvo.posicao)
         if posicao_inicial is None:
             posicao_inicial = self.posicao.copy()
 
@@ -321,7 +323,7 @@ class Companheiro(pygame.sprite.Sprite):
         )
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if self.direcao_movimento.magnitude() > 0:    
             if agora - self.ultimo_update_anim > self.velocidade_animacao:
                 self.ultimo_update_anim = agora

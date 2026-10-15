@@ -11,6 +11,7 @@ import math
 import random
 
 import pygame
+from source.systems.gameclock import relogio
 
 # ------------------------------------------------------------------------ #
 # CONFIG
@@ -326,13 +327,13 @@ class ItemParticulaColeta(pygame.sprite.Sprite):
         self.velocidade = pygame.math.Vector2(random.uniform(-50, 50), random.uniform(-95, -55))
 
         self.duracao_ms = random.randint(400, 500)
-        self.spawn_time = pygame.time.get_ticks()
+        self.spawn_time = relogio.agora()
 
     def update(self, delta_time):
         self.posicao += self.velocidade * delta_time
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
-        decorrido = pygame.time.get_ticks() - self.spawn_time
+        decorrido = relogio.agora() - self.spawn_time
         progresso = min(1.0, decorrido / self.duracao_ms)
 
         try:

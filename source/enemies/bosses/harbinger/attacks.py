@@ -1,5 +1,6 @@
 # source/enemies/bosses/harbinger/attacks.py
 import pygame
+from source.systems.gameclock import relogio
 import random
 import math
 from source.systems.entitymanager import entity_manager
@@ -57,7 +58,7 @@ class HarbingerAttacks:
     def iniciar_teleport_burst(self):
         """Ativa o estado de espera estratégica antes de desferir o TeleportBurstShot."""
         self.teleport_burst_ativo = True
-        self.teleport_burst_liberacao = pygame.time.get_ticks() + 800
+        self.teleport_burst_liberacao = relogio.agora() + 800
 
     def disparar_teleport_burst(self, dano=110, tamanho=(110, 110), velocidade=850):
         """Disparo de impacto do teleporte OFENSIVO ("Teleporte de
@@ -109,7 +110,7 @@ class HarbingerAttacks:
 
     def executar_onda_emp(self):
         """Invoca uma onda EMP amarela massiva e ultra rápida que desativa escudos."""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         from source.feats.skills.onda_emp import OndaEMP
         

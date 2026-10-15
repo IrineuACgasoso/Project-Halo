@@ -17,7 +17,7 @@ class Shotgun(Arma):
         # Encontra alvos próximos (Shotguns operam melhor à queima-roupa)
         inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=500)
         if inimigo_alvo and inimigo_alvo.alive():
-            direcao_base = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
+            direcao_base = self.direcao_para(inimigo_alvo)
             
             # Captura propriedades táticas seguras direto do dicionário de dados da arma
             qtd_estilhacos = getattr(self, 'projeteis_por_disparo', 6)

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 
@@ -24,7 +25,7 @@ class BossArbiter(BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks):
         self.inicializar_habilidades()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
         
         # Máquina de Estados / Inteligência

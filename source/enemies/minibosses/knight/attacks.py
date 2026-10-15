@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 import math
 from source.feats.projetil import LaserBeam
@@ -9,7 +10,7 @@ from source.systems.entitymanager import entity_manager
 
 class KnightAttacks:
     def executar_laser(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Fica totalmente parado (telegraph) carregando o ataque
         self.velocidade = 0  
@@ -37,7 +38,7 @@ class KnightAttacks:
             self.estado_habilidade = 'idle'
 
     def executar_run(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
                 
         if not self.running:
             self.velocidade_animacao = 120
@@ -59,7 +60,7 @@ class KnightAttacks:
                 self.estado_habilidade = 'idle'
     
     def executar_tp(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         raio_min = 250
         raio_max = 300
         tentativas = 40
@@ -111,7 +112,7 @@ class KnightAttacks:
         self.alpha_atual = 255 
         
         # Restaura cooldown e aplica trava
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.cooldown_tp = self.novo_cooldown(4000, 7000)
         self.ultimo_tp = agora
         
@@ -120,7 +121,7 @@ class KnightAttacks:
         self.estado_habilidade = 'idle'
 
     def executar_summon(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Só permite invocar se não houver um Watcher ativo vivo
         if self.watcher_ativo is None or not self.watcher_ativo.alive():
@@ -150,7 +151,7 @@ class KnightAttacks:
             self.cooldown_summon = 10000 
 
     def update_summon(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         tempo_preparacao = 1000 # O Knight fica vulnerável por 1.5s construindo o Watcher
         
         if agora - self.inicio_summon >= tempo_preparacao:
@@ -166,7 +167,7 @@ class KnightAttacks:
             self.estado_habilidade = 'idle'
 
     def executar_cleave(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         # Fica totalmente parado (telegraph) focado no jogador
         self.velocidade = 0  
 

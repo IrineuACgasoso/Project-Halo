@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from os.path import join
 from source.enemies.base.enemy_base import BaseEnemy
@@ -67,7 +68,7 @@ class EliteBase(BaseEnemy):
 
     def update(self, delta_time, paredes=None):
         direcao = (self.jogador.posicao - self.posicao)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         #Ativa carabina
         if agora - self.ultima_carabina >= self.cooldown_carabin:
             self.carabina_restante = self.contagem_carabina

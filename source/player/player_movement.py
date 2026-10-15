@@ -28,16 +28,18 @@ class PlayerMovement:
         self.hitbox.center = (round(self.posicao.x), round(self.posicao.y))
         self.rect.center = self.hitbox.center
     
-    def atualizar_void(self):
+    def atualizar_void(self, delta_time):
 
         # Calcula se o player está em uma zona de Void
         forca, ponto_alvo, dist = (
             self.game.mapa.calcular_puxo_void(self.posicao)
         )
         if ponto_alvo:
-            self.posicao += forca
+            # Valores antigos eram "por frame" (2.5 px e 1 de dano a cada frame). Convertidos
+            # para "por segundo" (x60) para não variar com o FPS.
+            self.posicao += forca * (60 * delta_time)
 
-            self.tomar_dano_direto(1)
+            self.tomar_dano_direto(60 * delta_time)
 
             # Se o player chegar muito perto do VoidPoint ele morre
             if dist < 15:

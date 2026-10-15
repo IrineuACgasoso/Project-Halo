@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.effects import RaioEscudo
 from source.feats.auras import EnergyAura
@@ -14,7 +15,7 @@ class Watcher(BaseEnemy):
         self.alvo_protegido = None
         self.distancia_ideal = 120 
         
-        self.ultimo_escudo = pygame.time.get_ticks()
+        self.ultimo_escudo = relogio.agora()
         self.intervalo_escudo = intervalo    
         self.porcentagem_escudo = porcentagem  
         self.min_escudo = min_esc            
@@ -37,7 +38,7 @@ class Watcher(BaseEnemy):
 
     def aplicar_escudo(self):
         """Dispara o raio apenas se o aliado tiver espaço no escudo."""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         if self.alvo_protegido and agora - self.ultimo_escudo >= self.intervalo_escudo:
             distancia_atual = (self.alvo_protegido.posicao - self.posicao).length()

@@ -1,5 +1,6 @@
 # source/enemies/bosses/harbinger/vfx.py
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 from source.feats.projetil import ProjetilUniversal
@@ -22,20 +23,20 @@ class HarbingerTeleport(pygame.sprite.Sprite):
         self.image = self.sprites[self.frame_atual]
         self.rect = self.image.get_rect(center=self.posicao)
         
-        self.tempo_criacao = pygame.time.get_ticks()
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
+        self.ultimo_update_animacao = relogio.agora()
         self.velocidade_animacao = 35  
         self.duracao_aviso = 330
     
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.tempo_criacao >= self.duracao_aviso:
             self.kill()
             return
         self.animar()
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + self.ordem) % len(self.sprites)
@@ -126,7 +127,7 @@ class EnergyBlastShot(ProjetilUniversal):
 
         if self.percorrido >= self.distancia_total:
             self.explodir()
-        elif pygame.time.get_ticks() - self.spawn_time > self.duracao:
+        elif relogio.agora() - self.spawn_time > self.duracao:
             self.kill()
 
     def explodir(self):

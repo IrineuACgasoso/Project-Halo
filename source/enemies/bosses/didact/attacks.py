@@ -1,5 +1,6 @@
 # enemies/didact/attacks.py
 import pygame
+from source.systems.gameclock import relogio
 import random
 from source.feats.projetil import LaserBeam
 from source.feats.skills.onda_emp import OndaEMP
@@ -11,7 +12,7 @@ class DidactAttacks:
     """Mixin responsável pela execução das habilidades e instanciamento de projéteis."""
 
     def ativar_laser(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.velocidade = 0
         self.estado_habilidade = 'aviso_laser'
         self.tempo_inicio_laser = agora
@@ -42,7 +43,7 @@ class DidactAttacks:
             color           = 'red')
 
     def puxar_jogador(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.cooldown_pull = self.novo_cooldown(10000, 15000)
         self.estado_habilidade = 'ataque_pull'
         self.tempo_inicio_pull = agora
@@ -60,10 +61,10 @@ class DidactAttacks:
         self.adicionar_escudo(self.cryptum_shield)
         self.velocidade = self.velocidade_cryptum
         self.estado_habilidade = 'crypt'
-        self.ultima_cryptum = pygame.time.get_ticks()
+        self.ultima_cryptum = relogio.agora()
         
-        self.tempo_ultimo_emp = pygame.time.get_ticks()
-        self.tempo_ultima_artilharia = pygame.time.get_ticks()
+        self.tempo_ultimo_emp = relogio.agora()
+        self.tempo_ultima_artilharia = relogio.agora()
 
     def disparar_emp(self):
         OndaEMP(

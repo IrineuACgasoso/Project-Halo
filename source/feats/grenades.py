@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 from source.feats.projetil import ProjetilUniversal
 from source.systems.entitymanager import entity_manager
@@ -187,7 +188,7 @@ class PlasmaGrenade(GrenadeBase):
             rotacionar=False,
             custom_config=custom_config
         )
-        self.tempo_criacao_pulso = pygame.time.get_ticks()
+        self.tempo_criacao_pulso = relogio.agora()
 
         # Canvas final precisa ser maior que a sprite pra caber a auréola
         # sem cortar (raio externo de 35 já ultrapassa uma sprite de 36x36)
@@ -232,7 +233,7 @@ class PlasmaGrenade(GrenadeBase):
         super().update(delta_time)
 
         # --- Pulso: oscila a opacidade da auréola com uma senoide no tempo ---
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         t = (agora - self.tempo_criacao_pulso) / 1000  # segundos
         velocidade_pulso = 6  # quanto maior, mais rápido pisca
         alpha_min, alpha_max = 90, 220

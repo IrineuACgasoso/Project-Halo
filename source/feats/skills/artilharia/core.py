@@ -1,5 +1,6 @@
 # source/feats/skills/artilharia/core.py
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
 
@@ -14,7 +15,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         # Carrega a configuração (A customizada tem prioridade, útil para o PurgeGrid)
         self.cfg = custom_config if custom_config else ARTILHARIA_PRESETS.get(preset, ARTILHARIA_PRESETS['padrao'])
 
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
         self.explodiu = False
 
         # --- DoT: controla o ciclo de tick de dano contínuo pós-explosão ---
@@ -45,7 +46,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
 
     def draw(self, surface, offset):
         pos_ajustada = self.posicao - offset
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # Otimização: Criar uma superfície do tamanho da explosão, e não da tela toda
         tamanho_surf = self.cfg.raio_explosao * 2
@@ -93,7 +94,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             self.rect.center = self.posicao
             self.hitbox.center = self.rect.center
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # --- Explosão inicial (telegraph terminou) ---
         if not self.explodiu and agora - self.tempo_criacao >= self.cfg.duracao:

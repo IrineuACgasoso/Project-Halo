@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.items import Items
 from source.enemies.base.enemy_base import BaseEnemy
 
@@ -21,7 +22,7 @@ class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
         self.hitbox.center = self.rect.center
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
 
         # Inteligência e Estados

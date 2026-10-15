@@ -79,7 +79,7 @@ class RankingData:
                 if score < 0:
                     score = 0
                 limpos.append({'name': nome, 'score': score})
-            except (AttributeError, TypeError, ValueError):
+            except (AttributeError, TypeError, ValueError, OverflowError):   # OverflowError: score = Infinity no JSON
                 continue
 
         limpos.sort(key=lambda x: x['score'], reverse=True)

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 
 from source.enemies.base.enemy_base import BaseEnemy
@@ -21,11 +22,11 @@ class GruntBase(BaseEnemy):
 
         # Plasma
         self.plasma_cooldown = self.novo_cooldown(8000, 12000)
-        self.ultimo_tiro = pygame.time.get_ticks()
+        self.ultimo_tiro = relogio.agora()
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
             self.plasma_cooldown = self.novo_cooldown(8000, 12000)
             self.plasma()

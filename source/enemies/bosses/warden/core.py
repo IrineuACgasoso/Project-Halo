@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.auras import EnergyAura
@@ -42,7 +43,7 @@ class BaseWarden(BaseEnemy, WardenSetup, WardenAI, WardenAttacks, WardenFunction
         self.is_boss = False # Apenas o DomainConsciousness reportará como Boss para a UI
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Gerenciamento de Aura (Apenas se receber algum escudo externo por itens/mixins)
         precisa_de_aura = getattr(self, 'escudo_atual', 0) > 0

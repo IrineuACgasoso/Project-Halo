@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 
@@ -57,14 +58,14 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
         """Congela o Scarab e o deixa vulnerável"""
         self.estado_combate = 'STUNNED'
         self.is_inofensivo = True
-        self.tempo_inicio_stun = pygame.time.get_ticks()
+        self.tempo_inicio_stun = relogio.agora()
 
     def animar(self):
         # TRAVA DA ANIMAÇÃO: Não se mexe enquanto estiver atordoado
         if self.estado_combate == 'STUNNED':
             return
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - getattr(self, 'ultimo_update_animacao', 0) > getattr(self, 'velocidade_animacao', 700):
             self.ultimo_update_animacao = agora
             frames = self.sprites[self.estado_animacao]
@@ -87,7 +88,7 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
         self.kill()
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # Inteligência e Estados
         self.executar_ia(agora, delta_time)

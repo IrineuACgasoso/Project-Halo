@@ -1,4 +1,5 @@
 import pygame
+from source.utils.paths import path
 import os
 from os.path import join
 
@@ -13,7 +14,7 @@ class TelaGameOver(MenuDraw):
     def __init__(self, game):
         self.game = game
         self.font = game.menu_principal.font
-        self.font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
+        self.font_path = path('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
         try:
             if os.path.exists(self.font_path):
                 self.font_titulo = pygame.font.Font(self.font_path, 80)
@@ -26,7 +27,7 @@ class TelaGameOver(MenuDraw):
         self.fase_carregada = -1 # Para rastrear qual fase está carregada
         self.som = None
         try:
-            self.som = pygame.mixer.Sound(join('assets', 'sounds', 'game_over.wav'))
+            self.som = pygame.mixer.Sound(path('assets', 'sounds', 'game_over.wav'))
             pygame.mixer.music.set_volume(0.3)
         except:
             pass

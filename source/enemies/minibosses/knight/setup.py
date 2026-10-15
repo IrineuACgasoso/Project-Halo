@@ -1,8 +1,9 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class KnightSetup:
     def inicializar_habilidades(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # FSM de Habilidades
         self.estado_habilidade = 'idle'

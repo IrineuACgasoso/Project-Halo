@@ -1,4 +1,5 @@
 from .projetil import ProjetilUniversal
+from source.utils.vetores import direcao_segura
 
 class ProjetilNeedler(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, alvo):
@@ -20,8 +21,10 @@ class ProjetilNeedler(ProjetilUniversal):
 
     def update(self, delta_time):
         if self.alvo_atual and self.alvo_atual.alive():
-            desejado = (self.alvo_atual.posicao - self.posicao).normalize()
-            self.direcao = (self.direcao + desejado * self.forca_curva).normalize()
+            desejado = direcao_segura(self.posicao, self.alvo_atual.posicao, padrao=self.direcao)
+            nova = self.direcao + desejado * self.forca_curva
+            if nova.length_squared() > 0:
+                self.direcao = nova.normalize()
             if self.rotacionar:
                 self.image = self.renderizar_com_rotacao()
                 self.rect = self.image.get_rect(center=self.rect.center)

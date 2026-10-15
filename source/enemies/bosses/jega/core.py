@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
@@ -49,7 +50,7 @@ class Jega(BaseEnemy, JegaSetup, JegaAI, JegaAttacks):
         self.kill()
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
@@ -61,7 +62,7 @@ class Jega(BaseEnemy, JegaSetup, JegaAI, JegaAttacks):
         self.image.set_alpha(int(self.alpha_atual))
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # Cálculos de Vetor (sempre ao quadrado nas comparações de gatilho)
         direcao_ao_jogador = (self.jogador.posicao - self.posicao)

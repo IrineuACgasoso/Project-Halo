@@ -1,9 +1,10 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class WardenSetup:
     def inicializar_habilidades(self):
         """Método principal que orquestra a inicialização de todos os subsistemas."""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         self._inicializar_fsm()
         self._inicializar_combatente()       # Estado interno da IA do Combatente

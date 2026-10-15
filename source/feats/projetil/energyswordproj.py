@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 
 from .projetil import ProjetilUniversal
@@ -41,7 +42,7 @@ class EnergySwordProj(ProjetilUniversal):
         )
         self.jogador = game.player
         self.velocidade_rotacao = velocidade_rotacao #graus por segundo
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
         self.duracao = duracao
 
         # Metade do comprimento da lâmina (eixo cabo -> ponta). Usado pra
@@ -77,5 +78,5 @@ class EnergySwordProj(ProjetilUniversal):
         self.angulo += self.velocidade_rotacao * delta_time
         self._atualizar_lamina()
 
-        if pygame.time.get_ticks() - self.tempo_criacao > self.duracao:
+        if relogio.agora() - self.tempo_criacao > self.duracao:
             self.kill()

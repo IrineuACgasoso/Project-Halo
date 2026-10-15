@@ -181,6 +181,16 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'burst_interval':       WeaponStats(value=300,   label=None,            increase=0,     range_val=0),
         }
     ),
+    'fuel_rod': WeaponProfile(
+        stats={
+            'dano':         WeaponStats(value=25,   label='Dano',           increase=10,    range_val=1),
+            'dot':          WeaponStats(value=3,    label='Dano do Veneno', increase=1,     range_val=1),
+            'quique':       WeaponStats(value=1,    label='Quiques',        increase=1,     range_val=2),
+            'duracao':      WeaponStats(value=4000, label='Duração',        increase=1000,  range_val=1),
+            'cooldown':     WeaponStats(value=12000,label='Cadência (ms)',  increase=-400,  range_val=1, min_val=8000),
+            'raio_maximo':  WeaponStats(value=750,  label='Alcance',        increase=50,    range_val=1),
+        }
+    ),
 }
 
 # ===== COMPANION =======================

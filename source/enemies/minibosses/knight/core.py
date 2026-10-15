@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.auras import EnergyAura
 from source.feats.items import Items
@@ -37,7 +38,7 @@ class Knight(BaseEnemy, KnightSetup, KnightAI, KnightAttacks):
         self.kill()
     
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # CORREÇÃO: Gerenciamento dinâmico da Aura baseado no escudo ativo
         if hasattr(self, 'escudo_atual') and self.escudo_atual > 0:

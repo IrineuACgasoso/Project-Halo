@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class PlayerCombat:
     def adicionar_escudo(self, valor):
@@ -13,7 +14,7 @@ class PlayerCombat:
         if self.escudo_atual >= self.escudo_maximo:
             return
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         tempo_sem_dano = (agora - self.ultimo_dano_sofrido)
         # Começou Regeneração
         if tempo_sem_dano >= self.shield_regen:
@@ -62,10 +63,10 @@ class PlayerCombat:
         # Ativa iframe
         if not ignorar_invencibilidade:
             self.invencivel = True
-            self.tempo_ultimo_dano = pygame.time.get_ticks()
+            self.tempo_ultimo_dano = relogio.agora()
 
         # Interrompe Regeneração de Escudo
-        self.ultimo_dano_sofrido = pygame.time.get_ticks()
+        self.ultimo_dano_sofrido = relogio.agora()
         self.regenerando_escudo = False
         
         # ===== VEÍCULO =====
@@ -126,7 +127,7 @@ class PlayerCombat:
         Chamado a cada frame pela arma dona do sistema (ex: MjolnirPunch.update)."""
         if self.espinho_cooldown <= 0 or self.espinho_disponivel:
             return
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_espinho_carregado >= self.espinho_cooldown:
             self.espinho_disponivel = True
 
@@ -139,7 +140,7 @@ class PlayerCombat:
             inimigo.receber_dano(self.dano_espinhos)
         self._spawnar_faiscas_espinhos()
         self.espinho_disponivel = False
-        self.ultimo_espinho_carregado = pygame.time.get_ticks()
+        self.ultimo_espinho_carregado = relogio.agora()
 
 
     def _spawnar_faiscas_espinhos(self):
@@ -156,12 +157,12 @@ class PlayerCombat:
 
     def atualizar_invencibilidade(self):
         if self.invencivel:
-            agora = pygame.time.get_ticks()
+            agora = relogio.agora()
             if agora - self.tempo_ultimo_dano > self.duracao_invencibilidade:
                 self.invencivel = False
                 
             # Pisca player
-            alpha = 255 if int(pygame.time.get_ticks() / 50) % 2 == 0 else 0
+            alpha = 255 if int(relogio.agora() / 50) % 2 == 0 else 0
             self.image.set_alpha(alpha)
         else:
             self.image.set_alpha(255)

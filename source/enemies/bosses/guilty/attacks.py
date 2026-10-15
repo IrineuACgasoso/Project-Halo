@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 import math
 from source.systems.entitymanager import entity_manager
@@ -26,11 +27,11 @@ class GuiltyAttacks:
                 self.estado_habilidade = 'idle'
                 self.ultimo_laser = agora
                 self.cooldown_laser = self.novo_cooldown(3000, 7000) if not self.enrage else self.novo_cooldown(1500, 4000)
-                self.wait = pygame.time.get_ticks() + 1000
+                self.wait = relogio.agora() + 1000
 
 
     def invocar_sentinelas(self, de_elite=False):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.start_sentinel >= 1000:
             eixos = [(0, -self.offset_invocacao), (0, self.offset_invocacao), 
                      (-self.offset_invocacao, 0), (self.offset_invocacao, 0)]
@@ -54,7 +55,7 @@ class GuiltyAttacks:
 
             self.ultima_invocacao = agora
             self.cooldown_invocacao = self.novo_cooldown(6000, 9000) if not self.enrage else self.novo_cooldown(3000, 6000)
-            self.wait = pygame.time.get_ticks() + 1000
+            self.wait = relogio.agora() + 1000
             self.estado_habilidade = 'idle'
 
 
@@ -79,8 +80,8 @@ class GuiltyAttacks:
             self.posicao = pygame.math.Vector2(nova_pos)
             self.rect.center = (round(self.posicao.x), round(self.posicao.y))
             GuiltyTeleport(self.rect.center)
-            self.ultimo_tp = pygame.time.get_ticks()
-            self.wait = pygame.time.get_ticks() + 500
+            self.ultimo_tp = relogio.agora()
+            self.wait = relogio.agora() + 500
             
         self.estado_habilidade = 'idle'
 

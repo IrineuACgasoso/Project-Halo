@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 
 class EnemySetup:
@@ -38,7 +39,7 @@ class EnemySetup:
 
     def setup_spawn_protection(self):
         self.invencivel = False
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
         self.tempo_invencibilidade = 0
     
     def setup_invisibility(self):

@@ -8,6 +8,9 @@ apenas organiza e blinda o código de renderização contra falhas comuns
 
 import pygame
 
+from source.debug import DEBUG
+from source.systems.entitymanager import entity_manager
+
 
 class Renderer:
     """
@@ -21,6 +24,7 @@ class Renderer:
     """
     def __init__(self, game):
         self.game = game
+        self._erros_logados = set()   # evita imprimir o mesmo erro 60x por segundo
 
     def draw(self):
         game = self.game
@@ -49,25 +53,29 @@ class Renderer:
     def _draw_menu_principal(self):
         self.game.menu_principal.draw(self.game.tela)
 
-    def _draw_jogando(self):
+    def _draw_mundo(self):
+        """Mapa + sprites + efeitos de inimigos, COM câmera. Compartilhado por jogo, pausa e
+        level-up (antes pausa/level-up desenhavam os sprites sem mapa e sem offset da câmera)."""
         game = self.game
         tela = game.tela
-
         deslocamento = game.camera.offset + game.camera.shake_offset
 
         game.mapa.draw(tela, deslocamento)
-        game.mapa.draw_debug(tela, deslocamento)
+        if DEBUG:   # overlay de paredes/spawns estava SEMPRE ligado no jogo final
+            game.mapa.draw_debug(tela, deslocamento)
 
         self._draw_sprites(deslocamento)
         self._draw_efeitos_inimigos(deslocamento)
 
-        game.hud.draw(tela)
+    def _draw_jogando(self):
+        game = self.game
+        self._draw_mundo()
+        game.hud.draw(game.tela)
         game.stage_manager.draw()
 
     def _draw_pausa(self):
-        from source.systems.entitymanager import entity_manager
         game = self.game
-        self._draw_grupo_seguro(entity_manager.all_sprites)
+        self._draw_mundo()
         game.menu_pausa.draw(game.tela)
 
     def _draw_colaboradores(self):
@@ -83,9 +91,8 @@ class Renderer:
         self.game.tela_game_over.draw(self.game.tela)
 
     def _draw_level_up(self):
-        from source.systems.entitymanager import entity_manager
         game = self.game
-        self._draw_grupo_seguro(entity_manager.all_sprites)
+        self._draw_mundo()
         game.hud.draw(game.tela)
         if game.tela_de_upgrade_ativa is not None:
             game.tela_de_upgrade_ativa.draw(game.tela)
@@ -103,13 +110,11 @@ class Renderer:
         falhar (imagem None, rect ausente, etc), pulamos só ele em vez
         de quebrar o frame inteiro.
         """
-        from source.systems.entitymanager import entity_manager
-
         try:
             sprites_ordenados = sorted(
                 entity_manager.all_sprites,
-                key=lambda s: getattr(s, 'rect', None).centery
-                if getattr(s, 'rect', None) else 0
+                # `if rect` era falso para Rect de tamanho 0 (bool(Rect) == False) -> y virava 0
+                key=lambda s: s.rect.centery if getattr(s, 'rect', None) is not None else 0
             )
         except Exception as e:
             self._log_erro('ordenacao_sprites', e)
@@ -132,8 +137,6 @@ class Renderer:
 
     def _draw_efeitos_inimigos(self, deslocamento):
         """Lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""
-        from source.systems.entitymanager import entity_manager
-
         tela = self.game.tela
         for inimigo in entity_manager.inimigos_grupo:
             try:
@@ -147,12 +150,6 @@ class Renderer:
                     inimigo.draw_extras(tela, deslocamento)
             except Exception as e:
                 self._log_erro(f'draw_extras:{inimigo.__class__.__name__}', e)
-
-    def _draw_grupo_seguro(self, grupo):
-        try:
-            grupo.draw(self.game.tela)
-        except Exception as e:
-            self._log_erro('draw_grupo', e)
 
     # ------------------------------------------------------------------ #
     # FALLBACK / LOG
@@ -173,6 +170,10 @@ class Renderer:
             pass
 
     def _log_erro(self, contexto, erro):
+        chave = (contexto, type(erro).__name__ if isinstance(erro, Exception) else str(erro))
+        if chave in self._erros_logados:
+            return
+        self._erros_logados.add(chave)
         print(f"[Renderer] Falha em '{contexto}': {erro}")
 
 

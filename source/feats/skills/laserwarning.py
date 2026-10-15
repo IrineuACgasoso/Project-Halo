@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class LaserWarning(pygame.sprite.Sprite):
     def __init__(self, owner, alvo, grupos, game, 
@@ -13,7 +14,7 @@ class LaserWarning(pygame.sprite.Sprite):
         self.duracao = duracao
         self.largura = largura
         self.cor_laser = cor_laser
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
 
         # Posições iniciais
         self.start_pos = pygame.math.Vector2(owner.posicao)
@@ -23,7 +24,7 @@ class LaserWarning(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Se o tempo acabou ou quem disparou morreu, remove o aviso
         if agora - self.tempo_criacao >= self.duracao or not self.owner.alive():
@@ -52,7 +53,7 @@ class LaserWarning(pygame.sprite.Sprite):
         end_pos_ajustada = self.end_pos - offset
         
         # Efeito opcional: fazer o laser "piscar" ou ficar mais forte perto do disparo
-        tempo_passado = pygame.time.get_ticks() - self.tempo_criacao
+        tempo_passado = relogio.agora() - self.tempo_criacao
         progresso = tempo_passado / self.duracao
         alpha = int(30 + (progresso * 90)) # Fica levemente mais visível com o tempo
         

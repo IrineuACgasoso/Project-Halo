@@ -1,5 +1,6 @@
 # source/enemies/bosses/harbinger/ia.py
 import pygame
+from source.systems.gameclock import relogio
 import random
 from source.systems.entitymanager import entity_manager
 
@@ -178,7 +179,7 @@ class HarbingerIA:
         self.estado_boss = 'recharging'
         self.permitir_spawns_normais = True
         self.recharge_spawn_liberado = True
-        self.recharge_spawn_timer_inicio = pygame.time.get_ticks()
+        self.recharge_spawn_timer_inicio = relogio.agora()
 
         # Cancela qualquer coisa em andamento para não sobrepor com a recarga
         self.energy_blast_ativo = False

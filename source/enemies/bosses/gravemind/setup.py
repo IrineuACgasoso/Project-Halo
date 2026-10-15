@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 
 class GravemindSetup:
@@ -61,23 +62,23 @@ class GravemindSetup:
         self.is_animating_respawn = True
         self.altura_atual = 0
         self.posicao_chao = pygame.math.Vector2(self.posicao)
-        self.timer_particula = pygame.time.get_ticks()
+        self.timer_particula = relogio.agora()
         
         # Setup do pequeno loop de animação do Gravemind
         self.frame_atual = 0
         self.velocidade_animacao_loop = 600
-        self.ultimo_update_animacao = pygame.time.get_ticks()
+        self.ultimo_update_animacao = relogio.agora()
 
     def _inicializar_acid_breath(self):
         # Usa o asterisco * para extrair o mínimo e máximo da tupla para a função
         self.cooldown_acido = self.novo_cooldown(*self.cd_acido_base)
-        self.ultima_baforada = pygame.time.get_ticks()
+        self.ultima_baforada = relogio.agora()
         self.tiros_restantes = 0
         self.ultimo_tiro_burst = 0
 
     def _inicializar_infection(self):
         self.cooldown_infeccao = self.novo_cooldown(*self.cd_infeccao_base)
-        self.ultima_infeccao = pygame.time.get_ticks()
+        self.ultima_infeccao = relogio.agora()
         self.spawns_restantes = 0
         self.ultimo_spawn_tick = 0
 
@@ -88,7 +89,7 @@ class GravemindSetup:
 
     def _inicializar_heads(self):
         self.cooldown_cabecas = self.novo_cooldown(*self.cd_cabecas_base)
-        self.ultima_cabeca = pygame.time.get_ticks()
+        self.ultima_cabeca = relogio.agora()
         self.cabecas_restantes = 0
         self.intervalo_cabeca_tick = 0
 

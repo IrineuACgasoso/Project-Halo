@@ -1,6 +1,5 @@
 import pygame
-import random
-from os.path import join
+from source.systems.gameclock import relogio
 # WINDOWS
 from source.windows.settings import *
 from source.windows.menu import *
@@ -21,7 +20,7 @@ from source.feats.buddies import *
 from source.feats.weapons import *
 from source.feats.vehicles import *
 from source.feats.effects import Portal
-from source.feats.assets import path
+from source.feats.assets import path, ASSETS
 # PLAYER
 from source.systems.levelup import *
 from source.player.player import Player 
@@ -107,7 +106,7 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        rifle = Pelican(
+        rifle = AssaultRifle(
             jogador=self.player,
             grupos=(entity_manager.all_sprites,
                     entity_manager.projeteis_jogador_grupo,
@@ -140,7 +139,9 @@ class Game:
         if self.estado_do_jogo != 'jogando':
             return
 
-        agora = pygame.time.get_ticks()
+        # O relógio de jogo só avança aqui: pausa/level-up/menus congelam todos os timers.
+        relogio.avancar(delta_time)
+        agora = relogio.agora()
 
         # Portal
         if self.spawnar_portal_em_breve:
@@ -193,10 +194,23 @@ class Game:
 
         # Game over
         if self.player.vida_atual <= 0:
-            self._calcular_pontuacao_final()
-            self.estado_do_jogo = 'game_over'
-            pygame.mixer.music.pause()
+            self._encerrar_partida()
 
+
+    def _encerrar_partida(self):
+        """Fecha a sessão (derrota ou fim da campanha) e vai para a tela final."""
+        self._calcular_pontuacao_final()
+        self.estado_do_jogo = 'game_over'
+        pygame.mixer.music.pause()
+
+    def existe_proxima_fase(self):
+        """True se há mapa carregável para a fase seguinte (evita KeyError no fim da campanha)."""
+        return f'{self.fase_atual + 1}' in ASSETS['maps']
+
+    def finalizar_campanha(self):
+        """Portal da última fase disponível foi tocado: encerra a campanha."""
+        print(f"Campanha concluída na fase {self.fase_atual}!")
+        self._encerrar_partida()
 
     def _calcular_pontuacao_final(self):
         """Extraído do update para não poluir o loop principal."""
@@ -214,11 +228,13 @@ class Game:
         print(f"Boss da fase {self.fase_atual} derrotado!")
         self.boss_atual = None
         self.spawnar_portal_em_breve = True
-        self.timer_portal = pygame.time.get_ticks()
+        self.timer_portal = relogio.agora()
 
     def run(self):
         while self.running:
-            delta_time = self.clock.tick(fps) / 1000
+            # Limita o dt: engasgos (arrastar janela, carregamento) geravam dt enorme e
+            # projéteis/inimigos atravessavam paredes ou teleportavam.
+            delta_time = min(self.clock.tick(fps) / 1000, 0.05)
             self.eventos()
             self.update(delta_time)
             self.draw()

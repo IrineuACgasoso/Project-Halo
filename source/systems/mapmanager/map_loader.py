@@ -4,7 +4,7 @@ import json
 
 class MapLoader:
     def carregar_json(self, caminho):
-        with open(caminho, 'r') as f:
+        with open(caminho, 'r', encoding='utf-8') as f:
             dados = json.load(f)
 
         for camada in dados['layers']:

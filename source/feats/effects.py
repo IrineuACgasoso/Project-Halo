@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from source.feats.assets import *
 
@@ -50,7 +51,7 @@ class RaioEscudo(pygame.sprite.Sprite):
         self.cor = cor
         
         self.duracao = 250 
-        self.tempo_criacao = pygame.time.get_ticks()
+        self.tempo_criacao = relogio.agora()
         
         self.gerar_imagem()
 
@@ -87,7 +88,7 @@ class RaioEscudo(pygame.sprite.Sprite):
         pygame.draw.line(self.image, (255, 255, 255), local_start, local_end, 3)
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.tempo_criacao > self.duracao or not self.alvo.alive() or not self.fonte.alive():
             self.kill()
         else:
@@ -108,7 +109,7 @@ class EfeitoFaiscas(pygame.sprite.Sprite):
         self.posicao = pygame.math.Vector2(posicao)
         self.cor = cor
         self.duracao = duracao
-        self.criado_em = pygame.time.get_ticks()
+        self.criado_em = relogio.agora()
 
         self.particulas = [
             {
@@ -125,7 +126,7 @@ class EfeitoFaiscas(pygame.sprite.Sprite):
         self._centro_local = pygame.math.Vector2(tam_canvas / 2, tam_canvas / 2)
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         decorrido = agora - self.criado_em
         if decorrido >= self.duracao:
             self.kill()

@@ -1,20 +1,9 @@
 import pygame
 from source.windows.settings import *
-import sys
-import os
 
 
-def path(*args):
-    """ 
-    Junta os caminhos e ajusta para o PyInstaller.
-    Aceita múltiplos argumentos: path('pasta', 'sub', 'arquivo.png')
-    """
-    relative_path = os.path.join(*args)
-    if hasattr(sys, '_MEIPASS'):
-        # Caminho dentro do executável
-        return os.path.join(sys._MEIPASS, relative_path)
-    # Caminho rodando o script .py
-    return os.path.join(os.path.abspath("."), relative_path)
+# `path` agora vive em source/utils/paths.py (evita import circular); reexportado aqui.
+from source.utils.paths import path  # noqa: E402,F401
 
 # Inicialização segura para o Executável
 pygame.init()

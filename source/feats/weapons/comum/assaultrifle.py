@@ -15,7 +15,7 @@ class AssaultRifle(Arma):
     def disparar(self):
         inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=700)
         if inimigo_alvo and inimigo_alvo.alive():
-            direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
+            direcao_vetor = self.direcao_para(inimigo_alvo)
             
             for _ in range(self.projeteis_por_disparo):
                 BurstRifle(

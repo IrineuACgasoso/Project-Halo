@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 
 from source.systems.entitymanager import entity_manager
@@ -30,8 +31,9 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         self.velocidade = velocidade
         self.duracao = duracao
         self.piercing = piercing
+        self._alvos_atingidos = set()   # usado pelo CollisionManager (perfuração finita)
         self.rotacionar = rotacionar # Se False, economiza RAM e CPU
-        self.spawn_time = pygame.time.get_ticks()
+        self.spawn_time = relogio.agora()
         self.posicao = pygame.math.Vector2(posicao_inicial)
         self.direcao = direcao_custom or pygame.math.Vector2(1, 0)
         
@@ -99,7 +101,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
         # O CollisionManager cuida do dano. A base só se mata por tempo.
-        if pygame.time.get_ticks() - self.spawn_time > self.duracao:
+        if relogio.agora() - self.spawn_time > self.duracao:
             self.kill()
 
 

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 import random
 from source.systems.entitymanager import entity_manager
@@ -16,7 +17,7 @@ class WardenAttacks:
     # ==================================================
 
     def executar_tp(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # LÊ AS VARIÁVEIS DINÂMICAS (Se não existirem, usa o padrão de fuga)
         raio_min = getattr(self, 'tp_raio_min', 350)
@@ -64,7 +65,7 @@ class WardenAttacks:
         
         self.hitbox.width = self.rect.width * 0.4
         
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.cooldown_tp = self.novo_cooldown(6000, 10000)
         self.ultimo_tp = agora
         self.tp_orb = None
@@ -86,7 +87,7 @@ class WardenAttacks:
     #====================================
 
     def executar_chop(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         self.velocidade = 0  
         
@@ -153,7 +154,7 @@ class WardenAttacks:
     #====================================
 
     def executar_heavy_rifle(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.velocidade = 0  
         
         if getattr(self, 'direcao_rifle_travada', None) is None:
@@ -243,7 +244,7 @@ class WardenAttacks:
     #====================================
 
     def executar_purge_assassino(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         self.velocidade = 0  
         
         if not getattr(self, 'purge_ativo', False):

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from source.feats.effects import DustParticle
 from source.systems.entitymanager import entity_manager
@@ -6,7 +7,7 @@ from source.systems.entitymanager import entity_manager
 
 class GravemindAnimation:
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         direcao = self.estado_animacao if self.estado_animacao in ['left', 'right'] else 'left'
 
         if self.estado_habilidade == 'acid':

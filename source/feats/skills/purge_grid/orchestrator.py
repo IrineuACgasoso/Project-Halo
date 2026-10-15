@@ -1,5 +1,6 @@
 # source/feats/skills/purge_grid/orchestrator.py
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.feats.skills.artilharia import ArtilhariaAviso, ArtilhariaConfig
 from .patterns import generate_grid_pattern, generate_radial_pattern, generate_directional_pattern
@@ -51,7 +52,7 @@ class PurgeGrid(pygame.sprite.Sprite):
         if not self.ativo:
             return
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         spawns_neste_frame = 0
         MAX_SPAWNS_PER_FRAME = 35
 

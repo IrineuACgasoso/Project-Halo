@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.skills.continuousbeam import ContinuousBeam
 
 class ScarabSetup:
@@ -28,7 +29,7 @@ class ScarabSetup:
         self.duracao_carga = 3000
         self.duracao_laser = 5000
         self.cooldown_laser = 12000
-        self.ultimo_laser = pygame.time.get_ticks()
+        self.ultimo_laser = relogio.agora()
         
         self.beam_principal = ContinuousBeam(
             self, color=(100, 255, 100), largura_base=40, dano_por_segundo=200, suavizacao=0.08
@@ -36,7 +37,7 @@ class ScarabSetup:
 
     def _setup_plasma(self):
         self.cooldown_plasma = self.novo_cooldown(4000, 10000)
-        self.ultimo_tiro_plasma = pygame.time.get_ticks()
+        self.ultimo_tiro_plasma = relogio.agora()
         self.tiros_restantes_rajada = 0
         self.pente_rajada = 6
         self.delay_entre_tiros = 250 

@@ -1,7 +1,5 @@
 import pygame
 from source.systems.entitymanager import entity_manager
-from source.feats.weapons import *
-from source.feats.projetil import *
 
 class CollisionManager:
     def __init__(self, game):
@@ -39,6 +37,13 @@ class CollisionManager:
 
         return False
 
+    @staticmethod
+    def colisao_hitbox_jogador(jogador, projetil):
+        """Projétil inimigo x jogador usando a HITBOX do jogador (menor que o sprite).
+        Antes usava collide_rect no sprite inteiro: tiros acertavam "no ar" ao lado do personagem."""
+        hitbox = getattr(jogador, 'hitbox', jogador.rect)
+        return hitbox.colliderect(getattr(projetil, 'collision_rect', projetil.rect))
+
     @classmethod
     def aura_collision(cls, sprite_inimigo, sprite_aura):
         """Colisão customizada para auras não detectarem inimigos invisíveis."""
@@ -58,7 +63,25 @@ class CollisionManager:
                 False, 
                 self.custom_collision
             )
+            if not atingidos:
+                continue
+            # Alvo mais próximo primeiro (ordem do grupo era arbitrária)
+            if len(atingidos) > 1:
+                px, py = projetil.rect.center
+                atingidos.sort(key=lambda e: (e.rect.centerx - px) ** 2 + (e.rect.centery - py) ** 2)
+
+            perfuracao_finita = getattr(projetil, 'piercing', float('inf')) != float('inf')
             for inimigo in atingidos:
+                # 1) Projétil já consumido neste frame não pode acertar mais ninguém
+                if not projetil.alive():
+                    break
+                # 2) Perfuração finita: no máximo 1 acerto por alvo (antes gastava toda a
+                #    perfuração no MESMO inimigo em frames seguidos, multiplicando o dano)
+                if perfuracao_finita:
+                    ja_atingidos = projetil.__dict__.setdefault('_alvos_atingidos', set())
+                    if inimigo in ja_atingidos:
+                        continue
+                    ja_atingidos.add(inimigo)
                 projetil.ao_atingir_alvo(inimigo)
 
         # 2. Projéteis dos Inimigos -> Jogador
@@ -66,7 +89,7 @@ class CollisionManager:
             player,
             entity_manager.projeteis_inimigos_grupo,
             False, 
-            pygame.sprite.collide_rect
+            self.colisao_hitbox_jogador
         )
         for projetil in colisoes_proj_inimigos:
             projetil.ao_atingir_alvo(player)

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from ..baseweapon import Arma
 from ...projetil import EnergySwordProj
 
@@ -16,7 +17,7 @@ class EnergySword(Arma):
         self.tempo_fim_ciclo = 0
 
     def update(self, delta_time):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora >= self.tempo_fim_ciclo:
             self.disparar()
             self.tempo_fim_ciclo = (agora + self.duracao + self.cooldown)

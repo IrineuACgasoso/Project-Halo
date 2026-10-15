@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 from .vfx import GuiltyTeleport
 from source.enemies.base import BaseEnemy
@@ -14,10 +15,10 @@ class ForerunnerTerminal(BaseEnemy):
         
         # Spawner autônomo de Sentinelas
         self.cooldown_invocacao = 3000 
-        self.ultima_invocacao = pygame.time.get_ticks() + random.randint(-2000, 0) # Desincroniza os spawns
+        self.ultima_invocacao = relogio.agora() + random.randint(-2000, 0) # Desincroniza os spawns
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # LÓGICA DE SPAWN: Só spawna se o Monitor ainda estiver em manutenção
         if self.monitor_pai.estado_fase == 'TRANSICAO':
@@ -32,7 +33,7 @@ class ForerunnerTerminal(BaseEnemy):
         # Centraliza a posição com base na câmera
         pos_tela_centro = pygame.math.Vector2(self.posicao.x - deslocamento.x, self.posicao.y - deslocamento.y)
         # Cria um pulso sutil baseado no tempo do jogo para o glow "respirar"
-        pulso = abs(pygame.time.get_ticks() % 1000 - 500) / 500 * 4
+        pulso = abs(relogio.agora() % 1000 - 500) / 500 * 4
         
         for raio_glow in range(32, 50, 3):
             # Quanto mais distante do centro, mais transparente fica

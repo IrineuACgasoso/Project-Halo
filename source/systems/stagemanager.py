@@ -1,8 +1,7 @@
 import pygame
-from os.path import join
 from source.systems.mapmanager import Mapa
 from source.systems.entitymanager import entity_manager
-from source.feats.effects import Portal
+from source.utils.paths import path
 from source.systems.spawner import Spawner
 
 class StageManager:
@@ -21,9 +20,14 @@ class StageManager:
         self.fase_carregada = False
 
     def iniciar_transicao(self):
-        if not self.transicao_ativa:
-            self.transicao_ativa = True
-            self.fase_carregada = False
+        if self.transicao_ativa:
+            return
+        # Última fase com mapa: não há para onde ir -> encerra a campanha em vez de crashar
+        if not self.game.existe_proxima_fase():
+            self.game.finalizar_campanha()
+            return
+        self.transicao_ativa = True
+        self.fase_carregada = False
 
     def update(self, delta_time):
         if not self.transicao_ativa: return
@@ -84,17 +88,20 @@ class StageManager:
         game.boss_atual = None
         
         # Novo Mapa
-        caminho = join('assets', 'img', 'map', f'{game.fase_atual}', f'm{game.fase_atual}.tmj')
+        caminho = path('assets', 'img', 'map', f'{game.fase_atual}', f'm{game.fase_atual}.tmj')
         game.mapa = Mapa(caminho, game.fase_atual, all_sprites=entity_manager.all_sprites)
+        # A câmera guardava o mapa ANTIGO: limites errados na fase nova (jogador saía da tela).
+        game.camera.mapa = game.mapa
+        game.camera.shake_timer = 0
         
         # Player
         nova_pos = game.mapa.get_player_spawn_pos()
         game.player.posicao = pygame.math.Vector2(nova_pos)
         game.player.hitbox.center = nova_pos
         game.player.rect.center = nova_pos
+        game.camera.update(game.player.posicao)
 
         # Reseta spawner
-        game.boss_atual = None
         game.spawner = Spawner(game)
         
 

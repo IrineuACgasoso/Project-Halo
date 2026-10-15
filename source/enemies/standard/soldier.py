@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import random
 import math
 from os.path import join
@@ -41,13 +42,13 @@ class Soldier(BaseEnemy):
         self.estado = 'normal' # Pode ser 'normal' ou 'teleportando'
         self.particula_teleporte = None
         self.alvo_teleporte = None
-        self.ultimo_teleporte = pygame.time.get_ticks()
+        self.ultimo_teleporte = relogio.agora()
         # Cooldown gigante para imersão e performance (entre 12 e 20 segundos)
         self.cooldown_teleporte = self.novo_cooldown(15000, 21000) 
 
         # Combate (Rajada Tripla e Cooldown)
         self.cooldown_rifle = self.novo_cooldown(7000, 13000)
-        self.ultimo_tiro_principal = pygame.time.get_ticks()
+        self.ultimo_tiro_principal = relogio.agora()
         
         self.tiros_restantes_rajada = 0
         self.delay_entre_tiros = 150 
@@ -59,7 +60,7 @@ class Soldier(BaseEnemy):
     
 
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         # Só anima se estiver no estado normal
         if self.estado == 'normal': 
             if agora - self.ultimo_update_animacao > self.velocidade_animacao:
@@ -71,7 +72,7 @@ class Soldier(BaseEnemy):
                 self.rect = self.image.get_rect(center=self.posicao)
     
     def gerenciar_rifle(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         if self.tiros_restantes_rajada > 0:
             if agora - self.ultimo_tiro_rajada >= self.delay_entre_tiros:
@@ -138,7 +139,7 @@ class Soldier(BaseEnemy):
         )
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # --- LÓGICA DO TELEPORTE (SEQUESTRANDO O UPDATE) ---
         if self.estado == 'teleportando':

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from ..baseweapon import Arma
 from ...projetil import Carabin
 
@@ -23,7 +24,7 @@ class CarabinRifle(Arma):
     
     def update(self, delta_time):
         super().update(delta_time)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if self.tiros_restantes > 0:
             if agora - self.ultimo_tiro_burst > self.burst_interval:
                 inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=650)
@@ -36,7 +37,7 @@ class CarabinRifle(Arma):
 
     def _spawn_carabin(self, inimigo):
         if inimigo and inimigo.alive():
-            direcao_vetor = (inimigo.posicao - self.jogador.posicao).normalize()
+            direcao_vetor = self.direcao_para(inimigo)
            
             # Movido para dentro do IF para evitar UnboundLocalError caso o inimigo morra
             Carabin(

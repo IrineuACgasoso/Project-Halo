@@ -15,7 +15,7 @@ class SniperRifle(Arma):
     def disparar(self):
         inimigo_alvo = self.encontrar_inimigo_mais_forte(self.inimigos_grupo, raio_maximo=1200)
         if inimigo_alvo and inimigo_alvo.alive():
-            direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
+            direcao_vetor = self.direcao_para(inimigo_alvo)
 
             HeavyBurst(
                 posicao_inicial = self.jogador.posicao,

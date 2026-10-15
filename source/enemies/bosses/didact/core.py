@@ -1,5 +1,6 @@
 # enemies/didact/core.py
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.items import Items
 from source.enemies.base.enemy_base import BaseEnemy
 
@@ -33,7 +34,7 @@ class Didact(BaseEnemy, DidactSetup, DidactAI, DidactAttacks):
 
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         direcao_x = self.jogador.posicao.x - self.posicao.x 
         self.set_sprite_direction(direcao_x)       
@@ -49,7 +50,7 @@ class Didact(BaseEnemy, DidactSetup, DidactAI, DidactAttacks):
 
     def animar(self):
         """Sobrescreve a animação base para usar as sprites de habilidade do Didact."""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # 1. Fase do Cryptum (Trava na sprite do Cryptum)
         if self.estado_habilidade == 'crypt':

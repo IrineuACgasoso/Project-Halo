@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.items import Items
 from source.enemies.base.enemy_base import BaseEnemy
 
@@ -37,7 +38,7 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
         self.receber_dano(quantidade)
 
     def update(self, delta_time, paredes=None):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         self.executar_estados(agora, delta_time)
 

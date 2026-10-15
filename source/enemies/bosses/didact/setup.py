@@ -1,5 +1,6 @@
 # enemies/didact/setup.py
 import pygame
+from source.systems.gameclock import relogio
 
 class DidactSetup:
     """Mixin responsável por inicializar todos os atributos das habilidades do Didact."""
@@ -16,7 +17,7 @@ class DidactSetup:
     def _setup_pull(self):
         self.velocidade_puxao = 500
         self.cooldown_pull = 5000
-        self.tempo_ultimo_pull = pygame.time.get_ticks()
+        self.tempo_ultimo_pull = relogio.agora()
         self.duracao_pull = 5000
         self.tempo_inicio_pull = 0
         self.dano_pull = self.jogador.vida_maxima / 100
@@ -26,7 +27,7 @@ class DidactSetup:
     def _setup_laser(self):
         self.cooldown_laser = 10000
         self.enraged_laser = self.novo_cooldown(250, 400)
-        self.tempo_ultimo_laser = pygame.time.get_ticks()
+        self.tempo_ultimo_laser = relogio.agora()
         self.duracao_aviso_laser = 1500
         self.duracao_disparo_laser = 500
         self.tempo_inicio_laser = 0

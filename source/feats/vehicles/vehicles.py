@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
 from source.data.weapon_data import VEHICLES_DATA
 from source.feats.buddies import Companheiro
@@ -36,7 +37,7 @@ class Vehicle(Companheiro):
         self.alvo = None
         self.direcao_movimento = pygame.math.Vector2()
         self.frame_atual = 0
-        self.ultimo_update_anim = pygame.time.get_ticks()
+        self.ultimo_update_anim = relogio.agora()
 
         # Estado próprio do veículo
         self.embarcado = False
@@ -76,7 +77,7 @@ class Vehicle(Companheiro):
         já cumpriu o cooldown pós-destruição)."""
         if not self.destruido:
             return True
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         return agora - self.tempo_destruicao >= self.cooldown_destruicao
 
     def entrar(self):
@@ -103,7 +104,7 @@ class Vehicle(Companheiro):
             return
         self.embarcado = False
         self.destruido = True
-        self.tempo_destruicao = pygame.time.get_ticks()
+        self.tempo_destruicao = relogio.agora()
         self.jogador.sair_veiculo()
 
     # ---- Loop principal ------------------------------------------------------
@@ -122,7 +123,7 @@ class Vehicle(Companheiro):
 
         self.atropelar()
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         inimigo = self.encontrar_alvo_mais_proximo(self.inimigos_grupo, self.raio_deteccao_inimigo, precisa_dano=True)
         if inimigo:
             self.alvo = inimigo
@@ -139,7 +140,7 @@ class Vehicle(Companheiro):
         if dano <= 0:
             return
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         raio_sq = self.raio_atropelamento ** 2
 
         for inimigo in self.inimigos_grupo:

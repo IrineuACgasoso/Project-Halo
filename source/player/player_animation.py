@@ -1,8 +1,9 @@
 import pygame
+from source.systems.gameclock import relogio
 
 class PlayerAnimation:
     def animar(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])

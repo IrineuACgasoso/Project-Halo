@@ -3,7 +3,7 @@ from os.path import join
 
 from source.windows.settings import largura_tela, altura_tela
 from source.systems.entitymanager import entity_manager
-from source.feats.assets import ASSETS
+from source.feats.assets import ASSETS, path as _fonte_path
 from .hud_draw import (
     draw_barra_escudo,
     draw_barra_vida,
@@ -27,13 +27,11 @@ class HUD:
         self._font_hud   = pygame.font.SysFont("Consolas", 13, bold=True)
         self._font_xp    = pygame.font.SysFont("Consolas", 11)
         self._font_boss  = self._carregar_fonte(
-            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 22)
-        self._font_boss  = self._carregar_fonte(
-            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 22)
+            _fonte_path('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 22)
         self._font_score  = self._carregar_fonte(
-            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 32)
+            _fonte_path('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 32)
         self._font_timer  = self._carregar_fonte(
-            join('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 40)
+            _fonte_path('assets', 'fonts', 'cinzel', 'CinzelDecorative-Regular.otf'), 40)
         
 
         # Ícones de coletáveis (escalonados)

@@ -60,7 +60,7 @@ class Player(
         if paredes is not None:
             self.mover_com_colisao(delta_time, paredes)
 
-        self.atualizar_void()
+        self.atualizar_void(delta_time)
 
         self.atualizar_buff(delta_time)
 

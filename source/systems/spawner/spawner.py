@@ -5,6 +5,10 @@ from .spawner_pools import PHASE_POOLS, DEFAULT_POOL
 from .spawner_bosses import CRONOGRAMA_BOSSES, BOSS_CLASSES, PHASE_BOSSES
 from source.systems.entitymanager import entity_manager
 
+# Teto de inimigos vivos: sem ele o spawn acelera sem limite e a colisão O(projéteis x inimigos)
+# derruba o FPS (espiral de morte). Ajuste conforme o hardware-alvo.
+MAX_INIMIGOS_VIVOS = 250
+
 
 class Spawner(SpawnerUtils):
     def __init__(self, game):
@@ -74,8 +78,9 @@ class Spawner(SpawnerUtils):
         if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:
             self.tempo_proximo_spawn = 0
             # A dificuldade escala com o tempo acumulado de todas as fases
-            qtd_spawn = 2 + fase 
-            for _ in range(qtd_spawn):
+            qtd_spawn = 2 + fase
+            vagas = MAX_INIMIGOS_VIVOS - len(entity_manager.inimigos_grupo)
+            for _ in range(max(0, min(qtd_spawn, vagas))):
                 self.spawnar('normal')
 
         # 2. Escala de dificuldade baseada no tempo de horda acumulado

@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 import math
 
 class ContinuousBeam:
@@ -30,7 +31,7 @@ class ContinuousBeam:
         p2 = self.mira_atual - deslocamento
         
         # Efeito visual de "pulsação"
-        oscilacao = math.sin(pygame.time.get_ticks() * 0.02) * 2
+        oscilacao = math.sin(relogio.agora() * 0.02) * 2
         largura_final = max(1, int(self.largura_base + oscilacao))
         
         # Desenha o rastro (brilho externo e centro branco)

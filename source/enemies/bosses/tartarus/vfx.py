@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 
 class ProtocoloHalo(pygame.sprite.Sprite):
@@ -9,7 +10,7 @@ class ProtocoloHalo(pygame.sprite.Sprite):
         self.boss = boss
         
         # Controle de Tempo
-        self.tempo_inicio = pygame.time.get_ticks()
+        self.tempo_inicio = relogio.agora()
         self.tempo_limite = tempo_limite_ms 
         
         # Controle Visual (Fade Branco)
@@ -32,7 +33,7 @@ class ProtocoloHalo(pygame.sprite.Sprite):
             self.kill()
             return
 
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
 
         # 2. Lógica matemática do timer (sem blits!)
         if not self.iniciou_disparo:
@@ -50,7 +51,7 @@ class ProtocoloHalo(pygame.sprite.Sprite):
 
     def hud_draw(self, surface):
         """Chamado exclusivamente pela HUD para desenhar UI e overlays"""
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         
         # Se disparou, pinta a tela
         if self.iniciou_disparo:

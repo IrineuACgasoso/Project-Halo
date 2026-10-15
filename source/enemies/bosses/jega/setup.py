@@ -1,4 +1,5 @@
 import pygame
+from source.systems.gameclock import relogio
 
 ORBITA_DISTANCIA_MIN = 450
 ORBITA_DISTANCIA_MAX = 600
@@ -6,7 +7,7 @@ ORBITA_DISTANCIA_MAX = 600
 class JegaSetup:
     def inicializar_habilidades(self):
         self.estado = 'perseguindo'
-        self.tempo_inicio_estado = pygame.time.get_ticks()
+        self.tempo_inicio_estado = relogio.agora()
         self.wait = 0
 
         self._inicializar_orbita_bote()
@@ -16,7 +17,7 @@ class JegaSetup:
 
     def _inicializar_orbita_bote(self):
         # Habilidade: Órbita Dinâmica e Bote
-        self.ultima_habilidade = pygame.time.get_ticks()
+        self.ultima_habilidade = relogio.agora()
         self.cooldown_habilidade = 5000
 
         # Faixa de distância em que a órbita pode ser ativada (ver config.py)
@@ -47,12 +48,12 @@ class JegaSetup:
 
     def _inicializar_spike(self):
         # Habilidade: Spike (artilharia de aviso)
-        self.ultimo_spike = pygame.time.get_ticks()
+        self.ultimo_spike = relogio.agora()
         self.cooldown_spike = self.novo_cooldown(4000, 6000)
 
     def _inicializar_ilusao(self):
         # Habilidade: Ilusões Sombrias (clones + backstab)
-        self.ultima_ilusao = pygame.time.get_ticks()
+        self.ultima_ilusao = relogio.agora()
         self.cooldown_ilusao = self.novo_cooldown(10000, 17000)
 
         # Tempo que o Jega real fica invisível se reposicionando pras costas

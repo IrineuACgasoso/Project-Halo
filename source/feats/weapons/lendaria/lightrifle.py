@@ -1,6 +1,7 @@
 from ..baseweapon import Arma
 from ...projetil import LightBullet
 import pygame
+from source.systems.gameclock import relogio
 
 class LightRifle(Arma):
     NOME_ASSET = 'light_rifle'
@@ -23,7 +24,7 @@ class LightRifle(Arma):
     
     def update(self, delta_time):
         super().update(delta_time)
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if self.tiros_restantes > 0:
             if agora - self.ultimo_tiro_burst > self.burst_interval:
                 inimigo = self.encontrar_inimigo_mais_forte(self.inimigos_grupo, raio_maximo=1000)
@@ -37,7 +38,7 @@ class LightRifle(Arma):
     def _spawn_light(self):
         inimigo_alvo = self.encontrar_inimigo_mais_forte(self.inimigos_grupo, raio_maximo=1000)
         if inimigo_alvo and inimigo_alvo.alive():
-            direcao_vetor = (inimigo_alvo.posicao - self.jogador.posicao).normalize()
+            direcao_vetor = self.direcao_para(inimigo_alvo)
 
             LightBullet(
                 posicao_inicial = self.jogador.posicao,

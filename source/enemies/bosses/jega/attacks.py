@@ -2,6 +2,7 @@ import math
 import random
 
 import pygame
+from source.systems.gameclock import relogio
 
 from source.feats.projetil import Carabin
 from source.feats.grenades import Spike
@@ -18,7 +19,7 @@ class JegaAttacks:
         """Ativa a órbita usando a distância REAL até o jogador como raio,
         evitando qualquer teleporte para encaixar em um raio fixo."""
         self.estado = 'orbitando'
-        self.tempo_inicio_estado = pygame.time.get_ticks()
+        self.tempo_inicio_estado = relogio.agora()
 
         self.sentido_orbita = random.choice([1, -1])
         self.raio_orbita = distancia_atual

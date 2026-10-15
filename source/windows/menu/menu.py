@@ -1,4 +1,5 @@
 import pygame
+from source.utils.paths import path
 import os
 from os.path import join
 
@@ -11,7 +12,7 @@ class MenuPrincipal(MenuDraw):
         self.game = game
         
         # --- CARREGAMENTO DA FONTE ---
-        self.font_path = join('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
+        self.font_path = path('assets', 'fonts', 'orbitron', 'Orbitron-Bold.ttf')
         try:
             if os.path.exists(self.font_path):
                 self.font = pygame.font.Font(self.font_path, 40)

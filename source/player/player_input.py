@@ -1,6 +1,7 @@
 import pygame
 
 from source.systems.entitymanager import entity_manager
+from source.debug import DEBUG
 
 class PlayerInput:
     def input(self):
@@ -16,6 +17,9 @@ class PlayerInput:
 
     # --- ÁREA DOS HACKS ---
     def debug_hacks(self):
+        # Atalhos de trapaça (L/P/B) só existem com MCE_DEBUG=1 — não vão mais no build final.
+        if not DEBUG:
+            return
         hack = pygame.key.get_pressed()
         
         # Hack L: Level Up
