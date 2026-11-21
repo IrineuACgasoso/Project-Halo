@@ -1,7 +1,7 @@
 """Configuração global da suíte.
 
-O jogo carrega TODOS os assets no import de `source.feats.assets` (pygame.init + set_mode
-oculto + ~120 MB de imagens, ~13 s). Por isso:
+Os assets são carregados uma vez, aqui, com `carregar_assets()` (pygame.init + janela oculta +
+as imagens do manifesto, ~1,5 s; o import do jogo não carrega nada desde a D3). Por isso:
   - os drivers SDL são forçados para `dummy` ANTES de qualquer import de pygame;
   - o cwd vira a raiz do repo, porque `source.utils.paths.path()` resolve relativo ao cwd;
   - o `Game` é criado uma única vez por sessão (fixture `game`) e cada teste que precisa
@@ -22,8 +22,10 @@ if ROOT not in sys.path:
 import pygame  # noqa: E402
 import pytest  # noqa: E402
 
-import source.feats.assets  # noqa: E402,F401  (carrega assets uma vez)
+from source.feats.assets import carregar_assets  # noqa: E402
 from source.windows.settings import largura_tela, altura_tela  # noqa: E402
+
+carregar_assets()   # antes da coleta: os módulos de teste leem ASSETS no nível do módulo
 
 
 def pytest_addoption(parser):

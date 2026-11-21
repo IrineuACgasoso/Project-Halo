@@ -1,4 +1,5 @@
-"""Assets: manifesto e equivalência com o carregamento antigo (roteiro D1); mapas sob demanda (D2).
+"""Assets: manifesto e equivalência com o carregamento antigo (roteiro D1); mapas sob demanda (D2);
+import sem efeito colateral (D3).
 
 `tests/golden/assets.json` foi gravado com as 251 linhas literais, ANTES da troca pelo manifesto:
 cada superfície vira 'LxA bits alpha|opaco crc32-dos-pixels-RGBA'.
@@ -7,6 +8,8 @@ Regravar (só quando a arte muda de propósito):
 """
 import json
 import os
+import subprocess
+import sys
 import zlib
 
 import pygame
@@ -236,3 +239,73 @@ def test_partida_decodifica_so_o_mapa_usado(novo_jogo, monkeypatch):
     fundo = novo_jogo.mapa.background
     assert fundo is mapas['2']
     assert (novo_jogo.mapa.largura_mapa_pixels, novo_jogo.mapa.altura_mapa_pixels) == fundo.get_size()
+
+
+# ------------------------------------------------------------------ #
+# Import sem efeito colateral (roteiro D3)
+# ------------------------------------------------------------------ #
+RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def rodar_em_processo_novo(codigo):
+    """Roda `codigo` num Python novo (este processo já carregou os assets) e devolve o stdout."""
+    ambiente = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy',
+                    PYGAME_HIDE_SUPPORT_PROMPT='1')
+    ambiente.pop('MCE_DEBUG', None)
+    feito = subprocess.run([sys.executable, '-c', codigo], cwd=RAIZ, env=ambiente,
+                           capture_output=True, text=True, timeout=120)
+    assert feito.returncode == 0, feito.stderr
+    return feito.stdout.strip()
+
+
+def test_importar_todo_o_jogo_nao_inicia_pygame_nem_carrega_assets():
+    saida = rodar_em_processo_novo(
+        'import importlib, sys, pygame\n'
+        'sys.path.insert(0, "tests")\n'
+        'from unit.test_imports import MODULOS\n'
+        'for m in MODULOS: importlib.import_module(m)\n'
+        'from source.feats.assets import ASSETS\n'
+        'print(len(MODULOS), pygame.get_init(), pygame.display.get_init(), len(ASSETS))')
+    quantos, pygame_iniciado, display_iniciado, assets = saida.split()
+    assert int(quantos) > 200
+    assert (pygame_iniciado, display_iniciado, assets) == ('False', 'False', '0')
+
+
+def test_carregar_sem_janela_abre_uma_oculta():
+    saida = rodar_em_processo_novo(
+        'import pygame\n'
+        'from source.feats.assets import ASSETS, carregar_assets\n'
+        'carregar_assets()\n'
+        'tela = pygame.display.get_surface()\n'
+        'print(tela.get_size(), bool(pygame.display.get_window_size()), len(ASSETS) > 0)')
+    assert saida == '(1280, 720) True True'
+
+
+def test_carregar_com_janela_aberta_usa_a_janela_do_jogo():
+    # O caminho do main.py: a janela vem primeiro e carregar_assets não abre outra.
+    saida = rodar_em_processo_novo(
+        'import pygame\n'
+        'pygame.init()\n'
+        'tela = pygame.display.set_mode((640, 360))\n'
+        'from source.feats.assets import ASSETS, carregar_assets\n'
+        'carregar_assets()\n'
+        'print(pygame.display.get_surface() is tela, len(ASSETS) > 0)')
+    assert saida == 'True True'
+
+
+def test_driver_sem_modo_oculto_abre_janela_comum(monkeypatch):
+    chamadas = []
+
+    def set_mode(tamanho, flags=0):
+        chamadas.append(flags)
+        if flags & pygame.HIDDEN:
+            raise pygame.error('sem modo oculto')
+    monkeypatch.setattr(pygame.display, 'get_surface', lambda: None)
+    monkeypatch.setattr(pygame.display, 'set_mode', set_mode)
+    modulo_assets._preparar_display()
+    assert chamadas == [pygame.HIDDEN, 0]
+
+
+def test_preparar_display_nao_troca_a_janela_existente(monkeypatch):
+    monkeypatch.setattr(pygame.display, 'set_mode', lambda *a: pytest.fail('abriu outra janela'))
+    modulo_assets._preparar_display()

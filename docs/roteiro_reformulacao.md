@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1 e D2 feitas; próxima: D3.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1, D2 e D3 feitas; próxima: D4.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -141,6 +141,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 - Muda: `pygame.init` e a janela oculta saem do import de `assets.py` e vão para `carregar_assets()`, chamado por `main.py` e pelo `conftest`.
 - Pré-condição: nenhum módulo lê `ASSETS` durante o import. Fora de classes já não há nenhum; dentro de corpos de classe, TODO: confirmar no início da etapa.
 - Testes: importar `source.game` não abre display; `test_imports` (A4) continua verde.
+- Feito (2026-11-21): pré-condição confirmada por AST (nenhum módulo lê `ASSETS` nem chama pygame no import, fora o próprio `assets.py`). Ver log.
 
 **D4 · Dados de inimigos** (risco: baixo; um commit por família)
 - Muda: `data/enemy_data.py` com dataclasses frozen (`vida`, `dano`, `velocidade`, faixas de cooldown, tabela de drop). Os inimigos comuns leem dali.

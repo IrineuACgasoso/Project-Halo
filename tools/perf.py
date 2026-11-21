@@ -12,7 +12,7 @@ Código de saída: 0 = ok; 1 = algum cenário piorou e a piora se confirmou ao m
 2 = base ilegível ou --gravar-base na bateria (a medida varia até 2x; grave só na tomada).
 
 Os imports do jogo ficam dentro das funções de propósito: o import de `source.feats.assets`
-(que carrega todos os assets) é uma das coisas medidas.
+somado a `carregar_assets()` ("import dos assets") é uma das coisas medidas.
 """
 import argparse
 import functools
@@ -320,7 +320,8 @@ def main(argv=None):
         return 2
 
     t0 = time.perf_counter()
-    import source.feats.assets  # noqa: F401  (o import carrega todos os assets)
+    from source.feats.assets import carregar_assets
+    carregar_assets()
     import_s = round(time.perf_counter() - t0, 2)
 
     import pygame

@@ -1,34 +1,38 @@
 """ASSETS: as imagens do jogo, montadas a partir de `data/manifesto_assets.py` (roteiro D1).
 
-Ainda carrega no import (pygame.init + janela oculta + `carregar_assets()`): a D3 tira esse
-efeito colateral. Os fundos das fases são a exceção: decodificados sob demanda (`MapasSobDemanda`, D2).
+O import não tem efeito colateral (roteiro D3): `ASSETS` nasce vazio e só é preenchido por
+`carregar_assets()`, que o `main.py`, o `conftest` e o `tools/perf.py` chamam. Os fundos das
+fases são decodificados sob demanda (`MapasSobDemanda`, D2).
 """
 from collections import OrderedDict
 from collections.abc import Mapping
 
 import pygame
 from source.windows.settings import *
+from source.windows.settings import altura_tela, largura_tela
 
 # `path` agora vive em source/utils/paths.py (evita import circular); reexportado aqui.
 from source.utils.paths import path  # noqa: E402,F401
 from source.data.manifesto_assets import MANIFESTO, Imagem
-
-# Inicialização segura para o Executável
-pygame.init()
-
-# Criar uma tela oculta evita que o convert_alpha() dê erro
-# e resolve o erro de "Embedded Interpreter" em alguns sistemas
-try:
-    screen = pygame.display.set_mode((1280, 720), pygame.HIDDEN)
-except pygame.error:
-    # Caso o driver de vídeo não suporte modo oculto
-    screen = pygame.display.set_mode((1280, 720))
 
 COR_PLACEHOLDER = (255, 0, 255)
 TAMANHO_PLACEHOLDER = (64, 64)   # para imagem sem escala no manifesto
 
 ASSETS = {}
 _arquivos_com_falha = set()      # cada arquivo ausente é logado uma vez só
+
+
+def _preparar_display():
+    """`convert`/`convert_alpha` exigem uma janela. Quem já abriu a sua (o `main.py`) não ganha
+    outra; sem janela (testes, ferramentas), abre uma oculta."""
+    if not pygame.get_init():
+        pygame.init()
+    if pygame.display.get_surface() is not None:
+        return
+    try:
+        pygame.display.set_mode((largura_tela, altura_tela), pygame.HIDDEN)
+    except pygame.error:
+        pygame.display.set_mode((largura_tela, altura_tela))   # driver sem modo oculto
 
 
 def _placeholder(imagem):
@@ -107,11 +111,10 @@ def _montar(no):
 
 def carregar_assets():
     """Preenche `ASSETS` (sempre o mesmo dict) a partir do manifesto. Idempotente.
+    Inicia o pygame e abre uma janela oculta se ainda não houver janela (`_preparar_display`).
     Os fundos das fases ficam sob demanda (`MapasSobDemanda`)."""
     if not ASSETS:
+        _preparar_display()
         ASSETS.update({chave: MapasSobDemanda(no) if chave == 'maps' else _montar(no)
                        for chave, no in MANIFESTO.items()})
     return ASSETS
-
-
-carregar_assets()

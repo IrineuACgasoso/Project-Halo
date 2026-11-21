@@ -2,6 +2,17 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa D3: import sem efeito colateral
+**O que foi feito**
+- Pré-condição verificada por AST (script fora do repo): fora o próprio `assets.py`, nenhum módulo de `source/` lê `ASSETS` nem chama pygame no import (nível do módulo, corpo de classe, valor padrão de argumento e decorador). A única chamada é `SUPERFICIE_VAZIA` (`utils/superficies.py`), uma `Surface` 1×1 que não precisa de display.
+- `feats/assets.py`: saíram `pygame.init()`, a janela oculta e a chamada de `carregar_assets()` do import. `ASSETS` nasce vazio. `carregar_assets()` chama `_preparar_display()`: inicia o pygame se preciso e só abre uma janela oculta (1280×720; sem modo oculto, uma comum) se ainda não houver janela. A global `screen` saiu (ninguém a usava).
+- Quem carrega: `main.py` (depois do `set_mode`, então o jogo não abre mais a janela oculta extra), o `conftest` (antes da coleta: `test_smoke_simulacao` lê `ASSETS['maps']` no nível do módulo) e o `tools/perf.py` ("import dos assets" = import + `carregar_assets()`, comparável com as medidas antigas).
+- Testes (+5 em `test_assets.py`): num processo novo, importar os 226 módulos de `source/` deixa o pygame e o display sem iniciar e `ASSETS` vazio (o teste falha no código da D2, conferido); carregar sem janela abre uma oculta; carregar com a janela do jogo aberta não troca a janela; driver sem modo oculto cai na janela comum; com janela existente não chama `set_mode`. `main.main()` rodado no driver dummy (com `Game.run` trocado) chega ao menu. Suíte: **828 verdes + 1 xfail**. Golden e catraca inalterados.
+
+**Desempenho** (na tomada): import dos assets 1,3 s (D2: 1,5 s na bateria); pico 379 MB. O `update` e o `draw` não mudaram. `troca_de_fase` segue acusada contra a base, como desde a D2.
+
+**Não validado:** o `main.py` no Windows de verdade (com janela): a ordem nova é janela → assets → `Game`; o executável (PyInstaller) não foi gerado.
+
 ## 2026-11-21 | Etapa D2: mapas sob demanda
 **O que foi feito**
 - `feats/assets.py::MapasSobDemanda` (um `Mapping`): `ASSETS['maps']` decodifica o fundo de uma fase no 1º acesso e guarda só os 2 mais recentes (LRU). `in`, `len` e a iteração consultam o manifesto, sem decodificar; chave inexistente dá `KeyError`, como num dict. Arquivo ausente vira o placeholder da D1.

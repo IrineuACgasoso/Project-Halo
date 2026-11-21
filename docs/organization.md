@@ -12,7 +12,7 @@ Project-Halo/
 ├── ruff.toml                # linter: regras F + lista de exceções que só encolhe (roteiro A4)
 ├── CLAUDE.md                # contexto essencial para toda sessão
 ├── docs/                    # documentação do projeto (este arquivo, log, arquitetura, roteiro_reformulacao, plano_bosses...)
-├── assets/                  # ~120 MB, carregados no import de feats/assets.py (menos os fundos das fases: sob demanda)
+├── assets/                  # ~120 MB, carregados por carregar_assets() (menos os fundos das fases: sob demanda)
 │   ├── data/ranking.json    # ranking em dev (versionado); no .exe vai para %APPDATA%/ProjectHalo
 │   ├── img/map/<n>/         # m<n>.tmj (Tiled) + imagem de fundo; existem as fases 0–8
 │   ├── img/{player,enemies,buddies,projectiles,icons,items,menu}/
@@ -64,7 +64,7 @@ Project-Halo/
     │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
-    │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto no import (efeito colateral!); MapasSobDemanda (D2)
+    │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto (chamado pelo main.py; import limpo, D3); MapasSobDemanda (D2)
     │   ├── weapons/         # baseweapon.py (Arma) + pastas por raridade: comum/incomum/rara/epica/lendaria
     │   ├── projetil/        # ProjetilUniversal + subclasses (brick, carabin, needler, laserblast...)
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI

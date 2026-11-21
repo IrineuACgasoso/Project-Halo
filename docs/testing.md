@@ -14,7 +14,7 @@
   - força `SDL_VIDEODRIVER=dummy` e `SDL_AUDIODRIVER=dummy`;
   - muda o cwd para a raiz, porque `path()` é relativo ao cwd;
   - remove `MCE_DEBUG`.
-- Importa `source.feats.assets` **uma vez por sessão**. Esse import leva cerca de 13 s e é o custo fixo de qualquer execução.
+- Chama `carregar_assets()` **uma vez por sessão**, antes da coleta (alguns módulos de teste leem `ASSETS` no nível do módulo). Leva ~1,5 s e é o custo fixo de qualquer execução. Importar o jogo não carrega nada (D3).
 - Fixtures:
   - `tela` e `game` (sessão): um `Game` real.
   - `game` liga `estados_estritos`: transição de estado fora da tabela vira exceção.

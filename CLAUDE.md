@@ -25,7 +25,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
 - **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`. O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
 - **Fases:** mapas Tiled em `assets/img/map/<n>/m<n>.tmj`. O pool de inimigos e os bosses de cada fase ficam em `source/systems/spawner/`.
-- **Import pesado:** `source/feats/assets.py` carrega os assets no import (~1,5 s), com `pygame.init` e janela oculta. Os fundos das fases são a exceção: `ASSETS['maps']` decodifica no 1º acesso e guarda só os 2 mais recentes. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
+- **Assets:** o import não carrega nada; `carregar_assets()` (`source/feats/assets.py`, ~1,5 s) preenche `ASSETS` e é chamado pelo `main.py`, pelo `conftest` e pelo `tools/perf.py`. Sem janela aberta, ele faz `pygame.init` e abre uma oculta. Não leia `ASSETS` no nível do módulo nem em corpo de classe. Os fundos das fases são a exceção: `ASSETS['maps']` decodifica no 1º acesso e guarda só os 2 mais recentes. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
 
 ## Regras críticas
 - **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.
