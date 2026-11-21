@@ -238,3 +238,20 @@ def test_ranking_no_exe_vai_para_appdata(monkeypatch, tmp_path):
 
 def test_ranking_em_dev_usa_arquivo_do_repo():
     assert ranking_data.caminho_padrao_ranking() == os.path.abspath(os.path.join('assets', 'data', 'ranking.json'))
+
+
+# ── HUD
+def test_hud_foco_do_boss_usa_relogio_de_jogo(novo_jogo, monkeypatch):
+    """Usava pygame.time.get_ticks(): a barra do boss dependia do relógio de parede, e a
+    contagem de alocações da catraca (A2) variava entre rodadas iguais."""
+    hud = novo_jogo.hud
+    monkeypatch.setattr(pygame.time, 'get_ticks', lambda: 10 ** 9)   # parede "andou" muito
+    hud._ultimo_check_boss = relogio.agora()
+    hud.foco_barra_vida = None
+    novo_jogo.spawner.spawnar('hunter')
+
+    hud._atualizar_boss_foco()
+    assert hud.foco_barra_vida is None   # jogo parado: ainda dentro do intervalo
+    relogio.avancar(hud._intervalo_check_boss / 1000)
+    hud._atualizar_boss_foco()
+    assert hud.foco_barra_vida is novo_jogo.boss_atual

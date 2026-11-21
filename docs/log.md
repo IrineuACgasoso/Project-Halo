@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Correção: HUD usava o relógio de parede
+- `HUD._atualizar_boss_foco` usava `pygame.time.get_ticks()` (viola a regra de tempo do `CLAUDE.md`). Agora usa `relogio.agora()`.
+- Efeito: o foco da barra de vida do boss é reavaliado a cada 500 ms **de jogo**. Na simulação headless, a barra aparecia antes ou depois conforme a velocidade da máquina, e a contagem de alocações da A2 variava ±1 Surface/frame entre rodadas iguais (foi assim que o bug apareceu).
+- Commit separado da A2 (roteiro §2, regra 6). Regressão em `test_regressoes.py::test_hud_foco_do_boss_usa_relogio_de_jogo`. Suíte: **372 verdes**.
+- Não muda a simulação (só o desenho do HUD); não validado visualmente.
+
 ## 2026-11-21 | Etapa A1: medição de desempenho
 **O que foi feito**
 - `tools/perf.py`: cenários headless com o loop real (update + draw, dt 1/60), jogador blindado e seeds fixas: `horda_150` (reposta fora do cronômetro), `fase0_60s`, `boss_<nome>` (20 s, todos do `PHASE_BOSSES`) e `troca_de_fase` (0→8). Grava média/p95/update/draw em `tools/perf_base.json`, mede o import dos assets e o pico de memória e compara com a base.

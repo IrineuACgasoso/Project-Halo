@@ -3,6 +3,7 @@ from os.path import join
 
 from source.windows.settings import largura_tela, altura_tela
 from source.systems.entitymanager import entity_manager
+from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS, path as _fonte_path
 from .hud_draw import (
     draw_barra_escudo,
@@ -62,7 +63,7 @@ class HUD:
         return pygame.font.SysFont("Georgia", size, bold=True)
 
     def _atualizar_boss_foco(self):
-        agora = pygame.time.get_ticks()
+        agora = relogio.agora()
         if agora - self._ultimo_check_boss < self._intervalo_check_boss:
             return
         self._ultimo_check_boss = agora
