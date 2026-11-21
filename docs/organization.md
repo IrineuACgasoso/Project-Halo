@@ -41,6 +41,7 @@ Project-Halo/
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
     │   ├── estados.py       # constantes de estado, TRANSICOES, Tela (roteiro B2)
     │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
+    │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes

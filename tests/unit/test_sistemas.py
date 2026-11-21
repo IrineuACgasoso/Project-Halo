@@ -246,3 +246,21 @@ def _tecla(key, mod=0):
 def test_esc_pausa_o_jogo(novo_jogo):
     novo_jogo.event_manager.tratar_jogando(_tecla(pygame.K_ESCAPE))
     assert novo_jogo.estado_do_jogo == 'pausa'
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=(
+    'BUG conhecido (achado na B4): tocar o portal da última fase e morrer no mesmo update chama '
+    '_encerrar_partida duas vezes (finalizar_campanha e _checar_game_over), somando a pontuação '
+    'final em dobro.'))
+def test_fim_de_campanha_e_morte_no_mesmo_update_pontua_uma_vez(novo_jogo, monkeypatch):
+    from source.feats.effects import Portal
+    monkeypatch.setattr(novo_jogo, 'estados_estritos', False)   # 2ª ida a game_over seria exceção
+    p = novo_jogo.player
+    novo_jogo.sessao.fase_atual = max(int(k) for k in ASSETS['maps'])
+    novo_jogo.sessao.portal_atual = Portal(p.posicao, entity_manager.all_sprites)
+    p.experiencia_atual = 7
+    p.vida_atual = 0
+    pontos_antes = p.pontuacao
+    novo_jogo.update(1 / 60)
+    assert novo_jogo.estado_do_jogo == 'game_over'
+    assert p.pontuacao == pontos_antes + 7

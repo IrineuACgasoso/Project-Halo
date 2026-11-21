@@ -1,5 +1,6 @@
 import pygame
 from source.systems.entitymanager import entity_manager
+from source.systems.eventos import eventos, INIMIGO_MORREU
 
 class CollisionManager:
     def __init__(self, game):
@@ -130,3 +131,6 @@ class CollisionManager:
         for inimigo in entity_manager.inimigos_grupo:
             if inimigo.vida <= 0:
                 inimigo.morrer((entity_manager.all_sprites, entity_manager.items_grupo))
+                # morrer() pode adiar a morte (Warden: a consciência espera os corpos)
+                if not inimigo.alive():
+                    eventos.emitir(INIMIGO_MORREU, inimigo=inimigo)

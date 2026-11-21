@@ -19,6 +19,7 @@ from source.systems.estados import (ESTADOS, TRANSICOES, Tela, TransicaoInvalida
                                     MENU_PRINCIPAL, JOGANDO, PAUSA, LEVEL_UP, CONFIGURACOES,
                                     COLABORADORES, RANKING, GAME_OVER)
 from source.systems.sessao import SessaoJogo
+from source.systems.eventos import eventos, BOSS_DERROTADO
 from source.debug import DEBUG
 # FEATS
 from source.feats.buddies import *
@@ -122,6 +123,7 @@ class Game:
         # 1. Relógio primeiro: tudo que nasce abaixo guarda timestamps dele. A simulação depende
         #    do valor absoluto (cooldowns "prontos" no início), então toda partida começa igual.
         relogio.reiniciar()
+        eventos.limpar()   # assinaturas valem por partida
 
         # 2. Limpa todos os grupos de sprite
         entity_manager.all_sprites.empty()
@@ -172,64 +174,74 @@ class Game:
 
 
     def update(self, delta_time):
+        """Um passo de simulação. A ordem dos passos importa (ver docs/architecture.md)."""
         if self._estado != JOGANDO:
             return
-
         # O relógio de jogo só avança aqui: pausa/level-up/menus congelam todos os timers.
         relogio.avancar(delta_time)
-        agora = relogio.agora()
+        self._atualizar_portal()
+        self._checar_boss_derrotado()
+        self._checar_portal_tocado()
+        self._atualizar_spawner(delta_time)
+        self._atualizar_entidades(delta_time)
+        self.collision_manager.update(delta_time)
+        self.stage_manager.update(delta_time)
+        self._checar_game_over()
 
-        # Portal
-        if self.sessao.spawnar_portal_em_breve:
-            if agora - self.sessao.timer_portal >= 2000:
-                self.sessao.portal_atual = Portal(self.mapa.portal_pos, entity_manager.all_sprites)
-                self.sessao.spawnar_portal_em_breve = False
+    def _atualizar_portal(self):
+        """O portal nasce 2000 ms (de jogo) depois que o boss morre."""
+        s = self.sessao
+        if s.spawnar_portal_em_breve and relogio.agora() - s.timer_portal >= 2000:
+            s.portal_atual = Portal(self.mapa.portal_pos, entity_manager.all_sprites)
+            s.spawnar_portal_em_breve = False
 
-        # Boss morreu
+    def _checar_boss_derrotado(self):
         if self.sessao.boss_atual and not self.sessao.boss_atual.alive():
             self.boss_derrotado()
 
-        # Colisão com portal
-        if self.sessao.portal_atual:
-            ox = self.sessao.portal_atual.rect.x - self.player.rect.x
-            oy = self.sessao.portal_atual.rect.y - self.player.rect.y
-            if self.player.mask.overlap(self.sessao.portal_atual.mask, (ox, oy)):
-                if not self.stage_manager.transicao_ativa:
-                    self.stage_manager.iniciar_transicao()
+    def _checar_portal_tocado(self):
+        portal = self.sessao.portal_atual
+        if not portal:
+            return
+        ox = portal.rect.x - self.player.rect.x
+        oy = portal.rect.y - self.player.rect.y
+        if self.player.mask.overlap(portal.mask, (ox, oy)) and not self.stage_manager.transicao_ativa:
+            self.stage_manager.iniciar_transicao()
 
-        # Timer e spawner só rodam sem boss nem transição ativa
+    def _atualizar_spawner(self, delta_time):
+        """Timer e spawner só rodam sem boss, portal nem transição."""
+        s = self.sessao
         jogo_livre = (
             not self.stage_manager.transicao_ativa
-            and not self.sessao.boss_atual
-            and not self.sessao.spawnar_portal_em_breve
-            and not self.sessao.portal_atual
+            and not s.boss_atual
+            and not s.spawnar_portal_em_breve
+            and not s.portal_atual
         )
         if jogo_livre:
-            self.sessao.timer_jogo += delta_time
+            s.timer_jogo += delta_time
             self.spawner.update(delta_time)
 
-        # Atualiza entidades
-        if self.player:
-            # Cada entidade consulta a grade na própria posição (roteiro C1)
-            paredes = self.mapa.grade_paredes
-            self.player.update(delta_time, paredes)
-            self.camera.update(self.player.posicao)
+    def _atualizar_entidades(self, delta_time):
+        """Player, câmera, armas e depois os outros sprites (inimigos recebem as paredes)."""
+        if not self.player:
+            return
+        # Cada entidade consulta a grade na própria posição (roteiro C1)
+        paredes = self.mapa.grade_paredes
+        self.player.update(delta_time, paredes)
+        self.camera.update(self.player.posicao)
 
-            for arma in self.player.armas.values():
-                arma.update(delta_time)
+        for arma in self.player.armas.values():
+            arma.update(delta_time)
 
-            for sprite in entity_manager.all_sprites:
-                if sprite == self.player:
-                    continue
-                if sprite in entity_manager.inimigos_grupo:
-                    sprite.update(delta_time, paredes)
-                else:
-                    sprite.update(delta_time)
+        for sprite in entity_manager.all_sprites:
+            if sprite == self.player:
+                continue
+            if sprite in entity_manager.inimigos_grupo:
+                sprite.update(delta_time, paredes)
+            else:
+                sprite.update(delta_time)
 
-        self.collision_manager.update(delta_time)
-        self.stage_manager.update(delta_time)
-
-        # Game over
+    def _checar_game_over(self):
         if self.player.vida_atual <= 0:
             self._encerrar_partida()
 
@@ -262,10 +274,12 @@ class Game:
         self.renderer.draw()
 
     def boss_derrotado(self):
-        print(f"Boss da fase {self.sessao.fase_atual} derrotado!")
-        self.sessao.boss_atual = None
-        self.sessao.spawnar_portal_em_breve = True
-        self.sessao.timer_portal = relogio.agora()
+        s = self.sessao
+        print(f"Boss da fase {s.fase_atual} derrotado!")
+        boss, s.boss_atual = s.boss_atual, None
+        s.spawnar_portal_em_breve = True
+        s.timer_portal = relogio.agora()
+        eventos.emitir(BOSS_DERROTADO, boss=boss, fase=s.fase_atual)
 
     def run(self):
         # Passo fixo: a simulação sempre avança de PASSO_FIXO em PASSO_FIXO, então um engasgo

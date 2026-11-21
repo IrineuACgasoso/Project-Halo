@@ -1,6 +1,7 @@
 import pygame
 from source.systems.mapmanager import Mapa
 from source.systems.entitymanager import entity_manager
+from source.systems.eventos import eventos, FASE_TROCADA
 from source.utils.paths import path
 from source.systems.spawner import Spawner
 
@@ -103,6 +104,7 @@ class StageManager:
 
         # Reseta spawner
         game.spawner = Spawner(game)
+        eventos.emitir(FASE_TROCADA, fase=game.sessao.fase_atual)
         
 
     def draw(self):

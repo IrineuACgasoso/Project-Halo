@@ -2,6 +2,21 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa B4: ordem de update explícita + eventos (bloco B concluído)
+**O que foi feito**
+- `Game.update` virou passos nomeados: `_atualizar_portal`, `_checar_boss_derrotado`, `_checar_portal_tocado`, `_atualizar_spawner`, `_atualizar_entidades`, colisão, fase, `_checar_game_over`. A ordem e as condições não mudaram.
+- `systems/eventos.py`: barramento síncrono `eventos` (`assinar`, `emitir`, `limpar`), limpo a cada partida. Eventos: `inimigo_morreu` (`CollisionManager`, só quando `morrer()` tirou o inimigo do mundo: a consciência do Warden adia a morte), `boss_derrotado` (boss, fase), `fase_trocada` (fase nova). `dano_causado` está definido, mas só é emitido a partir da **E1**: hoje há 3 APIs de dano e 4 overrides, e emitir em só parte delas daria dados errados para a F3.
+- Ainda não há assinantes no jogo (F3, G4 e a pontuação vêm depois).
+- Testes: `test_eventos.py` (16), incluindo a ordem dos passos e a contagem: em 60 s da fase 0, cada inimigo que saiu do mundo gerou exatamente um `inimigo_morreu`. Suíte: **722 verdes + 1 xfail**. Golden inalterado; catraca inalterada.
+
+**Bug novo (não corrigido; xfail):** tocar o portal da **última** fase e morrer no mesmo update chama `_encerrar_partida` duas vezes (`finalizar_campanha` e `_checar_game_over`): a pontuação final é somada em dobro (o teste deu 14 em vez de 7). Com `estados_estritos`, a 2ª ida a `game_over` vira exceção. `test_sistemas.py::test_fim_de_campanha_e_morte_no_mesmo_update_pontua_uma_vez` é `xfail(strict=True)`. Correção sugerida: `_checar_game_over` só age se o estado ainda for `jogando` (1 linha, commit próprio).
+
+**Desempenho:** rodada completa acusou horda e Guilty; lado a lado com o HEAD (B3), alternando: horda 8,8–9,3 × 8,9; Guilty 1,5–1,6 × 1,4–1,5; Warden 4,5–4,6 × 4,6 (uma rodada isolada deu 5,7, que não se repetiu); Guardian 9,3–9,4 × 9,3. Sem piora.
+
+**Ruído de medição (B2–B4):** nesta sessão a máquina mediu até 70% acima da base **no próprio HEAD**, na tomada. Por isso as 3 etapas foram validadas por A/B alternado contra o commit anterior (worktree), não contra `perf_base.json`. Base não regravada: convém medir de novo numa sessão "fria" antes da próxima etapa de desempenho.
+
+**Pendências:** o bug acima (xfail). TODO do Hunter preso nas paredes (ver C1). Próxima etapa: **C2** (só se o gatilho da §6 disparar) ou **C3**.
+
 ## 2026-11-21 | Etapa B3: sessão separada do Game
 **O que foi feito**
 - `systems/sessao.py::SessaoJogo` (dataclass): `timer_jogo`, `fase_atual`, `boss_atual`, `portal_atual`, `spawnar_portal_em_breve`, `timer_portal`, `tela_de_upgrade_ativa`, `gravemind_reborns`. Nasce em `_resetar_estado_jogo`; todos os consumidores (spawner, stage manager, HUD, game over, player, Gravemind, testes) passaram a `game.sessao.<campo>`. Migração completa no mesmo commit: os shims de propriedade previstos no roteiro não foram necessários.

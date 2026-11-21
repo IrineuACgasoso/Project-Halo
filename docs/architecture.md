@@ -36,19 +36,31 @@ stateDiagram-v2
 ```
 
 ## Game.update (ordem importa)
+Cada passo é um método nomeado; `test_eventos.py::test_update_roda_os_passos_na_ordem` fixa a ordem.
 1. `relogio.avancar(dt)`: este é o **único** lugar onde o relógio de jogo avança.
-2. Portal: aparece 2000 ms depois que o boss morre. Encostar nele chama `StageManager.iniciar_transicao()`.
-3. `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
-4. Atualizações: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
+2. `_atualizar_portal`: o portal aparece 2000 ms depois que o boss morre. `_checar_boss_derrotado` → `boss_derrotado()`. `_checar_portal_tocado`: encostar nele chama `StageManager.iniciar_transicao()`.
+3. `_atualizar_spawner`: `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
+4. `_atualizar_entidades`: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
 5. `CollisionManager.update`, nesta ordem:
    - projétil do jogador contra inimigos (o mais próximo primeiro; perfuração finita acerta cada alvo uma vez só);
    - projétil inimigo contra a hitbox do jogador;
    - contato (com espinhos);
    - coleta de itens;
    - auras (DPS × dt);
-   - morte dos inimigos (`morrer` gera os drops).
-6. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner e mata os sprites que não sobrevivem (player, companions, aura).
-7. Se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
+   - morte dos inimigos (`morrer` gera os drops; se o inimigo saiu do mundo, emite `inimigo_morreu`).
+6. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner, mata os sprites que não sobrevivem (player, companions, aura) e emite `fase_trocada`.
+7. `_checar_game_over`: se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
+
+## Eventos de jogo (`systems/eventos.py`)
+Barramento síncrono `eventos`: `assinar(nome, funcao)`, `emitir(nome, **dados)` (chama na hora, na ordem de assinatura; a exceção do assinante sobe) e `limpar()`, chamado a cada partida nova. Nome fora de `EVENTOS` é `ValueError`.
+| Evento | Dados | Quem emite |
+|---|---|---|
+| `inimigo_morreu` | `inimigo` | `CollisionManager` (passo 6), só se `morrer()` tirou o inimigo do mundo |
+| `boss_derrotado` | `boss`, `fase` | `Game.boss_derrotado` |
+| `fase_trocada` | `fase` (a nova) | `StageManager._trocar_dados_fase` |
+| `dano_causado` | definido na E1 | ainda ninguém: entra com o contrato de dano único (E1) |
+
+Ainda não há assinantes no jogo: os consumidores previstos são a memória dos bosses (F3), o áudio (G4) e a pontuação.
 
 ## Singletons e estado global
 - `entity_manager` (`systems/entitymanager.py`): guarda os grupos `all_sprites`, `inimigos_grupo`, `projeteis_jogador_grupo`, `projeteis_inimigos_grupo`, `items_grupo`, `auras_grupo` e o `player`. `Game._resetar_estado_jogo` esvazia esses grupos. Os grupos se acessam só por aqui (os aliases `game.<grupo>` foram removidos na B3).
