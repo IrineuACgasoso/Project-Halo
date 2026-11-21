@@ -2,6 +2,20 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa A4: higiene (bloco A concluído)
+**O que foi feito**
+- Código morto apagado (nada os importava, verificado por grep): `atriox/{setup,states,attacks,vfx}.py`, `escharum/vfx.py` e `harbinger/states.py`. O Atriox continua usando os mixins do Tartarus (identidade própria na F5).
+- `tests/unit/test_imports.py`: importa cada um dos 226 módulos de `source/` (um teste por módulo, a lista sai de uma varredura da pasta). Todos importam sozinhos: nenhum import circular nem quebrado.
+- `ruff==0.17.6` em `requirements-dev.txt`, com `ruff.toml` só nas regras `F`. As violações de hoje viraram exceções por arquivo × regra (108 arquivos, 139 pares): 168 `F401`, 117 `F405`, 42 `F403`, 5 `F841`, 1 `F811`. **Nenhum `F821`** (nome indefinido) no repo.
+- `tests/unit/test_lint.py`: o repo passa no ruff; exceção que não é mais necessária falha (é isso que faz a lista encolher); a config pega `F821`/`F401`/`F403`. `CLAUDE.md` ganhou o comando.
+- Suíte: **650 verdes + 1 xfail** (~100 s). Golden e catraca inalterados. `perf.py` não foi refeito: os arquivos apagados não eram importados, então o jogo em execução é o mesmo.
+
+**Achados (não corrigidos, ficam na lista de exceções)**
+- Os 5 `F841` e o `F811` são variáveis mortas inofensivas (`bruiser.py: agora`, `mortar.py: aviso`, `hud_draw.py: fill_rect` e o parâmetro `altura_tela` que sombreia o import, `ranking_draw.py: brilho`, `settings_draw.py: gap`). Nenhum esconde bug.
+- **Limite:** a exceção é por arquivo × regra, então um 2º import não usado num arquivo que já tem `F401` passa. Corrigir os `F401`/`F403` exige cuidado com imports de efeito colateral (ex.: `assets`), por isso não entrou nesta etapa.
+
+**Pendências:** o bug do relógio (B3). Próxima etapa: **B1** (ou C1).
+
 ## 2026-11-21 | Etapa A3: golden master
 **O que foi feito**
 - `tests/integration/test_golden.py`: 60 s da fase 0 (seed 1234, jogador blindado, só `update`), com uma amostra por segundo (inimigos, projéteis dos dois lados, itens, vida, escudo, XP, nível, pontuação, posição). Compara com `tests/golden/fase0.json` (uma amostra por linha, para o diff mostrar o segundo que mudou) e aponta a primeira divergência (`t=54 s, projeteis_inimigos: golden 5, agora 6`).

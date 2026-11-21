@@ -15,8 +15,9 @@ $env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: hacks
 .venv\Scripts\python.exe -m pytest tests/integration/test_golden.py --atualizar-golden  # só em mudança de comportamento declarada
 build.bat                                                         # exe em dist/main/ (usa o pyinstaller global 6.19)
 .venv\Scripts\python.exe tools/perf.py                            # ms/frame por cenário × tools/perf_base.json (~4 min, na tomada; --escala 0.1 = rápido)
+.venv\Scripts\python.exe -m ruff check                            # linter: só regras F (ruff.toml); também roda na suíte (test_lint.py)
 ```
-Não há linter, formatter nem typecheck configurados. Não invente um comando para eles.
+Não há formatter nem typecheck configurados. Não invente um comando para eles. As exceções do linter em `ruff.toml` só podem encolher: código novo não entra na lista.
 
 ## Arquitetura em 6 linhas (detalhes em @docs/architecture.md)
 - `main.py` chama `Game` (`source/game.py`). O loop é `eventos → update(dt) → draw`, o dt é limitado a 0.05 s e o estado fica numa string (`estado_do_jogo`).

@@ -7,8 +7,9 @@ Project-Halo/
 ├── main.py                  # ENTRYPOINT: pygame.init, janela, Game(tela).run()
 ├── build.bat                # PyInstaller --onedir (assets/ e source/ vão como data) → dist/main/main.exe
 ├── ha.ico                   # ícone do executável
-├── requirements*.txt        # pygame (runtime) / pytest (dev)
+├── requirements*.txt        # pygame (runtime) / pytest + ruff (dev)
 ├── pytest.ini               # config da suíte (testpaths, marker integration)
+├── ruff.toml                # linter: regras F + lista de exceções que só encolhe (roteiro A4)
 ├── CLAUDE.md                # contexto essencial para toda sessão
 ├── docs/                    # documentação do projeto (este arquivo, log, arquitetura, roteiro_reformulacao, plano_bosses...)
 ├── assets/                  # ~120 MB, carregados TODOS no import de feats/assets.py
