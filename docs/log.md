@@ -11,6 +11,8 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - **Equivalência:** `tests/golden/inimigos.json`, gravado com os valores antigos antes da troca. Para cada uma das 19 classes comuns: stats logo depois de criada, as faixas pedidas a `novo_cooldown` em 30 s de update perto do jogador e os drops da morte **na ordem** (`spawn_drop` sorteia item por item). Regravar só com `--atualizar-golden`.
 - Testes: `test_dados_inimigos.py`: equivalência, perfil imutável, cada classe usa o seu perfil, mudar o perfil muda o inimigo (prova que não sobrou número na classe), perfil sem o cooldown que a classe usa falha ao criar, inimigo sem perfil usa o drop padrão. Suíte: **844 verdes + 1 xfail**. Golden e catraca inalterados.
 
+- **D4.2 Flood** (Infection, FloodElite, FloodCarry, FloodMarine): o `morrer()` do `FloodForm` era cópia do da base e saiu; o do FloodCarry continua (solta os Infection) e usa a tabela do perfil.
+
 **Desempenho:** horda 4,1 ms/frame (p95 5,6), na tomada.
 
 ## 2026-11-21 | Etapa D3: import sem efeito colateral

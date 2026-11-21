@@ -8,11 +8,16 @@ from source.feats.items import *
 from source.feats.projetil import BurstRifle
 from source.feats.effects import emitir_poeira
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 
 class Infection(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=1, dano_base=5, velocidade_base=120, game=game, sprite_key='infection', flip_sprite=True)
+        perfil = INIMIGOS['infection']
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano, velocidade_base=perfil.velocidade,
+                         game=game, sprite_key='infection', flip_sprite=True)
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         
         self.setup_animation(estado_inicial='left', velocidade_animacao=150)
 
@@ -24,16 +29,18 @@ class Infection(BaseEnemy):
 
 class FloodForm(BaseEnemy):
     """Classe base que dita o comportamento padrão, movimento e drops de um Flood."""
-    def __init__(self, posicao, game, vida, dano, velocidade, variante, vel_animacao=200):
+    def __init__(self, posicao, game, perfil, variante, vel_animacao=200):
         super().__init__(
-            posicao=posicao, 
-            vida_base=vida, 
-            dano_base=dano, 
-            velocidade_base=velocidade, 
+            posicao=posicao,
+            vida_base=perfil.vida,
+            dano_base=perfil.dano,
+            velocidade_base=perfil.velocidade,
             game=game, 
             sprite_key='infection', # Mantém seu padrão de sprite key
             variante=variante
         )
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         self.setup_animation(estado_inicial='right', velocidade_animacao=vel_animacao)
 
     def update(self, delta_time, paredes=None):
@@ -43,38 +50,20 @@ class FloodForm(BaseEnemy):
         self.set_sprite_direction(direcao_x)
         self.animar()
 
-    def morrer(self, grupos=None):
-        Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            exp_shard=(1, 100, 100),       # 100% de chance de dropar 1
-            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
-            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
-            upgrade=(1, 0.1, 100)          # 0.1% de chance de dropar 1
-        )
-        self.kill()
-
 
 class FloodElite(FloodForm):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=20, dano=20, velocidade=200, variante='elite', vel_animacao=120)
+        super().__init__(posicao, game, INIMIGOS['flood_elite'], variante='elite', vel_animacao=120)
 
 
 class FloodCarry(FloodForm):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=80, dano=5, velocidade=50, variante='carry')
+        super().__init__(posicao, game, INIMIGOS['flood_carry'], variante='carry')
 
     def morrer(self, grupos=None):
         """Sobrescreve a morte para dropar o dobro e estourar em Infection Forms."""
-        # Drop aprimorado
-        Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            exp_shard=(2, 100, 100),       # 100% de chance de dropar 1
-            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
-            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
-            upgrade=(1, 0.1, 100)          # 0.1% de chance de dropar 1
-        )
+        # Drop aprimorado (perfil 'flood_carry')
+        Items.spawn_drop(self.posicao, grupos, **self.tabela_drop)
         
         # Liberação das Infection Forms
         for _ in range(4):
@@ -87,7 +76,7 @@ class FloodCarry(FloodForm):
 
 class FloodMarine(FloodForm):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=20, dano=10, velocidade=100, variante='marine')
+        super().__init__(posicao, game, INIMIGOS['flood_marine'], variante='marine')
         
         # Propriedades da Arma
         self.cooldown_ataque = 2500       
@@ -121,7 +110,7 @@ class FloodMarine(FloodForm):
                 if self.tiros_dados >= self.tiros_por_rajada:
                     self.em_rajada = False
                     self.ultimo_ataque = agora
-                    self.cooldown_ataque = self.novo_cooldown(4000, 9000)
+                    self.cooldown_ataque = self.novo_cooldown(*self.perfil.cooldowns['rajada'])
 
     def disparar(self):
         direcao_com_spread = self.calcular_direcao_tiro(0.2)

@@ -95,6 +95,8 @@ PERFIL_DA_CLASSE = {
     GruntRed: 'grunt_red', GruntBlue: 'grunt_blue', SpaceGrunt: 'space_grunt',
     Jackal: 'jackal', JackalSniper: 'jackal',
     Elite: 'elite', ReachElite: 'reach_elite', Halo4Elite: 'halo4_elite', Brute: 'brute',
+    Infection: 'infection', FloodElite: 'flood_elite', FloodCarry: 'flood_carry',
+    FloodMarine: 'flood_marine',
 }
 
 

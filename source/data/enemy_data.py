@@ -28,6 +28,13 @@ DROP_COVENANT_FORTE = _fixo({   # Elite e Brute
     'life_orb': (1, 1, 100),
     'upgrade': (1, 0.5, 100),
 })
+DROP_FLOOD = _fixo({
+    'exp_shard': (1, 100, 100),
+    'big_shard': (1, 2, 100),
+    'life_orb': (1, 1, 100),
+    'upgrade': (1, 0.1, 100),
+})
+DROP_FLOOD_CARRY = _fixo({**DROP_FLOOD, 'exp_shard': (2, 100, 100)})
 _SEM_COOLDOWNS = _fixo({})
 
 
@@ -55,4 +62,9 @@ INIMIGOS = _fixo({
     'reach_elite': _perfil(45, 35, 80, {'carabina': (3000, 7000)}, DROP_COVENANT_FORTE),
     'halo4_elite': _perfil(30, 15, 60, {'carabina': (3000, 7000)}, DROP_COVENANT_FORTE),
     'brute': _perfil(30, 20, 75, {'dizimadora': (5000, 8000)}, DROP_COVENANT_FORTE),
+    # Flood
+    'infection': _perfil(1, 5, 120),
+    'flood_elite': _perfil(20, 20, 200, drops=DROP_FLOOD),
+    'flood_carry': _perfil(80, 5, 50, drops=DROP_FLOOD_CARRY),
+    'flood_marine': _perfil(20, 10, 100, {'rajada': (4000, 9000)}, DROP_FLOOD),
 })
