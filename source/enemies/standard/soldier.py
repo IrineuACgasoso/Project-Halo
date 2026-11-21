@@ -9,6 +9,7 @@ from source.feats.items import *
 from source.feats.projetil import LightBullet
 from source.feats.skills.promethean_tp import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 # (Aviso: certifique-se de que a classe PrometheanTeleport está importada aqui!)
 
@@ -31,7 +32,11 @@ class Soldier(BaseEnemy):
             self.dano_rifle = 5
             self.velocidade_rifle = 600
 
-        super().__init__(posicao, vida_base=10, dano_base=10, velocidade_base=90, game=game, sprite_key='soldier', variante=self.tipo)
+        perfil = INIMIGOS['soldier']
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano, velocidade_base=perfil.velocidade,
+                         game=game, sprite_key='soldier', variante=self.tipo)
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         
         self.setup_animation(
             estado_inicial='left',
@@ -44,10 +49,10 @@ class Soldier(BaseEnemy):
         self.alvo_teleporte = None
         self.ultimo_teleporte = relogio.agora()
         # Cooldown gigante para imersão e performance (entre 12 e 20 segundos)
-        self.cooldown_teleporte = self.novo_cooldown(15000, 21000) 
+        self.cooldown_teleporte = self.novo_cooldown(*perfil.cooldowns['teleporte'])
 
         # Combate (Rajada Tripla e Cooldown)
-        self.cooldown_rifle = self.novo_cooldown(7000, 13000)
+        self.cooldown_rifle = self.novo_cooldown(*perfil.cooldowns['rifle'])
         self.ultimo_tiro_principal = relogio.agora()
         
         self.tiros_restantes_rajada = 0
@@ -82,7 +87,7 @@ class Soldier(BaseEnemy):
         else:
             if agora - self.ultimo_tiro_principal >= self.cooldown_rifle:
                 self.tiros_restantes_rajada = self.pente_rajada
-                self.cooldown_rifle = self.novo_cooldown(7000, 13000)
+                self.cooldown_rifle = self.novo_cooldown(*self.perfil.cooldowns['rifle'])
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):
@@ -154,7 +159,7 @@ class Soldier(BaseEnemy):
                 self.rect = self.image.get_rect(center=self.posicao)
                 
                 self.ultimo_teleporte = agora
-                self.cooldown_teleporte = self.novo_cooldown(15000, 21000)
+                self.cooldown_teleporte = self.novo_cooldown(*self.perfil.cooldowns['teleporte'])
             return
         
         # Inicia o teleporte se o cooldown acabou e ele não está atirando a rajada

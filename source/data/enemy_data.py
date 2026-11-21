@@ -67,4 +67,10 @@ INIMIGOS = _fixo({
     'flood_elite': _perfil(20, 20, 200, drops=DROP_FLOOD),
     'flood_carry': _perfil(80, 5, 50, drops=DROP_FLOOD_CARRY),
     'flood_marine': _perfil(20, 10, 100, {'rajada': (4000, 9000)}, DROP_FLOOD),
+    # Forerunner e Prometheans
+    'sentinel': _perfil(15, 10, 90),
+    'crawler': _perfil(20, 15, 120, {'teleporte': (12000, 20000), 'rifle': (5000, 9000)}),
+    'soldier': _perfil(10, 10, 90, {'teleporte': (15000, 21000), 'rifle': (7000, 13000)}),
+    'watcher': _perfil(25, 0, 180),        # dano 0: o Watcher só dá escudo aos aliados
+    'super_watcher': _perfil(75, 0, 300),
 })

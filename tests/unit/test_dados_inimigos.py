@@ -97,7 +97,14 @@ PERFIL_DA_CLASSE = {
     Elite: 'elite', ReachElite: 'reach_elite', Halo4Elite: 'halo4_elite', Brute: 'brute',
     Infection: 'infection', FloodElite: 'flood_elite', FloodCarry: 'flood_carry',
     FloodMarine: 'flood_marine',
+    Sentinel: 'sentinel', SentinelMajor: 'sentinel', Crawler: 'crawler', Soldier: 'soldier',
+    Watcher: 'watcher', SuperWatcher: 'super_watcher',
 }
+
+
+def test_toda_classe_comum_tem_perfil():
+    assert set(PERFIL_DA_CLASSE) == set(CLASSES)
+    assert set(PERFIL_DA_CLASSE.values()) == set(INIMIGOS)   # nenhum perfil sobrando
 
 
 def test_perfil_e_imutavel():

@@ -12,6 +12,7 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - Testes: `test_dados_inimigos.py`: equivalência, perfil imutável, cada classe usa o seu perfil, mudar o perfil muda o inimigo (prova que não sobrou número na classe), perfil sem o cooldown que a classe usa falha ao criar, inimigo sem perfil usa o drop padrão. Suíte: **844 verdes + 1 xfail**. Golden e catraca inalterados.
 
 - **D4.2 Flood** (Infection, FloodElite, FloodCarry, FloodMarine): o `morrer()` do `FloodForm` era cópia do da base e saiu; o do FloodCarry continua (solta os Infection) e usa a tabela do perfil.
+- **D4.3 Forerunner e Prometheans** (Sentinel, SentinelMajor, Crawler, Soldier, Watcher, SuperWatcher): o `Watcher` recebe `perfil=` no lugar de `vida_base=`/`velocidade_base=` (o SuperWatcher passa o dele). Com isso as 19 classes comuns têm perfil, e não sobrou perfil sem classe (teste).
 
 **Desempenho:** horda 4,1 ms/frame (p95 5,6), na tomada.
 

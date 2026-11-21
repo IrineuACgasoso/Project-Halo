@@ -5,10 +5,15 @@ import math
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.skills.continuousbeam import ContinuousBeam
 from source.feats.auras import EnergyAura
+from source.data.enemy_data import INIMIGOS
 
 class Sentinel(BaseEnemy):
     def __init__(self, posicao, game, variante='default'):
-        super().__init__(posicao, vida_base=15, dano_base=10, velocidade_base=90, game=game, sprite_key='sentinel', variante=variante)
+        perfil = INIMIGOS['sentinel']
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano, velocidade_base=perfil.velocidade,
+                         game=game, sprite_key='sentinel', variante=variante)
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         self.setup_animation(
             estado_inicial='left',
             velocidade_animacao=200

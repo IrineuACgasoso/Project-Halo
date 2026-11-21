@@ -9,11 +9,16 @@ from source.feats.items import *
 from source.feats.projetil import LightBullet
 from source.feats.skills.promethean_tp import PrometheanTeleport
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 
 class Crawler(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=20, dano_base=15, velocidade_base=120, game=game, sprite_key='crawler')
+        perfil = INIMIGOS['crawler']
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano,
+                         velocidade_base=perfil.velocidade, game=game, sprite_key='crawler')
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         
         self.setup_animation(
             estado_inicial = 'left',
@@ -26,10 +31,10 @@ class Crawler(BaseEnemy):
         self.alvo_teleporte = None
         self.ultimo_teleporte = relogio.agora()
         # Cooldown gigante para imersão e performance (entre 12 e 20 segundos)
-        self.cooldown_teleporte = self.novo_cooldown(12000, 20000)
+        self.cooldown_teleporte = self.novo_cooldown(*perfil.cooldowns['teleporte'])
 
         # Combate (Rajada Tripla e Cooldown)
-        self.cooldown_rifle = self.novo_cooldown(5000, 9000)
+        self.cooldown_rifle = self.novo_cooldown(*perfil.cooldowns['rifle'])
         self.ultimo_tiro_principal = relogio.agora()
         
         self.tiros_restantes_rajada = 0
@@ -64,7 +69,7 @@ class Crawler(BaseEnemy):
         else:
             if agora - self.ultimo_tiro_principal >= self.cooldown_rifle:
                 self.tiros_restantes_rajada = 3  
-                self.cooldown_rifle = self.novo_cooldown(5000, 9000)
+                self.cooldown_rifle = self.novo_cooldown(*self.perfil.cooldowns['rifle'])
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):
@@ -138,7 +143,7 @@ class Crawler(BaseEnemy):
                 self.rect = self.image.get_rect(center=self.posicao)
                 
                 self.ultimo_teleporte = agora
-                self.cooldown_teleporte = self.novo_cooldown(12000, 20000)
+                self.cooldown_teleporte = self.novo_cooldown(*self.perfil.cooldowns['teleporte'])
             return
         
         # Inicia o teleporte se o cooldown acabou e ele não está atirando a rajada

@@ -4,12 +4,15 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.effects import RaioEscudo
 from source.feats.auras import EnergyAura
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 class Watcher(BaseEnemy):
-    def __init__(self, posicao, game, vida_base=25, velocidade_base=180, intervalo=2000, porcentagem=0.05, min_esc=15, max_esc=40, cor_raio=(255, 120, 0), sprite_key='watcher', variante='default'):
-        # MUDANÇA: dano_base=0 para que ele SÓ dê escudo (sem dano por contato físico)
-        super().__init__(posicao, vida_base=vida_base, dano_base=0, velocidade_base=velocidade_base, game=game,
-                         sprite_key=sprite_key, variante=variante)
+    def __init__(self, posicao, game, perfil=INIMIGOS['watcher'], intervalo=2000, porcentagem=0.05, min_esc=15, max_esc=40, cor_raio=(255, 120, 0), sprite_key='watcher', variante='default'):
+        # O perfil tem dano 0: o Watcher SÓ dá escudo (sem dano por contato físico)
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano, velocidade_base=perfil.velocidade,
+                         game=game, sprite_key=sprite_key, variante=variante)
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         
         self.setup_animation(estado_inicial='left', velocidade_animacao=300)
 
@@ -114,8 +117,7 @@ class SuperWatcher(Watcher):
         super().__init__(
             posicao=posicao, 
             game=game,
-            vida_base=75,             
-            velocidade_base=300,      
+            perfil=INIMIGOS['super_watcher'],
             intervalo=2000,           
             porcentagem=0.10,         
             min_esc=20,               

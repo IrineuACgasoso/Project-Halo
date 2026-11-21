@@ -23,7 +23,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - `main.py` chama `Game` (`source/game.py`). O loop é `eventos → update(1/60) × n → draw`, com passo fixo (no máximo 5 passos por frame), e o estado fica numa string (`estado_do_jogo`).
 - **Singletons globais:** `entity_manager` (grupos de sprites e `player`) e `relogio` (relógio de jogo em ms, que só avança no estado `'jogando'`).
 - **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
-- **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`. O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
+- **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`; vida, dano, velocidade, faixas de cooldown e drops dos inimigos comuns, em `source/data/enemy_data.py` (`INIMIGOS`). O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
 - **Fases:** mapas Tiled em `assets/img/map/<n>/m<n>.tmj`. O pool de inimigos e os bosses de cada fase ficam em `source/systems/spawner/`.
 - **Assets:** o import não carrega nada; `carregar_assets()` (`source/feats/assets.py`, ~1,5 s) preenche `ASSETS` e é chamado pelo `main.py`, pelo `conftest` e pelo `tools/perf.py`. Sem janela aberta, ele faz `pygame.init` e abre uma oculta. Não leia `ASSETS` no nível do módulo nem em corpo de classe. Os fundos das fases são a exceção: `ASSETS['maps']` decodifica no 1º acesso e guarda só os 2 mais recentes. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
 

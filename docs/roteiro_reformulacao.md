@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1, D2 e D3 feitas; próxima: D4.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1 a D4 feitas; próxima: D5.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -146,6 +146,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **D4 · Dados de inimigos** (risco: baixo; um commit por família)
 - Muda: `data/enemy_data.py` com dataclasses frozen (`vida`, `dano`, `velocidade`, faixas de cooldown, tabela de drop). Os inimigos comuns leem dali.
 - Testes: equivalência (cada classe instanciada tem os mesmos stats de antes); golden inalterado.
+- Feito (2026-11-21): 3 commits (Covenant, Flood, Forerunner/Prometheans); `tests/golden/inimigos.json` gravado com os valores antigos (stats, faixas de cooldown e drops na ordem). Ver log.
 
 **D5 · Validação central de dados** (risco: nenhum)
 - Muda: `data/validacao.py::validar_tudo()` devolve a lista de erros de `weapon_data`, `ARMAS_REGISTRO`, pools, os 3 dicts de bosses, perfis de inimigos, manifesto e mapas (camadas obrigatórias, spawn dentro da navegação, portal). Roda nos testes (lista vazia) e na abertura do jogo com `MCE_DEBUG=1`.
