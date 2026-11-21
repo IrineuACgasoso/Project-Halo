@@ -44,11 +44,11 @@ class PlayerScaling:
     def abrir_proxima_tela_de_upgrade(self):
         """Abre a próxima tela pendente, se não houver uma aberta. O EventManager chama
         isto ao fechar uma tela, encadeando level-ups acumulados."""
-        if not self.fila_upgrades or self.game.tela_de_upgrade_ativa is not None:
+        if not self.fila_upgrades or self.game.sessao.tela_de_upgrade_ativa is not None:
             return
         id_forcado = self.fila_upgrades.pop(0)
         self.game.mudar_estado(LEVEL_UP)
-        self.game.tela_de_upgrade_ativa = TelaDeUpgrade(
+        self.game.sessao.tela_de_upgrade_ativa = TelaDeUpgrade(
             self.game.tela, self, self.game, id_arma_forcada=id_forcado
         )
 

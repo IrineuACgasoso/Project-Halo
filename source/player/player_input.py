@@ -30,7 +30,7 @@ class PlayerInput:
         # Hack P: Spawnar Portal (Instant Exit)
         elif hack[pygame.K_p]:
             # Verifica se o jogo já tem um portal ativo. 
-            if self.game.portal_atual is None:
+            if self.game.sessao.portal_atual is None:
                 # Importação local para evitar erro circular (Player importar Portal e Portal importar Player)
                 from source.feats.effects import Portal 
                 
@@ -38,9 +38,9 @@ class PlayerInput:
                 pos_portal = self.posicao + pygame.math.Vector2(offset, 0)
                 
                 novo_portal = Portal(pos_portal, entity_manager.all_sprites)
-                self.game.portal_atual = novo_portal
+                self.game.sessao.portal_atual = novo_portal
 
         elif hack[pygame.K_b]:
-            if self.game.boss_atual is None:
+            if self.game.sessao.boss_atual is None:
                 if hasattr(self.game, 'spawner'):
                     self.game.spawner.forcar_proximo_boss()

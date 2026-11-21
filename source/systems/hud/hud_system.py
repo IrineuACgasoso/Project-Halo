@@ -86,8 +86,8 @@ class HUD:
         _draw_xp(tela, self.game.player, self._font_xp)
 
         # O timer do jogo só some se houver um chefe real na arena
-        if not self.game.boss_atual:
-            _draw_timer(tela, self.game.timer_jogo, self._font_timer)
+        if not self.game.sessao.boss_atual:
+            _draw_timer(tela, self.game.sessao.timer_jogo, self._font_timer)
 
         _draw_score_box(tela, self.game, self._font_score) # Usa a fonte grande e negritada do timer
         

@@ -8,7 +8,7 @@ from .config import PURGE_PRESETS, PurgeConfig
 
 class PurgeGrid(pygame.sprite.Sprite):
     def __init__(self, game, caster, preset='padrao', custom_config: PurgeConfig = None):
-        super().__init__(game.all_sprites)
+        super().__init__(entity_manager.all_sprites)
         
         self.game = game
         self.caster = caster

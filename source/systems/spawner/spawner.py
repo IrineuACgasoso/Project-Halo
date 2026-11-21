@@ -36,7 +36,7 @@ class Spawner(SpawnerUtils):
             )
 
             # Salva a referência no jogo para a trava do Spawner funcionar!
-            self.game.boss_atual = novo_boss
+            self.game.sessao.boss_atual = novo_boss
 
             # Só define como True se a classe não tiver definido explicitamente como False
             if getattr(novo_boss, 'is_boss', None) is not False:
@@ -45,7 +45,7 @@ class Spawner(SpawnerUtils):
         # Inimigo comum
         else:
             # Pega os dados da fase atual ou o default
-            dados_fase = self.pools_por_fase.get(self.game.fase_atual, self.default_pool)
+            dados_fase = self.pools_por_fase.get(self.game.sessao.fase_atual, self.default_pool)
             
             # OTIMIZAÇÃO: random.choices escolhe baseado nos pesos
             classe_escolhida = random.choices(
@@ -65,14 +65,14 @@ class Spawner(SpawnerUtils):
         # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente.
         # Exceção: a própria boss pode liberar spawns comuns (ex.: Harbinger em 'recharging'),
         # sinalizando isso via atributo `permitir_spawns_normais`.
-        if self.game.boss_atual and self.game.boss_atual.alive() \
-                and not getattr(self.game.boss_atual, 'permitir_spawns_normais', False):
+        if self.game.sessao.boss_atual and self.game.sessao.boss_atual.alive() \
+                and not getattr(self.game.sessao.boss_atual, 'permitir_spawns_normais', False):
             return
 
         self.tempo_proximo_spawn += delta_time
 
-        tempo_atual = self.game.timer_jogo
-        fase = self.game.fase_atual
+        tempo_atual = self.game.sessao.timer_jogo
+        fase = self.game.sessao.fase_atual
 
         # Inimigos Comuns (Dificuldade sempre sobe)
         if self.tempo_proximo_spawn >= self.intervalo_spawn_atual:

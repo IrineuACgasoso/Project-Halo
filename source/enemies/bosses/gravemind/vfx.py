@@ -26,7 +26,7 @@ class FloodWarning(ArtilhariaAviso):
             
             # Só passa o bastão se o Proto NÃO for um lacaio qualquer
             if not self.spawn_minion:
-                self.game.boss_atual = proto
+                self.game.sessao.boss_atual = proto
 
             self.spawn_realizado = True
             # A classe pai já vai lidar com o self.kill() logo em seguida!
@@ -48,7 +48,7 @@ class GravePit(ArtilhariaAviso):
         if self.explodiu and not self.spawn_realizado:
             from .core import FinalGravemind
             final_boss = FinalGravemind(posicao=self.posicao, game=self.game)
-            self.game.boss_atual = final_boss
+            self.game.sessao.boss_atual = final_boss
             self.spawn_realizado = True
 
 

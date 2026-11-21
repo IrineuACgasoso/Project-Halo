@@ -45,9 +45,6 @@ def _amostra(game, segundo):
 
 def simular_golden(game):
     """Partida nova da fase 0 e uma amostra por segundo de jogo (a do segundo 0 inclusa)."""
-    # SHIM(B3): iniciar_novo_jogo não zera o relógio, e a simulação depende do valor absoluto
-    # dele (2ª partida com a mesma seed divergia em t=54 s). Ver test_nova_partida_zera_o_relogio.
-    relogio._ms = float(_OFFSET_INICIAL_MS)
     random.seed(PARAMETROS['seed'])
     voltar_ao_menu(game)
     game.iniciar_novo_jogo()
@@ -183,12 +180,9 @@ def test_simulacao_e_deterministica(game, primeira_rodada):
     assert primeira_divergencia(primeira_rodada, simular_golden(game)) is None
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=(
-    'BUG conhecido (vai para a B3): iniciar_novo_jogo não zera o relógio de jogo, e a simulação '
-    'depende do valor absoluto dele, então duas partidas com a mesma seed divergem. Zerar só o '
-    'relógio não basta: objetos da sessão (ex.: HUD._ultimo_check_boss) guardam timestamps da '
-    'partida anterior e veriam o tempo voltar.'))
 def test_nova_partida_zera_o_relogio(game):
+    """Era bug (A3 → B3): o relógio seguia da partida anterior, e a simulação depende do valor
+    absoluto dele (2ª partida com a mesma seed divergia em t=54 s)."""
     relogio.avancar(10)
     voltar_ao_menu(game)
     game.iniciar_novo_jogo()

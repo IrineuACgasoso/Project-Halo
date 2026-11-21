@@ -1,4 +1,5 @@
 from .projetil import ProjetilUniversal
+from source.systems.entitymanager import entity_manager
 from source.utils.vetores import direcao_segura
 
 class ProjetilNeedler(ProjetilUniversal):
@@ -49,7 +50,7 @@ class ProjetilNeedler(ProjetilUniversal):
             # Efeito de explosão (Dano massivo)
             ArtilhariaAviso(
                 posicao             = alvo.posicao,
-                grupos              = self.game.all_sprites,
+                grupos              = entity_manager.all_sprites,
                 game                = self.game, 
                 dono                = self.dono,
                 preset='needler_supercombine'

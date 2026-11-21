@@ -133,7 +133,7 @@ def test_level_up_aplica_bonus_e_abre_tela(player):
     assert player.pontuacao == 100
     assert player.experiencia_level_up == player.experiencia_level_up_base + 10 * player.contador_niveis
     assert player.game.estado_do_jogo == 'level_up'
-    assert player.game.tela_de_upgrade_ativa is not None
+    assert player.game.sessao.tela_de_upgrade_ativa is not None
 
 
 def test_ganho_grande_processa_varios_niveis_e_enfileira_telas(player):
@@ -146,7 +146,7 @@ def test_ganho_grande_processa_varios_niveis_e_enfileira_telas(player):
 
 def test_upgrade_forcado_usa_arma_informada(player):
     player.ativar_upgrade_forcado('assault_rifle')
-    tela = player.game.tela_de_upgrade_ativa
+    tela = player.game.sessao.tela_de_upgrade_ativa
     assert tela.modo_unico and tela.ids_das_opcoes == ['assault_rifle']
 
 

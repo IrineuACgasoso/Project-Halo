@@ -28,7 +28,7 @@ class TartarusAttacks:
             # Invoca impacto
             ArtilhariaAviso(
                 posicao=self.posicao, 
-                grupos=(self.game.all_sprites,), 
+                grupos=(entity_manager.all_sprites,), 
                 game=self.game,
                 dono='BOSS',
                 preset='tartarus_run'
@@ -83,7 +83,7 @@ class TartarusAttacks:
             # Dano no impacto
             ArtilhariaAviso(
                 posicao=self.posicao, 
-                grupos=(self.game.all_sprites,), 
+                grupos=(entity_manager.all_sprites,), 
                 game=self.game,
                 dono='BOSS',
                 preset='tartarus_leap'

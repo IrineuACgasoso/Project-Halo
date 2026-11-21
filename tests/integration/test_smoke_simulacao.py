@@ -70,7 +70,7 @@ def test_boss_luta_por_quinze_segundos(novo_jogo, nome, fase):
     ir_para_fase(novo_jogo, fase)
     blindar_jogador(novo_jogo.player)
     novo_jogo.spawner.spawnar(nome)
-    assert novo_jogo.boss_atual is not None
+    assert novo_jogo.sessao.boss_atual is not None
     simular(novo_jogo, 15, desenhar_a_cada=30)
     assert novo_jogo.estado_do_jogo == 'jogando'
     _sem_erros_de_render(novo_jogo)

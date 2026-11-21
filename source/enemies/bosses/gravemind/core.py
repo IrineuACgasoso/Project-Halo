@@ -77,12 +77,12 @@ class ProtoGravemind(BaseGravemind):
         super().update(delta_time, paredes)
 
     def respawn_logic(self):
-        if self.game.gravemind_reborns > 1 and not self.is_minion:
-            self.game.gravemind_reborns -= 1
+        if self.game.sessao.gravemind_reborns > 1 and not self.is_minion:
+            self.game.sessao.gravemind_reborns -= 1
             novo_aviso = FloodWarning(self.jogador.posicao, self.game)
-            self.game.boss_atual = novo_aviso
-        elif self.game.gravemind_reborns == 1:
-            self.game.gravemind_reborns = 0
+            self.game.sessao.boss_atual = novo_aviso
+        elif self.game.sessao.gravemind_reborns == 1:
+            self.game.sessao.gravemind_reborns = 0
             novo_pit = GravePit(self.jogador.posicao, self.game)
-            self.game.boss_atual = novo_pit
+            self.game.sessao.boss_atual = novo_pit
         self.kill()

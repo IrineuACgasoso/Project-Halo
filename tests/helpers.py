@@ -32,7 +32,8 @@ def voltar_ao_menu(game):
     de transições: no jogo só se chega ao menu pela pausa ou pelo game over, e um teste pode
     terminar em qualquer estado. Só para testes e ferramentas."""
     game._estado = MENU_PRINCIPAL
-    game.tela_de_upgrade_ativa = None
+    if game.sessao is not None:
+        game.sessao.tela_de_upgrade_ativa = None
 
 
 def blindar_jogador(player):
@@ -44,7 +45,7 @@ def blindar_jogador(player):
 
 def ir_para_fase(game, fase):
     """Troca o mapa como o StageManager faz, sem a animação de fade. Fase sem mapa usa o da 0."""
-    game.fase_atual = fase
+    game.sessao.fase_atual = fase
     mapa_fase = fase if str(fase) in ASSETS['maps'] else 0
     game.mapa = Mapa(path('assets', 'img', 'map', str(mapa_fase), f'm{mapa_fase}.tmj'),
                      mapa_fase, all_sprites=entity_manager.all_sprites)

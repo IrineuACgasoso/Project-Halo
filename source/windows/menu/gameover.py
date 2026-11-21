@@ -39,9 +39,9 @@ class TelaGameOver(MenuDraw):
 
     def carregar_bg_fase(self):
         # Só recarrega se a fase mudou desde a última vez
-        if self.fase_carregada != self.game.fase_atual:
+        if self.fase_carregada != self.game.sessao.fase_atual:
             try:
-                chave_fase = f'{self.game.fase_atual}'
+                chave_fase = f'{self.game.sessao.fase_atual}'
                 if 'gameover' in ASSETS and chave_fase in ASSETS['gameover']:
                     bg_original = ASSETS['gameover'][chave_fase]
                     self.bg = pygame.transform.scale(bg_original, (largura_tela, altura_tela))
@@ -49,7 +49,7 @@ class TelaGameOver(MenuDraw):
                     self.bg = pygame.Surface((largura_tela, altura_tela))
                     self.bg.fill((0, 0, 0))
                 
-                self.fase_carregada = self.game.fase_atual
+                self.fase_carregada = self.game.sessao.fase_atual
                 
             except Exception as e:
                 print(f"Erro BG: {e}")

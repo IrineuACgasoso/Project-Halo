@@ -52,7 +52,7 @@ class SpawnerUtils:
 
     def forcar_proximo_boss(self):
         """DEBUG: Invoca o próximo boss pendente da fase atual imediatamente."""
-        fase = self.game.fase_atual
+        fase = self.game.sessao.fase_atual
 
         # Verifica se existe boss configurado para essa fase
         if fase in PHASE_BOSSES:

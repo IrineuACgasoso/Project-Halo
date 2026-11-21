@@ -19,7 +19,7 @@ _OFFSET_INICIAL_MS = 60_000
 
 class GameClock:
     def __init__(self):
-        self._ms = float(_OFFSET_INICIAL_MS)
+        self.reiniciar()
 
     def avancar(self, delta_time):
         """Chamado UMA vez por frame simulado, com dt em segundos."""
@@ -27,6 +27,10 @@ class GameClock:
 
     def agora(self):
         return int(self._ms)
+
+    def reiniciar(self):
+        """Volta ao início. Chamado a cada partida nova (Game._resetar_estado_jogo)."""
+        self._ms = float(_OFFSET_INICIAL_MS)
 
 
 relogio = GameClock()

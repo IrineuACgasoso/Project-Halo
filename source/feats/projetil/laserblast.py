@@ -1,5 +1,6 @@
 import pygame
 from .projetil import ProjetilUniversal
+from source.systems.entitymanager import entity_manager
 
 class LaserBlast(ProjetilUniversal):
     """Feixe do Spartan Laser: núcleo branco-quente, envolto por um glow
@@ -80,7 +81,7 @@ class LaserBlast(ProjetilUniversal):
 
         ArtilhariaAviso(
             posicao=alvo.posicao,
-            grupos=(self.game.all_sprites,),
+            grupos=(entity_manager.all_sprites,),
             game=self.game,
             dono=self.dono,
             preset='spartan_laser'

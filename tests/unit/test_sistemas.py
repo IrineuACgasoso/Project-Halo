@@ -42,10 +42,10 @@ def test_toda_fase_com_mapa_tem_pool_e_boss():
 
 
 def test_intervalo_de_spawn_diminui_com_o_tempo_ate_o_piso(novo_jogo):
-    novo_jogo.timer_jogo = 0
+    novo_jogo.sessao.timer_jogo = 0
     novo_jogo.spawner.update(0.01)
     assert novo_jogo.spawner.intervalo_spawn_atual == pytest.approx(2.5)
-    novo_jogo.timer_jogo = 10_000
+    novo_jogo.sessao.timer_jogo = 10_000
     novo_jogo.spawner.update(0.01)
     assert novo_jogo.spawner.intervalo_spawn_atual == 0.5
 
@@ -62,7 +62,7 @@ def test_spawn_respeita_teto_de_inimigos(novo_jogo, monkeypatch):
 def test_boss_ativo_congela_spawner(novo_jogo):
     sp = novo_jogo.spawner
     sp.spawnar('hunter')
-    assert novo_jogo.boss_atual is not None and novo_jogo.boss_atual.is_boss
+    assert novo_jogo.sessao.boss_atual is not None and novo_jogo.sessao.boss_atual.is_boss
     antes = len(entity_manager.inimigos_grupo)
     sp.tempo_proximo_spawn = 999
     sp.update(1.0)
@@ -71,13 +71,13 @@ def test_boss_ativo_congela_spawner(novo_jogo):
 
 def test_boss_spawna_no_horario_uma_unica_vez(novo_jogo):
     sp = novo_jogo.spawner
-    novo_jogo.timer_jogo = CRONOGRAMA_BOSSES['hunter']
+    novo_jogo.sessao.timer_jogo = CRONOGRAMA_BOSSES['hunter']
     sp.update(0.01)
-    boss = novo_jogo.boss_atual
+    boss = novo_jogo.sessao.boss_atual
     assert type(boss) is BOSS_CLASSES['hunter'] and sp.boss_flags['hunter']
-    novo_jogo.boss_atual = None
+    novo_jogo.sessao.boss_atual = None
     sp.update(0.01)
-    assert novo_jogo.boss_atual is None
+    assert novo_jogo.sessao.boss_atual is None
 
 
 def test_posicao_de_spawn_fora_da_tela_e_dentro_do_alcance(novo_jogo):
@@ -209,7 +209,7 @@ def test_pontuacao_final_pondera_coletaveis(novo_jogo):
 
 
 def test_ultima_fase_encerra_campanha_em_vez_de_crashar(novo_jogo):
-    novo_jogo.fase_atual = max(int(k) for k in ASSETS['maps'])
+    novo_jogo.sessao.fase_atual = max(int(k) for k in ASSETS['maps'])
     assert not novo_jogo.existe_proxima_fase()
     novo_jogo.stage_manager.iniciar_transicao()
     assert novo_jogo.estado_do_jogo == 'game_over'
@@ -222,7 +222,7 @@ def test_transicao_troca_de_fase_preservando_player_e_armas(novo_jogo):
     sm.iniciar_transicao()
     for _ in range(200):
         sm.update(1 / 60)
-    assert novo_jogo.fase_atual == 1 and not sm.transicao_ativa
+    assert novo_jogo.sessao.fase_atual == 1 and not sm.transicao_ativa
     assert novo_jogo.player.alive() and 'assault_rifle' in novo_jogo.player.armas
     assert len(entity_manager.inimigos_grupo) == 0
     assert novo_jogo.camera.mapa is novo_jogo.mapa
@@ -231,12 +231,12 @@ def test_transicao_troca_de_fase_preservando_player_e_armas(novo_jogo):
 
 def test_boss_derrotado_agenda_portal(novo_jogo):
     novo_jogo.spawner.spawnar('hunter')
-    novo_jogo.boss_atual.kill()
+    novo_jogo.sessao.boss_atual.kill()
     novo_jogo.update(1 / 60)
-    assert novo_jogo.boss_atual is None and novo_jogo.spawnar_portal_em_breve
+    assert novo_jogo.sessao.boss_atual is None and novo_jogo.sessao.spawnar_portal_em_breve
     for _ in range(130):
         novo_jogo.update(1 / 60)
-    assert novo_jogo.portal_atual is not None
+    assert novo_jogo.sessao.portal_atual is not None
 
 
 def _tecla(key, mod=0):

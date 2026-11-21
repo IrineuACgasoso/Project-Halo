@@ -64,7 +64,7 @@ def test_nenhum_mixin_do_inimigo_e_anulado_por_base_enemy(classe):
 
 def test_didact_colide_pela_hitbox(novo_jogo):
     novo_jogo.spawner.spawnar('didact')
-    didact = novo_jogo.boss_atual
+    didact = novo_jogo.sessao.boss_atual
     assert didact.collision_rect is didact.hitbox
 
 
@@ -72,13 +72,13 @@ def test_didact_colide_pela_hitbox(novo_jogo):
 @pytest.mark.parametrize('nome', sorted(n for n, c in BOSS_CLASSES.items() if issubclass(c, BaseEnemy)))
 def test_boss_tem_vida_de_boss(novo_jogo, nome):
     novo_jogo.spawner.spawnar(nome)
-    assert novo_jogo.boss_atual.vida_maxima >= 500
+    assert novo_jogo.sessao.boss_atual.vida_maxima >= 500
 
 
 # ── Warden
 def test_warden_dropa_onde_caiu_o_ultimo_corpo_e_morre(novo_jogo):
     novo_jogo.spawner.spawnar('warden')
-    consciencia = novo_jogo.boss_atual
+    consciencia = novo_jogo.sessao.boss_atual
     corpos = list(consciencia.wardens_vivos)
     for corpo in corpos:
         corpo.vida = 0
@@ -254,7 +254,7 @@ def test_hud_foco_do_boss_usa_relogio_de_jogo(novo_jogo, monkeypatch):
     assert hud.foco_barra_vida is None   # jogo parado: ainda dentro do intervalo
     relogio.avancar(hud._intervalo_check_boss / 1000)
     hud._atualizar_boss_foco()
-    assert hud.foco_barra_vida is novo_jogo.boss_atual
+    assert hud.foco_barra_vida is novo_jogo.sessao.boss_atual
 
 
 # ── Paredes: inimigo longe do jogador atravessava paredes (recebia só as paredes perto DO JOGADOR)

@@ -2,6 +2,20 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa B3: sessão separada do Game
+**O que foi feito**
+- `systems/sessao.py::SessaoJogo` (dataclass): `timer_jogo`, `fase_atual`, `boss_atual`, `portal_atual`, `spawnar_portal_em_breve`, `timer_portal`, `tela_de_upgrade_ativa`, `gravemind_reborns`. Nasce em `_resetar_estado_jogo`; todos os consumidores (spawner, stage manager, HUD, game over, player, Gravemind, testes) passaram a `game.sessao.<campo>`. Migração completa no mesmo commit: os shims de propriedade previstos no roteiro não foram necessários.
+- `invocacao_protogravemind` foi apagado: era atribuído e nunca lido.
+- **Bug da A3 corrigido:** `relogio.reiniciar()` no início de cada partida, antes de criar qualquer objeto. O HUD, que guardava `_ultimo_check_boss` da partida anterior, agora é recriado com a sessão. `test_nova_partida_zera_o_relogio` perdeu o `xfail`, e o `# SHIM(B3)` do golden (que zerava o relógio à mão) foi apagado.
+- Os aliases `game.<grupo>` saíram; os 11 usos foram para `entity_manager.<grupo>`. 3 arquivos (`companion.py`, `laserblast.py`, `needler.py`) não importavam o `entity_manager`: adicionado (o ruff não pegaria no `companion.py`, que tem `import *` com exceção F405).
+- Testes: `test_sessao.py` (6) e `test_shims.py` (2; a regra 3 do roteiro previa o arquivo e ele não existia). `PERMITIDOS` está vazio: zero shims no repo. Suíte: **705 verdes, nenhum xfail**.
+
+**Golden: inalterado**, agora sem zerar o relógio à mão. A 2ª partida no mesmo processo continua idêntica (`test_simulacao_e_deterministica`): é a prova de que nada vaza entre partidas na fase 0.
+
+**Desempenho:** a rodada completa acusou horda, Warden, Guardian e Atriox, mas a máquina segue ruidosa (o HEAD anterior mediu de 6,3 a 9,2 ms na horda). Lado a lado e alternando com o HEAD: horda 6,1 × 6,3–9,2; Warden 4,7 × 4,6; Guardian 9,4–10,0 × 9,4–10,3; Atriox 3,3 × 3,4. Sem piora. Catraca inalterada.
+
+**Não validado:** restart pelo menu no jogo real (o fluxo é testado pelos handlers).
+
 ## 2026-11-21 | Correção: tela de colaboradores não desenhava
 - `TelaColaboradores.draw` usava `self.imagem`, mas o atributo é `self.image`: `AttributeError` a cada frame, que o `Renderer` engolia, mostrando "Erro ao renderizar" no lugar dos créditos. Achado na B2.
 - Commit separado da B2 (roteiro §2, regra 6). Regressão em `test_regressoes.py::test_tela_de_colaboradores_desenha_sem_erro`. Suíte: **696 verdes + 1 xfail**. Não validado visualmente.

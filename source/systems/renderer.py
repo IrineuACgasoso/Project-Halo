@@ -94,8 +94,8 @@ class Renderer:
         game = self.game
         self._draw_mundo()
         game.hud.draw(game.tela)
-        if game.tela_de_upgrade_ativa is not None:
-            game.tela_de_upgrade_ativa.draw(game.tela)
+        if game.sessao.tela_de_upgrade_ativa is not None:
+            game.sessao.tela_de_upgrade_ativa.draw(game.tela)
 
     # ------------------------------------------------------------------ #
     # HELPERS DE DESENHO (com blindagem individual por sprite)

@@ -69,7 +69,7 @@ class DidactAttacks:
     def disparar_emp(self):
         OndaEMP(
             posicao=self.posicao.copy(), 
-            grupos=self.game.all_sprites, 
+            grupos=entity_manager.all_sprites, 
             game=self.game, 
             atacante=self,
             preset='didact_shockwave' # Informando o preset profissionalizado

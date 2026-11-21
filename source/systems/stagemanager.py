@@ -49,7 +49,7 @@ class StageManager:
 
     def _trocar_dados_fase(self):
         game = self.game
-        game.fase_atual += 1
+        game.sessao.fase_atual += 1
         
         # Criamos uma lista de quem DEVE sobreviver
         sobreviventes = [game.player]
@@ -83,13 +83,13 @@ class StageManager:
                 arma.sprite_companion.posicao = pygame.math.Vector2(nova_pos)
                 arma.sprite_companion.rect.center = nova_pos
 
-        game.portal_atual = None             # Remove a referência do portal antigo
-        game.spawnar_portal_em_breve = False # Garante que a flag de espera suma
-        game.boss_atual = None
+        game.sessao.portal_atual = None             # Remove a referência do portal antigo
+        game.sessao.spawnar_portal_em_breve = False # Garante que a flag de espera suma
+        game.sessao.boss_atual = None
         
         # Novo Mapa
-        caminho = path('assets', 'img', 'map', f'{game.fase_atual}', f'm{game.fase_atual}.tmj')
-        game.mapa = Mapa(caminho, game.fase_atual, all_sprites=entity_manager.all_sprites)
+        caminho = path('assets', 'img', 'map', f'{game.sessao.fase_atual}', f'm{game.sessao.fase_atual}.tmj')
+        game.mapa = Mapa(caminho, game.sessao.fase_atual, all_sprites=entity_manager.all_sprites)
         # A câmera guardava o mapa ANTIGO: limites errados na fase nova (jogador saía da tela).
         game.camera.mapa = game.mapa
         game.camera.shake_timer = 0

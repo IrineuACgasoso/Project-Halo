@@ -1,6 +1,7 @@
 import pygame
 from source.utils.vetores import direcao_segura
 from source.systems.gameclock import relogio
+from source.systems.entitymanager import entity_manager
 import math
 import random
 from source.windows.settings import *
@@ -311,7 +312,7 @@ class Companheiro(pygame.sprite.Sprite):
 
         projetil_cls(
             posicao_inicial=posicao_inicial,
-            grupos=(self.jogador.game.all_sprites,), # Usa o primeiro grupo que ele pertence
+            grupos=(entity_manager.all_sprites,), # Usa o primeiro grupo que ele pertence
             jogador=self.jogador,
             game=self.jogador.game,
             dono='PLAYER', # Importante para não acertar o mestre!

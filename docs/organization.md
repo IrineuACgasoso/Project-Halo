@@ -29,7 +29,7 @@ Project-Halo/
 │   │                        # test_regressoes.py = um teste por bug já corrigido
 │   └── integration/         # smoke: loop real com cada mapa/inimigo/boss/arma
 └── source/
-    ├── game.py              # classe Game: estado, reset de sessão, update, fim de partida
+    ├── game.py              # classe Game: estado, criação da sessão, update, fim de partida
     ├── debug.py             # DEBUG = MCE_DEBUG=='1'
     ├── docs/BOSS_CREATION.md# guia antigo de bosses (BossBase inexistente); será substituído por docs/plano_bosses.md
     ├── data/
@@ -40,6 +40,7 @@ Project-Halo/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
     │   ├── estados.py       # constantes de estado, TRANSICOES, Tela (roteiro B2)
+    │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes

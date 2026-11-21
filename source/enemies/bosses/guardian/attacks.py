@@ -13,7 +13,7 @@ class GuardianAttacks:
     def disparar_emp(self):
         OndaEMP(
             posicao=self.posicao.copy(), 
-            grupos=self.game.all_sprites, 
+            grupos=entity_manager.all_sprites, 
             game=self.game, 
             atacante=self,
             preset='guardian_emp' # Informando o preset profissionalizado

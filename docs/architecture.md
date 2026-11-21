@@ -38,7 +38,7 @@ stateDiagram-v2
 ## Game.update (ordem importa)
 1. `relogio.avancar(dt)`: este é o **único** lugar onde o relógio de jogo avança.
 2. Portal: aparece 2000 ms depois que o boss morre. Encostar nele chama `StageManager.iniciar_transicao()`.
-3. `timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
+3. `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
 4. Atualizações: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
 5. `CollisionManager.update`, nesta ordem:
    - projétil do jogador contra inimigos (o mais próximo primeiro; perfuração finita acerta cada alvo uma vez só);
@@ -51,8 +51,11 @@ stateDiagram-v2
 7. Se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
 
 ## Singletons e estado global
-- `entity_manager` (`systems/entitymanager.py`): guarda os grupos `all_sprites`, `inimigos_grupo`, `projeteis_jogador_grupo`, `projeteis_inimigos_grupo`, `items_grupo`, `auras_grupo` e o `player`. `Game._resetar_estado_jogo` esvazia esses grupos. O `Game` mantém aliases (`game.all_sprites` etc.) para compatibilidade.
-- `relogio` (`systems/gameclock.py`): conta em ms, começa em 60 000 para que cooldowns com `ultimo = 0` já nasçam prontos, e fica congelado fora de `jogando`.
+- `entity_manager` (`systems/entitymanager.py`): guarda os grupos `all_sprites`, `inimigos_grupo`, `projeteis_jogador_grupo`, `projeteis_inimigos_grupo`, `items_grupo`, `auras_grupo` e o `player`. `Game._resetar_estado_jogo` esvazia esses grupos. Os grupos se acessam só por aqui (os aliases `game.<grupo>` foram removidos na B3).
+- `relogio` (`systems/gameclock.py`): conta em ms, começa em 60 000 para que cooldowns com `ultimo = 0` já nasçam prontos, e fica congelado fora de `jogando`. `relogio.reiniciar()` volta a 60 000 no início de cada partida.
+
+## Sessão (uma partida)
+`game.sessao` é uma `SessaoJogo` (`systems/sessao.py`, dataclass): `timer_jogo`, `fase_atual`, `boss_atual`, `portal_atual`, `spawnar_portal_em_breve`, `timer_portal`, `tela_de_upgrade_ativa`, `gravemind_reborns`. `iniciar_novo_jogo` → `_resetar_estado_jogo` reinicia o relógio, esvazia os grupos e cria **objetos novos**: sessão, HUD (guarda tempos da partida), mapa, câmera, player, spawner e stage manager. Estado que vale só durante a partida entra na sessão, não no `Game`. Os sistemas permanentes (menus, ranking, configurações, `CollisionManager`, `Renderer`) não guardam nada da partida.
 - Caches de classe: `ProjetilUniversal.GLOBAL_CACHE`, `EnemySprites.GLOBAL_SPRITE_CACHE`, `items.draw.GLOBAL_CACHE` e os caches da HUD.
 - `source/feats/assets.py`: no **import**, faz `pygame.init()`, abre uma janela oculta e carrega todas as imagens em `ASSETS`, com caminhos relativos ao cwd ou ao `sys._MEIPASS` no exe.
 

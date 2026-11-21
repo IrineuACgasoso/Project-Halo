@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: B1, B2 e C1 concluídas; próxima: B3.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: B1, B2, B3 e C1 concluídas; próxima: B4.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)

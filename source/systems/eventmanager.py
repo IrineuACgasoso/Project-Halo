@@ -63,7 +63,7 @@ class EventManager:
 
     def tratar_level_up(self, evento):
         g = self.game
-        tela = g.tela_de_upgrade_ativa
+        tela = g.sessao.tela_de_upgrade_ativa
         if not tela:
             return
 
@@ -76,7 +76,7 @@ class EventManager:
 
         # Retorna o fluxo do gameplay e, se houver level-ups acumulados, abre a próxima tela.
         g.mudar_estado(JOGANDO)
-        g.tela_de_upgrade_ativa = None
+        g.sessao.tela_de_upgrade_ativa = None
         g.player.abrir_proxima_tela_de_upgrade()
 
     def _aplicar_escolha_de_upgrade(self, id_da_arma):
