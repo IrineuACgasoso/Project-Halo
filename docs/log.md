@@ -2,6 +2,17 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa D4: dados de inimigos (um commit por família)
+**O que foi feito**
+- `source/data/enemy_data.py`: `PerfilInimigo` (dataclass frozen: `vida`, `dano` de contato, `velocidade`, `cooldowns` nome → (mín, máx) ms e `drops` no formato dos kwargs de `Items.spawn_drop`) e `INIMIGOS` (nome → perfil). As tabelas são `MappingProxyType` (só leitura). Valores de nível 0; a escala por nível continua em `EnemyScaling`.
+- `EnemySetup.setup_core` cria `tabela_drop = DROP_PADRAO`, e `EnemyCombat.morrer` usa `**self.tabela_drop`. Os inimigos comuns trocam a tabela e guardam `self.perfil`. Bosses e minibosses sem `morrer()` próprio continuam com a tabela de sempre (teste).
+- **D4.1 Covenant** (Grunt ×3, Jackal, JackalSniper, Elite ×3, Brute): os `morrer()` de Elite e Brute eram cópias do da base com outra tabela e saíram; com isso o `F405` de `brute.py` e `elite.py` saiu do `ruff.toml`. A linha solta `self.game` (sem efeito) do Brute saiu.
+- **Fica na classe:** sprite, variante, velocidade de animação, projéteis (dano e velocidade do tiro), IA e os primeiros cooldowns fixos (Brute 3000 ms, Elite 4000 ms, FloodMarine 2500 ms): trocá-los por uma faixa mudaria a sequência aleatória.
+- **Equivalência:** `tests/golden/inimigos.json`, gravado com os valores antigos antes da troca. Para cada uma das 19 classes comuns: stats logo depois de criada, as faixas pedidas a `novo_cooldown` em 30 s de update perto do jogador e os drops da morte **na ordem** (`spawn_drop` sorteia item por item). Regravar só com `--atualizar-golden`.
+- Testes: `test_dados_inimigos.py`: equivalência, perfil imutável, cada classe usa o seu perfil, mudar o perfil muda o inimigo (prova que não sobrou número na classe), perfil sem o cooldown que a classe usa falha ao criar, inimigo sem perfil usa o drop padrão. Suíte: **844 verdes + 1 xfail**. Golden e catraca inalterados.
+
+**Desempenho:** horda 4,1 ms/frame (p95 5,6), na tomada.
+
 ## 2026-11-21 | Etapa D3: import sem efeito colateral
 **O que foi feito**
 - Pré-condição verificada por AST (script fora do repo): fora o próprio `assets.py`, nenhum módulo de `source/` lê `ASSETS` nem chama pygame no import (nível do módulo, corpo de classe, valor padrão de argumento e decorador). A única chamada é `SUPERFICIE_VAZIA` (`utils/superficies.py`), uma `Surface` 1×1 que não precisa de display.

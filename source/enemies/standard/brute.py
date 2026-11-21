@@ -8,12 +8,16 @@ from source.feats.projetil import DizimatorBullet
 from source.feats.items import *
 from source.feats.assets import *
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 
 class Brute(BaseEnemy):
     def __init__(self, posicao, game):
-        super().__init__(posicao, vida_base=30,dano_base=20, velocidade_base=75, game=game, sprite_key='brute')
-        self.game
+        perfil = INIMIGOS['brute']
+        super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano,
+                         velocidade_base=perfil.velocidade, game=game, sprite_key='brute')
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
 
         #Animação
         self.setup_animation(
@@ -42,24 +46,13 @@ class Brute(BaseEnemy):
             direcao_spread      = direcao_tiro
             )
     
-    def morrer(self, grupos=None):
-        Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            exp_shard=(3, 100, 100),       # 100% de chance de dropar 1
-            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
-            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
-            upgrade=(1, 0.5, 100)          # 0.1% de chance de dropar 1
-        )
-        self.kill()
-
     def update(self, delta_time, paredes = None):
         super().update(delta_time, paredes)
         agora = relogio.agora()
 
         if agora - self.ultimo_shot >= self.cooldown_shot:
             self.ultimo_shot = agora
-            self.cooldown_shot = self.novo_cooldown(5000, 8000)
+            self.cooldown_shot = self.novo_cooldown(*self.perfil.cooldowns['dizimadora'])
             self.dizim()
             
         if self.vida <= self.vida_base / 2 and self.rage == False:

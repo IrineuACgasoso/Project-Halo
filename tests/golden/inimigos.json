@@ -1,0 +1,1009 @@
+{
+ "Brute": {
+  "cooldowns": [
+   [
+    5000,
+    8000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      3,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.5,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 22.0,
+   "dano_base": 22.0,
+   "escudo_maximo": 0,
+   "velocidade": 75.75,
+   "velocidade_base": 75.75,
+   "vida": 33.0,
+   "vida_base": 33.0,
+   "vida_maxima": 33.0
+  }
+ },
+ "Crawler": {
+  "cooldowns": [
+   [
+    5000,
+    9000
+   ],
+   [
+    12000,
+    20000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 16.5,
+   "dano_base": 16.5,
+   "escudo_maximo": 0,
+   "velocidade": 121.2,
+   "velocidade_base": 121.2,
+   "vida": 22.0,
+   "vida_base": 22.0,
+   "vida_maxima": 22.0
+  }
+ },
+ "Elite": {
+  "cooldowns": [
+   [
+    3000,
+    7000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      3,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.5,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 22.0,
+   "dano_base": 22.0,
+   "escudo_maximo": 0,
+   "velocidade": 40.4,
+   "velocidade_base": 40.4,
+   "vida": 22.0,
+   "vida_base": 22.0,
+   "vida_maxima": 22.0
+  }
+ },
+ "FloodCarry": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      2,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 5.5,
+   "dano_base": 5.5,
+   "escudo_maximo": 0,
+   "velocidade": 50.5,
+   "velocidade_base": 50.5,
+   "vida": 88.0,
+   "vida_base": 88.0,
+   "vida_maxima": 88.0
+  }
+ },
+ "FloodElite": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 22.0,
+   "dano_base": 22.0,
+   "escudo_maximo": 0,
+   "velocidade": 202.0,
+   "velocidade_base": 202.0,
+   "vida": 22.0,
+   "vida_base": 22.0,
+   "vida_maxima": 22.0
+  }
+ },
+ "FloodMarine": {
+  "cooldowns": [
+   [
+    4000,
+    9000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 101.0,
+   "velocidade_base": 101.0,
+   "vida": 22.0,
+   "vida_base": 22.0,
+   "vida_maxima": 22.0
+  }
+ },
+ "GruntBlue": {
+  "cooldowns": [
+   [
+    8000,
+    12000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 5.5,
+   "dano_base": 5.5,
+   "escudo_maximo": 0,
+   "velocidade": 65.65,
+   "velocidade_base": 65.65,
+   "vida": 2.2,
+   "vida_base": 2.2,
+   "vida_maxima": 2.2
+  }
+ },
+ "GruntRed": {
+  "cooldowns": [
+   [
+    8000,
+    12000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 50.5,
+   "velocidade_base": 50.5,
+   "vida": 2.2,
+   "vida_base": 2.2,
+   "vida_maxima": 2.2
+  }
+ },
+ "Halo4Elite": {
+  "cooldowns": [
+   [
+    3000,
+    7000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      3,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.5,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 16.5,
+   "dano_base": 16.5,
+   "escudo_maximo": 0,
+   "velocidade": 60.6,
+   "velocidade_base": 60.6,
+   "vida": 33.0,
+   "vida_base": 33.0,
+   "vida_maxima": 33.0
+  }
+ },
+ "Infection": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 5.5,
+   "dano_base": 5.5,
+   "escudo_maximo": 0,
+   "velocidade": 121.2,
+   "velocidade_base": 121.2,
+   "vida": 1.1,
+   "vida_base": 1.1,
+   "vida_maxima": 1.1
+  }
+ },
+ "Jackal": {
+  "cooldowns": [
+   [
+    4500,
+    6000
+   ],
+   [
+    6000,
+    11000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 50.5,
+   "velocidade_base": 50.5,
+   "vida": 16.5,
+   "vida_base": 16.5,
+   "vida_maxima": 16.5
+  }
+ },
+ "JackalSniper": {
+  "cooldowns": [
+   [
+    4500,
+    6000
+   ],
+   [
+    6000,
+    11000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 50.5,
+   "velocidade_base": 50.5,
+   "vida": 16.5,
+   "vida_base": 16.5,
+   "vida_maxima": 16.5
+  }
+ },
+ "ReachElite": {
+  "cooldowns": [
+   [
+    3000,
+    7000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      3,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      2,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.5,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 38.5,
+   "dano_base": 38.5,
+   "escudo_maximo": 0,
+   "velocidade": 80.8,
+   "velocidade_base": 80.8,
+   "vida": 49.50000000000001,
+   "vida_base": 49.50000000000001,
+   "vida_maxima": 49.50000000000001
+  }
+ },
+ "Sentinel": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 90.9,
+   "velocidade_base": 90.9,
+   "vida": 16.5,
+   "vida_base": 16.5,
+   "vida_maxima": 16.5
+  }
+ },
+ "SentinelMajor": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 33.0,
+   "velocidade": 90.9,
+   "velocidade_base": 90.9,
+   "vida": 16.5,
+   "vida_base": 16.5,
+   "vida_maxima": 16.5
+  }
+ },
+ "Soldier": {
+  "cooldowns": [
+   [
+    7000,
+    13000
+   ],
+   [
+    15000,
+    21000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 90.9,
+   "velocidade_base": 90.9,
+   "vida": 11.0,
+   "vida_base": 11.0,
+   "vida_maxima": 11.0
+  }
+ },
+ "SpaceGrunt": {
+  "cooldowns": [
+   [
+    8000,
+    12000
+   ]
+  ],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 11.0,
+   "dano_base": 11.0,
+   "escudo_maximo": 0,
+   "velocidade": 35.35,
+   "velocidade_base": 35.35,
+   "vida": 5.5,
+   "vida_base": 5.5,
+   "vida_maxima": 5.5
+  }
+ },
+ "SuperWatcher": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 0.0,
+   "dano_base": 0.0,
+   "escudo_maximo": 165.0,
+   "velocidade": 303.0,
+   "velocidade_base": 303.0,
+   "vida": 82.5,
+   "vida_base": 82.5,
+   "vida_maxima": 82.5
+  }
+ },
+ "Watcher": {
+  "cooldowns": [],
+  "drops": [
+   [
+    [
+     "exp_shard",
+     [
+      1,
+      100,
+      100
+     ]
+    ],
+    [
+     "big_shard",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "life_orb",
+     [
+      1,
+      1,
+      100
+     ]
+    ],
+    [
+     "upgrade",
+     [
+      1,
+      0.1,
+      100
+     ]
+    ]
+   ]
+  ],
+  "stats": {
+   "dano": 0.0,
+   "dano_base": 0.0,
+   "escudo_maximo": 0,
+   "velocidade": 181.8,
+   "velocidade_base": 181.8,
+   "vida": 27.500000000000004,
+   "vida_base": 27.500000000000004,
+   "vida_maxima": 27.500000000000004
+  }
+ }
+}

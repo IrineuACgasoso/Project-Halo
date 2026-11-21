@@ -49,14 +49,7 @@ class EnemyCombat:
         return updated_cooldown
 
     def morrer(self, grupos=None):
-        Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            exp_shard=(1, 100, 100),       # 100% de chance de dropar 1
-            big_shard=(1, 1, 100),        # 1% de chance de dropar 1
-            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
-            upgrade=(1, 0.1, 100)          # 0.1% de chance de dropar 1
-        )
+        Items.spawn_drop(self.posicao, grupos, **self.tabela_drop)
         self.kill()
 
     def iniciar_invisibilidade(

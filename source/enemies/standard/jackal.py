@@ -5,6 +5,7 @@ import random
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.projetil import PlasmaGun, M50
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 
 class Jackal(BaseEnemy): 
@@ -12,16 +13,19 @@ class Jackal(BaseEnemy):
         # Se um tipo não for forçado pela subclasse, sorteia os padrões
         self.tipo = tipo if tipo else random.choice(['blue', 'red'])
         
+        perfil = INIMIGOS['jackal']
         super().__init__(
-            posicao, 
-            vida_base=15, 
-            dano_base=10, 
-            velocidade_base=50, 
-            game=game, 
-            sprite_key='jackal', 
-            flip_sprite=True, 
+            posicao,
+            vida_base=perfil.vida,
+            dano_base=perfil.dano,
+            velocidade_base=perfil.velocidade,
+            game=game,
+            sprite_key='jackal',
+            flip_sprite=True,
             variante=self.tipo
         )
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
 
         self.setup_animation(
             estado_inicial='right',
@@ -29,7 +33,7 @@ class Jackal(BaseEnemy):
         )
 
         # Habilidades
-        self.plasma_cooldown = self.novo_cooldown(4500, 6000)
+        self.plasma_cooldown = self.novo_cooldown(*perfil.cooldowns['tiro_inicial'])
         self.escudo_quebrado = False
         self.ultimo_tiro = relogio.agora()
 
@@ -79,7 +83,7 @@ class Jackal(BaseEnemy):
         # Controle de Cadência de Tiro
         agora = relogio.agora()
         if agora - self.ultimo_tiro >= self.plasma_cooldown:
-            self.plasma_cooldown = self.novo_cooldown(6000, 11000)
+            self.plasma_cooldown = self.novo_cooldown(*self.perfil.cooldowns['tiro'])
             self.executar_ataque()
             self.ultimo_tiro = agora
         

@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import DROP_PADRAO
 
 class EnemySetup:
     def setup_core(self, game, sprite_key, variante):
@@ -10,6 +11,7 @@ class EnemySetup:
         self.jogador = self.game.player
         self.nome_completo = "INIMIGO"
         self.is_boss = False
+        self.tabela_drop = DROP_PADRAO   # kwargs de Items.spawn_drop; os comuns trocam pela do perfil
 
     def setup_stats(self, vida_base, dano_base, velocidade_base):
         # Base

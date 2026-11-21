@@ -8,20 +8,23 @@ from source.feats.projetil import Carabin
 from source.feats.items import *
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
+from source.data.enemy_data import INIMIGOS
 
 
 class EliteBase(BaseEnemy):
-    """Classe base que dita o comportamento padrão, movimento e drops de um Flood."""
-    def __init__(self, posicao, game, vida, dano, velocidade, variante, vel_animacao=200):
+    """Classe base que dita o comportamento padrão, movimento e drops de um Elite."""
+    def __init__(self, posicao, game, perfil, variante, vel_animacao=200):
         super().__init__(
-            posicao=posicao, 
-            vida_base=vida, 
-            dano_base=dano, 
-            velocidade_base=velocidade, 
+            posicao=posicao,
+            vida_base=perfil.vida,
+            dano_base=perfil.dano,
+            velocidade_base=perfil.velocidade,  
             game=game, 
             sprite_key='elite', # Mantém seu padrão de sprite key
             variante=variante
         )
+        self.perfil = perfil
+        self.tabela_drop = perfil.drops
         self.setup_animation(estado_inicial='right', velocidade_animacao=vel_animacao)
 
         #Carabin
@@ -55,24 +58,13 @@ class EliteBase(BaseEnemy):
             direcao_spread=direcao_tiro
         )
 
-    def morrer(self, grupos=None):
-        Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            exp_shard=(3, 100, 100),       # 100% de chance de dropar 1
-            big_shard=(1, 2, 100),        # 10% de chance de dropar 1
-            life_orb=(1, 1, 100),          # 1% de chance de dropar 1
-            upgrade=(1, 0.5, 100)          # 0.1% de chance de dropar 1
-        )
-        self.kill()
-
     def update(self, delta_time, paredes=None):
         direcao = (self.jogador.posicao - self.posicao)
         agora = relogio.agora()
         #Ativa carabina
         if agora - self.ultima_carabina >= self.cooldown_carabin:
             self.carabina_restante = self.contagem_carabina
-            self.cooldown_carabin = self.novo_cooldown(3000, 7000)
+            self.cooldown_carabin = self.novo_cooldown(*self.perfil.cooldowns['carabina'])
             self.ultima_carabina = agora
         #Atira carabina
         if self.carabina_restante > 0:
@@ -114,16 +106,16 @@ class EliteBase(BaseEnemy):
 
 class Elite(EliteBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=20, dano=20, velocidade=40, variante='default', vel_animacao=200)
+        super().__init__(posicao, game, INIMIGOS['elite'], variante='default', vel_animacao=200)
 
 
 class ReachElite(EliteBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=45, dano=35, velocidade=80, variante='reach', vel_animacao=120)
+        super().__init__(posicao, game, INIMIGOS['reach_elite'], variante='reach', vel_animacao=120)
 
 
 class Halo4Elite(EliteBase):
     def __init__(self, posicao, game):
-        super().__init__(posicao, game, vida=30, dano=15, velocidade=60, variante='h4', vel_animacao=180)
+        super().__init__(posicao, game, INIMIGOS['halo4_elite'], variante='h4', vel_animacao=180)
 
 
