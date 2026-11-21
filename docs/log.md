@@ -20,7 +20,9 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 
 **Etapa A0 concluída:** o trabalho pendente da sessão anterior + estes docs foram commitados como linha de base, com a tag `base-reformulacao`. O `promptgoat.md` (prompt pessoal na raiz) ficou de fora.
 
-**Pendências:** os pesos de sorteio por raridade e as bordas da E6 (item `upgrade` e level-up sem opções; ver roteiro §8). Próxima etapa: **A1**.
+**Decisões da E6 (depois da A0):** pesos de sorteio comum 40, incomum 25, rara 20, épica 10, lendária 5. Item `upgrade` e level-up sem opções (tudo no máximo) ficam para o recurso futuro **itens temporários e boosts** (roteiro §7.1); até lá, a E6 usa um comportamento provisório (só os pontos / não abre tela).
+
+**Pendências:** nenhuma decisão em aberto. Próxima etapa: **A1**.
 
 ## 2026-11-21 | Correção de todos os bugs conhecidos + plano de bosses
 **O que foi feito**

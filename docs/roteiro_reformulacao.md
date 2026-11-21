@@ -170,11 +170,12 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 - Hoje: `ArmaInfo.raridade` (4 comuns, 4 incomuns, 3 raras, 5 épicas, 6 lendárias, contando companions e veículos) só muda a cor no HUD e no level-up. O sorteio de `gerar_opcoes_aleatorias` é uniforme e não há nível máximo.
 - Muda (dados em `systems/levelup/constants.py`, validados por D5):
   - `NIVEL_MAXIMO_POR_RARIDADE = {comum: 25, incomum: 20, rara: 15, epica: 10, lendaria: 5}` (decidido);
-  - `PESO_SORTEIO_POR_RARIDADE` para oferecer **armas novas**: quanto mais rara, menos aparece. Valores iniciais: TODO: confirmar com você;
+  - `PESO_SORTEIO_POR_RARIDADE = {comum: 40, incomum: 25, rara: 20, epica: 10, lendaria: 5}` para oferecer **armas novas** (decidido);
   - arma no nível máximo sai do sorteio de upgrade e mostra "MAX" no HUD e no card.
 - Bordas que a etapa resolve:
-  - item `upgrade` sorteia só entre armas abaixo do máximo; se todas estiverem no máximo, vira pontuação (destino exato: TODO: confirmar);
-  - level-up sem nenhuma opção válida (6 armas, todas no máximo) não abre tela vazia: dá uma recompensa (TODO: confirmar qual);
+  - item `upgrade` sorteia só entre armas abaixo do máximo. Se todas estiverem no máximo, **provisoriamente** mantém só os +200 pontos que já dá hoje e não abre tela;
+  - level-up sem nenhuma opção válida (6 armas, todas no máximo) **provisoriamente** não abre tela (o nível sobe normalmente);
+  - os dois casos provisórios ficam num ponto único (`recompensa_sem_upgrade()`), marcado `# TODO(itens temporários)`, para o recurso futuro plugar ali;
   - `upgrade()` acima do máximo não faz nada (defesa em profundidade).
 - Testes: cada raridade para exatamente no seu máximo; sorteio respeita os pesos (seed fixa, 10 mil sorteios, tolerância); nenhuma tela vazia; item `upgrade` nunca escolhe arma no máximo. O teste atual que sobe toda arma até o nível 21 passa a subir até o máximo da raridade (é mudança de especificação, registrada no log, não enfraquecimento).
 - Muda o comportamento (declarado): golden regenerado se o sorteio entrar na simulação.
@@ -229,6 +230,10 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 | Dívida "PyInstaller fora do `.venv`" | H1 |
 | Dívida "10 armas/companions/veículos sem ícone" | conteúdo, fora do roteiro (o placeholder continua) |
 
+## 7.1 Depois do roteiro (recursos aprovados para o futuro)
+- **G4 · Áudio central** (descrito no bloco G).
+- **Itens temporários e boosts do personagem:** substituem os casos provisórios da E6 (item `upgrade` e level-up sem opções quando tudo está no máximo). Usam os eventos de B4 e os dados validados de D5. Desenho: TODO, a definir quando começar.
+
 ## 8. Decisões tomadas (2026-11-21)
 1. **A0:** commitar o trabalho pendente como linha de base: **sim** (feito).
 2. **A4:** `ruff` com as regras `F`, só em dev: **sim**.
@@ -236,4 +241,5 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 4. **E6:** nível máximo **por raridade**: comum 25, incomum 20, rara 15, épica 10, lendária 5. A raridade também passa a ter efeito real (peso no sorteio).
 5. **F3:** a memória adaptativa do boss **reseta a cada luta**.
 
-**Ainda em aberto (resolver no início da E6):** pesos de sorteio por raridade; o que o item `upgrade` vira quando tudo está no máximo; a recompensa de um level-up sem opções.
+6. **E6:** pesos de sorteio de arma nova: comum 40, incomum 25, rara 20, épica 10, lendária 5.
+7. **E6:** item `upgrade` e level-up sem opções (tudo no máximo) serão resolvidos pelos **itens temporários e boosts** (§7.1). Até lá, o comportamento provisório da E6 vale.
