@@ -21,7 +21,8 @@ Project-Halo/
 │   └── perf_base.json       # última base medida (comparada pelo perf.py; ±10% = portão)
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
-│   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), MapaSemImagem
+│   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), contar_alocacoes(), MapaSemImagem
+│   ├── perf/                # test_catraca.py: alocações por frame ≤ teto (roteiro A2)
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
 │   │                        # test_regressoes.py = um teste por bug já corrigido
 │   └── integration/         # smoke: loop real com cada mapa/inimigo/boss/arma

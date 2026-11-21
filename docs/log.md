@@ -2,6 +2,25 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa A2: catraca de alocação
+**O que foi feito**
+- `tests/helpers.py::contar_alocacoes()` conta, por tipo, as chamadas a `pygame.Surface(...)`, `mask.from_surface`, `transform.*` (menos as que não alocam) e `font.Font`/`SysFont`. A `Surface` é trocada por uma metaclasse que conta e devolve uma `Surface` original, então o `isinstance(x, pygame.Surface)` de `enemy_sprites` e `items/draw` continua valendo. `contador.pausado()` (aninhável) tira um trecho da conta.
+- `tests/perf/test_catraca.py`: 1 s de aquecimento fora da conta, depois update + draw por 3 s (horda de 150), 5 s (fase 0) ou 2 s (cada boss). Afirma `alocações/frame <= TETOS[cenário]`. Boss novo falha até ganhar teto; medida 10% abaixo do teto gera aviso para baixá-lo. Há um teste de ponta a ponta: uma Surface a mais por frame no HUD aparece como +1,0/frame.
+- Suíte: **397 verdes** (~63 s; a catraca soma ~20 s, tudo marcado `integration`). `perf.py`: saída 0 (a 1ª passada acusou 9 cenários e nenhum se confirmou na nova medida).
+
+**Tetos de hoje (alocações por frame)**
+- O HUD cria ~8 `Surface` por frame em **todo** cenário (fase 0 = 8,2, quase só isso); a barra do boss soma ~1. É o alvo principal da C3.
+- Horda de 150: 20,0 (12 `mask.from_surface` + 8 `Surface`): as máscaras são de projéteis criados (C3).
+- Bosses: 9,1 a 10,3; Warden 12,0. Guilty, Didact e Escharum criam ~1 máscara a cada 1–2 frames.
+
+**Achados**
+- O HUD usava `get_ticks` (corrigido no commit anterior): sem a correção, a contagem dos bosses variava ±1/frame entre rodadas iguais.
+- `test_perf_tool::test_confirmacao_mede_de_novo_e_descarta_ruido` oscilava desde a A1. A base de ~0 ms exigia que a troca de fase real passasse do piso de 1 ms, e ela mede ~1 ms. Agora a base é `-PISO_MS`. A ferramenta não mudou.
+- A contagem tem uma sobra de até 2 chamadas em 180 frames, vinda de caches de módulo (mais frios na 1ª partida do processo). O teto cobre isso (medida truncada em 0,1 + 0,1).
+- **Limite:** métodos de tipo em C (`Surface.copy`, `convert_alpha`, `subsurface`, `Font.render`) não são contados, porque o monkeypatch não os alcança. O texto do HUD renderizado por frame fica fora da catraca.
+
+**Pendências:** nenhuma. Próxima etapa: **A3**.
+
 ## 2026-11-21 | Correção: HUD usava o relógio de parede
 - `HUD._atualizar_boss_foco` usava `pygame.time.get_ticks()` (viola a regra de tempo do `CLAUDE.md`). Agora usa `relogio.agora()`.
 - Efeito: o foco da barra de vida do boss é reavaliado a cada 500 ms **de jogo**. Na simulação headless, a barra aparecia antes ou depois conforme a velocidade da máquina, e a contagem de alocações da A2 variava ±1 Surface/frame entre rodadas iguais (foi assim que o bug apareceu).

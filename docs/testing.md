@@ -24,6 +24,7 @@
   - `blindar_jogador(player)` deixa a vida enorme e o XP inalcançável, para que a simulação não pare em game over ou level-up.
   - `ir_para_fase(game, fase)` troca o mapa sem o fade; fase sem mapa usa o da fase 0. Também é usado por `tools/perf.py`.
   - `MapaSemImagem` reúne os mixins do `Mapa` sem precisar de imagem, para usar com `.tmj` sintéticos.
+  - `contar_alocacoes()` (gerenciador de contexto) conta as chamadas a `pygame.Surface(...)`, `mask.from_surface`, `transform.*` e `font.Font`/`SysFont` por tipo; `contador.pausado()` tira um trecho da conta. Não alcança métodos de tipo em C (`Surface.copy`, `convert_alpha`, `Font.render`).
 
 ## Estrutura e cobertura
 | Arquivo | Cobre |
@@ -36,9 +37,10 @@
 | `unit/test_sistemas.py` | Config do spawner (pools, bosses, cronograma), ritmo, teto e trava de boss, colisão, escudo e escala de inimigos, drops e coleta de itens, pontuação, transição e fim de campanha, portal, estados |
 | `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican e o caminho do ranking |
 | `unit/test_perf_tool.py` | `tools/perf.py`: p95, comparação com a tolerância de 10%, base em disco (ausente, ida e volta, inválida), argumentos recusados, `--gravar-base` recusado na bateria, confirmação por nova medida, um cenário por boss e smoke curto (horda e troca de fase, marcado `integration`) |
+| `perf/test_catraca.py` | **Catraca de alocação** (roteiro A2): alocações por frame (update + draw, depois de 1 s de aquecimento) na horda de 150, na fase 0 e em cada boss, contra `TETOS`, que só podem descer. Boss novo falha até ganhar teto (a mensagem traz o valor). Medida 10% abaixo do teto gera aviso para baixá-lo. Também testa o próprio contador |
 | `integration/test_smoke_simulacao.py` | Cada mapa real; uma partida de 10 s; cada inimigo comum por 8 s; **cada boss por 15 s**; cada arma no nível 10 em combate. Também verifica que o Renderer não engoliu nenhum erro |
 
-**Fora da cobertura:** aparência visual, áudio, balanceamento, menus e ranking interativos (`handle_event` das telas) e HUD em detalhe. Desempenho não vira asserção (varia por máquina): é medido com `tools/perf.py` e registrado no log.
+**Fora da cobertura:** aparência visual, áudio, balanceamento, menus e ranking interativos (`handle_event` das telas) e HUD em detalhe. Tempo não vira asserção (varia por máquina): é medido com `tools/perf.py` e registrado no log. Alocação vira (é determinística): `perf/test_catraca.py`.
 
 ## Escrevendo testes novos
 - Use o jogo real (as fixtures `novo_jogo` e `player`) em vez de mocks pesados. Os mixins dependem de muitos atributos de `self`.
@@ -47,4 +49,4 @@
 - **Nunca** escreva em `assets/data/ranking.json`. Use `RankingData(str(tmp_path / ...))`.
 - **Boss novo:** entra automaticamente no smoke test pelo `PHASE_BOSSES`. **Arma nova:** entra pelo `ARMAS_REGISTRO`.
 - **Bug encontrado e não corrigido:** use `@pytest.mark.xfail(strict=True, raises=<Erro>, reason="BUG conhecido ...")` e registre em `docs/log.md`. O `strict=True` faz o teste falhar quando o bug for corrigido, lembrando de remover a marca.
-- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje a suíte não tem nenhum `xfail` (371 testes).
+- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje a suíte não tem nenhum `xfail` (397 testes).

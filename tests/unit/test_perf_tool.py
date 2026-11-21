@@ -143,7 +143,10 @@ def test_confirmacao_mede_de_novo_e_descarta_ruido(novo_jogo):
     falso = _relatorio(troca_de_fase={'media_ms': 1e6, 'max_ms': 1e6})
     mudo = dict(saida=lambda m: None)
     assert perf.confirmar_pioras(novo_jogo, _relatorio(troca_de_fase={'media_ms': 1e5}), falso, **mudo) == []
-    confirmadas = perf.confirmar_pioras(novo_jogo, _relatorio(troca_de_fase={'media_ms': 1e-6}), falso, **mudo)
+    # Base -PISO_MS: qualquer medida real (> 0 ms) passa do piso. Com base ~0, a 2ª medida
+    # precisava passar de 1 ms, e a troca de fase mede ~1 ms: o teste oscilava.
+    base_menor = _relatorio(troca_de_fase={'media_ms': -perf.PISO_MS})
+    confirmadas = perf.confirmar_pioras(novo_jogo, base_menor, falso, **mudo)
     assert [c[:2] for c in confirmadas] == [('troca_de_fase', 'media_ms')]
 
 
