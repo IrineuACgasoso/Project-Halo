@@ -288,3 +288,9 @@ def test_inimigo_longe_do_jogador_colide_com_a_parede_perto_dele(novo_jogo):
     novo_jogo.update(1 / 60)
 
     assert _distancia_ao_segmento(inimigo.posicao, a, b) >= inimigo.raio_colisao_mapa - 0.5
+
+
+# ── Telas: colaboradores desenhava self.imagem, mas o atributo é self.image
+def test_tela_de_colaboradores_desenha_sem_erro(game):
+    """AttributeError a cada frame: o Renderer engolia o erro e mostrava 'Erro ao renderizar'."""
+    game.tela_colaboradores.draw(game.tela)

@@ -2,6 +2,10 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Correção: tela de colaboradores não desenhava
+- `TelaColaboradores.draw` usava `self.imagem`, mas o atributo é `self.image`: `AttributeError` a cada frame, que o `Renderer` engolia, mostrando "Erro ao renderizar" no lugar dos créditos. Achado na B2.
+- Commit separado da B2 (roteiro §2, regra 6). Regressão em `test_regressoes.py::test_tela_de_colaboradores_desenha_sem_erro`. Suíte: **696 verdes + 1 xfail**. Não validado visualmente.
+
 ## 2026-11-21 | Etapa B2: estados formalizados
 **O que foi feito**
 - `systems/estados.py`: constantes dos 8 estados, `ESTADOS`, `TRANSICOES` (origem → destinos), `TransicaoInvalida` e `Tela(evento, desenhar)`.

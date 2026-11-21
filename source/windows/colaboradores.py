@@ -16,4 +16,4 @@ class TelaColaboradores:
 
     def draw(self, tela):
         tela.fill((0, 0, 0)) 
-        tela.blit(self.imagem, self.imagem_rect)
+        tela.blit(self.image, self.imagem_rect)
