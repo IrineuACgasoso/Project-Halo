@@ -20,7 +20,7 @@ build.bat                                                         # exe em dist/
 Não há formatter nem typecheck configurados. Não invente um comando para eles. As exceções do linter em `ruff.toml` só podem encolher: código novo não entra na lista.
 
 ## Arquitetura em 6 linhas (detalhes em @docs/architecture.md)
-- `main.py` chama `Game` (`source/game.py`). O loop é `eventos → update(dt) → draw`, o dt é limitado a 0.05 s e o estado fica numa string (`estado_do_jogo`).
+- `main.py` chama `Game` (`source/game.py`). O loop é `eventos → update(1/60) × n → draw`, com passo fixo (no máximo 5 passos por frame), e o estado fica numa string (`estado_do_jogo`).
 - **Singletons globais:** `entity_manager` (grupos de sprites e `player`) e `relogio` (relógio de jogo em ms, que só avança no estado `'jogando'`).
 - **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
 - **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`. O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).

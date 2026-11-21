@@ -29,7 +29,7 @@
 ## Estrutura e cobertura
 | Arquivo | Cobre |
 |---|---|
-| `unit/test_core_utils.py` | `GameClock` (incluindo o congelamento fora de `jogando`), `path` (com e sem `_MEIPASS`), `direcao_segura`, `projetar_fora_da_linha` |
+| `unit/test_core_utils.py` | `GameClock` (incluindo o congelamento fora de `jogando`), `AcumuladorPassoFixo` e o `Game.run` com relógio falso, `path` (com e sem `_MEIPASS`), `direcao_segura`, `projetar_fora_da_linha` |
 | `unit/test_ranking_data.py` | Ida e volta, gravação atômica, ordenação e limite, formato legado, sanitização, JSON corrompido com backup, falha de escrita |
 | `unit/test_map.py` | Parser de `.tmj` (retângulo, polilinha, polígono, spawns, portal, void, navegação), `caminho_livre`, filtro e cache de paredes |
 | `unit/test_player.py` | Dano (i-frames, escudo, transbordo, veículo, morte), regeneração de escudo, espinhos, XP com vários níveis e fila de telas, upgrade forçado, buff de cooldown |
@@ -52,4 +52,4 @@
 - **Nunca** escreva em `assets/data/ranking.json`. Use `RankingData(str(tmp_path / ...))`.
 - **Boss novo:** entra automaticamente no smoke test pelo `PHASE_BOSSES`. **Arma nova:** entra pelo `ARMAS_REGISTRO`.
 - **Bug encontrado e não corrigido:** use `@pytest.mark.xfail(strict=True, raises=<Erro>, reason="BUG conhecido ...")` e registre em `docs/log.md`. O `strict=True` faz o teste falhar quando o bug for corrigido, lembrando de remover a marca.
-- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (relógio não zerado entre partidas, para a B3) em 651 testes.
+- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (relógio não zerado entre partidas, para a B3) em 661 testes.

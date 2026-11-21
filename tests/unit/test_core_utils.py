@@ -5,7 +5,9 @@ import sys
 import pygame
 import pytest
 
-from source.systems.gameclock import GameClock, _OFFSET_INICIAL_MS
+from source.systems.gameclock import (
+    AcumuladorPassoFixo, GameClock, MAX_PASSOS_POR_FRAME, PASSO_FIXO, _OFFSET_INICIAL_MS,
+)
 from source.utils.collision_utils import projetar_fora_da_linha
 from source.utils.paths import path
 from source.utils.vetores import direcao_segura
@@ -38,6 +40,81 @@ def test_relogio_congela_fora_do_estado_jogando(novo_jogo):
     antes = relogio.agora()
     novo_jogo.update(0.5)
     assert relogio.agora() == antes
+
+
+# ── AcumuladorPassoFixo (roteiro B1) ─────────────────────────────────────────
+def test_passo_fixo_frame_de_60fps_da_um_passo():
+    a = AcumuladorPassoFixo()
+    assert [a.passos(1 / 60) for _ in range(120)] == [1] * 120
+
+
+def test_passo_fixo_acumula_frames_curtos():
+    # 144 FPS: ~6,9 ms por frame; a soma vira passos sem perder tempo
+    a = AcumuladorPassoFixo()
+    total = sum(a.passos(1 / 144) for _ in range(144))
+    assert total in (59, 60)
+
+
+def test_passo_fixo_tick_em_ms_inteiros_nao_perde_nem_ganha_tempo():
+    # clock.tick devolve ms inteiros (16, 17, 17...): em 6 s de jogo saem 360 passos (±1)
+    a = AcumuladorPassoFixo()
+    ticks = [16, 17, 17] * 120
+    assert abs(sum(a.passos(ms / 1000) for ms in ticks) - 360) <= 1
+
+
+def test_passo_fixo_frame_lento_tem_no_maximo_cinco_passos():
+    a = AcumuladorPassoFixo()
+    assert a.passos(3 / 60) == 3
+    assert a.passos(2.0) == MAX_PASSOS_POR_FRAME == 5
+
+
+def test_passo_fixo_nao_entra_em_espiral_depois_de_engasgo():
+    # o atraso que passou do teto é descartado: o frame seguinte normal volta a dar 1 passo
+    a = AcumuladorPassoFixo()
+    a.passos(10.0)
+    assert a.acumulado == 0
+    assert a.passos(1 / 60) == 1
+
+
+def test_passo_fixo_dt_zero_ou_negativo_nao_gera_passo():
+    a = AcumuladorPassoFixo()
+    assert a.passos(0) == 0
+    assert a.passos(-1.0) == 0
+    assert a.acumulado == 0
+
+
+@pytest.mark.parametrize('passo, max_passos', [(0, 5), (-1 / 60, 5), (1 / 60, 0)])
+def test_passo_fixo_parametros_invalidos(passo, max_passos):
+    with pytest.raises(ValueError):
+        AcumuladorPassoFixo(passo, max_passos)
+
+
+class _RelogioFalso:
+    """Substitui pygame.time.Clock: devolve ms pré-definidos e encerra o loop no fim."""
+    def __init__(self, game, ticks_ms):
+        self.game, self.ticks = game, list(ticks_ms)
+
+    def tick(self, _fps):
+        ms = self.ticks.pop(0)
+        if not self.ticks:
+            self.game.running = False
+        return ms
+
+
+def test_game_run_usa_passo_fixo_e_um_draw_por_frame(game, monkeypatch):
+    chamadas = []
+    monkeypatch.setattr(game, 'eventos', lambda: chamadas.append('eventos'))
+    monkeypatch.setattr(game, 'update', lambda dt: chamadas.append(dt))
+    monkeypatch.setattr(game, 'draw', lambda: chamadas.append('draw'))
+    monkeypatch.setattr(game, 'clock', _RelogioFalso(game, [17, 10, 1000]))
+    monkeypatch.setattr(game, 'running', True)
+    game.run()
+    passo = PASSO_FIXO
+    assert chamadas == [
+        'eventos', passo, 'draw',                       # 17 ms: 1 passo, sobra ~0,3 ms
+        'eventos', 'draw',                              # 10 ms: ainda não completa um passo
+        'eventos', passo, passo, passo, passo, passo, 'draw',   # engasgo de 1 s: teto de 5
+    ]
 
 
 # ── paths ────────────────────────────────────────────────────────────────────

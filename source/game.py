@@ -1,5 +1,5 @@
 import pygame
-from source.systems.gameclock import relogio
+from source.systems.gameclock import relogio, AcumuladorPassoFixo
 # WINDOWS
 from source.windows.settings import *
 from source.windows.menu import *
@@ -231,10 +231,12 @@ class Game:
         self.timer_portal = relogio.agora()
 
     def run(self):
+        # Passo fixo: a simulação sempre avança de PASSO_FIXO em PASSO_FIXO, então um engasgo
+        # (arrastar a janela, carregamento) nunca gera um dt enorme que atravessa paredes.
+        acumulador = AcumuladorPassoFixo()
         while self.running:
-            # Limita o dt: engasgos (arrastar janela, carregamento) geravam dt enorme e
-            # projéteis/inimigos atravessavam paredes ou teleportavam.
-            delta_time = min(self.clock.tick(fps) / 1000, 0.05)
+            passos = acumulador.passos(self.clock.tick(fps) / 1000)
             self.eventos()
-            self.update(delta_time)
+            for _ in range(passos):
+                self.update(acumulador.passo)
             self.draw()

@@ -6,6 +6,7 @@ import pygame
 
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
+from source.systems.gameclock import PASSO_FIXO
 from source.systems.mapmanager import Mapa
 from source.systems.mapmanager.map_collision import MapCollision
 from source.systems.mapmanager.map_feats import MapFeats
@@ -13,7 +14,7 @@ from source.systems.mapmanager.map_loader import MapLoader
 from source.systems.mapmanager.map_utils import MapUtils
 from source.utils.paths import path
 
-DT = 1 / 60   # passo fixo de simulação (segundos)
+DT = PASSO_FIXO   # o mesmo passo fixo do Game.run (segundos)
 
 
 def simular(game, segundos, desenhar_a_cada=0):

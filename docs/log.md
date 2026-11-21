@@ -2,6 +2,16 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa B1: passo fixo de simulação
+**O que foi feito**
+- `gameclock.py::AcumuladorPassoFixo`: soma o tempo real do frame e devolve quantos passos de `PASSO_FIXO` (1/60 s) cabem, no máximo `MAX_PASSOS_POR_FRAME` (5). Quando bate o teto, o atraso é descartado: o jogo desacelera em vez de entrar em espiral. dt zero ou negativo não gera passo; parâmetro inválido lança `ValueError`.
+- `Game.run`: eventos 1× → `update(1/60)` × n → draw 1× por frame. Substitui o teto de 0,05 s. A assinatura de `update(dt)` não mudou.
+- `tests/helpers.py::DT` agora é o próprio `PASSO_FIXO` (jogo e testes usam o mesmo passo por construção).
+- 10 testes novos em `test_core_utils.py` (60/144 FPS, ticks em ms inteiros sem deriva, teto de 5, sem espiral, dt ≤ 0, parâmetros inválidos e o `Game.run` com relógio falso). Suíte: **660 verdes + 1 xfail**. Golden inalterado.
+- `perf.py` e a catraca não foram refeitos: os dois chamam `update` direto com dt de 1/60, e só o `Game.run` mudou.
+
+**Não validado:** sensação de jogo numa máquina que não segura 60 FPS (abaixo de 12 FPS o jogo passa a andar em câmera lenta, por causa do teto de 5 passos).
+
 ## 2026-11-21 | Etapa A4: higiene (bloco A concluído)
 **O que foi feito**
 - Código morto apagado (nada os importava, verificado por grep): `atriox/{setup,states,attacks,vfx}.py`, `escharum/vfx.py` e `harbinger/states.py`. O Atriox continua usando os mixins do Tartarus (identidade própria na F5).

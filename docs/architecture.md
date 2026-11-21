@@ -4,10 +4,10 @@
 `main.py` inicializa o pygame, abre a janela de 1280×720 e chama `Game(tela).run()`. A cada frame:
 
 ```
-dt = min(clock.tick(60)/1000, 0.05)   # o teto evita que objetos atravessem paredes depois de um engasgo
+n = acumulador.passos(clock.tick(60)/1000)   # passo fixo: quantos 1/60 s couberam (máx. 5)
 EventManager.processar()   # despacha o evento pelo estado atual (dict estado -> handler)
-Game.update(dt)            # só roda no estado 'jogando'
-Renderer.draw()            # despacha pelo estado; envolve tudo em try e loga cada erro 1x
+Game.update(1/60) × n      # só roda no estado 'jogando'
+Renderer.draw()            # um por frame; despacha pelo estado; envolve tudo em try e loga cada erro 1x
 ```
 
 **Estados** (`game.estado_do_jogo`): `menu_principal`, `jogando`, `pausa`, `level_up`, `configuracoes`, `colaboradores`, `ranking`, `game_over`. `EventManager._dispatch` e `Renderer._dispatch` precisam ter as **mesmas** chaves, e há um teste que verifica isso.
@@ -72,7 +72,7 @@ stateDiagram-v2
 
 ## Decisões técnicas (extraídas dos comentários no código)
 - **Relógio de jogo próprio** em vez de `get_ticks`: pausa e level-up quebravam cooldowns, i-frames e timers de boss.
-- **dt limitado a 0.05 s** (e a 0.033 s no movimento do player), para evitar *tunneling* depois de engasgos.
+- **Passo fixo de 1/60 s** (`AcumuladorPassoFixo` em `gameclock.py`, roteiro B1): a física não depende do FPS e o jogo roda igual aos testes. No máximo 5 passos por frame; o atraso além disso é descartado (o jogo desacelera em vez de entrar em espiral). O movimento do player ainda limita o dt a 0.033 s.
 - **`Renderer` engole exceções de desenho** e loga cada uma só uma vez: um sprite quebrado não derruba o jogo. Por isso os testes conferem `renderer._erros_logados`.
 - **`RankingData`** grava de forma atômica (arquivo `.tmp` + `os.replace`), sanitiza os dados e faz backup de um JSON corrompido. Nunca lança exceção.
 - **`MAX_INIMIGOS_VIVOS = 250`**: evita a espiral de morte da colisão O(projéteis × inimigos).

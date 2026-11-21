@@ -37,7 +37,7 @@ Project-Halo/
     │   └── enemy_data.py    # vazio
     ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils
     ├── systems/
-    │   ├── gameclock.py     # relogio (singleton, ms de jogo)
+    │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
     │   ├── eventmanager.py  # input por estado + aplicação da escolha de upgrade
     │   ├── renderer.py      # draw por estado, blindado contra exceções
