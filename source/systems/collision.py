@@ -2,9 +2,51 @@ import pygame
 from source.systems.entitymanager import entity_manager
 from source.systems.eventos import eventos, INIMIGO_MORREU
 
+# Inimigo com colisão circular (Scarab) é candidato de toda consulta: o círculo do
+# collide_circle passa da borda do rect, e esses inimigos são raros (bosses).
+_RECT_SEMPRE_CANDIDATO = pygame.Rect(-10 ** 6, -10 ** 6, 2 * 10 ** 6, 2 * 10 ** 6)
+
+
+def rect_de_colisao(sprite):
+    """O retângulo que `custom_collision` compara (collision_rect > hitbox > rect)."""
+    return getattr(sprite, 'collision_rect', getattr(sprite, 'hitbox', sprite.rect))
+
+
+class BroadphaseInimigos:
+    """Broadphase (roteiro C2): os retângulos de colisão dos inimigos são lidos 1× por frame,
+    e cada consulta filtra os candidatos com `Rect.collidelistall` (laço em C). Os candidatos
+    voltam na ordem do grupo, e a decisão final continua sendo de `custom_collision`.
+
+    Limite: um inimigo que surge ou se move DURANTE a passada de colisão (ex.: teleporte ao
+    tomar dano) só é visto pelos projéteis no frame seguinte."""
+
+    def __init__(self):
+        self.inimigos = []
+        self.rects = []
+
+    def reconstruir(self, grupo):
+        self.inimigos = grupo.sprites()
+        self.rects = [_RECT_SEMPRE_CANDIDATO if getattr(inimigo, 'usar_circulo', False)
+                      else rect_de_colisao(inimigo)
+                      for inimigo in self.inimigos]
+
+    def candidatos(self, rect, grupo):
+        """Inimigos cujo retângulo toca `rect` e que ainda estão em `grupo`, na ordem do grupo."""
+        inimigos = self.inimigos
+        return [inimigos[i] for i in rect.collidelistall(self.rects) if grupo.has(inimigos[i])]
+
+
 class CollisionManager:
     def __init__(self, game):
         self.game = game
+        self.broadphase = BroadphaseInimigos()
+
+    def colidindo_com_inimigos(self, sprite):
+        """Mesmo resultado de `spritecollide(sprite, inimigos_grupo, False, custom_collision)`,
+        testando só os candidatos do broadphase."""
+        grupo = entity_manager.inimigos_grupo
+        return [inimigo for inimigo in self.broadphase.candidatos(rect_de_colisao(sprite), grupo)
+                if self.custom_collision(sprite, inimigo)]
 
     @classmethod
     def custom_collision(cls, sprite1, sprite2):
@@ -21,8 +63,8 @@ class CollisionManager:
         # Ele tenta pegar a 'collision_rect' (estilo Jega).
         # Se não achar, tenta a 'hitbox' (estilo Zealot).
         # Se o objeto não for um boss/inimigo complexo, usa o 'rect' normal.
-        rect1 = getattr(sprite1, 'collision_rect', getattr(sprite1, 'hitbox', sprite1.rect))
-        rect2 = getattr(sprite2, 'collision_rect', getattr(sprite2, 'hitbox', sprite2.rect))
+        rect1 = rect_de_colisao(sprite1)
+        rect2 = rect_de_colisao(sprite2)
 
         # 3. Checa colisão entre as hitboxes (Matemática pura, quase zero custo de CPU)
         if rect1.colliderect(rect2):
@@ -55,15 +97,11 @@ class CollisionManager:
     def update(self, delta_time):
         player = self.game.player
         if not player: return
+        self.broadphase.reconstruir(entity_manager.inimigos_grupo)
 
         # 1. Projéteis do Jogador -> Inimigos
         for projetil in entity_manager.projeteis_jogador_grupo:
-            atingidos = pygame.sprite.spritecollide(
-                projetil, 
-                entity_manager.inimigos_grupo, 
-                False, 
-                self.custom_collision
-            )
+            atingidos = self.colidindo_com_inimigos(projetil)
             if not atingidos:
                 continue
             # Alvo mais próximo primeiro (ordem do grupo era arbitrária)
@@ -96,12 +134,7 @@ class CollisionManager:
             projetil.ao_atingir_alvo(player)
 
         # 3. Colisão de Contato: Jogador -> Inimigos (Ignora se estiver oculto)
-        inimigos_contato = pygame.sprite.spritecollide(
-            player,
-            entity_manager.inimigos_grupo,
-            False,
-            self.custom_collision
-        )
+        inimigos_contato = self.colidindo_com_inimigos(player)
         for inimigo in inimigos_contato:
             # Se o inimigo estiver inofensivo (ex: no ar), ignora o dano
             if getattr(inimigo, 'inofensivo', False):

@@ -2,6 +2,18 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa C2: broadphase de inimigos
+**Gatilho (§6) medido:** 250 inimigos da fase 0, 10 s, na tomada. Só com a AR: colisão 0,35 ms/frame. Com 5 armas no nível 10 (needler, carabin, shotgun, sniper, machine gun): **colisão 5,6 ms/frame** (passa dos 2 ms); com spartan laser, light rifle, sniper, needler e dizimator: 2,3 ms. A busca de alvo das armas custou **0,04 ms/frame**. Script fora do repo (cronometra `CollisionManager.update` e `encontrar_inimigo_*`).
+
+**O que foi feito**
+- `collision.py::BroadphaseInimigos`: os retângulos de colisão dos inimigos são lidos 1× por frame (`reconstruir`, no início do `CollisionManager.update`), e cada consulta filtra os candidatos com `Rect.collidelistall` (laço em C), na ordem do grupo. A decisão final continua com `custom_collision`. Usada por projétil × inimigo e no contato do jogador (`colidindo_com_inimigos`). Inimigo com `usar_circulo` (Scarab) é candidato de toda consulta, porque o círculo passa da borda do rect.
+- `rect_de_colisao(sprite)` concentra a regra collision_rect > hitbox > rect (antes repetida no `custom_collision`).
+- **Decisão (difere do roteiro):** filtro por `collidelistall` em vez de uma `GradeEntidades`. É mais simples, mantém a ordem do grupo de graça (a ordem decide o desempate do "mais próximo primeiro") e mediu o bastante: colisão de **5,6 → 0,3 ms/frame** no cenário do gatilho. A busca de alvo **não** entrou (0,04 ms/frame: a regra 7 não justifica); fica para a E4, se o perfil pedir.
+- **Limite declarado:** inimigo que surge ou se move *durante* a passada de colisão (ex.: teleporte ao tomar dano) só é visto pelos projéteis no frame seguinte. Na força bruta seria no mesmo frame. O teste quadro a quadro (abaixo) não pegou nenhum caso em 4 s de combate.
+- Testes: `test_broadphase.py` (11): equivalência com `spritecollide` (mesma lista, mesma ordem) em 3000 sondas aleatórias numa horda com Scarab, Didact e Jega; para o jogador; e **quadro a quadro** em 4 s de combate com 4 armas de projétil (cada consulta conferida com a força bruta no próprio frame). Bordas: grupo vazio, inimigo que saiu do grupo, inimigo circular, reconstrução, consulta inválida. Suíte: **733 verdes + 1 xfail**. Golden inalterado; catraca inalterada.
+
+**Desempenho:** a rodada completa acusou piora em quase tudo, inclusive no `draw`, que a C2 não toca (mesmo ruído da B2–B4). A/B alternado com o HEAD (worktree), na tomada: horda (½ escala, ordem invertida) C2 4,6–5,2 × HEAD 5,3–5,6; Warden 4,6–4,7 × 4,7–4,9. Sem piora. Base não regravada.
+
 ## 2026-11-21 | Etapa B4: ordem de update explícita + eventos (bloco B concluído)
 **O que foi feito**
 - `Game.update` virou passos nomeados: `_atualizar_portal`, `_checar_boss_derrotado`, `_checar_portal_tocado`, `_atualizar_spawner`, `_atualizar_entidades`, colisão, fase, `_checar_game_over`. A ordem e as condições não mudaram.

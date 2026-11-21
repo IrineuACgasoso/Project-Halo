@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A e B e a C1 concluídos; próxima: C2 (só se o gatilho da §6 disparar) ou C3.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A e B, C1 e C2 concluídos; próxima: C3.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -113,6 +113,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 - Gatilho: depois de C1, `CollisionManager.update` + busca de alvo das armas > 2 ms/frame com 250 inimigos.
 - Muda: `GradeEntidades` reconstruída 1× por frame; usada por projétil × inimigo, contato e `encontrar_inimigo_mais_proximo`/`_mais_forte`.
 - Testes: equivalência com a força bruta (mesmo conjunto de acertos em cenários aleatórios); golden inalterado.
+- Feito (2026-11-21): gatilho disparou (5,6 ms/frame com 5 armas). Saiu como filtro `Rect.collidelistall` (`BroadphaseInimigos`), não grade; a busca de alvo ficou de fora (0,04 ms). Ver log.
 
 **C3 · Projéteis e efeitos sem alocação** (risco: baixo)
 - Muda: a máscara do projétil vai para o `GLOBAL_CACHE` por (sprite, tamanho, ângulo). Fim das `Surface` por frame em `ArtilhariaAviso.draw`, `PlasmaGrenade.update`, `cone_strike`, `onda_emp`, auras e efeitos. Partículas vêm de um pool com teto global.

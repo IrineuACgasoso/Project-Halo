@@ -44,7 +44,7 @@ Project-Halo/
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções
-    │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes
+    │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
     │   ├── stagemanager.py  # fade e troca de fase/mapa; fim de campanha
     │   ├── camera.py        # offset seguindo o player + shake
     │   ├── spawner/         # spawner.py (ritmo/teto), spawner_pools.py (inimigos por fase),

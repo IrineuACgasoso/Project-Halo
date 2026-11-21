@@ -38,6 +38,7 @@
 | `unit/test_player.py` | Dano (i-frames, escudo, transbordo, veículo, morte), regeneração de escudo, espinhos, XP com vários níveis e fila de telas, upgrade forçado, buff de cooldown |
 | `unit/test_levelup_e_armas.py` | Integridade de `ARMAS_REGISTRO` e `weapon_data`, `_deve_melhorar`, `min_val`, sorteio e navegação da `TelaDeUpgrade`, equipar e subir **cada** arma até o nível 21 |
 | `unit/test_sistemas.py` | Config do spawner (pools, bosses, cronograma), ritmo, teto e trava de boss, colisão, escudo e escala de inimigos, drops e coleta de itens, pontuação, transição e fim de campanha, portal, estados |
+| `unit/test_broadphase.py` | `BroadphaseInimigos` (roteiro C2): mesma lista e mesma ordem do `spritecollide` em sondas aleatórias (com Scarab, Didact e Jega), para o jogador e quadro a quadro em combate com armas de projétil; grupo vazio, inimigo fora do grupo, inimigo circular, reconstrução |
 | `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican, o caminho do ranking e o inimigo longe do jogador colidindo com a parede perto dele (C1) |
 | `unit/test_estados.py` | Tabela `TRANSICOES` (só estados conhecidos, sem beco sem saída), registro de telas, `mudar_estado` (estrito lança, no jogo loga 1× e aplica, estado inexistente é recusado), nenhum estado escrito à mão no código e os **fluxos reais** percorrendo exatamente a tabela |
 | `unit/test_sessao.py` | `SessaoJogo` (roteiro B3): duas partidas seguidas não compartilham sessão, HUD, mapa, câmera, player, spawner nem stage manager; relógio e HUD zerados; partida "suja" não atrapalha a seguinte; o `Game` não guarda mais campos de sessão nem aliases de grupo |
@@ -59,4 +60,4 @@
 - **Nunca** escreva em `assets/data/ranking.json`. Use `RankingData(str(tmp_path / ...))`.
 - **Boss novo:** entra automaticamente no smoke test pelo `PHASE_BOSSES`. **Arma nova:** entra pelo `ARMAS_REGISTRO`.
 - **Bug encontrado e não corrigido:** use `@pytest.mark.xfail(strict=True, raises=<Erro>, reason="BUG conhecido ...")` e registre em `docs/log.md`. O `strict=True` faz o teste falhar quando o bug for corrigido, lembrando de remover a marca.
-- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (fim de campanha e morte no mesmo update pontuam em dobro, achado na B4) em 723 testes.
+- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (fim de campanha e morte no mesmo update pontuam em dobro, achado na B4) em 734 testes.
