@@ -130,6 +130,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **D1 · Manifesto de assets** (risco: médio)
 - Muda: as 251 linhas literais viram uma tabela (`chave → arquivo, escala, flip, alpha`) e um carregador `carregar_assets()` idempotente. O formato de `ASSETS` não muda. Arquivo ausente gera placeholder magenta + log, em vez de crash.
 - Testes: todo arquivo do manifesto existe; as chaves de `ASSETS` e os tamanhos das superfícies são idênticos aos de antes (equivalência gravada antes da troca).
+- Feito (2026-11-21): `data/manifesto_assets.py`; as 248 superfícies saíram idênticas pixel a pixel (`tests/golden/assets.json`, gravado com o código antigo). Ver log.
 
 **D2 · Mapas sob demanda** (risco: baixo)
 - Muda: `ASSETS['maps']` vira um mapeamento preguiçoso (carrega no primeiro acesso, mantém só os 2 mais recentes). `existe_proxima_fase()` consulta o manifesto, não a imagem.

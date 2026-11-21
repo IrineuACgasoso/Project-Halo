@@ -14,7 +14,7 @@
 - **Logs:** o projeto usa `print` com prefixo (`[RankingData]`, `[Renderer]`). Não há módulo de logging.
 
 ## Assets
-- Sempre via `ASSETS[...]` (`feats/assets.py`) ou `path(...)` (`utils/paths.py`). Nunca use caminho absoluto nem `os.getcwd()` direto, porque o executável usa `sys._MEIPASS`.
+- Sempre via `ASSETS[...]` (`feats/assets.py`) ou `path(...)` (`utils/paths.py`). Imagem nova entra no manifesto (`data/manifesto_assets.py`), nunca como `pygame.image.load` solto. Nunca use caminho absoluto nem `os.getcwd()` direto, porque o executável usa `sys._MEIPASS`.
 - Fontes: `utils/fonts.carregar_fonte(...)`, que tem cache e fallback para SysFont.
 
 ## Segurança e dados

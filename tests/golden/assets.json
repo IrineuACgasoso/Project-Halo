@@ -1,0 +1,404 @@
+{
+ "buddies": {
+  "arbiter": [
+   "192x192 32b alpha 945c0f8d",
+   "192x192 32b alpha 1ae2dee2",
+   "192x192 32b alpha 945c0f8d",
+   "192x192 32b alpha 346fedce"
+  ],
+  "cortana": [
+   "128x192 32b alpha ef1439f5",
+   "128x192 32b alpha ba25a5f0"
+  ],
+  "marine": [
+   "96x144 32b alpha f3c4b680",
+   "96x144 32b alpha f6d26b18",
+   "96x144 32b alpha f3c4b680",
+   "96x144 32b alpha 9ecd2fc9"
+  ],
+  "noble": [
+   "144x216 32b alpha 1d1c7ce2",
+   "144x216 32b alpha 6ac56c41",
+   "144x216 32b alpha 1d1c7ce2",
+   "144x216 32b alpha 9e17db64"
+  ]
+ },
+ "effects": {
+  "portal": "192x288 32b alpha a2344102"
+ },
+ "enemies": {
+  "arbiter": [
+   "250x250 32b alpha 9bedee10",
+   "250x250 32b alpha da52bd53",
+   "250x250 32b alpha 9bedee10",
+   "250x250 32b alpha 3c9e8e6f"
+  ],
+  "atriox": [
+   "300x450 32b alpha 1fd7e52f",
+   "300x450 32b alpha fd25a72f",
+   "300x450 32b alpha 1fd7e52f",
+   "300x450 32b alpha c8e7fdb0"
+  ],
+  "brute": [
+   "200x200 32b alpha 268501fa",
+   "200x200 32b alpha d02f5c79"
+  ],
+  "crawler": [
+   "128x128 32b alpha e1acc046",
+   "128x128 32b alpha 5789cb67",
+   "128x128 32b alpha b5cb0414",
+   "128x128 32b alpha f83e9f53"
+  ],
+  "didact": {
+   "attack": [
+    "250x375 32b alpha a0b88432"
+   ],
+   "cryptum": [
+    "400x400 32b alpha 45a5f4a0"
+   ],
+   "default": [
+    "250x375 32b alpha c3c01077",
+    "250x375 32b alpha c924dbab",
+    "250x375 32b alpha c3c01077",
+    "250x375 32b alpha 707a1cc5"
+   ]
+  },
+  "elite": {
+   "default": [
+    "120x180 32b alpha 815ef920",
+    "120x180 32b alpha 4ce536e7",
+    "120x180 32b alpha 815ef920",
+    "120x180 32b alpha f9266ef0"
+   ],
+   "h4": [
+    "120x180 32b alpha b25d9f43",
+    "120x180 32b alpha c71ea352",
+    "120x180 32b alpha b25d9f43",
+    "120x180 32b alpha cfc15bb1"
+   ],
+   "reach": [
+    "150x180 32b alpha fc287d40",
+    "150x180 32b alpha e6dddbbe",
+    "150x180 32b alpha fc287d40",
+    "150x180 32b alpha 26d14bb7"
+   ]
+  },
+  "escharum": [
+   "250x375 32b alpha c65bc26b",
+   "250x375 32b alpha 2a4ec703",
+   "250x375 32b alpha 746eb200",
+   "250x375 32b alpha c1b008ae"
+  ],
+  "gravemind": {
+   "final": [
+    "900x600 32b alpha 41fb6b1b",
+    "900x600 32b alpha d9da3d4e",
+    "900x600 32b alpha 8aa03851"
+   ],
+   "proto": [
+    "750x500 32b alpha 6ff84a46",
+    "750x500 32b alpha ca532172",
+    "750x500 32b alpha 55e78cf2"
+   ]
+  },
+  "grunt": {
+   "blue": [
+    "80x120 32b alpha 025cc2db"
+   ],
+   "red": [
+    "80x120 32b alpha d68b65da",
+    "80x120 32b alpha ff23a06c",
+    "80x120 32b alpha d68b65da",
+    "80x120 32b alpha da550bae"
+   ],
+   "space": [
+    "120x180 32b alpha d1ffe02b"
+   ]
+  },
+  "guardian": [
+   "1500x3000 32b alpha 5cb0dddd"
+  ],
+  "guilty": {
+   "damaged": [
+    "100x100 32b alpha 43c26421",
+    "100x100 32b alpha 91a50ded",
+    "100x100 32b alpha 9db9931c"
+   ],
+   "normal": [
+    "100x100 32b alpha a5f41c20",
+    "100x100 32b alpha 9fdd9fed",
+    "100x100 32b alpha 7c19200a"
+   ],
+   "teleport": [
+    "128x160 32b alpha 1d42efdd",
+    "128x160 32b alpha a1476900",
+    "128x160 32b alpha cdf29daa",
+    "128x160 32b alpha 7c3a4e5b",
+    "128x160 32b alpha 7de483e3",
+    "128x160 32b alpha 5c950bce",
+    "128x160 32b alpha 58b020cc",
+    "128x160 32b alpha dc6a4b20",
+    "128x160 32b alpha 902503a3",
+    "128x160 32b alpha b2831b72",
+    "128x160 32b alpha c3c7d009"
+   ]
+  },
+  "harbinger": {
+   "default": [
+    "200x300 32b alpha b6247003",
+    "200x300 32b alpha 359c26aa",
+    "200x300 32b alpha 195658c6",
+    "200x300 32b alpha 7e969679",
+    "200x300 32b alpha 54f97b15"
+   ],
+   "teleport": [
+    "100x100 32b alpha 25d31612",
+    "100x100 32b alpha 03731e70",
+    "100x100 32b alpha b191f5f5",
+    "100x100 32b alpha fdc8ebcb",
+    "100x100 32b alpha 19a415a4",
+    "100x100 32b alpha 82236cf9",
+    "100x100 32b alpha c9092447",
+    "100x100 32b alpha b263bdc6"
+   ]
+  },
+  "hunter": [
+   "250x250 32b alpha 059897a4",
+   "270x270 32b alpha 7ecf04da"
+  ],
+  "infection": {
+   "carry": [
+    "128x192 32b alpha 2ee112c3",
+    "128x192 32b alpha 3f8b6c44",
+    "128x192 32b alpha 2ee112c3",
+    "128x192 32b alpha 5e8a5460"
+   ],
+   "default": [
+    "72x48 32b alpha 04992bed",
+    "72x48 32b alpha 3621d163",
+    "72x48 32b alpha bb0b045d"
+   ],
+   "elite": [
+    "192x192 32b alpha 574bf149",
+    "192x192 32b alpha 7aef8839",
+    "192x192 32b alpha 47f1bee4",
+    "192x192 32b alpha baedef3c"
+   ],
+   "marine": [
+    "128x128 32b alpha fa8222ce",
+    "128x128 32b alpha c76a7f9f",
+    "128x128 32b alpha fa8222ce",
+    "128x128 32b alpha b6016f96"
+   ]
+  },
+  "jackal": {
+   "blue": [
+    "132x120 32b alpha 357ede66",
+    "132x120 32b alpha 859d5ff8",
+    "132x120 32b alpha 357ede66",
+    "132x120 32b alpha b0ca4625"
+   ],
+   "blue_broken": [
+    "132x132 32b alpha 79008170",
+    "132x132 32b alpha fcdef4ff",
+    "132x132 32b alpha 79008170",
+    "132x132 32b alpha fdda5d03"
+   ],
+   "red": [
+    "120x120 32b alpha e493ab50",
+    "120x120 32b alpha a8785756",
+    "120x120 32b alpha e493ab50",
+    "120x120 32b alpha d7ccd819"
+   ],
+   "red_broken": [
+    "120x120 32b alpha 2ff7373e",
+    "120x120 32b alpha 92fc8d3f"
+   ],
+   "sniper": [
+    "132x120 32b alpha bacb7bd1",
+    "132x120 32b alpha f46ad8ee",
+    "132x120 32b alpha bacb7bd1",
+    "132x120 32b alpha 1982eef0"
+   ]
+  },
+  "jega": [
+   "256x256 32b alpha 296ccbd4",
+   "256x256 32b alpha d48d770e",
+   "256x256 32b alpha 5dbe0ea8",
+   "256x256 32b alpha 411754fa",
+   "256x256 32b alpha cf0d5ce0",
+   "256x256 32b alpha 01132891",
+   "256x256 32b alpha 411754fa"
+  ],
+  "knight": [
+   "250x250 32b alpha 82986886",
+   "250x250 32b alpha 17d93f27",
+   "250x250 32b alpha 82986886",
+   "250x250 32b alpha eeac50b7"
+  ],
+  "scarab": {
+   "broken": [
+    "1024x1024 32b alpha e2b08575",
+    "1024x1024 32b alpha b14180bb",
+    "1024x1024 32b alpha e2b08575",
+    "1024x1024 32b alpha 3f050e52"
+   ],
+   "damaged": [
+    "1024x1024 32b alpha 29ab027b",
+    "1024x1024 32b alpha 23bf6c6e",
+    "1024x1024 32b alpha 29ab027b",
+    "1024x1024 32b alpha 2bd4d1b7"
+   ],
+   "default": [
+    "1024x1024 32b alpha f8872ad8",
+    "1024x1024 32b alpha fae07dba",
+    "1024x1024 32b alpha f8872ad8",
+    "1024x1024 32b alpha 1ba1dfa7"
+   ]
+  },
+  "sentinel": {
+   "default": [
+    "128x192 32b alpha d4d9dc9f",
+    "128x192 32b alpha dcccab38"
+   ],
+   "major": [
+    "192x288 32b alpha 87f7f8bf",
+    "192x288 32b alpha 87f7f8bf"
+   ]
+  },
+  "soldier": {
+   "default": [
+    "96x120 32b alpha 297d895b",
+    "96x120 32b alpha 8c5ec50a",
+    "96x120 32b alpha 297d895b",
+    "96x120 32b alpha 8a2f5775"
+   ],
+   "sniper": [
+    "128x128 32b alpha 4f4139f0",
+    "128x128 32b alpha e5980865",
+    "128x128 32b alpha 4f4139f0",
+    "128x128 32b alpha 39545d0a"
+   ]
+  },
+  "tartarus": [
+   "192x288 32b alpha c46b341f",
+   "192x288 32b alpha 96ab9a6f",
+   "192x288 32b alpha c46b341f",
+   "192x288 32b alpha 48533b70"
+  ],
+  "terminal": [
+   "96x130 32b alpha a15a415f"
+  ],
+  "warden": {
+   "clone": [
+    "500x500 32b alpha fd85baf4",
+    "500x500 32b alpha 67c1f13e",
+    "500x500 32b alpha babe9d08"
+   ],
+   "default": [
+    "550x550 32b alpha 8b9ebce1",
+    "550x550 32b alpha d8da48de",
+    "550x550 32b alpha 15614c93"
+   ]
+  },
+  "watcher": {
+   "default": [
+    "96x96 32b alpha 86da839f",
+    "96x96 32b alpha 86da839f",
+    "96x96 32b alpha 86da839f",
+    "96x96 32b alpha df354d3a"
+   ],
+   "omega": [
+    "144x144 32b alpha 54c993d8",
+    "144x144 32b alpha 54c993d8",
+    "144x144 32b alpha 54c993d8",
+    "144x144 32b alpha 3a11820a"
+   ]
+  },
+  "zealot": [
+   "200x200 32b alpha 95a2d91f",
+   "200x200 32b alpha 81f5be8f",
+   "200x200 32b alpha ef1af869",
+   "200x200 32b alpha d5cd319f"
+  ]
+ },
+ "gameover": {
+  "0": "1280x720 32b alpha 77deb24e",
+  "1": "1280x720 32b alpha 9f9c8930",
+  "2": "1280x720 32b alpha 3bba3944",
+  "3": "1280x720 32b alpha 717a147b",
+  "4": "1280x720 32b alpha 2481577a",
+  "5": "1280x720 32b alpha 66684429",
+  "6": "1280x720 32b alpha 9449bb58",
+  "7": "1280x720 32b alpha 856c2de6"
+ },
+ "icons": {
+  "arbiter": "96x96 32b alpha b56d3ee7",
+  "assault_rifle": "87x87 32b alpha 34ac0cbd",
+  "carabin": "53x53 32b alpha 9fd47695",
+  "cortana": "96x96 32b alpha 3e3c28ae",
+  "energy_sword": "64x64 32b alpha cc344a2e",
+  "grenade_launcher": "64x64 32b alpha 9e34c206",
+  "marine": "64x64 32b alpha 8cfe3bd7",
+  "mk2_shield": "96x96 32b alpha f7452575",
+  "needler": "84x84 32b alpha 7d1fd81b",
+  "noble": "64x64 32b alpha 85d15c14",
+  "shotgun": "96x96 32b alpha 859c00eb",
+  "spartan_laser": "96x96 32b alpha c5a1a100"
+ },
+ "items": {
+  "big_shard": "96x96 32b alpha 96e35853",
+  "cafe": "128x128 32b alpha 930bd89e",
+  "exp_shard": "32x32 32b alpha dbb010d4",
+  "life_orb": "96x96 32b alpha a40c26cf",
+  "light_bullet": "96x96 32b alpha cd0e580f"
+ },
+ "maps": {
+  "0": "4608x3072 32b opaco ec9cf23f",
+  "1": "3072x2048 32b opaco de0dc3bf",
+  "2": "4608x3072 32b opaco 14858b19",
+  "3": "4608x3072 32b opaco 3afc7537",
+  "4": "3072x2048 32b opaco a20a2aae",
+  "5": "3072x2048 32b opaco 0c985206",
+  "6": "4608x3072 32b opaco c0beb659",
+  "7": "2304x1536 32b opaco acdadfd5",
+  "8": "4608x3072 32b opaco c3822b33"
+ },
+ "menu": {
+  "colaboradores": "1280x720 32b opaco 59e7e18a",
+  "haloring": "1280x720 32b alpha 05208e0e",
+  "logo": "576x384 32b alpha 459913b4",
+  "menuback": "1280x720 32b alpha 8f512620",
+  "menuback2": "1280x720 32b alpha a4461324",
+  "ranking": "1280x720 32b opaco e230adc0"
+ },
+ "player": {
+  "left": [
+   "144x144 32b alpha d1a26ed6",
+   "144x144 32b alpha bd42583a",
+   "144x144 32b alpha c0afdcdb"
+  ],
+  "right": [
+   "144x144 32b alpha 8d672a88",
+   "144x144 32b alpha d37fa63e",
+   "144x144 32b alpha 3db76ea8"
+  ]
+ },
+ "projectiles": {
+  "acid_breath": "32x32 32b alpha 5ba062d8",
+  "ar": "16x16 32b alpha 5a2d9b7b",
+  "bcarabin": "96x96 32b alpha efad3d9d",
+  "blue_laser": "96x96 32b alpha 4def4171",
+  "carabin": "64x64 32b alpha 2b9bb8b1",
+  "dizimator": "36x36 32b alpha d199f3d9",
+  "energy_sword": "64x64 32b alpha cc344a2e",
+  "green_laser": "96x96 32b alpha 110a937e",
+  "light_bullet": "96x96 32b alpha bf0fc111",
+  "m50": "16x16 32b alpha 620a0d90",
+  "needler": "64x36 32b alpha aef83253",
+  "plasma": "16x16 32b alpha 5d45b210",
+  "plasma_grenade": "64x64 32b alpha 20df39ec",
+  "red_laser": "32x32 32b alpha e8e12209",
+  "spike": "96x48 32b alpha 1a52168b"
+ }
+}

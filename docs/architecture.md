@@ -69,7 +69,7 @@ Ainda não há assinantes no jogo: os consumidores previstos são a memória dos
 ## Sessão (uma partida)
 `game.sessao` é uma `SessaoJogo` (`systems/sessao.py`, dataclass): `timer_jogo`, `fase_atual`, `boss_atual`, `portal_atual`, `spawnar_portal_em_breve`, `timer_portal`, `tela_de_upgrade_ativa`, `gravemind_reborns`. `iniciar_novo_jogo` → `_resetar_estado_jogo` reinicia o relógio, esvazia os grupos e cria **objetos novos**: sessão, HUD (guarda tempos da partida), mapa, câmera, player, spawner e stage manager. Estado que vale só durante a partida entra na sessão, não no `Game`. Os sistemas permanentes (menus, ranking, configurações, `CollisionManager`, `Renderer`) não guardam nada da partida.
 - Caches de classe: `ProjetilUniversal.GLOBAL_CACHE`, `EnemySprites.GLOBAL_SPRITE_CACHE`, `items.draw.GLOBAL_CACHE` e os caches da HUD.
-- `source/feats/assets.py`: no **import**, faz `pygame.init()`, abre uma janela oculta e carrega todas as imagens em `ASSETS`, com caminhos relativos ao cwd ou ao `sys._MEIPASS` no exe.
+- `source/feats/assets.py`: no **import**, faz `pygame.init()`, abre uma janela oculta e carrega todas as imagens do manifesto (`data/manifesto_assets.py`) em `ASSETS` (`carregar_assets()`, idempotente; arquivo ausente vira placeholder magenta + aviso), com caminhos relativos ao cwd ou ao `sys._MEIPASS` no exe.
 
 ## Entidades
 | Entidade | Composição | Notas |

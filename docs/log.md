@@ -2,6 +2,16 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa D1: manifesto de assets
+**O que foi feito**
+- `source/data/manifesto_assets.py`: `MANIFESTO`, com o mesmo formato de `ASSETS` (dicts e listas) e uma `Imagem(arquivo, escala, alpha, espelhar)` em cada folha. Ajudantes `quadros(pasta, nomes, escala)` e `numerados(prefixo, fim, inicio)` para as sequências de quadros; os nomes fora de padrão (`guilty.png`, `clone2/clone/clone3`, `super.png` 2×, Hunter com 2 escalas) ficam explícitos. Módulo só de dados (sem pygame).
+- `feats/assets.py`: as 251 linhas literais viraram `carregar_imagem(imagem)` e `carregar_assets()`, que preenche **o mesmo dict** `ASSETS` (os `from ... import ASSETS` continuam valendo) e é idempotente. Ainda roda no import (a D3 tira). Arquivo ausente ou ilegível vira um placeholder magenta do tamanho pedido (64×64 sem escala) e um aviso no console, uma vez por arquivo.
+- O jogador espelhado (`player.left`) agora é `espelhar=True` no manifesto (antes, `flip` da lista da direita). `player_right_frames` saiu (ninguém o importava). A exceção `F405` do `assets.py` saiu do `ruff.toml`.
+- **Equivalência:** `tests/golden/assets.json` foi gravado **com o código antigo**, antes da troca: cada superfície vira `LxA bits alpha|opaco crc32-dos-pixels`. As 248 superfícies saíram idênticas pixel a pixel. Regravar só com `--atualizar-golden`, quando a arte mudar de propósito.
+- Testes: `test_assets.py` (14): equivalência, todo arquivo do manifesto existe, a estrutura de `ASSETS` espelha o manifesto, idempotência (zero `image.load` na 2ª chamada), espelhar, opaco sem alpha, ausente (com e sem alpha, log uma vez) e ilegível viram placeholder. Suíte: **813 verdes + 1 xfail**. Golden inalterado; catraca inalterada.
+
+**Desempenho:** o jogo em execução usa as mesmas superfícies (pixels idênticos), então só o import foi medido. A/B alternado com o HEAD (worktree), 3 rodadas: HEAD 3,4–4,6 s × D1 3,0–4,7 s. Sem diferença.
+
 ## 2026-11-21 | Etapa C4: render (bloco C concluído)
 **O que foi feito**
 - **Culling** (`Renderer._sprites_visiveis`): só ordena e desenha o sprite de imagem cuja imagem toca a tela (caixa da imagem, não do rect, com folga de 2 px para o arredondamento do blit). Sprite com `draw` próprio sempre entra: o rect dele nem sempre cobre o que desenha (artilharia e aviso de laser têm rect 1×1), e esses efeitos já se recortam sozinhos desde a C3. Sprite quebrado continua entrando, para o erro ser logado como antes.

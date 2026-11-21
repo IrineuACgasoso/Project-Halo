@@ -23,7 +23,7 @@ Project-Halo/
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
 │   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), contar_alocacoes(), MapaSemImagem
-│   ├── golden/              # fase0.json: golden master (roteiro A3), regerado só com --atualizar-golden
+│   ├── golden/              # fase0.json: golden master (A3); assets.json: assinatura de cada imagem (D1). Só com --atualizar-golden
 │   ├── perf/                # test_catraca.py: alocações por frame ≤ teto (roteiro A2)
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
 │   │                        # test_regressoes.py = um teste por bug já corrigido
@@ -34,7 +34,8 @@ Project-Halo/
     ├── docs/BOSS_CREATION.md# guia antigo de bosses (BossBase inexistente); será substituído por docs/plano_bosses.md
     ├── data/
     │   ├── weapon_data.py   # BALANCEAMENTO: WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA (WeaponStats)
-    │   └── enemy_data.py    # vazio
+    │   ├── enemy_data.py    # vazio
+    │   └── manifesto_assets.py # MANIFESTO: toda imagem (arquivo, escala, alpha, espelhar), no formato de ASSETS
     ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float),
     │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
     ├── systems/
@@ -63,7 +64,7 @@ Project-Halo/
     │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
-    │   ├── assets.py        # ASSETS: carrega todas as imagens no import (efeito colateral!)
+    │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto no import (efeito colateral!)
     │   ├── weapons/         # baseweapon.py (Arma) + pastas por raridade: comum/incomum/rara/epica/lendaria
     │   ├── projetil/        # ProjetilUniversal + subclasses (brick, carabin, needler, laserblast...)
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI
@@ -81,12 +82,12 @@ Project-Halo/
 | Tarefa | Onde |
 |---|---|
 | Balancear arma, companion ou veículo | `source/data/weapon_data.py` |
-| Nova arma | Classe em `feats/weapons/<raridade>/` com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `feats/assets.py['icons']` |
+| Nova arma | Classe em `feats/weapons/<raridade>/` com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `MANIFESTO['icons']` (`data/manifesto_assets.py`) |
 | Novo companion ou veículo | `feats/buddies/` ou `feats/vehicles/`, com `COMPANION_DATA`/`VEHICLES_DATA` e `ARMAS_REGISTRO` |
-| Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), sprites em `ASSETS['enemies']`, peso em `spawner_pools.py` |
+| Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), sprites em `MANIFESTO['enemies']`, peso em `spawner_pools.py` |
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
-| Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `ASSETS['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
+| Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |

@@ -1,14 +1,19 @@
+"""ASSETS: as imagens do jogo, montadas a partir de `data/manifesto_assets.py` (roteiro D1).
+
+Ainda carrega tudo no import (pygame.init + janela oculta + `carregar_assets()`): a D3 tira
+esse efeito colateral.
+"""
 import pygame
 from source.windows.settings import *
 
-
 # `path` agora vive em source/utils/paths.py (evita import circular); reexportado aqui.
 from source.utils.paths import path  # noqa: E402,F401
+from source.data.manifesto_assets import MANIFESTO, Imagem
 
 # Inicialização segura para o Executável
 pygame.init()
 
-# Criar uma tela oculta evita que o convert_alpha() dê erro 
+# Criar uma tela oculta evita que o convert_alpha() dê erro
 # e resolve o erro de "Embedded Interpreter" em alguns sistemas
 try:
     screen = pygame.display.set_mode((1280, 720), pygame.HIDDEN)
@@ -16,458 +21,52 @@ except pygame.error:
     # Caso o driver de vídeo não suporte modo oculto
     screen = pygame.display.set_mode((1280, 720))
 
-# Sou preguiçoso e nao quero escrever função
-player_right_frames = [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'player', 'player1.png')).convert_alpha(), (144, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'player', 'player2.png')).convert_alpha(), (144, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'player', 'player3.png')).convert_alpha(), (144, 144)),
-            ]
+COR_PLACEHOLDER = (255, 0, 255)
+TAMANHO_PLACEHOLDER = (64, 64)   # para imagem sem escala no manifesto
 
-ASSETS = {
-    'projectiles': {
-        'plasma': pygame.image.load(path('assets', 'img', 'projectiles', 'plasmagun.png')).convert_alpha(),
-        'carabin': pygame.image.load(path('assets', 'img', 'projectiles', 'carabin.png')).convert_alpha(),
-        'bcarabin': pygame.image.load(path('assets', 'img', 'projectiles', 'bcarabin.png')).convert_alpha(),
-        'needler': pygame.image.load(path('assets', 'img', 'projectiles', 'needler.png')).convert_alpha(),
-        'plasma_grenade': pygame.image.load(path('assets', 'img', 'projectiles', 'plasma_grenade.png')).convert_alpha(),
-        'm50': pygame.image.load(path('assets', 'img', 'projectiles', 'm50.png')).convert_alpha(),
-        'ar': pygame.image.load(path('assets', 'img', 'projectiles', 'ar.png')).convert_alpha(),
-        'energy_sword' : pygame.image.load(path('assets', 'img', 'projectiles','energysword.png')).convert_alpha(),
-        'light_bullet': pygame.image.load(path('assets', 'img', 'projectiles', 'lightrifle.png')).convert_alpha(),
-        'dizimator': pygame.image.load(path('assets', 'img', 'projectiles', 'dizimator.png')).convert_alpha(),
-        'spike' : pygame.image.load(path('assets', 'img', 'projectiles', 'spike.png')).convert_alpha(),
-        'acid_breath': pygame.image.load(path('assets', 'img', 'projectiles', 'acid.gif')).convert_alpha(),
-        'red_laser': pygame.image.load(path('assets', 'img', 'projectiles', 'redlaser.png')).convert_alpha(),
-        'blue_laser': pygame.image.load(path('assets', 'img', 'projectiles', 'bluelaser.png')).convert_alpha(),
-        'green_laser': pygame.image.load(path('assets', 'img', 'projectiles', 'greenlaser.png')).convert_alpha()
-        
-    },
-
-    'icons': {
-        'assault_rifle': pygame.image.load(path('assets', 'img', 'icons', 'ar.png')).convert_alpha(),
-        'grenade_launcher': pygame.image.load(path('assets', 'img', 'icons', 'plasma_grenade.png')).convert_alpha(),
-        'needler': pygame.image.load(path('assets', 'img', 'icons', 'needler.png')).convert_alpha(),
-        'carabin': pygame.image.load(path('assets', 'img', 'icons', 'carabin.png')).convert_alpha(),
-        'spartan_laser': pygame.image.load(path('assets', 'img', 'icons', 'spartan_laser.png')).convert_alpha(),
-        'shotgun': pygame.image.load(path('assets', 'img', 'icons', 'shotgun.png')).convert_alpha(),
-        'cortana': pygame.image.load(path('assets', 'img', 'icons', 'cortana.png')).convert_alpha(),
-        'mk2_shield': pygame.image.load(path('assets', 'img', 'icons', 'mk2.png')).convert_alpha(),
-        'arbiter': pygame.image.load(path('assets', 'img', 'icons', 'arbiter.png')).convert_alpha(),
-        'marine': pygame.image.load(path('assets', 'img', 'icons', 'marine.png')).convert_alpha(),
-        'energy_sword': pygame.image.load(path('assets', 'img', 'icons', 'energy_sword.png')).convert_alpha(),
-        'noble': pygame.image.load(path('assets', 'img', 'icons', 'noble.png')).convert_alpha(),
-        },
-
-    'items': {
-        'exp_shard': pygame.image.load(path('assets', 'img', 'items', 'expshard.png')).convert_alpha(),
-        'big_shard': pygame.image.load(path('assets', 'img', 'items', 'bigshard.png')).convert_alpha(),
-        'life_orb': pygame.image.load(path('assets', 'img', 'items', 'lifeorb.png')).convert_alpha(),
-        'light_bullet': pygame.image.load(path('assets', 'img', 'items', 'lightbullet.png')).convert_alpha(),
-        'cafe': pygame.image.load(path('assets', 'img', 'items', 'cafe.png')).convert_alpha(),
-    },
-
-    'player': {
-        'right': player_right_frames,
-        'left': [pygame.transform.flip(sprite, True, False) for sprite in player_right_frames]
-    },
-
-    'buddies' : {
-        'cortana' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'cortana', 'cortana1.png')).convert_alpha(), (128, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'cortana', 'cortana2.png')).convert_alpha(), (128, 192)),
-        ],
-        'arbiter' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter1.png')).convert_alpha(), (192, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter2.png')).convert_alpha(), (192, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter3.png')).convert_alpha(), (192, 192)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'arbiter', 'arbiter4.png')).convert_alpha(), (192, 192)),
-        ],
-        'marine' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine1.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine2.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine3.png')).convert_alpha(), (96, 144)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'marine', 'marine4.png')).convert_alpha(), (96, 144)),
-        ],
-        'noble' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble1.png')).convert_alpha(), (144, 216)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble2.png')).convert_alpha(), (144, 216)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble3.png')).convert_alpha(), (144, 216)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'buddies', 'noble', 'noble4.png')).convert_alpha(), (144, 216)),
-        ],
-    },
+ASSETS = {}
+_arquivos_com_falha = set()      # cada arquivo ausente é logado uma vez só
 
 
-    'enemies': {
-        'hunter': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'hunter','hunter1.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'hunter','hunter2.png')).convert_alpha(), (270, 270))
-        ],
-
-        'zealot': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'zealot', 'zealot1.png')).convert_alpha(), (200,200)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'zealot', 'zealot2.png')).convert_alpha(), (200,200)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'zealot', 'zealot3.png')).convert_alpha(), (200,200)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'zealot', 'zealot4.png')).convert_alpha(), (200,200))
-        ],
-
-        'guilty': {
-            'normal' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty2.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty3.png')).convert_alpha(), (100, 100))
-            ],
-            'damaged' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty4.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty5.png')).convert_alpha(), (100, 100)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'guilty6.png')).convert_alpha(), (100, 100))
-            ],
-            'teleport' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp1.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp2.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp3.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp4.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp5.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp6.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp7.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp8.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp9.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp10.png')).convert_alpha(), (128, 160)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'teleport', 'tp11.png')).convert_alpha(), (128, 160))
-            ]
-        },
-        'terminal' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guilty', 'terminal.png')).convert_alpha(), (96, 130)),
-            ],
-
-        'scarab' : {
-            'default' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab1.png')).convert_alpha(),(1024, 1024)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab2.png')).convert_alpha(),(1024, 1024)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab3.png')).convert_alpha(),(1024, 1024)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'scarab4.png')).convert_alpha(),(1024, 1024))
-            ],
-            'damaged' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged1.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged2.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged3.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'damaged', 'damaged4.png')).convert_alpha(),(1024, 1024))
-             ],
-            'broken' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken1.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken2.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken3.png')).convert_alpha(),(1024, 1024)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'scarab', 'broken', 'broken4.png')).convert_alpha(),(1024, 1024))
-            ]
-        },
-
-        'arbiter': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss1.png')).convert_alpha(), (250,250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss2.png')).convert_alpha(), (250,250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss3.png')).convert_alpha(), (250,250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'arbiter', 'boss4.png')).convert_alpha(), (250,250))
-        ],
-
-        'tartarus': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus1.png')).convert_alpha(), (192, 288)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus2.png')).convert_alpha(), (192, 288)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus3.png')).convert_alpha(), (192, 288)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'tartarus', 'tartarus4.png')).convert_alpha(), (192, 288))
-        ],
-
-        'gravemind': {
-            'final': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'final', 'final1.png')).convert_alpha(), (900,600)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'final', 'final2.png')).convert_alpha(), (900,600)), 
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'final', 'final3.png')).convert_alpha(), (900,600)), 
-                ],
-            
-            'proto': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'proto', 'proto1.png')).convert_alpha(), (750,500)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'proto', 'proto2.png')).convert_alpha(), (750,500)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'gravemind', 'proto', 'proto3.png')).convert_alpha(), (750,500)),
-                ]
-        },
-
-        'knight' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'knight', 'command1.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'knight', 'command2.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'knight', 'command3.png')).convert_alpha(), (250, 250)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'knight', 'command4.png')).convert_alpha(), (250, 250)),
-        ],
-
-        'didact' : {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'did1.png')).convert_alpha(), (250, 375)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'did2.png')).convert_alpha(), (250, 375)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'did3.png')).convert_alpha(), (250, 375)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'did4.png')).convert_alpha(), (250, 375))
-                ],
-            'attack' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'didpull.png')).convert_alpha(), (250, 375)),
-                ],
-            'cryptum' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'didact', 'cryptum.png')).convert_alpha(), (400, 400))
-                ]
-        },
-
-        'warden' : {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'warden.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'warden2.png')).convert_alpha(), (550,550)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'warden3.png')).convert_alpha(), (550,550))
-            ],
-            'clone' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'clone2.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'clone.png')).convert_alpha(), (500,500)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'warden', 'clone3.png')).convert_alpha(), (500,500))
-            ]
-        },
-
-        'guardian': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'guardian', 'guardian1.png')).convert_alpha(), (1500,3000)),
-        ],
-
-        'jega' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega1.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega2.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega3.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega4.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega5.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega6.png')).convert_alpha(), (256, 256)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'jega', 'jega7.png')).convert_alpha(), (256, 256))
-        ],
-
-        'escharum': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha1.png')).convert_alpha(), (250, 375)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha2.png')).convert_alpha(), (250, 375)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha3.png')).convert_alpha(), (250, 375)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'escharum', 'escha4.png')).convert_alpha(), (250, 375))
-        ],
-
-        'harbinger' : {
-            'default': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb1.png')).convert_alpha(), (200,300)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb2.png')).convert_alpha(), (200,300)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb3.png')).convert_alpha(), (200,300)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb4.png')).convert_alpha(), (200,300)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'harb5.png')).convert_alpha(), (200,300))
-            ],
-            'teleport': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp1.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp2.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp3.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp4.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp5.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp6.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp7.png')).convert_alpha(), (100,100)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'harbinger', 'teleport', 'tp8.png')).convert_alpha(), (100,100)),
-            ]
-        },
-
-        'atriox': [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox1.png')).convert_alpha(), (300, 450)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox2.png')).convert_alpha(), (300, 450)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox3.png')).convert_alpha(), (300, 450)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'bosses', 'atriox', 'atriox4.png')).convert_alpha(), (300, 450))
-        ],
-
-        'grunt': {
-            'red': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'red', 'grunt1.png')).convert_alpha(), (80, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'red', 'grunt2.png')).convert_alpha(), (80, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'red', 'grunt3.png')).convert_alpha(), (80, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'red', 'grunt4.png')).convert_alpha(), (80, 120)),
-            ],
-            'blue': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'blue', 'grunt1.png')).convert_alpha(), (80, 120)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'blue', 'grunt2.png')).convert_alpha(), (80, 120)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'blue', 'grunt3.png')).convert_alpha(), (80, 120)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'blue', 'grunt4.png')).convert_alpha(), (80, 120)),
-            ],
-            'space': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'space', 'grunt1.png')).convert_alpha(), (120, 180)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'space', 'grunt2.png')).convert_alpha(), (120, 180)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'space', 'grunt3.png')).convert_alpha(), (120, 180)),
-                #pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'grunt', 'space', 'grunt4.png')).convert_alpha(), (120, 180)),
-            ],
+def _placeholder(imagem):
+    superficie = pygame.Surface(imagem.escala or TAMANHO_PLACEHOLDER, pygame.SRCALPHA)
+    superficie.fill(COR_PLACEHOLDER)
+    return superficie.convert_alpha() if imagem.alpha else superficie.convert()
 
 
-    },
-
-        'jackal': {
-            'red': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red1.png')).convert_alpha(), (120, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red2.png')).convert_alpha(), (120, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red3.png')).convert_alpha(), (120, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red4.png')).convert_alpha(), (120, 120))
-            ],
-            'red_broken': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red5.png')).convert_alpha(), (120, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'red', 'red6.png')).convert_alpha(), (120, 120)),            
-            ],
-            'blue': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue1.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue2.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue3.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue4.png')).convert_alpha(), (132, 120)),
-            ],
-            'blue_broken': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue5.png')).convert_alpha(), (132, 132)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue6.png')).convert_alpha(), (132, 132)),            
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue7.png')).convert_alpha(), (132, 132)),            
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'blue', 'blue8.png')).convert_alpha(), (132, 132)),            
-            ],
-            'sniper': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'sniper', 'sniper1.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'sniper', 'sniper2.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'sniper', 'sniper3.png')).convert_alpha(), (132, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'jackal', 'sniper', 'sniper4.png')).convert_alpha(), (132, 120)),
-            ]
-        },
-
-        'infection': {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection1.png')).convert_alpha(), (72, 48)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection2.png')).convert_alpha(), (72, 48)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'infection3.png')).convert_alpha(), (72, 48))
-                ],
-
-            'elite' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'elite', 'elite1.png')).convert_alpha(), (192, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'elite', 'elite2.png')).convert_alpha(), (192, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'elite', 'elite3.png')).convert_alpha(), (192, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'elite', 'elite4.png')).convert_alpha(), (192, 192))
-                ],
-            'marine' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'marine', 'marine1.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'marine', 'marine2.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'marine', 'marine3.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'marine', 'marine4.png')).convert_alpha(), (128, 128))
-                ],
-
-            'carry'  : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'carry', 'carry1.png')).convert_alpha(), (128, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'carry', 'carry2.png')).convert_alpha(), (128, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'carry', 'carry3.png')).convert_alpha(), (128, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'flood', 'carry', 'carry4.png')).convert_alpha(), (128, 192))
-                ]
-        },
-
-        'elite': {
-            'default': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite1.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite2.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite3.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'elite4.png')).convert_alpha(),(120,180))
-                ],
-            'reach': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot1.png')).convert_alpha(),(150, 180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot2.png')).convert_alpha(),(150, 180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot3.png')).convert_alpha(),(150, 180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'reach', 'zealot4.png')).convert_alpha(),(150, 180))
-                ],
-            'h4': [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot1.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot2.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot3.png')).convert_alpha(),(120,180)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'elite', 'h4', 'zealot4.png')).convert_alpha(),(120,180))
-                ],
-            },
-
-        'brute': [ 
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'brute', 'brute.png')).convert_alpha(),(200,200)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'covenant', 'brute', 'brute2.png')).convert_alpha(),(200,200))
-           ],
-        
-        'sentinel': {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent1.png')).convert_alpha(), (128, 192)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'sent2.png')).convert_alpha(), (128, 192)),
-                ],
-            'major' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'super.png')).convert_alpha(), (192, 288)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'forerunner', 'sentinel', 'super.png')).convert_alpha(), (192, 288))
-                ],
-        },
-
-        'crawler' : [
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw1.png')).convert_alpha(), (128, 128)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw2.png')).convert_alpha(), (128, 128)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw3.png')).convert_alpha(), (128, 128)),
-            pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'crawler', 'craw4.png')).convert_alpha(), (128, 128)),
-            ],
-        
-        'watcher' : {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (96, 96)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (96, 96)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (96, 96)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (96, 96)),
-                ],
-            'omega' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat1.png')).convert_alpha(), (144, 144)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat2.png')).convert_alpha(), (144, 144)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat3.png')).convert_alpha(), (144, 144)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'watcher', 'wat4.png')).convert_alpha(), (144, 144)),
-                ]
-            },
-
-        'soldier' : {
-            'default' : [
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier1.png')).convert_alpha(), (96, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier2.png')).convert_alpha(), (96, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier3.png')).convert_alpha(), (96, 120)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'soldier4.png')).convert_alpha(), (96, 120)),
-                ],
-
-            'sniper' : [ 
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper1.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper2.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper3.png')).convert_alpha(), (128, 128)),
-                pygame.transform.scale(pygame.image.load(path('assets', 'img', 'enemies', 'prometheans', 'soldier', 'sniper', 'sniper4.png')).convert_alpha(), (128, 128)),
-                ]
-            }
-                
-        },
+def carregar_imagem(imagem):
+    """Surface de uma `Imagem` do manifesto. Arquivo ausente ou ilegível vira um placeholder
+    magenta do tamanho pedido (e um aviso no console), em vez de derrubar o jogo."""
+    caminho = path('assets', 'img', *imagem.arquivo.split('/'))
+    try:
+        bruta = pygame.image.load(caminho)
+    except (FileNotFoundError, pygame.error) as erro:
+        if imagem.arquivo not in _arquivos_com_falha:
+            _arquivos_com_falha.add(imagem.arquivo)
+            print(f'[Assets] Imagem ausente ou ilegível, usando placeholder: {caminho} ({erro})')
+        superficie = _placeholder(imagem)
+    else:
+        superficie = bruta.convert_alpha() if imagem.alpha else bruta.convert()
+        if imagem.escala:
+            superficie = pygame.transform.scale(superficie, imagem.escala)
+    if imagem.espelhar:
+        superficie = pygame.transform.flip(superficie, True, False)
+    return superficie
 
 
-    'maps': {
-        '0' : pygame.image.load(path('assets', 'img', 'map', '0', 'map0.jpg')).convert(),
-        '1' : pygame.image.load(path('assets', 'img', 'map', '1', 'map1.jpg')).convert(),
-        '2' : pygame.image.load(path('assets', 'img', 'map', '2', 'map2.jpg')).convert(),
-        '3' : pygame.image.load(path('assets', 'img', 'map', '3', 'map3.jpg')).convert(),
-        '4' : pygame.image.load(path('assets', 'img', 'map', '4', 'map4.jpg')).convert(),
-        '5' : pygame.image.load(path('assets', 'img', 'map', '5', 'map5.jpg')).convert(),
-        '6' : pygame.image.load(path('assets', 'img', 'map', '6', 'map6.jpg')).convert(),
-        '7' : pygame.image.load(path('assets', 'img', 'map', '7', 'map7.jpg')).convert(),
-        '8' : pygame.image.load(path('assets', 'img', 'map', '8', 'map8.jpg')).convert()
-
-    },
-
-    'menu': {
-        'logo'          : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'menu', 'logo.png')).convert_alpha(),(576, 384)),
-        'menuback'      : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'menu', 'menuback.png')).convert_alpha(), (largura_tela, altura_tela)),
-        'menuback2'     : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'menu', 'menuback2.png')).convert_alpha(), (largura_tela, altura_tela)),
-        'haloring'      : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'menu', 'haloring.png')).convert_alpha(), (largura_tela, altura_tela)),
-        'colaboradores' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'colaboradores.png')).convert(), (largura_tela, altura_tela)),
-        'ranking'       : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'ranking.jpg')).convert(), (largura_tela, altura_tela))
-    },
-
-    'gameover' : {
-        '0' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '0', 'over0.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '1' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '1', 'over1.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '2' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '2', 'over2.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '3' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '3', 'over3.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '4' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '4', 'over4.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '5' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '5', 'over5.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '6' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '6', 'over6.png')).convert_alpha(), (largura_tela, altura_tela)),
-        '7' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'map', '7', 'over7.png')).convert_alpha(), (largura_tela, altura_tela)),
-
-    },
+def _montar(no):
+    if isinstance(no, Imagem):
+        return carregar_imagem(no)
+    if isinstance(no, list):
+        return [_montar(x) for x in no]
+    return {chave: _montar(filho) for chave, filho in no.items()}
 
 
-    'effects' : {
-        'portal' : pygame.transform.scale(pygame.image.load(path('assets', 'img', 'portal.png')).convert_alpha(), (192, 288))
-    }
-    
-    }
+def carregar_assets():
+    """Preenche `ASSETS` (sempre o mesmo dict) a partir do manifesto. Idempotente."""
+    if not ASSETS:
+        ASSETS.update(_montar(MANIFESTO))
+    return ASSETS
+
+
+carregar_assets()

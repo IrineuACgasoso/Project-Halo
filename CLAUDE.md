@@ -25,7 +25,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
 - **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`. O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
 - **Fases:** mapas Tiled em `assets/img/map/<n>/m<n>.tmj`. O pool de inimigos e os bosses de cada fase ficam em `source/systems/spawner/`.
-- **Import pesado:** `source/feats/assets.py` carrega **todos** os assets no import, com `pygame.init` e janela oculta.
+- **Import pesado:** `source/feats/assets.py` carrega **todos** os assets no import, com `pygame.init` e janela oculta. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
 
 ## Regras críticas
 - **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.
@@ -34,10 +34,10 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Arma nova:** a ordem de `ArmaInfo.grupos` precisa bater com o desempacotamento no `__init__`. Ela também precisa de 2 coisas, e `test_levelup_e_armas.py` verifica as duas:
   - um perfil em `weapon_data.py` com a chave igual a `NOME_ASSET`;
   - um `ArmaInfo` em `ARMAS_REGISTRO`.
-  - O ícone em `ASSETS['icons']` é opcional: sem ele, o HUD desenha um placeholder.
+  - O ícone em `MANIFESTO['icons']` é opcional: sem ele, o HUD desenha um placeholder.
 - **Boss novo:** precisa de entradas em `PHASE_BOSSES`, `BOSS_CLASSES` e `CRONOGRAMA_BOSSES`, nos três. Todo `while` dentro de uma rotina geradora precisa de `yield`.
 - **Desempenho:** meça com `tools/perf.py` antes de otimizar (depois do bloco C, horda e bosses mais caros ficam em ~4 ms/frame). Não aloque `Surface`/máscara por frame (a catraca está perto de zero e pega): use `utils/superficies.py` (máscara, camada alpha, rascunho) e `feats/particulas.py`.
-- **Fase nova:** precisa de um mapa em `assets/img/map/<n>/` registrado em `ASSETS['maps']`, mais um pool e um boss. Sem o mapa, `existe_proxima_fase()` encerra a campanha.
+- **Fase nova:** precisa de um mapa em `assets/img/map/<n>/` registrado em `MANIFESTO['maps']`, mais um pool e um boss. Sem o mapa, `existe_proxima_fase()` encerra a campanha.
 - **Commits:** mensagens em português (veja @docs/conventions.md). Nunca faça commit de `dist/`, `build/` ou `.venv/`. `assets/data/ranking.json` é versionado; não o altere em testes (use `tmp_path`).
 - **Bugs:** não corrija um bug "de passagem" sem avisar. Bugs conhecidos ficam em @docs/log.md e em testes `xfail(strict=True)`.
 
