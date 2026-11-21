@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-11-21T13:12:03",
+  "gerado_em": "2026-11-21T14:10:30",
   "maquina": {
     "sistema": "Windows-11-10.0.26200-SP0",
     "cpu": "Intel64 Family 6 Model 142 Stepping 12, GenuineIntel",
@@ -8,132 +8,132 @@
     "energia": "tomada"
   },
   "escala": 1.0,
-  "import_assets_s": 4.2,
+  "import_assets_s": 2.28,
   "cenarios": {
     "horda_150": {
       "frames": 1200,
-      "media_ms": 33.2,
-      "p95_ms": 46.52,
-      "update_media_ms": 30.38,
-      "draw_media_ms": 2.82
+      "media_ms": 5.22,
+      "p95_ms": 14.46,
+      "update_media_ms": 3.29,
+      "draw_media_ms": 1.93
     },
     "fase0_60s": {
       "frames": 3600,
-      "media_ms": 5.3,
-      "p95_ms": 8.74,
-      "update_media_ms": 3.84,
-      "draw_media_ms": 1.46
+      "media_ms": 1.66,
+      "p95_ms": 2.34,
+      "update_media_ms": 0.56,
+      "draw_media_ms": 1.1
     },
     "boss_hunter": {
       "frames": 1200,
-      "media_ms": 1.97,
-      "p95_ms": 2.92,
-      "update_media_ms": 0.52,
-      "draw_media_ms": 1.45
+      "media_ms": 1.17,
+      "p95_ms": 1.88,
+      "update_media_ms": 0.09,
+      "draw_media_ms": 1.09
     },
     "boss_zealot": {
       "frames": 1200,
-      "media_ms": 2.44,
-      "p95_ms": 3.0,
-      "update_media_ms": 1.07,
-      "draw_media_ms": 1.37
+      "media_ms": 1.3,
+      "p95_ms": 1.65,
+      "update_media_ms": 0.28,
+      "draw_media_ms": 1.02
     },
     "boss_guilty": {
       "frames": 1200,
-      "media_ms": 2.08,
-      "p95_ms": 2.73,
-      "update_media_ms": 0.53,
-      "draw_media_ms": 1.55
+      "media_ms": 1.4,
+      "p95_ms": 1.66,
+      "update_media_ms": 0.23,
+      "draw_media_ms": 1.17
     },
     "boss_scarab": {
       "frames": 1200,
-      "media_ms": 2.06,
-      "p95_ms": 2.69,
-      "update_media_ms": 0.17,
-      "draw_media_ms": 1.89
+      "media_ms": 1.51,
+      "p95_ms": 1.94,
+      "update_media_ms": 0.07,
+      "draw_media_ms": 1.43
     },
     "boss_arbiter": {
       "frames": 1200,
-      "media_ms": 3.17,
-      "p95_ms": 4.2,
-      "update_media_ms": 1.14,
-      "draw_media_ms": 2.03
+      "media_ms": 1.77,
+      "p95_ms": 2.54,
+      "update_media_ms": 0.16,
+      "draw_media_ms": 1.61
     },
     "boss_tartarus": {
       "frames": 1200,
-      "media_ms": 3.3,
-      "p95_ms": 4.61,
-      "update_media_ms": 1.59,
-      "draw_media_ms": 1.71
+      "media_ms": 2.5,
+      "p95_ms": 3.56,
+      "update_media_ms": 1.08,
+      "draw_media_ms": 1.42
     },
     "boss_gravemind": {
       "frames": 1200,
-      "media_ms": 5.56,
-      "p95_ms": 7.26,
-      "update_media_ms": 3.66,
-      "draw_media_ms": 1.9
+      "media_ms": 3.99,
+      "p95_ms": 5.12,
+      "update_media_ms": 2.43,
+      "draw_media_ms": 1.56
     },
     "boss_knight": {
       "frames": 1200,
-      "media_ms": 2.22,
-      "p95_ms": 5.09,
-      "update_media_ms": 0.53,
-      "draw_media_ms": 1.7
+      "media_ms": 1.6,
+      "p95_ms": 3.63,
+      "update_media_ms": 0.35,
+      "draw_media_ms": 1.25
     },
     "boss_didact": {
       "frames": 1200,
-      "media_ms": 4.08,
-      "p95_ms": 7.16,
-      "update_media_ms": 1.62,
-      "draw_media_ms": 2.46
+      "media_ms": 2.88,
+      "p95_ms": 5.29,
+      "update_media_ms": 1.01,
+      "draw_media_ms": 1.88
     },
     "boss_warden": {
       "frames": 1200,
-      "media_ms": 6.82,
-      "p95_ms": 13.88,
-      "update_media_ms": 3.33,
-      "draw_media_ms": 3.49
+      "media_ms": 4.22,
+      "p95_ms": 8.56,
+      "update_media_ms": 1.74,
+      "draw_media_ms": 2.49
     },
     "boss_guardian": {
       "frames": 1200,
-      "media_ms": 11.53,
-      "p95_ms": 34.1,
-      "update_media_ms": 1.24,
-      "draw_media_ms": 10.29
+      "media_ms": 8.67,
+      "p95_ms": 26.25,
+      "update_media_ms": 0.6,
+      "draw_media_ms": 8.07
     },
     "boss_jega": {
       "frames": 1200,
-      "media_ms": 2.46,
-      "p95_ms": 3.66,
-      "update_media_ms": 0.76,
-      "draw_media_ms": 1.7
+      "media_ms": 1.49,
+      "p95_ms": 2.88,
+      "update_media_ms": 0.16,
+      "draw_media_ms": 1.33
     },
     "boss_escharum": {
       "frames": 1200,
-      "media_ms": 2.42,
-      "p95_ms": 3.55,
-      "update_media_ms": 0.61,
-      "draw_media_ms": 1.81
+      "media_ms": 1.72,
+      "p95_ms": 2.71,
+      "update_media_ms": 0.27,
+      "draw_media_ms": 1.45
     },
     "boss_harbinger": {
       "frames": 1200,
-      "media_ms": 2.03,
-      "p95_ms": 2.7,
-      "update_media_ms": 0.59,
-      "draw_media_ms": 1.43
+      "media_ms": 1.22,
+      "p95_ms": 1.64,
+      "update_media_ms": 0.12,
+      "draw_media_ms": 1.1
     },
     "boss_atriox": {
       "frames": 1200,
-      "media_ms": 4.76,
-      "p95_ms": 6.54,
-      "update_media_ms": 2.76,
-      "draw_media_ms": 2.0
+      "media_ms": 3.05,
+      "p95_ms": 4.25,
+      "update_media_ms": 1.5,
+      "draw_media_ms": 1.54
     },
     "troca_de_fase": {
       "trocas": 8,
-      "media_ms": 1.18,
-      "max_ms": 1.53
+      "media_ms": 1.56,
+      "max_ms": 1.89
     }
   },
-  "memoria_pico_mb": 781.1
+  "memoria_pico_mb": 783.4
 }

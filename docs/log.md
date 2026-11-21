@@ -2,6 +2,33 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa C1: grade espacial de paredes
+**O que foi feito**
+- `mapmanager/grade_paredes.py::GradeParedes`: os segmentos viram tuplas de float `(indice, x1, y1, x2, y2)`, e cada um entra nas células de 128 px que a sua caixa, inflada de `MARGEM_GRADE` (128 px), toca. A célula da entidade traz todo segmento a menos de 128 px dela, na ordem do mapa (a ordem importa: os empurrões são sequenciais). Consulta = um acesso a dict, sem alocar. Raio maior que a margem (ex.: hitbox de veículo) junta células. A grade é montada no fim de `carregar_json`.
+- `collision_utils.py`: `empurrao_do_segmento` (float, mesma ordem de contas do `Vector2` antigo) e `sair_das_paredes(posicao, raio, grade, iteracoes)`, usados pelo inimigo (`aplicar_colisao_mapa`) e pelo jogador (`mover_com_colisao`). O `Game.update` passa a grade no lugar da lista; as ~30 assinaturas `update(dt, paredes)` não mudaram.
+- Removidos (sem uso): `get_paredes_proximas` e `projetar_fora_da_linha`. Os testes deles migraram para as funções novas; o cache de bbox (ainda usado por `caminho_livre`) passou a ser testado por ele.
+- **Bug corrigido:** inimigo longe do jogador colide com as paredes perto dele. O teste (`test_regressoes.py`) foi escrito antes como `xfail(strict=True)`, falhou no código antigo (inimigo parado a 6 px da parede, raio 15) e perdeu a marca.
+- Testes: `test_grade_paredes.py` (19), com a **equivalência** contra uma cópia literal do código antigo em 10 mil posições do mapa 0 (inimigo e jogador): resultado idêntico bit a bit. Suíte: **681 verdes + 1 xfail em 40 s** (antes, 75 s).
+
+**Golden: inalterado (não foi regerado).** O roteiro previa regerar, mas a mudança não aparece nesse cenário. Verificado em 2 passos: (1) a grade nova consultada à moda antiga (paredes perto do jogador) reproduz o golden bit a bit, o que prova a matemática e a ordem; (2) a consulta nova (perto de cada entidade) também dá o golden idêntico: com o jogador parado na fase 0, nenhum inimigo chega a uma parede fora da lista antiga. O bug fica coberto pelo teste de regressão.
+
+**Decisão:** a margem começou em 64 px. A equivalência falhou para o jogador (raio 48, folga de só 16 px): num canto fundo os empurrões o deslocaram 56 px, até paredes que a consulta não trouxe. Com 128 px a folga é de 80 px (jogador) e 113 px (inimigo), ao custo de 4,7 segmentos por célula em média no mapa 0 (eram 3,2).
+
+**Desempenho** (na tomada; ms/frame, média × base da A1)
+| Cenário | Antes | Depois | p95 depois |
+|---|---|---|---|
+| horda_150 | 33,2 | **5,2 a 6,3** | 14,5 a 17,5 |
+| fase0_60s | 5,3 | 1,7 a 2,2 | 2,3 a 4,2 |
+| bosses | 2,0 a 11,5 | 1,2 a 8,7 (−7% a −47%) | |
+| troca_de_fase | 1,2 | 1,6 (+0,4 ms: montar a grade; abaixo do piso de 1 ms) | |
+- Meta da C1 (horda ≤ 10 ms) cumprida. Parte da queda dos bosses é ruído: o `draw`, que a C1 não toca, também caiu entre as 2 rodadas. O Guardian segue o mais caro (draw ~8 ms, alvo da C4/F5).
+- **`tools/perf_base.json` regravado** com a 2ª rodada: sem isso, a base antiga esconderia uma regressão de até 80% na horda. Os números da A1 continuam na entrada dela, para a tabela final da H2.
+- Catraca: sem mudança (o `Vector2` antigo não era contado).
+
+**Não validado:** a sensação de colisão no jogo real (deslizar em parede e cantos). A equivalência prova o mesmo empurrão; não foi jogado.
+
+**Pendências:** o bug do relógio (B3). Próxima etapa: **B2** (ou C2, se o perfil pedir: gatilho na §6).
+
 ## 2026-11-21 | Etapa B1: passo fixo de simulação
 **O que foi feito**
 - `gameclock.py::AcumuladorPassoFixo`: soma o tempo real do frame e devolve quantos passos de `PASSO_FIXO` (1/60 s) cabem, no máximo `MAX_PASSOS_POR_FRAME` (5). Quando bate o teto, o atraso é descartado: o jogo desacelera em vez de entrar em espiral. dt zero ou negativo não gera passo; parâmetro inválido lança `ValueError`.

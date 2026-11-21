@@ -1,5 +1,5 @@
 import pygame
-from source.utils.collision_utils import projetar_fora_da_linha
+from source.utils.collision_utils import sair_das_paredes
 
 
 class EnemyCollision:
@@ -25,17 +25,8 @@ class EnemyCollision:
             
         return False
     
-    def aplicar_colisao_mapa(self, paredes_ativas):
-        # A mesma lógica de iteração que usamos no Player
-        for _ in range(self.iteracoes_colisao_mapa): # Inimigos podem usar 2 iterações para poupar processamento
-            for parede in paredes_ativas:
-                pontos = parede['pontos']
-                for i in range(len(pontos) - 1):
-                    p1 = pontos[i]
-                    p2 = pontos[i+1]
-                    
-                    push = projetar_fora_da_linha(self.posicao, p1, p2, self.raio_colisao_mapa)
-                    if push:
-                        self.posicao += push
-
-            
+    def aplicar_colisao_mapa(self, grade_paredes):
+        """Empurra o inimigo para fora das paredes perto DELE (até a C1 eram as perto do jogador,
+        e um inimigo longe dele atravessava paredes)."""
+        sair_das_paredes(self.posicao, self.raio_colisao_mapa, grade_paredes,
+                         self.iteracoes_colisao_mapa)   # 2 iterações para poupar processamento

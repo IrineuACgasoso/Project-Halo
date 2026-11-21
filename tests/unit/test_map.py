@@ -104,12 +104,7 @@ def test_caminho_livre_quando_nao_cruza(mapa_parede):
     assert mapa_parede.caminho_livre((0, 300), (200, 300))
 
 
-def test_paredes_proximas_filtra_por_raio(mapa_parede):
-    assert mapa_parede.get_paredes_proximas((150, 100), raio=1000)
-    assert mapa_parede.get_paredes_proximas((5000, 5000), raio=1000) == []
-
-
 def test_cache_de_bbox_invalida_quando_paredes_mudam(mapa_parede):
-    mapa_parede.get_paredes_proximas((0, 0))
+    assert mapa_parede.caminho_livre((5050, 4900), (5050, 5100))
     mapa_parede.paredes.append({'tipo': 'linha', 'pontos': [V(5000, 5000), V(5100, 5000)]})
-    assert len(mapa_parede.get_paredes_proximas((5050, 5000), raio=100)) == 1
+    assert not mapa_parede.caminho_livre((5050, 4900), (5050, 5100))

@@ -1,6 +1,8 @@
 import pygame
 import json
 
+from .grade_paredes import GradeParedes
+
 
 class MapLoader:
     def carregar_json(self, caminho):
@@ -101,4 +103,6 @@ class MapLoader:
                 for obj in camada['objects']:
                     rect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
                     self.navigation_zones.append(rect)
-    
+
+        # Paredes prontas para consulta por posição (roteiro C1)
+        self.grade_paredes = GradeParedes(self.paredes)

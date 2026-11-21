@@ -255,3 +255,36 @@ def test_hud_foco_do_boss_usa_relogio_de_jogo(novo_jogo, monkeypatch):
     relogio.avancar(hud._intervalo_check_boss / 1000)
     hud._atualizar_boss_foco()
     assert hud.foco_barra_vida is novo_jogo.boss_atual
+
+
+# ── Paredes: inimigo longe do jogador atravessava paredes (recebia só as paredes perto DO JOGADOR)
+def _distancia_ao_segmento(p, a, b):
+    ab = b - a
+    t = max(0.0, min(1.0, (p - a).dot(ab) / ab.length_squared()))
+    return p.distance_to(a + t * ab)
+
+
+def _segmento_longe_do_jogador(mapa, pos_jogador):
+    """Um segmento longo cuja parede inteira está fora da caixa de ±500 px em volta do jogador
+    (o filtro antigo, `get_paredes_proximas`, que a C1 removeu)."""
+    for parede in mapa.paredes:
+        pts = parede['pontos']
+        x0, x1 = min(p.x for p in pts) - 600, max(p.x for p in pts) + 600
+        y0, y1 = min(p.y for p in pts) - 600, max(p.y for p in pts) + 600
+        if x0 <= pos_jogador.x <= x1 and y0 <= pos_jogador.y <= y1:
+            continue
+        for a, b in zip(pts, pts[1:]):
+            if a.distance_to(b) > 120:
+                return V(a), V(b)
+    raise AssertionError('o mapa da fase 0 não tem parede longe do spawn do jogador')
+
+
+def test_inimigo_longe_do_jogador_colide_com_a_parede_perto_dele(novo_jogo):
+    a, b = _segmento_longe_do_jogador(novo_jogo.mapa, novo_jogo.player.posicao)
+    normal = (b - a).rotate(90).normalize()
+    inimigo = _inimigo(novo_jogo, (a + b) / 2 + normal * 5)   # 5 px de uma parede, raio 15
+    assert _distancia_ao_segmento(inimigo.posicao, a, b) < inimigo.raio_colisao_mapa
+
+    novo_jogo.update(1 / 60)
+
+    assert _distancia_ao_segmento(inimigo.posicao, a, b) >= inimigo.raio_colisao_mapa - 0.5

@@ -28,7 +28,7 @@ stateDiagram-v2
 1. `relogio.avancar(dt)`: este é o **único** lugar onde o relógio de jogo avança.
 2. Portal: aparece 2000 ms depois que o boss morre. Encostar nele chama `StageManager.iniciar_transicao()`.
 3. `timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
-4. Atualizações: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`).
+4. Atualizações: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
 5. `CollisionManager.update`, nesta ordem:
    - projétil do jogador contra inimigos (o mais próximo primeiro; perfuração finita acerta cada alvo uma vez só);
    - projétil inimigo contra a hitbox do jogador;
@@ -53,7 +53,7 @@ stateDiagram-v2
 | Bosses | `class X(BaseEnemy, XSetup, XAI, XAttacks)` | máquina de estados por string com timestamps de `relogio`. O Arbiter (em andamento) usa rotinas geradoras e `config.py` |
 | Armas | `Arma(ABC)` em `feats/weapons/baseweapon.py` | `update` controla a cadência; `disparar()` devolve `True` quando atirou; `upgrade()` faz `nivel += 1` e depois `aplicar_upgrades` |
 | Companions e veículos | `Arma` "wrapper" que cria um sprite `Companheiro`/`Vehicle` | ficam em `armas` como qualquer arma |
-| Mapa | `MapLoader/MapCollision/MapUtils/MapFeats` | lê as camadas Tiled `Colisoes`, `SpawnPoints`, `SpawnPlayer`, `Portal`, `Void`, `VoidPoint`, `Navigation` |
+| Mapa | `MapLoader/MapCollision/MapUtils/MapFeats` | lê as camadas Tiled `Colisoes`, `SpawnPoints`, `SpawnPlayer`, `Portal`, `Void`, `VoidPoint`, `Navigation`; ao fim da leitura monta `grade_paredes` |
 
 ## Fluxos principais
 - **XP e level-up:**

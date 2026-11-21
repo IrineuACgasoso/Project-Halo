@@ -3,8 +3,8 @@ import pygame
 
 class MapCollision:
     def _bboxes_paredes(self):
-        """Bounding box de cada parede, calculada UMA vez (antes era recalculada com min()/max()
-        sobre todos os pontos de todas as paredes, mais um Rect novo por parede, a cada frame)."""
+        """Bounding box de cada parede, calculada UMA vez e refeita se a lista de paredes mudar
+        (usada pelo descarte rápido de `caminho_livre`)."""
         cache = getattr(self, '_paredes_bbox_cache', None)
         if cache is None or cache[0] != len(self.paredes):
             caixas = []
@@ -15,15 +15,6 @@ class MapCollision:
             cache = (len(self.paredes), caixas)
             self._paredes_bbox_cache = cache
         return cache[1]
-
-    def get_paredes_proximas(self, entidade_pos, raio=1000):
-        # O filtro antigo inflava o rect em `raio` no TOTAL, ou seja, +-raio/2 em cada lado.
-        meio = raio / 2
-        x, y = entidade_pos[0], entidade_pos[1]
-        return [
-            p for (x0, y0, x1, y1, p) in self._bboxes_paredes()
-            if x0 - meio <= x <= x1 + meio and y0 - meio <= y <= y1 + meio
-        ]
 
     @staticmethod
     def _segmentos_se_cruzam(a, b, c, d):

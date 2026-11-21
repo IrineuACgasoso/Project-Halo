@@ -29,13 +29,14 @@
 ## Estrutura e cobertura
 | Arquivo | Cobre |
 |---|---|
-| `unit/test_core_utils.py` | `GameClock` (incluindo o congelamento fora de `jogando`), `AcumuladorPassoFixo` e o `Game.run` com relógio falso, `path` (com e sem `_MEIPASS`), `direcao_segura`, `projetar_fora_da_linha` |
+| `unit/test_core_utils.py` | `GameClock` (incluindo o congelamento fora de `jogando`), `AcumuladorPassoFixo` e o `Game.run` com relógio falso, `path` (com e sem `_MEIPASS`), `direcao_segura`, `empurrao_do_segmento` |
 | `unit/test_ranking_data.py` | Ida e volta, gravação atômica, ordenação e limite, formato legado, sanitização, JSON corrompido com backup, falha de escrita |
-| `unit/test_map.py` | Parser de `.tmj` (retângulo, polilinha, polígono, spawns, portal, void, navegação), `caminho_livre`, filtro e cache de paredes |
+| `unit/test_map.py` | Parser de `.tmj` (retângulo, polilinha, polígono, spawns, portal, void, navegação), `caminho_livre` e o cache de bbox das paredes |
+| `unit/test_grade_paredes.py` | `GradeParedes` (roteiro C1): montagem, degenerados, parâmetros inválidos, bordas e coordenadas negativas, raio maior que a margem, a propriedade "nenhum segmento dentro do raio fica de fora" e a **equivalência** com o empurrão antigo (cópia literal dele no teste) em 10 mil posições do mapa 0, para inimigo e jogador |
 | `unit/test_player.py` | Dano (i-frames, escudo, transbordo, veículo, morte), regeneração de escudo, espinhos, XP com vários níveis e fila de telas, upgrade forçado, buff de cooldown |
 | `unit/test_levelup_e_armas.py` | Integridade de `ARMAS_REGISTRO` e `weapon_data`, `_deve_melhorar`, `min_val`, sorteio e navegação da `TelaDeUpgrade`, equipar e subir **cada** arma até o nível 21 |
 | `unit/test_sistemas.py` | Config do spawner (pools, bosses, cronograma), ritmo, teto e trava de boss, colisão, escudo e escala de inimigos, drops e coleta de itens, pontuação, transição e fim de campanha, portal, estados |
-| `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican e o caminho do ranking |
+| `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican, o caminho do ranking e o inimigo longe do jogador colidindo com a parede perto dele (C1) |
 | `unit/test_imports.py` | Todo módulo de `source/` importa sozinho (import quebrado, circular ou nome indefinido no nível do módulo). Módulo novo entra automaticamente |
 | `unit/test_lint.py` | `ruff check` verde; toda exceção de `ruff.toml` ainda é necessária (entrada que sobrou falha); a config pega `F821`/`F401`/`F403` |
 | `unit/test_perf_tool.py` | `tools/perf.py`: p95, comparação com a tolerância de 10%, base em disco (ausente, ida e volta, inválida), argumentos recusados, `--gravar-base` recusado na bateria, confirmação por nova medida, um cenário por boss e smoke curto (horda e troca de fase, marcado `integration`) |
@@ -52,4 +53,4 @@
 - **Nunca** escreva em `assets/data/ranking.json`. Use `RankingData(str(tmp_path / ...))`.
 - **Boss novo:** entra automaticamente no smoke test pelo `PHASE_BOSSES`. **Arma nova:** entra pelo `ARMAS_REGISTRO`.
 - **Bug encontrado e não corrigido:** use `@pytest.mark.xfail(strict=True, raises=<Erro>, reason="BUG conhecido ...")` e registre em `docs/log.md`. O `strict=True` faz o teste falhar quando o bug for corrigido, lembrando de remover a marca.
-- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (relógio não zerado entre partidas, para a B3) em 661 testes.
+- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (relógio não zerado entre partidas, para a B3) em 682 testes.

@@ -35,7 +35,7 @@ Project-Halo/
     ├── data/
     │   ├── weapon_data.py   # BALANCEAMENTO: WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA (WeaponStats)
     │   └── enemy_data.py    # vazio
-    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils
+    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float)
     ├── systems/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
@@ -47,6 +47,7 @@ Project-Halo/
     │   ├── spawner/         # spawner.py (ritmo/teto), spawner_pools.py (inimigos por fase),
     │   │                    # spawner_bosses.py (PHASE_BOSSES, BOSS_CLASSES, CRONOGRAMA_BOSSES)
     │   ├── mapmanager/      # Mapa = loader(.tmj) + collision(paredes) + utils(navegação) + feats(void)
+│   │                    # grade_paredes.py: GradeParedes (segmentos por célula de 128 px, roteiro C1)
     │   ├── levelup/         # constants.py (ARMAS_REGISTRO, MAX_ARMAS=6, paletas), levelup.py (TelaDeUpgrade), draw.py
     │   └── hud/             # hud_system.py (estado) + hud_draw.py (desenho)
     ├── player/              # Player + mixins: input, movement, animation, combat (dano/escudo/espinhos),

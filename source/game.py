@@ -174,7 +174,8 @@ class Game:
 
         # Atualiza entidades
         if self.player:
-            paredes = self.mapa.get_paredes_proximas(self.player.posicao)
+            # Cada entidade consulta a grade na própria posição (roteiro C1)
+            paredes = self.mapa.grade_paredes
             self.player.update(delta_time, paredes)
             self.camera.update(self.player.posicao)
 
