@@ -244,10 +244,5 @@ def _tecla(key, mod=0):
 
 
 def test_esc_pausa_o_jogo(novo_jogo):
-    novo_jogo.event_manager._jogando(_tecla(pygame.K_ESCAPE))
+    novo_jogo.event_manager.tratar_jogando(_tecla(pygame.K_ESCAPE))
     assert novo_jogo.estado_do_jogo == 'pausa'
-
-
-def test_todos_os_estados_tem_handler_e_desenho(game):
-    from source.systems.renderer import Renderer
-    assert set(game.event_manager._dispatch) == set(Renderer._dispatch)

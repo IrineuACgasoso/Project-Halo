@@ -147,8 +147,9 @@ def _medir_frames(game, segundos, antes_do_frame=None):
 # ------------------------------------------------------------------ #
 def _partida(game, seed, fase=0):
     """Partida nova e determinística, com o jogador blindado (sem game over nem level-up)."""
-    from helpers import blindar_jogador, ir_para_fase
+    from helpers import blindar_jogador, ir_para_fase, voltar_ao_menu
     random.seed(seed)
+    voltar_ao_menu(game)
     game.iniciar_novo_jogo()
     if fase:
         ir_para_fase(game, fase)
@@ -217,7 +218,8 @@ def medir_cenarios(game, filtro=None, escala=1.0, saida=print, somente=None):
             continue
         saida(f'  medindo {nome}...')
         resultados[nome] = cenario(game, escala)
-    game.estado_do_jogo = 'menu_principal'
+    from helpers import voltar_ao_menu
+    voltar_ao_menu(game)
     return resultados
 
 

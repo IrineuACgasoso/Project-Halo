@@ -6,6 +6,7 @@ import pygame
 
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
+from source.systems.estados import MENU_PRINCIPAL
 from source.systems.gameclock import PASSO_FIXO
 from source.systems.mapmanager import Mapa
 from source.systems.mapmanager.map_collision import MapCollision
@@ -24,6 +25,14 @@ def simular(game, segundos, desenhar_a_cada=0):
         game.update(DT)
         if desenhar_a_cada and i % desenhar_a_cada == 0:
             game.draw()
+
+
+def voltar_ao_menu(game):
+    """Encerra a partida de teste em qualquer estado e volta ao menu, sem passar pela tabela
+    de transições: no jogo só se chega ao menu pela pausa ou pelo game over, e um teste pode
+    terminar em qualquer estado. Só para testes e ferramentas."""
+    game._estado = MENU_PRINCIPAL
+    game.tela_de_upgrade_ativa = None
 
 
 def blindar_jogador(player):

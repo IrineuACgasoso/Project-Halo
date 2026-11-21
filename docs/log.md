@@ -2,6 +2,19 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa B2: estados formalizados
+**O que foi feito**
+- `systems/estados.py`: constantes dos 8 estados, `ESTADOS`, `TRANSICOES` (origem → destinos), `TransicaoInvalida` e `Tela(evento, desenhar)`.
+- `Game.estado_do_jogo` virou propriedade só de leitura; a troca é `game.mudar_estado(CONSTANTE)`. Fora da tabela: com `estados_estritos` (testes e `MCE_DEBUG`) lança exceção; no jogo final loga 1× e aplica, para não prender o jogador numa tela. Estado inexistente é sempre recusado.
+- As 17 atribuições migraram (`EventManager`, `Game`, `player_scaling`, `colaboradores`). A tela de colaboradores trocava o estado sozinha: agora devolve `'sair'`, como as outras.
+- Registro único `game.telas[estado] = Tela(handler, desenho)` (`Game._registrar_telas`), lido pelo `EventManager` e pelo `Renderer`. Os dois `_dispatch` sumiram; os métodos viraram `tratar_<estado>` e `desenhar_<estado>`.
+- Tabela tirada do código, inclusive um caso pouco óbvio: **`level_up → game_over`** (subir de nível e morrer no mesmo update; a partida acaba com a tela de upgrade aberta, como antes).
+- Testes: `test_estados.py` (13): tabela coerente, registro cobre os estados, estrito × jogo final, nenhum estado escrito à mão em `source/`, e um teste que percorre os **fluxos reais** pelos handlers e exige que as transições feitas sejam exatamente a tabela. `helpers.voltar_ao_menu(game)` encerra partidas de teste em qualquer estado (usado pela fixture, golden e `perf.py`). Suíte: **694 verdes + 1 xfail**. Golden inalterado; catraca inalterada.
+
+**Desempenho:** o `perf.py` acusou piora em quase tudo (horda 5,2 → 7,9 ms), inclusive no `draw` dos bosses e na troca de fase, que a B2 não toca. Na tomada. Medi o HEAD anterior (worktree) e a B2 alternados, nas mesmas condições: horda 6,3–6,7 (HEAD) × 6,3–6,6 (B2); Warden 4,5 × 4,8; Guardian 9,5 × 10,0; Gravemind 4,2 × 4,2. Diferença dentro do ruído; a máquina é que estava mais lenta que na base. Base não regravada.
+
+**Não validado:** navegação real dos menus com teclado (os fluxos foram testados chamando os handlers).
+
 ## 2026-11-21 | Etapa C1: grade espacial de paredes
 **O que foi feito**
 - `mapmanager/grade_paredes.py::GradeParedes`: os segmentos viram tuplas de float `(indice, x1, y1, x2, y2)`, e cada um entra nas células de 128 px que a sua caixa, inflada de `MARGEM_GRADE` (128 px), toca. A célula da entidade traz todo segmento a menos de 128 px dela, na ordem do mapa (a ordem importa: os empurrões são sequenciais). Consulta = um acesso a dict, sem alocar. Raio maior que a margem (ex.: hitbox de veículo) junta células. A grade é montada no fim de `carregar_json`.
@@ -26,6 +39,8 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - Catraca: sem mudança (o `Vector2` antigo não era contado).
 
 **Não validado:** a sensação de colisão no jogo real (deslizar em parede e cantos). A equivalência prova o mesmo empurrão; não foi jogado.
+
+**Jogado depois (relato do usuário):** a colisão ficou boa. Numa rodada o **Hunter ficou preso nas paredes centrais**: a hitbox dele é grande e o spawn caiu muito perto da parede. **TODO (futuro):** tratar no próprio mapa, com paredes "sólidas" de verdade (área bloqueada, não só segmentos que empurram), para impedir que uma entidade nasça ou entre dentro delas. Sem etapa no roteiro ainda.
 
 **Pendências:** o bug do relógio (B3). Próxima etapa: **B2** (ou C2, se o perfil pedir: gatilho na §6).
 

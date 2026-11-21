@@ -39,8 +39,9 @@ Project-Halo/
     ├── systems/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
-    │   ├── eventmanager.py  # input por estado + aplicação da escolha de upgrade
-    │   ├── renderer.py      # draw por estado, blindado contra exceções
+    │   ├── estados.py       # constantes de estado, TRANSICOES, Tela (roteiro B2)
+    │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
+    │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes
     │   ├── stagemanager.py  # fade e troca de fase/mapa; fim de campanha
     │   ├── camera.py        # offset seguindo o player + shake
@@ -87,7 +88,7 @@ Project-Halo/
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
 | Curva de XP e bônus de nível | `player/player_scaling.py::level_up` |
 | Escala de dificuldade dos inimigos | `enemies/base/enemy_scaling.py` |
-| Nova tela ou estado | Handler em `eventmanager.py` **e** draw em `renderer.py` (mesma chave) |
+| Nova tela ou estado | Constante e transições em `systems/estados.py`, `tratar_<estado>` em `eventmanager.py`, `desenhar_<estado>` em `renderer.py` e a linha em `Game._registrar_telas` |
 | HUD | `systems/hud/hud_draw.py` |
 | Resolução ou FPS | `windows/settings/settings_constants.py` |
 | Testes | `tests/unit/` (lógica) ou `tests/integration/` (loop real) |

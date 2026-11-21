@@ -33,13 +33,13 @@ class Renderer:
         tela.fill('black')
 
         estado = game.estado_do_jogo
-        metodo = self._dispatch.get(estado)
+        tela_do_estado = game.telas.get(estado)
 
-        if metodo is None:
+        if tela_do_estado is None:
             self._draw_estado_desconhecido(estado)
         else:
             try:
-                metodo(self)
+                tela_do_estado.desenhar()
             except Exception as e:
                 # Nunca deixamos uma falha de desenho derrubar o jogo.
                 self._log_erro(estado, e)
@@ -50,7 +50,7 @@ class Renderer:
     # ------------------------------------------------------------------ #
     # ESTADOS
     # ------------------------------------------------------------------ #
-    def _draw_menu_principal(self):
+    def desenhar_menu_principal(self):
         self.game.menu_principal.draw(self.game.tela)
 
     def _draw_mundo(self):
@@ -67,38 +67,35 @@ class Renderer:
         self._draw_sprites(deslocamento)
         self._draw_efeitos_inimigos(deslocamento)
 
-    def _draw_jogando(self):
+    def desenhar_jogando(self):
         game = self.game
         self._draw_mundo()
         game.hud.draw(game.tela)
         game.stage_manager.draw()
 
-    def _draw_pausa(self):
+    def desenhar_pausa(self):
         game = self.game
         self._draw_mundo()
         game.menu_pausa.draw(game.tela)
 
-    def _draw_colaboradores(self):
+    def desenhar_colaboradores(self):
         self.game.tela_colaboradores.draw(self.game.tela)
 
-    def _draw_ranking(self):
+    def desenhar_ranking(self):
         self.game.ranking.draw(self.game.tela)
 
-    def _draw_configuracoes(self):
+    def desenhar_configuracoes(self):
         self.game.tela_configuracoes.draw(self.game.tela)
 
-    def _draw_game_over(self):
+    def desenhar_game_over(self):
         self.game.tela_game_over.draw(self.game.tela)
 
-    def _draw_level_up(self):
+    def desenhar_level_up(self):
         game = self.game
         self._draw_mundo()
         game.hud.draw(game.tela)
         if game.tela_de_upgrade_ativa is not None:
             game.tela_de_upgrade_ativa.draw(game.tela)
-
-    # Mapa estado -> método (montado no fim da classe)
-    _dispatch = {}
 
     # ------------------------------------------------------------------ #
     # HELPERS DE DESENHO (com blindagem individual por sprite)
@@ -156,7 +153,7 @@ class Renderer:
     # ------------------------------------------------------------------ #
     def _draw_estado_desconhecido(self, estado):
         """Estado sem tela associada: não trava o jogo, só avisa em tela."""
-        self._log_erro('estado_desconhecido', f"estado_do_jogo='{estado}' sem draw definido")
+        self._log_erro('estado_desconhecido', f"estado '{estado}' sem tela registrada")
         self._draw_fallback(f"Estado desconhecido: {estado}")
 
     def _draw_fallback(self, mensagem="Erro ao renderizar"):
@@ -176,16 +173,3 @@ class Renderer:
         self._erros_logados.add(chave)
         print(f"[Renderer] Falha em '{contexto}': {erro}")
 
-
-# Registro do dispatch de estados (feito fora do corpo da classe para
-# manter os métodos privados legíveis acima).
-Renderer._dispatch = {
-    'menu_principal': Renderer._draw_menu_principal,
-    'jogando':        Renderer._draw_jogando,
-    'pausa':          Renderer._draw_pausa,
-    'colaboradores':  Renderer._draw_colaboradores,
-    'ranking':        Renderer._draw_ranking,
-    'configuracoes':  Renderer._draw_configuracoes,
-    'game_over':      Renderer._draw_game_over,
-    'level_up':       Renderer._draw_level_up,
-}

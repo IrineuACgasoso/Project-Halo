@@ -15,6 +15,10 @@ from source.systems.spawner import Spawner
 from source.systems.entitymanager import entity_manager
 from source.systems.eventmanager import EventManager
 from source.systems.renderer import Renderer
+from source.systems.estados import (ESTADOS, TRANSICOES, Tela, TransicaoInvalida, transicao_valida,
+                                    MENU_PRINCIPAL, JOGANDO, PAUSA, LEVEL_UP, CONFIGURACOES,
+                                    COLABORADORES, RANKING, GAME_OVER)
+from source.debug import DEBUG
 # FEATS
 from source.feats.buddies import *
 from source.feats.weapons import *
@@ -35,8 +39,10 @@ class Game:
         self.running = True
         self.clock = pygame.time.Clock()
 
-        # Estado
-        self.estado_do_jogo = 'menu_principal'
+        # Estado: só muda por mudar_estado(), que confere a tabela TRANSICOES (roteiro B2)
+        self._estado = MENU_PRINCIPAL
+        self.estados_estritos = DEBUG      # True: transição inválida lança exceção (testes/debug)
+        self._transicoes_invalidas_logadas = set()
         self.player = None
         self.boss_atual = None
         self.portal_atual = None
@@ -46,6 +52,47 @@ class Game:
 
         # EventManager gerencia o estado da tela
         self.event_manager = EventManager(self)
+        self.telas = self._registrar_telas()
+
+    def _registrar_telas(self):
+        """Registro único estado -> (handler de evento, desenho), lido pelo EventManager e
+        pelo Renderer. Estado novo entra aqui, em ESTADOS e em TRANSICOES."""
+        ev, r = self.event_manager, self.renderer
+        return {
+            MENU_PRINCIPAL: Tela(ev.tratar_menu_principal, r.desenhar_menu_principal),
+            JOGANDO:        Tela(ev.tratar_jogando,        r.desenhar_jogando),
+            PAUSA:          Tela(ev.tratar_pausa,          r.desenhar_pausa),
+            LEVEL_UP:       Tela(ev.tratar_level_up,       r.desenhar_level_up),
+            CONFIGURACOES:  Tela(ev.tratar_configuracoes,  r.desenhar_configuracoes),
+            COLABORADORES:  Tela(ev.tratar_colaboradores,  r.desenhar_colaboradores),
+            RANKING:        Tela(ev.tratar_ranking,        r.desenhar_ranking),
+            GAME_OVER:      Tela(ev.tratar_game_over,      r.desenhar_game_over),
+        }
+
+    @property
+    def estado_do_jogo(self):
+        return self._estado
+
+    def mudar_estado(self, novo):
+        """Troca o estado conferindo TRANSICOES.
+
+        Transição inválida lança `TransicaoInvalida` quando `estados_estritos` (testes e
+        MCE_DEBUG). No jogo final ela é logada uma vez e aplicada, para não travar o jogador
+        numa tela; o destino só é recusado se nem existir (não haveria tela para desenhar).
+        """
+        if transicao_valida(self._estado, novo):
+            self._estado = novo
+            return
+        erro = TransicaoInvalida(f'{self._estado!r} -> {novo!r} (permitidas: '
+                                 f'{sorted(TRANSICOES.get(self._estado, ()))})')
+        if self.estados_estritos:
+            raise erro
+        chave = (self._estado, novo)
+        if chave not in self._transicoes_invalidas_logadas:
+            self._transicoes_invalidas_logadas.add(chave)
+            print(f'[Game] Transição de estado inválida: {erro}')
+        if novo in ESTADOS:
+            self._estado = novo
 
 
     def _inicializar_sistemas_permanentes(self):
@@ -119,7 +166,7 @@ class Game:
         self.spawner      = Spawner(self)
         self.stage_manager = StageManager(self)
 
-        self.estado_do_jogo = 'jogando'
+        self.mudar_estado(JOGANDO)
 
         # Aliases para compatibilidade (stagemanager, hud, etc ainda usam self.X)
         self.all_sprites              = entity_manager.all_sprites
@@ -136,7 +183,7 @@ class Game:
 
 
     def update(self, delta_time):
-        if self.estado_do_jogo != 'jogando':
+        if self._estado != JOGANDO:
             return
 
         # O relógio de jogo só avança aqui: pausa/level-up/menus congelam todos os timers.
@@ -201,7 +248,7 @@ class Game:
     def _encerrar_partida(self):
         """Fecha a sessão (derrota ou fim da campanha) e vai para a tela final."""
         self._calcular_pontuacao_final()
-        self.estado_do_jogo = 'game_over'
+        self.mudar_estado(GAME_OVER)
         pygame.mixer.music.pause()
 
     def existe_proxima_fase(self):

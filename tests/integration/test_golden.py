@@ -12,7 +12,7 @@ import random
 
 import pytest
 
-from helpers import DT, blindar_jogador
+from helpers import DT, blindar_jogador, voltar_ao_menu
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import _OFFSET_INICIAL_MS, relogio
 
@@ -49,6 +49,7 @@ def simular_golden(game):
     # dele (2ª partida com a mesma seed divergia em t=54 s). Ver test_nova_partida_zera_o_relogio.
     relogio._ms = float(_OFFSET_INICIAL_MS)
     random.seed(PARAMETROS['seed'])
+    voltar_ao_menu(game)
     game.iniciar_novo_jogo()
     game.renderer._erros_logados.clear()
     blindar_jogador(game.player)
@@ -59,7 +60,7 @@ def simular_golden(game):
             game.update(DT)
         amostras.append(_amostra(game, segundo))
     assert game.estado_do_jogo == 'jogando', 'a simulação parou: o golden não valeria'
-    game.estado_do_jogo = 'menu_principal'
+    voltar_ao_menu(game)
     return {**PARAMETROS, 'amostras': amostras}
 
 
@@ -189,6 +190,7 @@ def test_simulacao_e_deterministica(game, primeira_rodada):
     'partida anterior e veriam o tempo voltar.'))
 def test_nova_partida_zera_o_relogio(game):
     relogio.avancar(10)
+    voltar_ao_menu(game)
     game.iniciar_novo_jogo()
-    game.estado_do_jogo = 'menu_principal'
+    voltar_ao_menu(game)
     assert relogio.agora() == _OFFSET_INICIAL_MS

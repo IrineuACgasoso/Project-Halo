@@ -40,18 +40,21 @@ def tela():
 @pytest.fixture(scope='session')
 def game(tela):
     from source.game import Game
-    return Game(tela)
+    game = Game(tela)
+    game.estados_estritos = True   # transição de estado fora da tabela vira exceção (roteiro B2)
+    return game
 
 
 @pytest.fixture
 def novo_jogo(game):
     """Partida nova e determinística (fase 0, AssaultRifle, sem bosses)."""
+    from helpers import voltar_ao_menu
+    voltar_ao_menu(game)   # um teste anterior pode ter terminado em qualquer estado
     random.seed(1234)
     game.iniciar_novo_jogo()
     game.renderer._erros_logados.clear()
     yield game
-    game.estado_do_jogo = 'menu_principal'
-    game.tela_de_upgrade_ativa = None
+    voltar_ao_menu(game)
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 import random
 import pygame
 from source.systems.levelup import TelaDeUpgrade
+from source.systems.estados import LEVEL_UP
 
 class PlayerScaling:
     def ganhar_xp(self, quantidade):
@@ -46,7 +47,7 @@ class PlayerScaling:
         if not self.fila_upgrades or self.game.tela_de_upgrade_ativa is not None:
             return
         id_forcado = self.fila_upgrades.pop(0)
-        self.game.estado_do_jogo = 'level_up'
+        self.game.mudar_estado(LEVEL_UP)
         self.game.tela_de_upgrade_ativa = TelaDeUpgrade(
             self.game.tela, self, self.game, id_arma_forcada=id_forcado
         )

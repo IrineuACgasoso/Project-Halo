@@ -9,9 +9,10 @@ class TelaColaboradores:
         self.imagem_rect = self.image.get_rect(center=self.game.tela.get_rect().center)
 
     def handle_event(self, evento):
-        if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_ESCAPE:
-                self.game.estado_do_jogo = 'menu_principal'
+        """Devolve 'sair' no ESC (quem troca o estado é o EventManager)."""
+        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+            return 'sair'
+        return None
 
     def draw(self, tela):
         tela.fill((0, 0, 0)) 

@@ -36,7 +36,7 @@ def test_relogio_acumula_fracoes_sem_perder_precisao():
 
 def test_relogio_congela_fora_do_estado_jogando(novo_jogo):
     from source.systems.gameclock import relogio
-    novo_jogo.estado_do_jogo = 'pausa'
+    novo_jogo.mudar_estado('pausa')
     antes = relogio.agora()
     novo_jogo.update(0.5)
     assert relogio.agora() == antes

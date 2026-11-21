@@ -5,12 +5,15 @@
 
 ```
 n = acumulador.passos(clock.tick(60)/1000)   # passo fixo: quantos 1/60 s couberam (máx. 5)
-EventManager.processar()   # despacha o evento pelo estado atual (dict estado -> handler)
+EventManager.processar()   # entrega cada evento a game.telas[estado].evento
 Game.update(1/60) × n      # só roda no estado 'jogando'
-Renderer.draw()            # um por frame; despacha pelo estado; envolve tudo em try e loga cada erro 1x
+Renderer.draw()            # um por frame; chama game.telas[estado].desenhar dentro de try e loga cada erro 1x
 ```
 
-**Estados** (`game.estado_do_jogo`): `menu_principal`, `jogando`, `pausa`, `level_up`, `configuracoes`, `colaboradores`, `ranking`, `game_over`. `EventManager._dispatch` e `Renderer._dispatch` precisam ter as **mesmas** chaves, e há um teste que verifica isso.
+**Estados** (`systems/estados.py`): `menu_principal`, `jogando`, `pausa`, `level_up`, `configuracoes`, `colaboradores`, `ranking`, `game_over`, como constantes.
+- `game.estado_do_jogo` é só leitura. A troca é `game.mudar_estado(CONSTANTE)`, que confere a tabela `TRANSICOES`. Fora dela: com `game.estados_estritos` (testes e `MCE_DEBUG=1`) lança `TransicaoInvalida`; no jogo final loga 1× e aplica (estado inexistente é recusado).
+- `game.telas[estado] = Tela(evento, desenhar)` é o registro único lido pelo `EventManager` e pelo `Renderer` (`Game._registrar_telas`).
+- Estado novo: constante e `ESTADOS`, linha em `TRANSICOES`, handler `tratar_<estado>` + `desenhar_<estado>` no registro. `test_estados.py` percorre os fluxos reais e exige que as transições feitas sejam **exatamente** a tabela.
 
 ```mermaid
 stateDiagram-v2
@@ -21,7 +24,15 @@ stateDiagram-v2
   jogando --> level_up: XP / item upgrade
   level_up --> jogando: escolha (abre a próxima tela da fila)
   jogando --> game_over: vida 0 ou fim da campanha
+  level_up --> game_over: subiu de nível e morreu no mesmo update
   game_over --> jogando: RESTART
+  game_over --> menu_principal: EXIT
+  menu_principal --> ranking
+  menu_principal --> configuracoes
+  menu_principal --> colaboradores
+  ranking --> menu_principal: ESC
+  configuracoes --> menu_principal: ESC
+  colaboradores --> menu_principal: ESC
 ```
 
 ## Game.update (ordem importa)

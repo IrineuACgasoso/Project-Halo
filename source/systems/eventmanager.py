@@ -1,31 +1,22 @@
 import pygame
 from source.systems.levelup import ARMAS_REGISTRO
 from source.systems.entitymanager import entity_manager
+from source.systems.estados import (MENU_PRINCIPAL, JOGANDO, PAUSA, CONFIGURACOES,
+                                    COLABORADORES, RANKING)
 
 
 class EventManager:
     """
-    Responsável exclusivamente por capturar e despachar eventos pygame.
-    O Game.eventos() vira uma linha: self.event_manager.processar()
+    Captura os eventos pygame e os entrega ao handler do estado atual.
+    O par (handler, desenho) de cada estado fica num registro único: `Game.telas`.
     """
 
     def __init__(self, game):
         self.game = game
-        # Mapeia estado -> método handler
-        self._dispatch = {
-            'menu_principal': self._menu_principal,
-            'jogando':        self._jogando,
-            'pausa':          self._pausa,
-            'level_up':       self._level_up,
-            'configuracoes':  self._configuracoes,
-            'colaboradores':  self._colaboradores,
-            'ranking':        self._ranking,
-            'game_over':      self._game_over,
-        }
 
     def processar(self):
         g = self.game
-        handler = self._dispatch.get(g.estado_do_jogo)
+        tela = g.telas.get(g.estado_do_jogo)
 
         for evento in pygame.event.get():
             # Globais — sempre ativos
@@ -38,40 +29,39 @@ class EventManager:
                     pygame.display.toggle_fullscreen()
 
             # Delega para o handler do estado atual
-            if handler:
-                handler(evento)
+            if tela:
+                tela.evento(evento)
 
     # ── Handlers por estado ──────────────────────────────────────────────────
 
-    def _menu_principal(self, evento):
+    def tratar_menu_principal(self, evento):
         g = self.game
         escolha = g.menu_principal.handle_event(evento)
         if escolha == 'START GAME':
             g.iniciar_novo_jogo()
         elif escolha == 'RANKING':
-            g.estado_do_jogo = 'ranking'
+            g.mudar_estado(RANKING)
         elif escolha == 'SETTINGS':
-            g.estado_do_jogo = 'configuracoes'
+            g.mudar_estado(CONFIGURACOES)
         elif escolha == 'CREATORS':
-            g.estado_do_jogo = 'colaboradores'
+            g.mudar_estado(COLABORADORES)
         elif escolha == 'QUIT':
             g.running = False
-    
-    def _jogando(self, evento):
-        g = self.game
-        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
-            g.estado_do_jogo = 'pausa'
 
-    def _pausa(self, evento):
+    def tratar_jogando(self, evento):
+        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+            self.game.mudar_estado(PAUSA)
+
+    def tratar_pausa(self, evento):
         g = self.game
         escolha = g.menu_pausa.handle_event(evento)
         if escolha == 'RESUME':
-            g.estado_do_jogo = 'jogando'
+            g.mudar_estado(JOGANDO)
         elif escolha == 'EXIT TO MENU':
-            g.estado_do_jogo = 'menu_principal'
+            g.mudar_estado(MENU_PRINCIPAL)
             g.menu_principal = type(g.menu_principal)(g)  # Recria sem hardcode
 
-    def _level_up(self, evento):
+    def tratar_level_up(self, evento):
         g = self.game
         tela = g.tela_de_upgrade_ativa
         if not tela:
@@ -85,7 +75,7 @@ class EventManager:
         self._aplicar_escolha_de_upgrade(id_da_arma)
 
         # Retorna o fluxo do gameplay e, se houver level-ups acumulados, abre a próxima tela.
-        g.estado_do_jogo = 'jogando'
+        g.mudar_estado(JOGANDO)
         g.tela_de_upgrade_ativa = None
         g.player.abrir_proxima_tela_de_upgrade()
 
@@ -104,22 +94,22 @@ class EventManager:
             nova_arma.equipar()
         g.player.armas[id_da_arma] = nova_arma
 
-    def _colaboradores(self, evento):
+    def tratar_colaboradores(self, evento):
         g = self.game
         if g.tela_colaboradores.handle_event(evento) == 'sair':
-            g.estado_do_jogo = 'menu_principal'
+            g.mudar_estado(MENU_PRINCIPAL)
 
-    def _ranking(self, evento):
+    def tratar_ranking(self, evento):
         g = self.game
         if g.ranking.handle_event(evento) == 'exit_to_menu':
-            g.estado_do_jogo = 'menu_principal'
+            g.mudar_estado(MENU_PRINCIPAL)
 
-    def _configuracoes(self, evento):
+    def tratar_configuracoes(self, evento):
         g = self.game
         if g.tela_configuracoes.handle_event(evento) == 'sair':
-            g.estado_do_jogo = 'menu_principal'
+            g.mudar_estado(MENU_PRINCIPAL)
 
-    def _game_over(self, evento):
+    def tratar_game_over(self, evento):
         g = self.game
         escolha = g.tela_game_over.handle_event(evento)
         if escolha in ('RESTART MISSION', 'EXIT TO MENU'):
@@ -129,4 +119,4 @@ class EventManager:
             if escolha == 'RESTART MISSION':
                 g.iniciar_novo_jogo()
             else:
-                g.estado_do_jogo = 'menu_principal'
+                g.mudar_estado(MENU_PRINCIPAL)

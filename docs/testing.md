@@ -17,11 +17,13 @@
 - Importa `source.feats.assets` **uma vez por sessão**. Esse import leva cerca de 13 s e é o custo fixo de qualquer execução.
 - Fixtures:
   - `tela` e `game` (sessão): um `Game` real.
-  - `novo_jogo`: `random.seed(1234)` mais `game.iniciar_novo_jogo()`, que zera os grupos do `entity_manager` e cria player, mapa da fase 0, spawner e stage manager.
+  - `game` liga `estados_estritos`: transição de estado fora da tabela vira exceção.
+  - `novo_jogo`: volta ao menu, `random.seed(1234)` e `game.iniciar_novo_jogo()`, que zera os grupos do `entity_manager` e cria player, mapa da fase 0, spawner e stage manager.
   - `player`: o `Player` real dessa partida.
 - `helpers.py`:
   - `simular(game, segundos, desenhar_a_cada)` roda o `update` real com dt fixo de 1/60 e chama o `draw` a cada N frames.
   - `blindar_jogador(player)` deixa a vida enorme e o XP inalcançável, para que a simulação não pare em game over ou level-up.
+  - `voltar_ao_menu(game)` encerra a partida de teste em qualquer estado, sem passar pela tabela de transições (no jogo, o menu só vem da pausa ou do game over).
   - `ir_para_fase(game, fase)` troca o mapa sem o fade; fase sem mapa usa o da fase 0. Também é usado por `tools/perf.py`.
   - `MapaSemImagem` reúne os mixins do `Mapa` sem precisar de imagem, para usar com `.tmj` sintéticos.
   - `contar_alocacoes()` (gerenciador de contexto) conta as chamadas a `pygame.Surface(...)`, `mask.from_surface`, `transform.*` e `font.Font`/`SysFont` por tipo; `contador.pausado()` tira um trecho da conta. Não alcança métodos de tipo em C (`Surface.copy`, `convert_alpha`, `Font.render`).
@@ -37,6 +39,7 @@
 | `unit/test_levelup_e_armas.py` | Integridade de `ARMAS_REGISTRO` e `weapon_data`, `_deve_melhorar`, `min_val`, sorteio e navegação da `TelaDeUpgrade`, equipar e subir **cada** arma até o nível 21 |
 | `unit/test_sistemas.py` | Config do spawner (pools, bosses, cronograma), ritmo, teto e trava de boss, colisão, escudo e escala de inimigos, drops e coleta de itens, pontuação, transição e fim de campanha, portal, estados |
 | `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican, o caminho do ranking e o inimigo longe do jogador colidindo com a parede perto dele (C1) |
+| `unit/test_estados.py` | Tabela `TRANSICOES` (só estados conhecidos, sem beco sem saída), registro de telas, `mudar_estado` (estrito lança, no jogo loga 1× e aplica, estado inexistente é recusado), nenhum estado escrito à mão no código e os **fluxos reais** percorrendo exatamente a tabela |
 | `unit/test_imports.py` | Todo módulo de `source/` importa sozinho (import quebrado, circular ou nome indefinido no nível do módulo). Módulo novo entra automaticamente |
 | `unit/test_lint.py` | `ruff check` verde; toda exceção de `ruff.toml` ainda é necessária (entrada que sobrou falha); a config pega `F821`/`F401`/`F403` |
 | `unit/test_perf_tool.py` | `tools/perf.py`: p95, comparação com a tolerância de 10%, base em disco (ausente, ida e volta, inválida), argumentos recusados, `--gravar-base` recusado na bateria, confirmação por nova medida, um cenário por boss e smoke curto (horda e troca de fase, marcado `integration`) |
