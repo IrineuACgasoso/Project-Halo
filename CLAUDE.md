@@ -36,7 +36,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
   - um `ArmaInfo` em `ARMAS_REGISTRO`.
   - O ícone em `ASSETS['icons']` é opcional: sem ele, o HUD desenha um placeholder.
 - **Boss novo:** precisa de entradas em `PHASE_BOSSES`, `BOSS_CLASSES` e `CRONOGRAMA_BOSSES`, nos três. Todo `while` dentro de uma rotina geradora precisa de `yield`.
-- **Desempenho:** o gargalo medido é a horda (colisão inimigo × parede), não os bosses. Não aloque `Surface`/máscara por frame; use cache.
+- **Desempenho:** meça com `tools/perf.py` antes de otimizar (depois do bloco C, horda e bosses mais caros ficam em ~4 ms/frame). Não aloque `Surface`/máscara por frame (a catraca está perto de zero e pega): use `utils/superficies.py` (máscara, camada alpha, rascunho) e `feats/particulas.py`.
 - **Fase nova:** precisa de um mapa em `assets/img/map/<n>/` registrado em `ASSETS['maps']`, mais um pool e um boss. Sem o mapa, `existe_proxima_fase()` encerra a campanha.
 - **Commits:** mensagens em português (veja @docs/conventions.md). Nunca faça commit de `dist/`, `build/` ou `.venv/`. `assets/data/ranking.json` é versionado; não o altere em testes (use `tmp_path`).
 - **Bugs:** não corrija um bug "de passagem" sem avisar. Bugs conhecidos ficam em @docs/log.md e em testes `xfail(strict=True)`.

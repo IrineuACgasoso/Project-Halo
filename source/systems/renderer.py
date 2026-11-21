@@ -107,15 +107,16 @@ class Renderer:
         falhar (imagem None, rect ausente, etc), pulamos só ele em vez
         de quebrar o frame inteiro.
         """
+        visiveis = self._sprites_visiveis(deslocamento)
         try:
             sprites_ordenados = sorted(
-                entity_manager.all_sprites,
+                visiveis,
                 # `if rect` era falso para Rect de tamanho 0 (bool(Rect) == False) -> y virava 0
                 key=lambda s: s.rect.centery if getattr(s, 'rect', None) is not None else 0
             )
         except Exception as e:
             self._log_erro('ordenacao_sprites', e)
-            sprites_ordenados = list(entity_manager.all_sprites)
+            sprites_ordenados = visiveis
 
         tela = self.game.tela
         for sprite in sprites_ordenados:
@@ -131,6 +132,27 @@ class Renderer:
             except Exception as e:
                 self._log_erro(f'sprite:{sprite.__class__.__name__}', e)
                 continue
+
+    def _sprites_visiveis(self, deslocamento):
+        """Culling pela câmera (roteiro C4), na ordem do grupo: só ordena e desenha o sprite de
+        imagem cuja imagem toca a tela (folga de 2 px para o arredondamento do blit). Sprite com
+        `draw` próprio sempre entra: o rect dele nem sempre cobre o que desenha (a artilharia
+        tem rect 1x1 e desenha o raio todo), e esses efeitos já se recortam sozinhos."""
+        largura, altura = self.game.tela.get_size()
+        tela_no_mundo = pygame.Rect(int(deslocamento.x) - 2, int(deslocamento.y) - 2,
+                                    largura + 4, altura + 4)
+        visiveis = []
+        for sprite in entity_manager.all_sprites:
+            try:
+                if not hasattr(sprite, 'draw'):
+                    imagem, rect = sprite.image, sprite.rect
+                    if imagem is None or not tela_no_mundo.colliderect(
+                            rect.x, rect.y, imagem.get_width(), imagem.get_height()):
+                        continue
+            except Exception:
+                pass   # sprite quebrado entra: o desenho dele loga o erro, como antes
+            visiveis.append(sprite)
+        return visiveis
 
     def _draw_efeitos_inimigos(self, deslocamento):
         """Lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""

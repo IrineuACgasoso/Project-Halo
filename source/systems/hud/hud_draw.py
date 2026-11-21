@@ -20,6 +20,32 @@ _XP_W      = 320
 _XP_H      = 10
 _XP_Y      = 8
 
+# ── Caches (roteiro C4: o HUD não cria Surface nem renderiza texto se nada mudou) ──
+_BARRAS = {}   # chave -> [Surface SRCALPHA reaproveitada, estado desenhado nela]
+_TEXTOS = {}   # chave (lugar no HUD) -> (texto, cor, fonte, Surface renderizada)
+_FUNDOS = {}   # chave -> Surface estática (fundo de slot, placar)
+
+
+def _camada_barra(chave, tamanho, estado):
+    """(Surface, redesenhar): uma Surface SRCALPHA por barra, reaproveitada. Quando `estado`
+    (o que define o desenho: largura, cor...) muda, ela volta limpa e `redesenhar` é True."""
+    entrada = _BARRAS.get(chave)
+    if entrada is None or entrada[0].get_size() != tamanho:
+        entrada = _BARRAS[chave] = [pygame.Surface(tamanho, pygame.SRCALPHA), None]
+    if entrada[1] == estado:
+        return entrada[0], False
+    entrada[0].fill((0, 0, 0, 0))
+    entrada[1] = estado
+    return entrada[0], True
+
+
+def _texto(chave, fonte, texto, cor):
+    """Texto do lugar `chave` do HUD, renderizado de novo só quando texto, cor ou fonte mudam."""
+    entrada = _TEXTOS.get(chave)
+    if entrada is None or entrada[0] != texto or entrada[1] != cor or entrada[2] is not fonte:
+        entrada = _TEXTOS[chave] = (texto, cor, fonte, fonte.render(texto, True, cor))
+    return entrada[3]
+
 
 def _chanfrado(rect, corte=8):
     """Retorna polígono com cantos cortados (estilo Halo)."""
@@ -46,17 +72,19 @@ def draw_barra_escudo(surface, rect, pct, cor=(80, 160, 255), cor_borda=(180, 22
 
     # Preenchimento
     if pct > 0:
-        fill_rect = pygame.Rect(rect.x, rect.y, max(0, int(rect.width * pct)), rect.height)
+        largura = int(rect.width * pct)
+        com_brilho = brilho and pct > 0.02
         # Clip para não vazar
-        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-        fill_poly_local = _chanfrado(pygame.Rect(0, 0, max(1, int(rect.width * pct)), rect.height), corte)
-        pygame.draw.polygon(fill_surf, (*cor, 220), fill_poly_local)
+        fill_surf, redesenhar = _camada_barra(('escudo', rect.size), rect.size, (largura, cor, com_brilho))
+        if redesenhar:
+            fill_poly_local = _chanfrado(pygame.Rect(0, 0, max(1, largura), rect.height), corte)
+            pygame.draw.polygon(fill_surf, (*cor, 220), fill_poly_local)
 
-        # Linha de brilho no topo
-        if brilho and pct > 0.02:
-            bw = max(1, int(rect.width * pct) - corte * 2)
-            bx = corte
-            pygame.draw.line(fill_surf, (200, 230, 255, 160), (bx, 2), (bx + bw, 2), 2)
+            # Linha de brilho no topo
+            if com_brilho:
+                bw = max(1, largura - corte * 2)
+                bx = corte
+                pygame.draw.line(fill_surf, (200, 230, 255, 160), (bx, 2), (bx + bw, 2), 2)
 
         surface.blit(fill_surf, rect.topleft)
 
@@ -80,10 +108,11 @@ def draw_barra_vida(surface, rect, pct, cor=(200, 40, 40), cor_borda=(255, 80, 8
     pygame.draw.polygon(surface, (30, 5, 5, 180), fundo_poly)
 
     if pct > 0:
-        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         fill_w = max(1, int(rect.width * pct))
-        fill_poly_local = _chanfrado(pygame.Rect(0, 0, fill_w, rect.height), corte)
-        pygame.draw.polygon(fill_surf, (*cor, 230), fill_poly_local)
+        fill_surf, redesenhar = _camada_barra(('vida', rect.size), rect.size, (fill_w, cor))
+        if redesenhar:
+            fill_poly_local = _chanfrado(pygame.Rect(0, 0, fill_w, rect.height), corte)
+            pygame.draw.polygon(fill_surf, (*cor, 230), fill_poly_local)
         surface.blit(fill_surf, rect.topleft)
 
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 1)
@@ -105,22 +134,23 @@ def draw_barra_xp(surface, rect, pct, nivel, xp_atual, xp_max,
 
     # Fill
     if pct > 0:
-        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         fw = max(1, int(rect.width * pct))
-        fp = _chanfrado(pygame.Rect(0, 0, fw, rect.height), corte)
-        pygame.draw.polygon(fill_surf, (*cor, 200), fp)
-        # Reflexo
-        pygame.draw.line(fill_surf, (230, 120, 80, 120), (corte, 1), (fw - corte, 1), 1)
+        fill_surf, redesenhar = _camada_barra(('xp', rect.size), rect.size, (fw, cor))
+        if redesenhar:
+            fp = _chanfrado(pygame.Rect(0, 0, fw, rect.height), corte)
+            pygame.draw.polygon(fill_surf, (*cor, 200), fp)
+            # Reflexo
+            pygame.draw.line(fill_surf, (230, 120, 80, 120), (corte, 1), (fw - corte, 1), 1)
         surface.blit(fill_surf, rect.topleft)
 
     pygame.draw.polygon(surface, (255, 190, 30, 180), fundo_poly, 1)
 
     if fonte:
         # Nível à esquerda
-        txt_nivel = fonte.render(f"LVL {nivel}", True, (180, 230, 255))
+        txt_nivel = _texto('xp_nivel', fonte, f"LVL {nivel}", (180, 230, 255))
         surface.blit(txt_nivel, (rect.x - txt_nivel.get_width() - 8, rect.centery - txt_nivel.get_height() // 2))
         # XP à direita
-        txt_xp = fonte.render(f"{int(xp_atual)}/{int(xp_max)}", True, (120, 190, 220))
+        txt_xp = _texto('xp_valor', fonte, f"{int(xp_atual)}/{int(xp_max)}", (120, 190, 220))
         surface.blit(txt_xp, (rect.right + 6, rect.centery - txt_xp.get_height() // 2))
 
 
@@ -131,10 +161,11 @@ def draw_barra_veiculo(surface, rect, pct, cor=(40, 200, 40), cor_borda=(0, 255,
     pygame.draw.polygon(surface, (30, 5, 5, 180), fundo_poly)
 
     if pct > 0:
-        fill_surf = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         fill_w = max(1, int(rect.width * pct))
-        fill_poly_local = _chanfrado(pygame.Rect(0, 0, fill_w, rect.height), corte)
-        pygame.draw.polygon(fill_surf, (*cor, 230), fill_poly_local)
+        fill_surf, redesenhar = _camada_barra(('veiculo', rect.size), rect.size, (fill_w, cor))
+        if redesenhar:
+            fill_poly_local = _chanfrado(pygame.Rect(0, 0, fill_w, rect.height), corte)
+            pygame.draw.polygon(fill_surf, (*cor, 230), fill_poly_local)
         surface.blit(fill_surf, rect.topleft)
 
     pygame.draw.polygon(surface, cor_borda, fundo_poly, 1)
@@ -164,8 +195,8 @@ def draw_boss_hud(surface, boss, font_titulo, font_barra, largura_tela, altura_t
     cor_vida = (160, 0, 0) if not getattr(boss, 'is_final_form', False) else (110, 0, 160)
 
     # --- Nome ---
-    sombra = font_titulo.render(boss.titulo, True, (0, 0, 0))
-    nome   = font_titulo.render(boss.titulo, True, (215, 180, 60))
+    sombra = _texto('boss_sombra', font_titulo, boss.titulo, (0, 0, 0))
+    nome   = _texto('boss_nome', font_titulo, boss.titulo, (215, 180, 60))
     nr = nome.get_rect(centerx=largura_tela // 2, bottom=y - 4)
     surface.blit(sombra, nr.move(2, 2))
     surface.blit(nome, nr)
@@ -176,19 +207,21 @@ def draw_boss_hud(surface, boss, font_titulo, font_barra, largura_tela, altura_t
     pygame.draw.polygon(surface, (15, 5, 5), poly_bg)
 
     if pct > 0:
-        fill_surf = pygame.Surface((BAR_W, BAR_H), pygame.SRCALPHA)
         fw = max(1, int(BAR_W * pct))
-        fp = _chanfrado(pygame.Rect(0, 0, fw, BAR_H), corte)
-        pygame.draw.polygon(fill_surf, (*cor_vida, 240), fp)
+        fill_surf, redesenhar = _camada_barra('boss_vida', (BAR_W, BAR_H), (fw, cor_vida))
+        if redesenhar:
+            fp = _chanfrado(pygame.Rect(0, 0, fw, BAR_H), corte)
+            pygame.draw.polygon(fill_surf, (*cor_vida, 240), fp)
         surface.blit(fill_surf, bar_rect.topleft)
 
     # Escudo sobreposto
     if hasattr(boss, 'escudo_atual') and boss.escudo_atual > 0 and boss.escudo_maximo > 0:
         pct_e = max(0.0, min(1.0, boss.escudo_atual / boss.escudo_maximo))
-        shield_surf = pygame.Surface((BAR_W, BAR_H), pygame.SRCALPHA)
         sw = max(1, int(BAR_W * pct_e))
-        sp = _chanfrado(pygame.Rect(0, 0, sw, BAR_H), corte)
-        pygame.draw.polygon(shield_surf, (60, 130, 255, 200), sp)
+        shield_surf, redesenhar = _camada_barra('boss_escudo', (BAR_W, BAR_H), sw)
+        if redesenhar:
+            sp = _chanfrado(pygame.Rect(0, 0, sw, BAR_H), corte)
+            pygame.draw.polygon(shield_surf, (60, 130, 255, 200), sp)
         surface.blit(shield_surf, bar_rect.topleft)
 
     # Moldura dourada
@@ -253,7 +286,7 @@ def _draw_xp(tela, player, font_xp):
 def _draw_timer(tela, timer_jogo, font_timer):
     t  = timer_jogo
     txt = f"{int(t // 60):02d}:{int(t % 60):02d}"
-    surf = font_timer.render(txt, True, (255, 255, 255))
+    surf = _texto('timer', font_timer, txt, (255, 255, 255))
     tela.blit(surf, surf.get_rect(center=(largura_tela // 2, 44)))
 
 def _draw_coletaveis(tela, coletaveis_player, icones, font_hud):
@@ -334,10 +367,13 @@ def _draw_weapon_slots(surface, player, fonte):
             cor_fundo = (5, 15, 25, 60)
             cor_borda = (0, 100, 150, 60)
 
-        # Desenha o fundo transparente
-        slot_surf = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
-        poly_local = _chanfrado(pygame.Rect(0, 0, slot_w, slot_h), corte=6)
-        pygame.draw.polygon(slot_surf, cor_fundo, poly_local)
+        # Desenha o fundo transparente (um por cor, em cache)
+        chave_fundo = ('slot', slot_w, slot_h, tuple(cor_fundo))
+        slot_surf = _FUNDOS.get(chave_fundo)
+        if slot_surf is None:
+            slot_surf = _FUNDOS[chave_fundo] = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
+            poly_local = _chanfrado(pygame.Rect(0, 0, slot_w, slot_h), corte=6)
+            pygame.draw.polygon(slot_surf, cor_fundo, poly_local)
         surface.blit(slot_surf, rect.topleft)
 
         # Desenha o contorno/borda
@@ -358,7 +394,7 @@ def _draw_weapon_slots(surface, player, fonte):
 
             cor_lvl = PALETA_NIVEL[escolhida]
 
-            txt_nivel = fonte.render(f"L{arma.nivel}", True, cor_lvl)
+            txt_nivel = _texto(('slot', i), fonte, f"L{arma.nivel}", cor_lvl)
             txt_rect = txt_nivel.get_rect(bottomright=(rx + slot_w - 5, ry + slot_h - 3))
             surface.blit(txt_nivel, txt_rect)
 
@@ -388,9 +424,11 @@ def _draw_score_box(surface, game, fonte):
     ]
 
     # 1. Fundo da Box - Cinza Metálico Tático com Alpha (Transparência)
-    surf_box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
-    pts_local = [(p[0] - rx, p[1] - ry) for p in pts_fundo]
-    pygame.draw.polygon(surf_box, (30, 35, 40, 215), pts_local)
+    surf_box = _FUNDOS.get('placar')
+    if surf_box is None:
+        surf_box = _FUNDOS['placar'] = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
+        pts_local = [(p[0] - rx, p[1] - ry) for p in pts_fundo]
+        pygame.draw.polygon(surf_box, (30, 35, 40, 215), pts_local)
     surface.blit(surf_box, (rx, ry))
 
     # 2. Bordas Externas - Azul Neon/Ciano Puro
@@ -398,7 +436,7 @@ def _draw_score_box(surface, game, fonte):
 
     # 3. Texto da Pontuação formatado (Formatado com zeros à esquerda para a vibe de contador militar: 00340)
     txt_score = f"{int(pontuacao):05d}"
-    surf_txt = fonte.render(txt_score, True, (0, 225, 255))
+    surf_txt = _texto('placar', fonte, txt_score, (0, 225, 255))
     
     # Centralização interna perfeita
     txt_rect = surf_txt.get_rect(center=(rx + box_w // 2 - 2, ry + box_h // 2 + 1))

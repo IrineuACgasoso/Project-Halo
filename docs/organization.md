@@ -44,7 +44,7 @@ Project-Halo/
     │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
-    │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções
+    │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções; culling pela câmera (C4)
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
     │   ├── stagemanager.py  # fade e troca de fase/mapa; fim de campanha
     │   ├── camera.py        # offset seguindo o player + shake
@@ -53,7 +53,7 @@ Project-Halo/
     │   ├── mapmanager/      # Mapa = loader(.tmj) + collision(paredes) + utils(navegação) + feats(void)
 │   │                    # grade_paredes.py: GradeParedes (segmentos por célula de 128 px, roteiro C1)
     │   ├── levelup/         # constants.py (ARMAS_REGISTRO, MAX_ARMAS=6, paletas), levelup.py (TelaDeUpgrade), draw.py
-    │   └── hud/             # hud_system.py (estado) + hud_draw.py (desenho)
+    │   └── hud/             # hud_system.py (estado) + hud_draw.py (desenho; barras, fundos e textos em cache: C4)
     ├── player/              # Player + mixins: input, movement, animation, combat (dano/escudo/espinhos),
     │                        # scaling (XP/level-up/buff), setup (valores iniciais)
     ├── enemies/

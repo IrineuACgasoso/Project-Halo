@@ -2,6 +2,26 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa C4: render (bloco C concluído)
+**O que foi feito**
+- **Culling** (`Renderer._sprites_visiveis`): só ordena e desenha o sprite de imagem cuja imagem toca a tela (caixa da imagem, não do rect, com folga de 2 px para o arredondamento do blit). Sprite com `draw` próprio sempre entra: o rect dele nem sempre cobre o que desenha (artilharia e aviso de laser têm rect 1×1), e esses efeitos já se recortam sozinhos desde a C3. Sprite quebrado continua entrando, para o erro ser logado como antes.
+- **HUD** (`hud_draw.py`): uma `Surface` reaproveitada por barra (`_camada_barra`), redesenhada só quando a largura ou a cor muda; fundo dos slots (um por cor) e do placar em cache (`_FUNDOS`); texto renderizado só quando muda (`_texto`, por lugar do HUD: nível, XP, timer, placar, nível de cada slot, nome do boss). A variável morta `fill_rect` saiu, e com ela a exceção `F841` do `hud_draw.py` no `ruff.toml`.
+- **Decisão (difere do roteiro):** sem camadas estáticas pré-renderizadas. O HUD inteiro custa ~0,2 ms/frame (profiler), e o fundo e a borda das barras ficam um abaixo e o outro acima do preenchimento: seriam 2 camadas para ganhar centésimos de ms (regra 7).
+- **Equivalência:** (1) teste permanente: o mundo desenhado com e sem culling é idêntico pixel a pixel numa horda de 150 com tremor de câmera (12 quadros, mais de 100 sprites cortados); (2) checagem única (script fora do repo): o HUD antigo (`git HEAD`) e o novo saíram idênticos em 1200 estados aleatórios (vida, escudo, XP, veículo, timer, placar, armas e níveis, barra e escudo de Hunter, Guardian e Warden), com o cache frio e quente.
+- Testes: `test_render.py` (13): culling (fora, borda, imagem maior que o rect, `draw` próprio, sem imagem), equivalência do culling, **draw parado = zero `Surface` e zero `Font.render`** (com e sem boss), texto renderizado de novo só quando o valor muda, barra reaproveitada, `_erros_logados` vazio. Suíte: **798 verdes + 1 xfail**. Golden inalterado.
+
+**Catraca (alocações/frame):** fase 0 8,0 → **0,0**; horda 8,0 → 0,02; bosses ≤ 0,06, menos o Gravemind (0,64: máscara da animação de respawn, F2/F5). Tetos em 0,1 (o mínimo pela regra de arredondamento) e 0,7 no Gravemind. O aviso "baixe o teto" só dispara se o teto puder mesmo descer. **Esperado:** na suíte completa o Gravemind mede 0,48 (caches de partícula já quentes) e dá o aviso; isolado mede 0,64, então o teto fica em 0,7.
+
+**Desempenho:** a rodada completa acusou Knight e Warden (p95) e saiu ruidosa (o `update`, que a C4 não toca, subiu até 16%). A/B alternado com a C3 (worktree): `draw` 0,1 a 0,3 ms menor em todos (Zealot 1,05 → 0,91; Guilty 1,28 → 1,14; Warden 2,7 → 2,4); Warden em 5 pares: média 3,4–3,7 × 3,4–4,1, p95 9,8–10,8 × 8,1–10,7 (sem piora confirmada); Knight dentro do ruído.
+
+**Bloco C × base da A1** (rodadas completas desta sessão, na tomada): horda 33,2 → **4,4–4,6** ms/frame (p95 46,5 → 6,2–6,6); Guardian 11,5 → 3,4–4,0 (p95 34,1 → 4,7–6,4); fase 0 5,3 → 1,6–1,8; alocações da horda 20,0 → 0,02/frame.
+
+**`perf_base.json` não regravado:** a máquina esteve ruidosa a sessão toda (B2–C4). A base atual esconde regressões de até ~50% na horda e no Guardian (o p95 caiu mais que isso). **Pendência:** regravar com `--gravar-base` numa sessão fria, na tomada, antes da próxima etapa de desempenho.
+
+**Não validado:** a aparência do HUD e do culling no jogo real (a equivalência de pixels cobre a lógica, não a tela de verdade).
+
+**Pendências:** regravar a base do perf (acima); o bug do fim de campanha (xfail, B4); o TODO do Hunter preso nas paredes (C1). Próxima etapa: **D1** (manifesto de assets).
+
 ## 2026-11-21 | Etapa C3: projéteis e efeitos sem alocação
 **Onde o frame alocava (medido por sítio, cenários da catraca):** na horda, 11,8 das 20 alocações/frame eram `mask.from_surface` da **animação dos inimigos comuns** (a A2 tinha atribuído aos projéteis); Guilty e Didact criavam 1 máscara/frame; no `draw`, artilharia, cone, onda EMP e aviso de laser criavam uma `Surface` por efeito por frame (Warden 2,6/frame).
 

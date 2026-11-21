@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A e B, C1 a C3 concluídos; próxima: C4.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos; próxima: D1.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -124,6 +124,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 - Muda: culling pela câmera (só ordena e desenha o que intersecta a tela + margem). HUD com camadas estáticas pré-renderizadas, uma `Surface` reutilizada por barra e cache de texto que só renderiza quando o valor muda.
 - Testes: sprite fora da tela não recebe `draw`; catraca do `draw` em `jogando` = 0 sem mudança de valor; `renderer._erros_logados` vazio.
 - Não validado automaticamente: aparência do HUD (conferir no jogo).
+- Feito (2026-11-21): catraca da fase 0 em 0,0/frame; sem camadas estáticas (o HUD custa ~0,2 ms/frame). Ver log.
 
 ### D. Assets e dados
 **D1 · Manifesto de assets** (risco: médio)
