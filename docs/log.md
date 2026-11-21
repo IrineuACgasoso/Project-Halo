@@ -2,6 +2,22 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa A3: golden master
+**O que foi feito**
+- `tests/integration/test_golden.py`: 60 s da fase 0 (seed 1234, jogador blindado, só `update`), com uma amostra por segundo (inimigos, projéteis dos dois lados, itens, vida, escudo, XP, nível, pontuação, posição). Compara com `tests/golden/fase0.json` (uma amostra por linha, para o diff mostrar o segundo que mudou) e aponta a primeira divergência (`t=54 s, projeteis_inimigos: golden 5, agora 6`).
+- Regerar exige `--atualizar-golden` (opção nova do `conftest.py`); o teste então é pulado com aviso para registrar o motivo no log.
+- `test_simulacao_e_deterministica`: uma 2ª partida no mesmo processo dá o mesmo resultado. O golden gerado em dois processos diferentes também saiu idêntico.
+- Suíte: **409 verdes + 1 xfail**, em ~92 s (o golden soma ~28 s, porque são 2 simulações de 60 s). Nenhum código de produção mudou, então o perf não foi refeito.
+
+**Bug novo (não corrigido; vai para a B3)**
+- `iniciar_novo_jogo` não zera o `relogio`, e a simulação depende do valor **absoluto** dele: a 2ª partida com a mesma seed divergiu em t=54 s. Zerando o relógio antes de cada partida, 3 rodadas seguidas ficaram idênticas.
+- Não foi corrigido porque zerar só o relógio quebraria objetos que duram a sessão: o `HUD._ultimo_check_boss`, por exemplo, guarda o tempo da partida anterior e veria o tempo voltar, congelando a barra do boss. É exatamente o escopo da B3 (sessão nova a cada partida).
+- Até lá, o golden zera o relógio antes de simular (`# SHIM(B3)` em `simular_golden`). `test_nova_partida_zera_o_relogio` é `xfail(strict=True)`.
+
+**Limite do golden:** o jogador não recebe input, então a posição só muda por empurrão (no cenário atual ela fica parada). O movimento entra no golden quando a E3 permitir plugar um bot.
+
+**Pendências:** o bug do relógio (B3). Próxima etapa: **A4**.
+
 ## 2026-11-21 | Etapa A2: catraca de alocação
 **O que foi feito**
 - `tests/helpers.py::contar_alocacoes()` conta, por tipo, as chamadas a `pygame.Surface(...)`, `mask.from_surface`, `transform.*` (menos as que não alocam) e `font.Font`/`SysFont`. A `Surface` é trocada por uma metaclasse que conta e devolve uma `Surface` original, então o `isinstance(x, pygame.Surface)` de `enemy_sprites` e `items/draw` continua valendo. `contador.pausado()` (aninhável) tira um trecho da conta.

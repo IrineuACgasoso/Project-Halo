@@ -26,6 +26,12 @@ import source.feats.assets  # noqa: E402,F401  (carrega assets uma vez)
 from source.windows.settings import largura_tela, altura_tela  # noqa: E402
 
 
+def pytest_addoption(parser):
+    parser.addoption('--atualizar-golden', action='store_true', default=False,
+                     help='regrava tests/golden/*.json. Só em mudança de comportamento '
+                          'declarada (roteiro §2, regra 5), com o motivo em docs/log.md')
+
+
 @pytest.fixture(scope='session')
 def tela():
     return pygame.display.set_mode((largura_tela, altura_tela))

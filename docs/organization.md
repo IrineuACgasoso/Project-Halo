@@ -22,6 +22,7 @@ Project-Halo/
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
 │   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), contar_alocacoes(), MapaSemImagem
+│   ├── golden/              # fase0.json: golden master (roteiro A3), regerado só com --atualizar-golden
 │   ├── perf/                # test_catraca.py: alocações por frame ≤ teto (roteiro A2)
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
 │   │                        # test_regressoes.py = um teste por bug já corrigido

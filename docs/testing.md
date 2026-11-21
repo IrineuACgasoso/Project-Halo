@@ -3,7 +3,7 @@
 **Framework:** pytest 9 (`requirements-dev.txt`). A configuração fica em `pytest.ini`. Não há CI.
 
 ```powershell
-.venv\Scripts\python.exe -m pytest                       # tudo (35–75 s conforme a máquina)
+.venv\Scripts\python.exe -m pytest                       # tudo (~90 s; ~25 s são a catraca e o golden)
 .venv\Scripts\python.exe -m pytest tests/unit            # unitários
 .venv\Scripts\python.exe -m pytest -m "not integration"  # sem as simulações
 .venv\Scripts\python.exe -m pytest -k boss -x            # filtro por nome, parando na 1ª falha
@@ -38,6 +38,7 @@
 | `unit/test_regressoes.py` | Um teste por bug corrigido. Inclui um **teste genérico de MRO** (nenhum mixin de inimigo pode ser anulado por `BaseEnemy`), os grupos de todas as armas, o Fuel Rod (DoT e quique), a rajada sem alvo, o Warden, o EMP, o Pelican e o caminho do ranking |
 | `unit/test_perf_tool.py` | `tools/perf.py`: p95, comparação com a tolerância de 10%, base em disco (ausente, ida e volta, inválida), argumentos recusados, `--gravar-base` recusado na bateria, confirmação por nova medida, um cenário por boss e smoke curto (horda e troca de fase, marcado `integration`) |
 | `perf/test_catraca.py` | **Catraca de alocação** (roteiro A2): alocações por frame (update + draw, depois de 1 s de aquecimento) na horda de 150, na fase 0 e em cada boss, contra `TETOS`, que só podem descer. Boss novo falha até ganhar teto (a mensagem traz o valor). Medida 10% abaixo do teto gera aviso para baixá-lo. Também testa o próprio contador |
+| `integration/test_golden.py` | **Golden master** (roteiro A3): 60 s da fase 0 (seed 1234, jogador blindado, sem input, só update) comparados segundo a segundo com `tests/golden/fase0.json` (inimigos, projéteis, itens, vida, escudo, XP, nível, pontuação, posição). Uma 2ª partida no mesmo processo tem de dar o mesmo resultado. Regerar: `--atualizar-golden` (opção do `conftest.py`), só em mudança de comportamento declarada e com o motivo no log |
 | `integration/test_smoke_simulacao.py` | Cada mapa real; uma partida de 10 s; cada inimigo comum por 8 s; **cada boss por 15 s**; cada arma no nível 10 em combate. Também verifica que o Renderer não engoliu nenhum erro |
 
 **Fora da cobertura:** aparência visual, áudio, balanceamento, menus e ranking interativos (`handle_event` das telas) e HUD em detalhe. Tempo não vira asserção (varia por máquina): é medido com `tools/perf.py` e registrado no log. Alocação vira (é determinística): `perf/test_catraca.py`.
@@ -49,4 +50,4 @@
 - **Nunca** escreva em `assets/data/ranking.json`. Use `RankingData(str(tmp_path / ...))`.
 - **Boss novo:** entra automaticamente no smoke test pelo `PHASE_BOSSES`. **Arma nova:** entra pelo `ARMAS_REGISTRO`.
 - **Bug encontrado e não corrigido:** use `@pytest.mark.xfail(strict=True, raises=<Erro>, reason="BUG conhecido ...")` e registre em `docs/log.md`. O `strict=True` faz o teste falhar quando o bug for corrigido, lembrando de remover a marca.
-- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje a suíte não tem nenhum `xfail` (397 testes).
+- **Bug corrigido:** adicione a regressão em `unit/test_regressoes.py`. Hoje há **1** `xfail` (relógio não zerado entre partidas, para a B3) em 410 testes.

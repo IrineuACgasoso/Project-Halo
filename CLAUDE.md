@@ -9,9 +9,10 @@ O código e os identificadores estão em **português**. Mantenha esse padrão.
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # deps (pygame + pytest)
 .venv\Scripts\python.exe main.py                                  # rodar o jogo
 $env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: hacks L/P/B + overlay de paredes
-.venv\Scripts\python.exe -m pytest                                # suíte completa (35–75 s conforme a máquina; ~13 s são o carregamento dos assets)
+.venv\Scripts\python.exe -m pytest                                # suíte completa (~90 s; ~13 s são o carregamento dos assets)
 .venv\Scripts\python.exe -m pytest tests/unit                     # só unitários
 .venv\Scripts\python.exe -m pytest -m "not integration"           # pula as simulações longas
+.venv\Scripts\python.exe -m pytest tests/integration/test_golden.py --atualizar-golden  # só em mudança de comportamento declarada
 build.bat                                                         # exe em dist/main/ (usa o pyinstaller global 6.19)
 .venv\Scripts\python.exe tools/perf.py                            # ms/frame por cenário × tools/perf_base.json (~4 min, na tomada; --escala 0.1 = rápido)
 ```
