@@ -4,31 +4,16 @@ import random
 
 import pytest
 
-from helpers import simular, blindar_jogador
+from helpers import simular, blindar_jogador, ir_para_fase
 from source.feats.assets import ASSETS
 from source.systems.entitymanager import entity_manager
 from source.systems.levelup import ARMAS_REGISTRO
-from source.systems.mapmanager import Mapa
 from source.systems.spawner.spawner_bosses import PHASE_BOSSES
 from source.systems.spawner.spawner_pools import PHASE_POOLS
-from source.utils.paths import path
 
 pytestmark = pytest.mark.integration
 
 FASES_COM_MAPA = sorted(int(k) for k in ASSETS['maps'])
-
-
-
-def _ir_para_fase(game, fase):
-    """Troca o mapa como o StageManager faz, sem a animação de fade."""
-    game.fase_atual = fase
-    mapa_fase = fase if fase in FASES_COM_MAPA else 0
-    game.mapa = Mapa(path('assets', 'img', 'map', str(mapa_fase), f'm{mapa_fase}.tmj'),
-                     mapa_fase, all_sprites=entity_manager.all_sprites)
-    game.camera.mapa = game.mapa
-    pos = game.mapa.get_player_spawn_pos()
-    game.player.posicao.update(pos)
-    game.player.rect.center = game.player.hitbox.center = pos
 
 
 def _sem_erros_de_render(game):
@@ -37,7 +22,7 @@ def _sem_erros_de_render(game):
 
 @pytest.mark.parametrize('fase', FASES_COM_MAPA)
 def test_mapas_reais_carregam_e_sao_jogaveis(novo_jogo, fase):
-    _ir_para_fase(novo_jogo, fase)
+    ir_para_fase(novo_jogo, fase)
     mapa = novo_jogo.mapa
     assert mapa.paredes, 'mapa sem camada Colisoes'
     assert mapa.pontos_de_spawn, 'mapa sem SpawnPoints'
@@ -64,7 +49,7 @@ def _casos_inimigos():
 
 @pytest.mark.parametrize('classe, fase', list(_casos_inimigos()))
 def test_inimigo_comum_luta_por_oito_segundos(novo_jogo, classe, fase):
-    _ir_para_fase(novo_jogo, fase)
+    ir_para_fase(novo_jogo, fase)
     blindar_jogador(novo_jogo.player)
     novo_jogo.spawner.update = lambda dt: None          # só o inimigo testado
     for i in range(3):
@@ -82,7 +67,7 @@ def _casos_bosses():
 @pytest.mark.parametrize('nome, fase', list(_casos_bosses()))
 def test_boss_luta_por_quinze_segundos(novo_jogo, nome, fase):
     random.seed(fase)
-    _ir_para_fase(novo_jogo, fase)
+    ir_para_fase(novo_jogo, fase)
     blindar_jogador(novo_jogo.player)
     novo_jogo.spawner.spawnar(nome)
     assert novo_jogo.boss_atual is not None

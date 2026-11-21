@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: A0 concluída; próxima: A1.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: A1 concluída; próxima: A2.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -22,7 +22,7 @@ Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de 
 ## 3. Portão de qualidade (definição de pronto de toda etapa)
 - [ ] Suíte **completa** verde (`.venv\Scripts\python.exe -m pytest`), sem `xfail` novo sem registro no log.
 - [ ] Golden master: inalterado, ou regenerado com justificativa (regra 5).
-- [ ] `tools/perf.py`: nenhum cenário piora mais de 10% em relação à última medição registrada.
+- [ ] `tools/perf.py`: nenhum cenário piora mais de 10% **e** mais de 1 ms em relação à base, com a piora confirmada numa segunda medição (o script faz isso sozinho; ruído medido na A1).
 - [ ] Catraca de alocação: o teto não sobe (só pode descer).
 - [ ] Testes novos da etapa: caminho feliz, bordas e erro.
 - [ ] O que não dá para validar automaticamente (visual, áudio, sensação de jogo) está listado como **não validado** na entrega.

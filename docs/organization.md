@@ -16,9 +16,12 @@ Project-Halo/
 │   ├── img/map/<n>/         # m<n>.tmj (Tiled) + imagem de fundo; existem as fases 0–8
 │   ├── img/{player,enemies,buddies,projectiles,icons,items,menu}/
 │   ├── fonts/ sounds/ audio/
+├── tools/
+│   ├── perf.py              # medição headless de ms/frame por cenário (roteiro A1)
+│   └── perf_base.json       # última base medida (comparada pelo perf.py; ±10% = portão)
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
-│   ├── helpers.py           # simular(), blindar_jogador(), MapaSemImagem
+│   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), MapaSemImagem
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
 │   │                        # test_regressoes.py = um teste por bug já corrigido
 │   └── integration/         # smoke: loop real com cada mapa/inimigo/boss/arma
@@ -84,3 +87,4 @@ Project-Halo/
 | HUD | `systems/hud/hud_draw.py` |
 | Resolução ou FPS | `windows/settings/settings_constants.py` |
 | Testes | `tests/unit/` (lógica) ou `tests/integration/` (loop real) |
+| Medir desempenho | `tools/perf.py` (cenários em `listar_cenarios()`) |

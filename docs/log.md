@@ -2,6 +2,31 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa A1: medição de desempenho
+**O que foi feito**
+- `tools/perf.py`: cenários headless com o loop real (update + draw, dt 1/60), jogador blindado e seeds fixas: `horda_150` (reposta fora do cronômetro), `fase0_60s`, `boss_<nome>` (20 s, todos do `PHASE_BOSSES`) e `troca_de_fase` (0→8). Grava média/p95/update/draw em `tools/perf_base.json`, mede o import dos assets e o pico de memória e compara com a base.
+- `ir_para_fase` saiu do smoke test para `tests/helpers.py` (o perf reusa).
+- `tests/unit/test_perf_tool.py`: 24 testes. Suíte: **371 verdes em 36 s**. Nenhum código de produção mudou.
+
+**Base (notebook na tomada, Windows 11, Python 3.13.5, pygame 2.6.1)**, em ms/frame (update + draw)
+| Cenário | Média | p95 | Update | Draw |
+|---|---|---|---|---|
+| horda_150 | 33,2 | 46,5 | 30,4 | 2,8 |
+| fase0_60s | 5,3 | 8,7 | 3,8 | 1,5 |
+| boss_guardian | 11,5 | 34,1 | 1,2 | **10,3** |
+| boss_warden | 6,8 | 13,9 | 3,3 | 3,5 |
+| boss_gravemind | 5,6 | 7,3 | 3,7 | 1,9 |
+| outros 12 bosses | 2,0 a 4,8 | 2,7 a 7,2 | 0,2 a 2,8 | 1,4 a 2,5 |
+| troca_de_fase | 1,2 (máx 1,5) | | | |
+- Import dos assets: 4,2 s (a doc dizia ~13 s; a diferença não foi investigada, TODO: confirmar a frio). Pico de memória: **781 MB**.
+- Leitura: a horda é o único cenário fora dos 16,7 ms, e o update é 92% dela (alvo da C1/C2). O Guardian é o único boss caro, e o custo está no **draw** (alvo da C4/F5). A troca de fase é barata porque os mapas já estão decodificados no import; a D2 vai mudar isso, então é preciso medir de novo.
+
+**Ruído (decisões de implementação)**
+- **Na bateria** (4 rodadas): a horda variou de 32,7 a 45,9 ms, e numa rodada os bosses saíram 2× mais lentos. **Na tomada** (2 rodadas): as médias variaram até ±4% (Atriox +8%), e o p95 até 17%.
+- Por isso: (1) a piora só conta se passar de 10% **e** de 1 ms; (2) o cenário acusado é medido de novo antes de reprovar (na 2ª rodada na tomada, o p95 do Atriox foi acusado e não se confirmou); (3) o relatório registra a fonte de energia, e `--gravar-base` é recusado na bateria. O §3 do roteiro foi atualizado.
+
+**Pendências:** nenhuma. Próxima etapa: **A2** (catraca de alocação).
+
 ## 2026-11-21 | Roteiro de reformulação (só documentação)
 **O que foi feito**
 - Criado `docs/roteiro_reformulacao.md`, com 8 blocos (A–H) de etapas atômicas, as regras de transição (estrangulamento, shims com prazo, golden master, catraca de alocação) e o portão de qualidade de cada etapa.

@@ -1,10 +1,14 @@
 """Utilitários compartilhados pelos testes (importe com `from helpers import ...`)."""
 import pygame
 
+from source.feats.assets import ASSETS
+from source.systems.entitymanager import entity_manager
+from source.systems.mapmanager import Mapa
 from source.systems.mapmanager.map_collision import MapCollision
 from source.systems.mapmanager.map_feats import MapFeats
 from source.systems.mapmanager.map_loader import MapLoader
 from source.systems.mapmanager.map_utils import MapUtils
+from source.utils.paths import path
 
 DT = 1 / 60   # passo fixo de simulação (segundos)
 
@@ -23,6 +27,18 @@ def blindar_jogador(player):
     level-up, que congela o update e esconderia o resto da simulação)."""
     player.vida_maxima = player.vida_atual = 10 ** 9
     player.experiencia_level_up = 10 ** 12
+
+
+def ir_para_fase(game, fase):
+    """Troca o mapa como o StageManager faz, sem a animação de fade. Fase sem mapa usa o da 0."""
+    game.fase_atual = fase
+    mapa_fase = fase if str(fase) in ASSETS['maps'] else 0
+    game.mapa = Mapa(path('assets', 'img', 'map', str(mapa_fase), f'm{mapa_fase}.tmj'),
+                     mapa_fase, all_sprites=entity_manager.all_sprites)
+    game.camera.mapa = game.mapa
+    pos = game.mapa.get_player_spawn_pos()
+    game.player.posicao.update(pos)
+    game.player.rect.center = game.player.hitbox.center = pos
 
 
 class MapaSemImagem(MapLoader, MapCollision, MapUtils, MapFeats):

@@ -13,6 +13,7 @@ $env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: hacks
 .venv\Scripts\python.exe -m pytest tests/unit                     # só unitários
 .venv\Scripts\python.exe -m pytest -m "not integration"           # pula as simulações longas
 build.bat                                                         # exe em dist/main/ (usa o pyinstaller global 6.19)
+.venv\Scripts\python.exe tools/perf.py                            # ms/frame por cenário × tools/perf_base.json (~4 min, na tomada; --escala 0.1 = rápido)
 ```
 Não há linter, formatter nem typecheck configurados. Não invente um comando para eles.
 
