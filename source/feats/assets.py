@@ -1,8 +1,11 @@
 """ASSETS: as imagens do jogo, montadas a partir de `data/manifesto_assets.py` (roteiro D1).
 
-Ainda carrega tudo no import (pygame.init + janela oculta + `carregar_assets()`): a D3 tira
-esse efeito colateral.
+Ainda carrega no import (pygame.init + janela oculta + `carregar_assets()`): a D3 tira esse
+efeito colateral. Os fundos das fases são a exceção: decodificados sob demanda (`MapasSobDemanda`, D2).
 """
+from collections import OrderedDict
+from collections.abc import Mapping
+
 import pygame
 from source.windows.settings import *
 
@@ -54,6 +57,46 @@ def carregar_imagem(imagem):
     return superficie
 
 
+class MapasSobDemanda(Mapping):
+    """`ASSETS['maps']` (roteiro D2): o fundo de uma fase só é decodificado no 1º acesso, e só os
+    `limite` mais recentes ficam guardados (cada fundo grande ocupa ~56 MB).
+
+    `in`, `len` e a iteração consultam o manifesto, sem decodificar nada. `values()`/`items()`
+    decodificam todos (um por vez, respeitando o limite): evite fora de teste.
+    """
+
+    def __init__(self, manifesto, limite=2):
+        if limite < 1:
+            raise ValueError(f'limite precisa ser >= 1 (veio {limite})')
+        self._manifesto = dict(manifesto)
+        self._limite = limite
+        self._cache = OrderedDict()
+
+    def __getitem__(self, chave):
+        if chave in self._cache:
+            self._cache.move_to_end(chave)
+            return self._cache[chave]
+        superficie = carregar_imagem(self._manifesto[chave])   # chave inválida: KeyError
+        self._cache[chave] = superficie
+        while len(self._cache) > self._limite:
+            self._cache.popitem(last=False)
+        return superficie
+
+    def __contains__(self, chave):
+        return chave in self._manifesto
+
+    def __iter__(self):
+        return iter(self._manifesto)
+
+    def __len__(self):
+        return len(self._manifesto)
+
+    @property
+    def carregados(self):
+        """Chaves decodificadas, da menos para a mais recente."""
+        return list(self._cache)
+
+
 def _montar(no):
     if isinstance(no, Imagem):
         return carregar_imagem(no)
@@ -63,9 +106,11 @@ def _montar(no):
 
 
 def carregar_assets():
-    """Preenche `ASSETS` (sempre o mesmo dict) a partir do manifesto. Idempotente."""
+    """Preenche `ASSETS` (sempre o mesmo dict) a partir do manifesto. Idempotente.
+    Os fundos das fases ficam sob demanda (`MapasSobDemanda`)."""
     if not ASSETS:
-        ASSETS.update(_montar(MANIFESTO))
+        ASSETS.update({chave: MapasSobDemanda(no) if chave == 'maps' else _montar(no)
+                       for chave, no in MANIFESTO.items()})
     return ASSETS
 
 

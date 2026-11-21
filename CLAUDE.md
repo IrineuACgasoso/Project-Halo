@@ -9,7 +9,7 @@ O código e os identificadores estão em **português**. Mantenha esse padrão.
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # deps (pygame + pytest)
 .venv\Scripts\python.exe main.py                                  # rodar o jogo
 $env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: hacks L/P/B + overlay de paredes
-.venv\Scripts\python.exe -m pytest                                # suíte completa (~90 s; ~13 s são o carregamento dos assets)
+.venv\Scripts\python.exe -m pytest                                # suíte completa (~65 s; na bateria, até o dobro)
 .venv\Scripts\python.exe -m pytest tests/unit                     # só unitários
 .venv\Scripts\python.exe -m pytest -m "not integration"           # pula as simulações longas
 .venv\Scripts\python.exe -m pytest tests/integration/test_golden.py --atualizar-golden  # só em mudança de comportamento declarada
@@ -25,7 +25,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
 - **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`. O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
 - **Fases:** mapas Tiled em `assets/img/map/<n>/m<n>.tmj`. O pool de inimigos e os bosses de cada fase ficam em `source/systems/spawner/`.
-- **Import pesado:** `source/feats/assets.py` carrega **todos** os assets no import, com `pygame.init` e janela oculta. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
+- **Import pesado:** `source/feats/assets.py` carrega os assets no import (~1,5 s), com `pygame.init` e janela oculta. Os fundos das fases são a exceção: `ASSETS['maps']` decodifica no 1º acesso e guarda só os 2 mais recentes. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
 
 ## Regras críticas
 - **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.

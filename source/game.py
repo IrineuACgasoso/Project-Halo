@@ -26,7 +26,8 @@ from source.feats.buddies import *
 from source.feats.weapons import *
 from source.feats.vehicles import *
 from source.feats.effects import Portal
-from source.feats.assets import path, ASSETS
+from source.feats.assets import path
+from source.data.manifesto_assets import MANIFESTO
 # PLAYER
 from source.systems.levelup import *
 from source.player.player import Player 
@@ -254,8 +255,9 @@ class Game:
         pygame.mixer.music.pause()
 
     def existe_proxima_fase(self):
-        """True se há mapa carregável para a fase seguinte (evita KeyError no fim da campanha)."""
-        return f'{self.sessao.fase_atual + 1}' in ASSETS['maps']
+        """True se o manifesto tem mapa para a fase seguinte (evita KeyError no fim da campanha).
+        Não decodifica a imagem (roteiro D2)."""
+        return f'{self.sessao.fase_atual + 1}' in MANIFESTO['maps']
 
     def finalizar_campanha(self):
         """Portal da última fase disponível foi tocado: encerra a campanha."""

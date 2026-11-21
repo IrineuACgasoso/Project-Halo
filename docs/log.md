@@ -2,6 +2,27 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa D2: mapas sob demanda
+**O que foi feito**
+- `feats/assets.py::MapasSobDemanda` (um `Mapping`): `ASSETS['maps']` decodifica o fundo de uma fase no 1º acesso e guarda só os 2 mais recentes (LRU). `in`, `len` e a iteração consultam o manifesto, sem decodificar; chave inexistente dá `KeyError`, como num dict. Arquivo ausente vira o placeholder da D1.
+- `Game.existe_proxima_fase()` lê `MANIFESTO['maps']`, não a imagem.
+- Nada desenha sobre o fundo do mapa (verificado por grep), então a superfície do cache pode ser reaproveitada entre partidas.
+- Testes: +10 em `test_assets.py`: consultar chaves não decodifica, 1º acesso decodifica e reaproveita, LRU (inclusive o acesso que renova a recência), limite 1, limite inválido, `KeyError`, mapa ausente, e uma partida real (nova partida decodifica só o mapa 0; `existe_proxima_fase` não decodifica; 2 trocas de fase deixam só os mapas 1 e 2). A equivalência da D1 continua verde (os fundos decodificados sob demanda saem iguais). Suíte: **823 verdes + 1 xfail**. Golden inalterado; catraca inalterada.
+
+**Desempenho** (A/B alternado com a D1, worktree, `perf.py --cenario troca_de_fase`, 2 rodadas; **na bateria**)
+| | D1 | D2 |
+|---|---|---|
+| import dos assets | 2,5–2,6 s | **1,5 s** |
+| pico de memória (só a troca de fase) | 562 MB | **379 MB** |
+| troca de fase | 1,6–1,9 ms | **120–140 ms** (máx 200) |
+- A troca de fase ficou mais cara de propósito: a decodificação saiu do import e foi para ela (56–185 ms por mapa; o JPG de 4608×3072 é o mais lento). Ela roda com a tela toda preta (`fade_alpha == 255`), e o passo fixo absorve o quadro longo (no máximo 5 passos de recuperação). O `perf.py` acusa `troca_de_fase` contra a base (1,56 ms): **esperado**, até a base ser regravada.
+- Os outros cenários não foram medidos: a D2 não toca o `update` nem o `draw` (o mapa é criado fora do cronômetro), e na bateria a medida não vale.
+- Suíte na bateria: 130 s, contra 64 s na rodada da D1 (energia não registrada). `test_grade_paredes.py` levou o mesmo tempo nos dois commits (A/B: 14,5–15,6 s), então a diferença é a energia, não a D2.
+
+**Não validado:** a sensação da troca de fase no jogo real (a pausa cai no quadro preto) e o início de uma nova partida depois de um game over numa fase alta (o mapa 0 pode ter saído do cache: +~185 ms ao começar).
+
+**Pendências:** regravar `perf_base.json` (na tomada, sessão fria) — agora também para absorver a troca de fase nova; o bug do fim de campanha (xfail, B4); o TODO do Hunter preso nas paredes (C1). Próxima etapa: **D3** (import sem efeito colateral).
+
 ## 2026-11-21 | Etapa D1: manifesto de assets
 **O que foi feito**
 - `source/data/manifesto_assets.py`: `MANIFESTO`, com o mesmo formato de `ASSETS` (dicts e listas) e uma `Imagem(arquivo, escala, alpha, espelhar)` em cada folha. Ajudantes `quadros(pasta, nomes, escala)` e `numerados(prefixo, fim, inicio)` para as sequências de quadros; os nomes fora de padrão (`guilty.png`, `clone2/clone/clone3`, `super.png` 2×, Hunter com 2 escalas) ficam explícitos. Módulo só de dados (sem pygame).

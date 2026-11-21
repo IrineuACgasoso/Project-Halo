@@ -1,4 +1,4 @@
-"""Assets: equivalência com o carregamento antigo (roteiro D1).
+"""Assets: manifesto e equivalência com o carregamento antigo (roteiro D1); mapas sob demanda (D2).
 
 `tests/golden/assets.json` foi gravado com as 251 linhas literais, ANTES da troca pelo manifesto:
 cada superfície vira 'LxA bits alpha|opaco crc32-dos-pixels-RGBA'.
@@ -14,7 +14,7 @@ import pytest
 
 from source.data.manifesto_assets import MANIFESTO, Imagem, folhas, numerados, quadros
 from source.feats import assets as modulo_assets
-from source.feats.assets import ASSETS, carregar_assets, carregar_imagem
+from source.feats.assets import ASSETS, MapasSobDemanda, carregar_assets, carregar_imagem
 from source.utils.paths import path
 
 CAMINHO_REGISTRO = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'golden', 'assets.json')
@@ -77,6 +77,8 @@ def test_estrutura_de_assets_espelha_o_manifesto():
     def forma(no):
         if isinstance(no, (Imagem, pygame.Surface)):
             return 'folha'
+        if isinstance(no, MapasSobDemanda):   # sem decodificar os fundos
+            return {k: 'folha' for k in no}
         if isinstance(no, list):
             return [forma(x) for x in no]
         return {k: forma(v) for k, v in no.items()}
@@ -139,3 +141,98 @@ def test_arquivo_ilegivel_vira_placeholder(sem_falhas_logadas, monkeypatch, tmp_
     superficie = carregar_imagem(Imagem('quebrada.png', (8, 8)))
     assert superficie.get_at((4, 4))[:3] == modulo_assets.COR_PLACEHOLDER
     assert 'quebrada.png' in capsys.readouterr().out
+
+
+# ------------------------------------------------------------------ #
+# Mapas sob demanda (roteiro D2)
+# ------------------------------------------------------------------ #
+@pytest.fixture
+def decodificados(monkeypatch):
+    """Troca o decodificador por um falso que anota cada arquivo pedido."""
+    pedidos = []
+
+    def falso(imagem):
+        pedidos.append(imagem.arquivo)
+        return pygame.Surface((4, 4))
+    monkeypatch.setattr(modulo_assets, 'carregar_imagem', falso)
+    return pedidos
+
+
+def _mapas(limite=2):
+    return MapasSobDemanda({str(n): Imagem(f'map/{n}/map{n}.jpg', alpha=False) for n in range(4)},
+                           limite=limite)
+
+
+def test_assets_maps_e_sob_demanda_com_as_chaves_do_manifesto():
+    assert isinstance(ASSETS['maps'], MapasSobDemanda)
+    assert list(ASSETS['maps']) == list(MANIFESTO['maps'])
+
+
+def test_consultar_chaves_nao_decodifica(decodificados):
+    mapas = _mapas()
+    assert '0' in mapas and '9' not in mapas and 0 not in mapas
+    assert len(mapas) == 4 and list(mapas) == ['0', '1', '2', '3']
+    assert mapas.get('9') is None
+    assert decodificados == [] and mapas.carregados == []
+
+
+def test_decodifica_no_primeiro_acesso_e_reaproveita(decodificados):
+    mapas = _mapas()
+    primeira = mapas['1']
+    assert mapas['1'] is primeira
+    assert decodificados == ['map/1/map1.jpg'] and mapas.carregados == ['1']
+
+
+def test_guarda_so_os_mais_recentes(decodificados):
+    mapas = _mapas(limite=2)
+    for chave in '012':
+        mapas[chave]
+    assert mapas.carregados == ['1', '2']
+    mapas['1']                       # volta a ser o mais recente
+    mapas['3']
+    assert mapas.carregados == ['1', '3']
+    mapas['0']                       # foi descartado: decodifica de novo
+    assert decodificados == ['map/0/map0.jpg', 'map/1/map1.jpg', 'map/2/map2.jpg',
+                             'map/3/map3.jpg', 'map/0/map0.jpg']
+
+
+def test_limite_um_guarda_so_o_atual(decodificados):
+    mapas = _mapas(limite=1)
+    mapas['0'], mapas['1']
+    assert mapas.carregados == ['1']
+
+
+@pytest.mark.parametrize('limite', [0, -1])
+def test_limite_invalido_e_erro(limite):
+    with pytest.raises(ValueError):
+        _mapas(limite)
+
+
+def test_chave_inexistente_e_keyerror(decodificados):
+    with pytest.raises(KeyError):
+        _mapas()['9']
+    assert decodificados == []
+
+
+def test_mapa_ausente_vira_placeholder(sem_falhas_logadas):
+    mapas = MapasSobDemanda({'0': Imagem('map/nao_existe.jpg', alpha=False)})
+    assert mapas['0'].get_size() == modulo_assets.TAMANHO_PLACEHOLDER
+
+
+def test_partida_decodifica_so_o_mapa_usado(novo_jogo, monkeypatch):
+    from helpers import voltar_ao_menu
+    mapas = MapasSobDemanda(MANIFESTO['maps'])
+    monkeypatch.setitem(ASSETS, 'maps', mapas)
+    voltar_ao_menu(novo_jogo)
+    novo_jogo.iniciar_novo_jogo()
+    assert mapas.carregados == ['0']
+    assert novo_jogo.existe_proxima_fase() and mapas.carregados == ['0']
+
+    sm = novo_jogo.stage_manager
+    sm._trocar_dados_fase()
+    assert novo_jogo.sessao.fase_atual == 1 and mapas.carregados == ['0', '1']
+    sm._trocar_dados_fase()
+    assert mapas.carregados == ['1', '2']
+    fundo = novo_jogo.mapa.background
+    assert fundo is mapas['2']
+    assert (novo_jogo.mapa.largura_mapa_pixels, novo_jogo.mapa.altura_mapa_pixels) == fundo.get_size()

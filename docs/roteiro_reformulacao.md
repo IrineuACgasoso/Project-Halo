@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos; próxima: D1.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1 e D2 feitas; próxima: D3.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -135,6 +135,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **D2 · Mapas sob demanda** (risco: baixo)
 - Muda: `ASSETS['maps']` vira um mapeamento preguiçoso (carrega no primeiro acesso, mantém só os 2 mais recentes). `existe_proxima_fase()` consulta o manifesto, não a imagem.
 - Testes: só o mapa usado é decodificado; troca de fase e fim de campanha continuam verdes. O ganho de import e memória entra no log (medido com A1).
+- Feito (2026-11-21): import −42%, pico de memória −183 MB; a troca de fase passou a custar ~130 ms (decodificação, com a tela preta). Ver log.
 
 **D3 · Import sem efeito colateral** (risco: médio)
 - Muda: `pygame.init` e a janela oculta saem do import de `assets.py` e vão para `carregar_assets()`, chamado por `main.py` e pelo `conftest`.
