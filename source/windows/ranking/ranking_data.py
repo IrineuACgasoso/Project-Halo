@@ -10,7 +10,25 @@ diretório sem permissão, etc nunca devem derrubar o jogo).
 import json
 import os
 import shutil
+import sys
 from datetime import datetime
+
+from source.utils.paths import path
+
+PASTA_DADOS_USUARIO = 'ProjectHalo'
+
+
+def caminho_padrao_ranking():
+    """Onde o ranking mora.
+    - Rodando o .py: assets/data/ranking.json (arquivo versionado do repo).
+    - Executável (PyInstaller): %APPDATA%/ProjectHalo/ranking.json. O cwd do .exe varia
+      (atalho, terminal) e a pasta do jogo pode ser somente leitura; antes o arquivo era
+      gravado relativo ao cwd e "sumia" conforme o jogo era aberto.
+    """
+    if getattr(sys, 'frozen', False):
+        base = os.environ.get('APPDATA') or os.path.dirname(sys.executable)
+        return os.path.join(base, PASTA_DADOS_USUARIO, 'ranking.json')
+    return path('assets', 'data', 'ranking.json')
 
 
 class RankingData:
@@ -30,7 +48,7 @@ class RankingData:
 
     def __init__(self, caminho_arquivo=None):
         if caminho_arquivo is None:
-            caminho_arquivo = os.path.join('assets', 'data', 'ranking.json')
+            caminho_arquivo = caminho_padrao_ranking()
         self.caminho = caminho_arquivo
 
     # ------------------------------------------------------------------ #

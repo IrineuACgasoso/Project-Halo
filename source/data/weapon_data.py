@@ -53,7 +53,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano':       WeaponStats(value=1,    label='Dano',       increase=1,     range_val=1),
             'rebatidas':  WeaponStats(value=3,    label='Rebotes',    increase=1,     range_val=1),
             'velocidade': WeaponStats(value=1000, label='Velocidade', increase=100,   range_val=1),
-            'cooldown':   WeaponStats(value=2000, label='Cooldown',   increase=-100,  range_val=1),
+            'cooldown':   WeaponStats(value=2000, label='Cooldown',   increase=-100,  range_val=1, min_val=1000),
         }
     ),
 
@@ -92,7 +92,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
     'carabin_rifle': WeaponProfile(
             stats={
                 'dano':           WeaponStats(value=1,    label='Dano',     increase=1,     range_val=1),
-                'burst_count':    WeaponStats(value=5,    label='Rajada',   increase=1,     range_val=[1, 2, 3, 4]),
+                'burst_count':    WeaponStats(value=5,    label='Rajada',   increase=1,     range_val=[2, 3, 4]),
                 'cooldown':       WeaponStats(value=3500, label='Cooldown', increase=-100,  range_val=1, min_val=2500),
                 'burst_interval': WeaponStats(value=90,   label=None,       increase=0,     range_val=0),
                 'velocidade':     WeaponStats(value=650,  label=None,       increase=0,     range_val=0),

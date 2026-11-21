@@ -39,7 +39,8 @@ class OndaEMP(pygame.sprite.Sprite):
             
             # Criamos uma margem de detecção ao quadrado para evitar que o frame "pule" a colisão
             largura_colisao = self.cfg.velocidade_expansao * delta_time * 1.5
-            raio_min_sq = (self.raio_atual - largura_colisao) ** 2
+            # max(0, ...): elevar um raio negativo ao quadrado criava um "buraco" no centro da onda
+            raio_min_sq = max(0.0, self.raio_atual - largura_colisao) ** 2
             raio_max_sq = (self.raio_atual + largura_colisao) ** 2
             
             # Se a distância ao quadrado estiver dentro da coroa circular da borda

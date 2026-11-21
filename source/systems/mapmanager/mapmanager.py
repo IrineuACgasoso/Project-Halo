@@ -40,7 +40,7 @@ class Mapa(
 
     def get_player_spawn_pos(self):
         """Retorna o ponto manual se existir, senão retorna o centro do mapa."""
-        if self.player_spawn_manual:
+        if self.player_spawn_manual is not None:   # Vector2(0, 0) é falsy, mas é um spawn válido
             return self.player_spawn_manual
         return pygame.math.Vector2(self.largura_mapa_pixels / 2, self.altura_mapa_pixels / 2)
 

@@ -80,7 +80,9 @@ class GrenadeBase(ProjetilUniversal):
         if alvo_bruto is None:
             return None
 
-        if hasattr(alvo_bruto, 'sprites'):
+        # isinstance, não hasattr('sprites'): o Player também tem `.sprites` (dict de animação),
+        # e tratá-lo como Group derrubava o jogo quando um boss lançava granada no jogador.
+        if isinstance(alvo_bruto, pygame.sprite.AbstractGroup):
             candidatos = alvo_bruto.sprites()
         elif isinstance(alvo_bruto, (list, tuple, set)):
             candidatos = alvo_bruto
@@ -170,14 +172,17 @@ class PlasmaGrenade(GrenadeBase):
     RAIO_INTERNO = 14
     RAIO_EXTERNO = 20
 
-    def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo, custom_config=None):
+    def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo,
+                 custom_config=None, preset='plasma_grenade'):
+        # `inimigos_grupo` aceita grupo/lista OU um sprite unico (ex.: o jogador, quando
+        # quem lanca e um inimigo como o Arbiter) — ver GrenadeBase._checar_colisao.
         super().__init__(
             posicao_inicial=posicao_inicial,
             posicao_alvo=posicao_alvo,
             grupos=grupos,
             game=game,
             dono=dono,
-            preset='plasma_grenade',
+            preset=preset,
             sprite_key='plasma_grenade',
             tamanho=(36, 36),
             colisao_alvo=inimigos_grupo,
@@ -257,3 +262,49 @@ class PlasmaGrenade(GrenadeBase):
         self.image = composta
         self.rect = self.image.get_rect(center=self.rect.center)
 
+
+
+class FuelRodGrenade(PlasmaGrenade):
+    """Carga do Fuel Rod. Explode com impacto + nuvem venenosa (config com dot=True e
+    impacto_com_dot=True, montada pela arma). Se cair SEM grudar em ninguém, quica até
+    `quiques` vezes rumo ao inimigo vivo mais próximo do ponto de queda."""
+
+    RAIO_BUSCA_QUIQUE = 350
+    REDUCAO_ALTURA_QUIQUE = 0.6
+
+    def __init__(self, *args, quiques=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.quiques = max(0, int(quiques))
+
+    def _explodir_sem_grude(self):
+        alvo = self._alvo_do_quique() if self.quiques > 0 else None
+        if alvo is None:
+            super()._explodir_sem_grude()
+            return
+        self._quicar(alvo.posicao)
+
+    def _alvo_do_quique(self):
+        grupo = self.colisao_alvo
+        if not isinstance(grupo, pygame.sprite.AbstractGroup):
+            return None
+        raio_sq = self.RAIO_BUSCA_QUIQUE ** 2
+        melhor, melhor_dist = None, raio_sq
+        for inimigo in grupo:
+            if not inimigo.alive() or getattr(inimigo, 'invulneravel', False):
+                continue
+            dist = self.target_pos.distance_squared_to(inimigo.posicao)
+            if dist <= melhor_dist:
+                melhor, melhor_dist = inimigo, dist
+        return melhor
+
+    def _quicar(self, destino):
+        """Reinicia o arco a partir do ponto de queda, mais baixo a cada quique."""
+        self.quiques -= 1
+        self.start_pos = pygame.math.Vector2(self.target_pos)
+        self.target_pos = pygame.math.Vector2(destino)
+        self.posicao = pygame.math.Vector2(self.start_pos)
+        self.total_dist = self.start_pos.distance_to(self.target_pos)
+        self.max_height *= self.REDUCAO_ALTURA_QUIQUE
+        vetor = self.target_pos - self.start_pos
+        if vetor.length_squared() > 0:
+            self.direcao = vetor.normalize()

@@ -39,6 +39,12 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         if raio_atual <= 0:
             return
 
+        # Cone de 360° = círculo completo (evita a linha radial do polígono fechado)
+        if self.cfg.angulo_spray >= 360:
+            centro = (self.cfg.raio, self.cfg.raio)
+            pygame.draw.circle(surface, cor, centro, int(raio_atual), espessura)
+            return
+
         # Ângulo base central do vetor de direção em radianos
         angulo_base = math.atan2(self.direcao.y, self.direcao.x)
         metade_arco = math.radians(self.cfg.angulo_spray / 2)
@@ -135,4 +141,4 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         if hasattr(alvo, 'tomar_dano_direto'):
             alvo.tomar_dano_direto(self.cfg.dano)
         elif hasattr(alvo, 'receber_dano'):
-            alvo.receber_dano(self.cfg.dano)
+            alvo.receber_dano(self.cfg.dano)

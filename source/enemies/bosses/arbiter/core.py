@@ -3,17 +3,22 @@ from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.items import Items
 
+from .config import CFG
 from .setup import ArbiterSetup
 from .states import ArbiterAI
 from .attacks import ArbiterAttacks
+from .arsenal import ArbiterArsenal
+from .movement import ArbiterMovement
 
-class BossArbiter(BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks):
+
+class BossArbiter(ArbiterMovement, BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks, ArbiterArsenal):
+    # ArbiterMovement ANTES de BaseEnemy: precisa sobrescrever `mover` (ver movement.py)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=2500, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
-        
+
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
         self.is_boss = True
-        
+
         self.setup_animation(estado_inicial='right', velocidade_animacao=200)
 
         # Hitbox Personalizada
@@ -24,29 +29,50 @@ class BossArbiter(BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks):
 
         self.inicializar_habilidades()
 
+    # ------------------------------------------------------------ combate
+    @property
+    def revelado(self):
+        """Camuflado, mas denunciado por um flash (atirou / golpeou / encostou no jogador)."""
+        return self.invis_phase is not None and self.flash_timer > 0
+
+    @property
+    def invulneravel(self):
+        """Igual a base, exceto que revelar-se ao atacar abre uma janela de dano (counterplay ao stealth)."""
+        if getattr(self, 'is_invulneravel', False) or getattr(self, 'invencivel', False):
+            return True
+        if self.invisivel:
+            return not (CFG.vulneravel_ao_revelar and self.revelado)
+        return False
+
     def update(self, delta_time, paredes=None):
         agora = relogio.agora()
+        self._agora = agora
+        self._dt = delta_time
+
+        self._atualizar_percepcao(delta_time, agora)
+        self._checar_fase()
+
         dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
-        
-        # Máquina de Estados / Inteligência
+
+        # Maquina de Estados / Inteligencia
         self.executar_estados(agora, delta_time, dist_sq)
 
         # Mira sempre pro jogador independente da habilidade
-        direcao_x = self.jogador.posicao.x - self.posicao.x 
+        direcao_x = self.jogador.posicao.x - self.posicao.x
         self.set_sprite_direction(direcao_x)
-        
-        # Movimento e Física (A velocidade processada no states reage aqui)
+
+        # Movimento e Fisica (a velocidade/direcao decididas nas rotinas reagem aqui)
         super().update(delta_time, paredes)
-        
+
         self.animar()
         self.hitbox.center = self.rect.center
 
     def morrer(self, grupos=None):
         Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            big_shard=((6, 7, 8, 10), (60, 30, 9, 1), 100), 
-            life_orb=(1, 100, 100),              
-            upgrade=((1, 2), (99, 1), 100)       
+            self.posicao,
+            grupos,
+            big_shard=((6, 7, 8, 10), (60, 30, 9, 1), 100),
+            life_orb=(1, 100, 100),
+            upgrade=((1, 2), (99, 1), 100)
         )
         self.kill()

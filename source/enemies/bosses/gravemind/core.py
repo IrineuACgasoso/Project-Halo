@@ -9,7 +9,8 @@ from .states import GravemindAI
 from .attacks import GravemindAttacks
 from .vfx import GravePit, FloodWarning
 
-class BaseGravemind(BaseEnemy, GravemindSetup, GravemindAI, GravemindAttacks, GravemindAnimation):
+# GravemindAnimation ANTES de BaseEnemy: senão EnemyAnimation.animar vence na MRO e a animação própria nunca roda.
+class BaseGravemind(GravemindAnimation, BaseEnemy, GravemindSetup, GravemindAI, GravemindAttacks):
     """Herança múltipla"""
     def __init__(self, posicao, game, jogador, variante, vida, dano):
         super().__init__(

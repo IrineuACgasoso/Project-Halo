@@ -10,7 +10,8 @@ from .states import DidactAI
 from .attacks import DidactAttacks
 
 # A Classe Didact se torna uma junção de: BaseEnemy + Setup + IA + Ataques
-class Didact(BaseEnemy, DidactSetup, DidactAI, DidactAttacks):
+# DidactAI ANTES de BaseEnemy: senão EnemyCollision.collision_rect vence na MRO e a hitbox é ignorada.
+class Didact(DidactAI, BaseEnemy, DidactSetup, DidactAttacks):
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=8000, dano_base=60, velocidade_base=50, 
                          game=game, sprite_key='didact', flip_sprite=True)

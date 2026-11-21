@@ -6,8 +6,8 @@ from .vehicles import Vehicle
 
 class VehiclePelican(Vehicle):
     """
-    Warthog: veículo blindado com metralhadora traseira de cadência alta
-    e atropelamento de inimigos.
+    Pelican: aeronave UNSC com metralhadora pesada (HeavyBurst) e atropelamento.
+    Stats em VEHICLES_DATA['pelican'].
     """
 
     def decidir_disparo_veiculo(self, agora):
@@ -33,15 +33,15 @@ class VehiclePelican(Vehicle):
 
 
 class Pelican(Arma):
-    NOME_ASSET = 'warhog'
+    NOME_ASSET = 'pelican'
 
     def __init__(self, jogador, grupos, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         deve_criar = kwargs.get('criar_sprite', True)
         self.game = game
         self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
-        self.nome = "Warthog"
-        self.descricao = "Veículo blindado UNSC com metralhadora traseira. Aperte V para entrar ou sair."
+        self.nome = "Pelican"
+        self.descricao = "Aeronave UNSC com metralhadora pesada. Aperte V para entrar ou sair."
         self.sprite_veiculo = None
         self._tecla_v_pressionada_anterior = False
         if deve_criar:  # Só cria se for solicitado
@@ -52,7 +52,7 @@ class Pelican(Arma):
             self.sprite_veiculo = VehiclePelican(
                 self.jogador, self.all_sprites,
                 self.inimigos_grupo, self.item_grupo,
-                'warhog'
+                self.NOME_ASSET
             )
     
     def disparar(self):

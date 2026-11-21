@@ -102,7 +102,9 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             self.tempo_criacao = agora
 
             if self.cfg.dot:
-                # Não aplica o `dano` de impacto: só liga o ciclo de ticks
+                # Por padrão não aplica o `dano` de impacto, só liga o ciclo de ticks
+                if self.cfg.impacto_com_dot:
+                    self._aplicar_dano_em_area(self.cfg.dano)
                 self.dot_ativo = True
                 self.dot_inicio = agora
                 self.dot_ultimo_tick = agora

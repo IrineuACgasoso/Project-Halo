@@ -64,7 +64,7 @@ class Crawler(BaseEnemy):
         else:
             if agora - self.ultimo_tiro_principal >= self.cooldown_rifle:
                 self.tiros_restantes_rajada = 3  
-                self.cooldown_rifle = random.choice(self.opcoes_cooldown)
+                self.cooldown_rifle = self.novo_cooldown(5000, 9000)
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):

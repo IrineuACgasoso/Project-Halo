@@ -82,9 +82,9 @@ class BaseWarden(BaseEnemy, WardenSetup, WardenAI, WardenAttacks, WardenFunction
         # SALVA A POSIÇÃO: Atualiza o manager com o local exato da morte deste corpo
         if self.manager:
             self.manager.ultima_posicao_corpo = self.posicao.copy()
-        # Remove a si mesmo do rastreio do manager antes de sumir
-        if self in self.manager.wardens_vivos:
-            self.manager.wardens_vivos.remove(self)
+            # Remove a si mesmo do rastreio do manager antes de sumir
+            if self in self.manager.wardens_vivos:
+                self.manager.wardens_vivos.remove(self)
             
         self.kill()
 
@@ -161,14 +161,19 @@ class DomainConsciousness(BaseEnemy):
     def update(self, delta_time, paredes=None):
         # O manager apenas monitora se a presença física do Warden foi eliminada
         if not self.wardens_vivos:
-            self.morrer()
+            # Mesmos grupos que o CollisionManager usa; sem eles o drop final nascia fora do mundo.
+            self.morrer((entity_manager.all_sprites, entity_manager.items_grupo))
 
     def morrer(self, grupos=None):
+        # `vida` é a soma dos corpos: chega a 0 antes de o CollisionManager processar o último
+        # corpo do frame. Só morre quando nenhum corpo segue vivo (senão o drop sai no lugar errado).
+        if any(w.alive() for w in self.wardens_vivos):
+            return
         # Captura onde o último Warden caiu, ou usa o centro do spawn como última alternativa (fallback)
         pos_drop = getattr(self, 'ultima_posicao_corpo', self.posicao)
         # Quando todos os corpos caem, a Consciência gera a recompensa unificada
         Items.spawn_drop(
-            self.posicao, 
+            pos_drop,
             grupos, 
             big_shard=((12, 14, 16, 20), (70, 28, 1.9, 0.1), 100), 
             life_orb=(1, 100, 100),              

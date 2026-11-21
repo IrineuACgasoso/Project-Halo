@@ -152,7 +152,7 @@ ARMAS_REGISTRO = _registro(
     ),
     ArmaInfo(
         id='fuel_rod', nome='Fuel Rod', classe=FuelRod,
-        grupos=['all_sprites', 'inimigos_grupo', 'items_grupo'],
+        grupos=['all_sprites', 'projeteis_jogador_grupo', 'inimigos_grupo'],
         descricao='Canhão de combustível que envenena tudo que tocar.', raridade='epica'
     ),
 )

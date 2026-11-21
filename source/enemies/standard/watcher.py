@@ -8,7 +8,8 @@ from source.systems.entitymanager import entity_manager
 class Watcher(BaseEnemy):
     def __init__(self, posicao, game, vida_base=25, velocidade_base=180, intervalo=2000, porcentagem=0.05, min_esc=15, max_esc=40, cor_raio=(255, 120, 0), sprite_key='watcher', variante='default'):
         # MUDANÇA: dano_base=0 para que ele SÓ dê escudo (sem dano por contato físico)
-        super().__init__(posicao, vida_base=vida_base, dano_base=0, velocidade_base=velocidade_base, game=game, sprite_key=sprite_key)
+        super().__init__(posicao, vida_base=vida_base, dano_base=0, velocidade_base=velocidade_base, game=game,
+                         sprite_key=sprite_key, variante=variante)
         
         self.setup_animation(estado_inicial='left', velocidade_animacao=300)
 

@@ -82,7 +82,7 @@ class Soldier(BaseEnemy):
         else:
             if agora - self.ultimo_tiro_principal >= self.cooldown_rifle:
                 self.tiros_restantes_rajada = self.pente_rajada
-                self.cooldown_rifle = random.choice(self.opcoes_cooldown)
+                self.cooldown_rifle = self.novo_cooldown(7000, 13000)
                 self.ultimo_tiro_principal = agora
 
     def atirar_lightrifle(self):

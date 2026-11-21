@@ -17,18 +17,23 @@ class Dizimator(Arma):
         self.tiros_restantes = 0
         self.ultimo_tiro_burst = 0
         
+    RAIO_ALVO = 550
+
     def disparar(self) -> bool:
-        if self.tiros_restantes <= 0:
-            self.tiros_restantes = self.burst_count
-            return True 
-        return False
+        # Só inicia a rajada se houver alvo: antes o cooldown era gasto mesmo sem ninguém no alcance.
+        if self.tiros_restantes > 0:
+            return False
+        if self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.RAIO_ALVO) is None:
+            return False
+        self.tiros_restantes = self.burst_count
+        return True
     
     def update(self, delta_time):
         super().update(delta_time)
         agora = relogio.agora()
         if self.tiros_restantes > 0:
             if agora - self.ultimo_tiro_burst > self.burst_interval:
-                inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=550)
+                inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.RAIO_ALVO)
                 if inimigo:
                     self._spawn_bullet(inimigo)
                     self.tiros_restantes -= 1

@@ -45,4 +45,27 @@ CONE_STRIKE_PRESETS = {
         cor_preenchimento=(200, 50, 0, 90),# Preenchimento denso e quente
         cor_explosao=(255, 230, 150, 250)  # Clarão branco/dourado no impacto
     ),
+
+    # === ARBITER (Covenant) — energia azul ===
+    # Espada de energia: curtissimo alcance, arco aberto, telegraph rapido.
+    'arbiter_energy_sword': ConeStrikeConfig(
+        dano=120,
+        raio=230,
+        angulo_spray=100,
+        duracao=450,
+        cor_borda=(90, 190, 255, 225),
+        cor_preenchimento=(40, 120, 255, 90),
+        cor_explosao=(190, 240, 255, 245)
+    ),
+
+    # Onda de choque 360 usada na transicao de fase (punir quem fica colado nele).
+    'arbiter_nova': ConeStrikeConfig(
+        dano=80,
+        raio=260,
+        angulo_spray=360,
+        duracao=900,
+        cor_borda=(70, 170, 255, 210),
+        cor_preenchimento=(30, 100, 255, 70),
+        cor_explosao=(170, 225, 255, 240)
+    ),
 }

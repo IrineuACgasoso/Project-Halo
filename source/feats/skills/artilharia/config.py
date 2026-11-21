@@ -13,6 +13,7 @@ class ArtilhariaConfig:
     dot: bool = False
     dano_por_segundo: int = 0
     duracao_dot: int = 3000
+    impacto_com_dot: bool = False   # com dot=True: aplica `dano` na explosão ANTES de iniciar os ticks
 
 # === PRESETS DA ARTILHARIA ===
 ARTILHARIA_PRESETS = {

@@ -15,3 +15,5 @@ __pycache__/
 
 # Outros
 .vscode/
+# Testes
+.pytest_cache/

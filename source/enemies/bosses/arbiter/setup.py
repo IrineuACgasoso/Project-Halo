@@ -1,46 +1,43 @@
+import random
 import pygame
 from source.systems.gameclock import relogio
+from .config import CFG, FASES
+
+V2 = pygame.math.Vector2
+
 
 class ArbiterSetup:
     def inicializar_habilidades(self):
+        agora = relogio.agora()
+
+        # --- fases ---
+        self.fase = 1
+        self.fase_cfg = FASES[0]
+        self.transicao_pendente = False
+
+        # --- maquina de estados (cada habilidade e uma rotina/gerador) ---
         self.estado_habilidade = 'idle'
-        self.ja_teleportou = False  # Controle do teleporte da invisibilidade comum
-        self.wait = 0
+        self.rotina = None
+        self.ultima_habilidade = None
+        self.wait = 0                      # exaustao pos-habilidade (ms)
+        self._agora = agora
+        self._dt = 0.0
 
-        self._inicializar_invisibilidade()
-        self._inicializar_carabina()
-        self._inicializar_antistuck()
-        self._inicializar_invocacao()
-        
-    def _inicializar_invisibilidade(self):
-        # 1. Habilidade: Sprint Invisível (Camuflagem Ativa)
-        self.ultima_invisibi = relogio.agora()
-        self.cooldown_invisibilidade = 10000
-        self.duracao_invisibilidade = 3500
+        # --- cooldowns: nome -> instante (ms) em que volta a ficar disponivel ---
+        self.cd = {nome: agora + ms for nome, ms in CFG.cooldown_inicial.items()}
 
-    def _inicializar_carabina(self):
-        # 2. Habilidade: Rajada de Carabina Comum
-        self.ultima_carabina = relogio.agora()
-        self.cooldown_carabin = 4000
-        self.intervalo_carabina = 80
-        self.cronometro_carabina = 0
-        self.carabina_restante = 0
-        self.contagem_carabina = 5
+        # --- invocacao ---
+        self.elites_invocados = []
 
-    def _inicializar_antistuck(self):
-        # 3. Mecanismo Dependente: Anti-Stuck de Contra-Ataque (Spray Oculto)
-        self.ultimo_check_posicao = relogio.agora()
-        self.posicao_anterior = pygame.math.Vector2(self.posicao.x, self.posicao.y)
-        self.ja_teleportou_stuck = False
-        self.spray_iniciado = False
-        self.spray_restante = 0
-        self.intervalo_spray = 45  # Cadência absurdamente rápida para os 20 tiros
-        self.cronometro_spray = 0
-        self.tempo_teleporte_stuck = 0
+        # --- movimento / percepcao ---
+        self._dir_mov = None               # None = perseguir o jogador (comportamento base)
+        self._lado_strafe = random.choice((-1, 1))
+        self._troca_lado_em = agora + random.randint(*CFG.strafe_troca_ms)
+        self._flip_valido_em = 0
+        self._pos_jogador_ant = V2(self.jogador.posicao)
+        self._vel_jogador = V2(0, 0)
 
-    def _inicializar_invocacao(self):
-        # 4. Habilidade: Invocação de Elites
-        self.ultima_invocacao = relogio.agora()
-        self.cooldown_invocacao = 16000
-        self.tempo_inicio_summon = 0
-        self.duracao_summon = 1000  # Tempo parado invocando (1 segundo)
+        # --- anti-stuck ---
+        self.ultimo_check_posicao = agora
+        self._pos_ant_frame = V2(self.posicao)
+        self._caminho_livre = 0.0          # px percorridos desde o ultimo check (so conta fora de habilidades)

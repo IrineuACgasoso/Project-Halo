@@ -21,7 +21,7 @@ class Shotgun(Arma):
             
             # Captura propriedades táticas seguras direto do dicionário de dados da arma
             qtd_estilhacos = getattr(self, 'projeteis_por_disparo', 6)
-            angulo_espalhamento = getattr(self, 'espalhamento', 14)  # Limite angular do leque em graus
+            angulo_espalhamento = getattr(self, 'spread', 14)  # Limite angular do leque em graus (stat 'spread')
             vel_projetil = getattr(self, 'velocidade_projetil', getattr(self, 'velocidade', 750))
             
             for _ in range(qtd_estilhacos):
