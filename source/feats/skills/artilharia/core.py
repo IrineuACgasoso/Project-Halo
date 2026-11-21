@@ -1,5 +1,6 @@
 # source/feats/skills/artilharia/core.py
 import pygame
+from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
@@ -30,7 +31,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         self.alvo = alvo
 
         # --- Requisito para o pygame.sprite lidar com desenho ---
-        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio
         self.rect = self.image.get_rect(center=self.posicao)
 
         # FIX: Atributo falso para enganar a física/colisão padrão da engine
@@ -48,10 +49,14 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         pos_ajustada = self.posicao - offset
         agora = relogio.agora()
 
-        # Otimização: Criar uma superfície do tamanho da explosão, e não da tela toda
-        tamanho_surf = self.cfg.raio_explosao * 2
-        temp_surface = pygame.Surface((tamanho_surf, tamanho_surf), pygame.SRCALPHA)
-        centro_local = (self.cfg.raio_explosao, self.cfg.raio_explosao)
+        # Camada reaproveitada (roteiro C3), em coordenadas de tela: mesmos pixels da antiga
+        # Surface de 2r x 2r colada em (pos - r) (o blit trunca a posição, como o int()).
+        raio = self.cfg.raio_explosao
+        x0, y0 = int(pos_ajustada.x - raio), int(pos_ajustada.y - raio)
+        temp_surface, area = camada_alpha(surface, (x0, y0, raio * 2, raio * 2))
+        if temp_surface is None:
+            return
+        centro_local = (x0 + raio, y0 + raio)
 
         if not self.explodiu:
             progresso = min((agora - self.tempo_criacao) / self.cfg.duracao, 1)
@@ -71,8 +76,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             # Impacto da explosão (sem DoT, ou já terminou o DoT)
             pygame.draw.circle(temp_surface, self.cfg.cor_explosao, centro_local, self.cfg.raio_explosao)
 
-        # Desenha a superfície temporária na tela, centralizada na posição real
-        surface.blit(temp_surface, (pos_ajustada.x - self.cfg.raio_explosao, pos_ajustada.y - self.cfg.raio_explosao))
+        surface.blit(temp_surface, area.topleft, area)
 
     def _aplicar_dano_em_area(self, dano):
         """Aplica `dano` a todos os alvos dentro do raio, uma vez."""

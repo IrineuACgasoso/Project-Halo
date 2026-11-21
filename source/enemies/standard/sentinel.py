@@ -36,7 +36,8 @@ class Sentinel(BaseEnemy):
         self.velocidade_mira = 0.05
 
     def animar(self):
-        self.set_image(self.sprites[self.estado_animacao][self.indice_animacao])
+        frame = self.sprites[self.estado_animacao][self.indice_animacao]
+        self.set_image(frame, origem=frame)   # máscara do cache, não recalculada a cada frame
 
     def update(self, delta_time, paredes=None):
         agora = relogio.agora()

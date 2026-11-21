@@ -2,6 +2,7 @@ import pygame
 from source.systems.gameclock import relogio
 from source.feats.items import Items
 from source.enemies.base.enemy_base import BaseEnemy
+from source.utils.superficies import mascara_de
 
 from .setup import GuiltySetup
 from .states import GuiltyAI
@@ -16,7 +17,7 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
         self.is_boss = True
 
         self.setup_animation(estado_inicial='left', velocidade_animacao=300)
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = mascara_de(self.image)
         
         self.inicializar_habilidades()
 
@@ -60,7 +61,7 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
             self.image = self.sprites[self.estado_animacao][0]
 
         self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = mascara_de(self.image)
 
     def draw_laser(self, superficie, deslocamento):
         """Atualiza a origem com offset dinâmico antes de renderizar"""

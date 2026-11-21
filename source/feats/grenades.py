@@ -171,6 +171,7 @@ class PlasmaGrenade(GrenadeBase):
 
     RAIO_INTERNO = 14
     RAIO_EXTERNO = 20
+    PASSO_ALPHA_PULSO = 10   # quantização do alpha da auréola (cache das compostas)
 
     def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo,
                  custom_config=None, preset='plasma_grenade'):
@@ -245,22 +246,32 @@ class PlasmaGrenade(GrenadeBase):
         pulso = (math.sin(t * velocidade_pulso) + 1) / 2  # normaliza pra 0..1
         alpha_glow = int(alpha_min + (alpha_max - alpha_min) * pulso)
 
-        glow_base = self._obter_glow_base()
-        glow_atual = glow_base.copy()
-        glow_atual.set_alpha(alpha_glow)
-
-        # Recompõe num canvas maior que a sprite, pra caber a auréola inteira
-        cw, ch = self.tamanho_canvas
-        composta = pygame.Surface(self.tamanho_canvas, pygame.SRCALPHA)
-
-        gw, gh = glow_atual.get_size()
-        composta.blit(glow_atual, (cw / 2 - gw / 2, ch / 2 - gh / 2), special_flags=pygame.BLEND_RGBA_ADD)
-
-        bw, bh = self.tamanho
-        composta.blit(self.image_base, (cw / 2 - bw / 2, ch / 2 - bh / 2))
-
-        self.image = composta
+        self.image = self._obter_composta(alpha_glow)
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def _obter_composta(self, alpha_glow):
+        """Sprite + auréola com o alpha do pulso, composta uma vez por nível de alpha e guardada
+        no GLOBAL_CACHE (roteiro C3: antes eram 2 Surfaces por granada por frame). O alpha é
+        quantizado em passos de PASSO_ALPHA_PULSO (diferença máxima de 9/255, invisível)."""
+        nivel = alpha_glow - alpha_glow % self.PASSO_ALPHA_PULSO
+        chave = (f"plasma_composta_{self.sprite_key}_{self.tamanho[0]}x{self.tamanho[1]}"
+                 f"_{self.RAIO_INTERNO}_{self.RAIO_EXTERNO}_{nivel}")
+        composta = ProjetilUniversal.GLOBAL_CACHE.get(chave)
+        if composta is None:
+            glow_atual = self._obter_glow_base().copy()
+            glow_atual.set_alpha(nivel)
+
+            # Recompõe num canvas maior que a sprite, pra caber a auréola inteira
+            cw, ch = self.tamanho_canvas
+            composta = pygame.Surface(self.tamanho_canvas, pygame.SRCALPHA)
+
+            gw, gh = glow_atual.get_size()
+            composta.blit(glow_atual, (cw / 2 - gw / 2, ch / 2 - gh / 2), special_flags=pygame.BLEND_RGBA_ADD)
+
+            bw, bh = self.tamanho
+            composta.blit(self.image_base, (cw / 2 - bw / 2, ch / 2 - bh / 2))
+            ProjetilUniversal.GLOBAL_CACHE[chave] = composta
+        return composta
 
 
 

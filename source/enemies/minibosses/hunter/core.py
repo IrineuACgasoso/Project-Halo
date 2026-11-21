@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.enemies.base.enemy_base import BaseEnemy
+from source.utils.superficies import mascara_de
 from source.feats.items import Items
 
 # Imports locais do pacote
@@ -19,7 +20,7 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
             velocidade_animacao=900
         )        
         
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = mascara_de(self.image)
         self.inicializar_habilidades()
 
     def animar(self):
@@ -34,7 +35,7 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
             self.image = self.sprites[self.estado_animacao][self.frame_atual]
             
-            self.mask = pygame.mask.from_surface(self.image)
+            self.mask = mascara_de(self.image)
             self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
 
     def receber_dano(self, quantidade):

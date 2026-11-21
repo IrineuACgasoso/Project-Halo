@@ -1,7 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 import random
-from source.feats.effects import DustParticle
+from source.feats.effects import emitir_poeira
 from source.systems.entitymanager import entity_manager
 
 
@@ -37,7 +37,7 @@ class GravemindAnimation:
                 self.timer_particula = agora
                 for _ in range(3):
                     off_x = random.randint(-self.tamanho_sprite[0]//4, self.tamanho_sprite[0]//4)
-                    DustParticle((self.posicao_chao.x + off_x, self.posicao_chao.y), (entity_manager.all_sprites,))
+                    emitir_poeira((self.posicao_chao.x + off_x, self.posicao_chao.y), (entity_manager.all_sprites,))
             if self.altura_atual >= self.tamanho_sprite[1]:
                 self.altura_atual = self.tamanho_sprite[1]
                 self.is_animating_respawn = False

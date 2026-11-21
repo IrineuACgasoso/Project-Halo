@@ -6,7 +6,7 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import BurstRifle
-from source.feats.effects import DustParticle
+from source.feats.effects import emitir_poeira
 from source.systems.entitymanager import entity_manager
 
 
@@ -79,7 +79,7 @@ class FloodCarry(FloodForm):
         # Liberação das Infection Forms
         for _ in range(4):
             pos_offset = self.posicao + pygame.math.Vector2(random.randint(-50, 50), random.randint(-50, 50))
-            DustParticle(posicao=pos_offset, grupos=entity_manager.all_sprites)
+            emitir_poeira(pos_offset, entity_manager.all_sprites)
             Infection(posicao=pos_offset, game=self.game)
             
         self.kill()

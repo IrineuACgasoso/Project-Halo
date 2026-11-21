@@ -2,6 +2,34 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa C3: projéteis e efeitos sem alocação
+**Onde o frame alocava (medido por sítio, cenários da catraca):** na horda, 11,8 das 20 alocações/frame eram `mask.from_surface` da **animação dos inimigos comuns** (a A2 tinha atribuído aos projéteis); Guilty e Didact criavam 1 máscara/frame; no `draw`, artilharia, cone, onda EMP e aviso de laser criavam uma `Surface` por efeito por frame (Warden 2,6/frame).
+
+**O que foi feito**
+- `utils/superficies.py`: `mascara_de` (cache com chave fraca por superfície), `camada_alpha` (buffer SRCALPHA do tamanho da tela, limpo e recortado na caixa do efeito), `rascunho` (SRCALPHA local por tamanho) e `SUPERFICIE_VAZIA`.
+- Máscaras do cache: inimigos comuns (`mostrar_frame_atual` substitui `get_current_sprite`: a cópia continua, porque o alpha é por inimigo, mas a máscara vem do frame original), Sentinel, Guilty, Didact, Hunter, Guardian e projéteis (`ProjetilUniversal`).
+- `draw` sem `Surface`: artilharia, onda EMP e aviso de laser pela `camada_alpha`; o cone pelo `rascunho` (o `draw.polygon` recortado pela borda da tela muda pixels da aresta; os raios vêm de presets, então há poucos tamanhos). `RaioEscudo` (Watcher) criava uma `Surface` por frame no `update`; agora tem `draw` próprio e só atualiza a caixa.
+- Granada de plasma: a composta (sprite + auréola) fica em cache por nível de alpha (passo 10). Itens: o frame com brilho pulsante fica em cache por nível de alpha (passo 5; antes eram 2 cópias por item por frame).
+- `feats/particulas.py`: `Particula` (imagem base em cache + 16 variantes de alpha, guardadas na partícula) e `emitir`, com **teto global** `TETO_PARTICULAS = 2000` em `entity_manager.particulas_grupo` (novo, zerado a cada partida). Substitui `DustParticle` (`emitir_poeira`), `ItemParticulaColeta` e o rastro do teleporte Promethean (que copiava uma `Surface` por partícula). O núcleo do teleporte fica em cache por tamanho. A ordem dos sorteios é a mesma de antes, inclusive quando o teto descarta.
+- Picos medidos de partículas vivas: Warden 1504, Knight 781, Gravemind 30, hordas das fases 0–8 ≤ 12; a horda do pool da fase 9 (sem mapa) passa de 2500. O teto não corta nenhum caso jogável de hoje.
+- Testes: `test_sem_alocacao.py` (50), com **equivalência de pixels** (cópia literal do código antigo) para artilharia, cone (todos os presets, 3 direções), onda EMP e aviso de laser em 8 posições × 2 offsets, inclusive cortados pela borda e fora da tela; composta da granada idêntica à antiga. Mais: máscaras do cache, update da horda sem `mask.from_surface`, partículas (teto, fade, sorteios, reset por partida), `draw` dos efeitos sem alocar. Suíte: **785 verdes + 1 xfail**. Golden inalterado.
+
+**Catraca (alocações/frame):** horda 20,0 → **8,0**; fase 0 8,2 → 8,0; bosses 9,1–12,0 → 8,6–10,0. O que sobra é o HUD (~8/frame: C4). No `update`, só aquecimento de cache (ângulo novo de projétil, base nova de partícula), criação de boss e o Gravemind (máscara por frame da animação de respawn: F2/F5, como já previsto no roteiro §7). Tetos baixados.
+
+**Desempenho** (na tomada; a rodada completa contra a base):
+| Cenário | Média | p95 |
+|---|---|---|
+| horda_150 | 5,2 → 4,6 | 14,5 → **6,2** |
+| boss_guardian | 8,6 → **3,4** | 25,6 → 4,7 |
+| boss_tartarus / atriox / didact | −29% a −33% | −21% a −36% |
+- Acusados: Knight e Warden (p95). A/B alternado com a C2 (worktree), 3 rodadas: Warden média 4,6–4,7 → 3,7–3,8, p95 igual; Knight média igual, p95 4,0–4,2 → 4,2–4,8 (abaixo do piso de 1 ms). A 1ª versão da partícula consultava o cache de variantes a cada frame e custava 2× no profiler; agora a lista fica na partícula.
+
+**Achados (não corrigidos)**
+- `OndaEMP.draw` sem deslocamento chama `camera.aplicar_posicao`, que não existe (o método é `apply_pos`). O `Renderer` sempre passa o deslocamento, então o ramo não roda.
+- `Sentinel.animar` passa o frame do cache sem copiar para `set_image`, que aplica `set_alpha` nele: o alpha de um Sentinel vale para todos que mostram o mesmo frame.
+
+**Não validado:** a aparência das partículas (alpha em 16 níveis), do brilho dos itens e da granada (níveis de alpha) e do raio do Watcher (agora desenhado em coordenadas de tela) no jogo real.
+
 ## 2026-11-21 | Etapa C2: broadphase de inimigos
 **Gatilho (§6) medido:** 250 inimigos da fase 0, 10 s, na tomada. Só com a AR: colisão 0,35 ms/frame. Com 5 armas no nível 10 (needler, carabin, shotgun, sniper, machine gun): **colisão 5,6 ms/frame** (passa dos 2 ms); com spartan laser, light rifle, sniper, needler e dizimator: 2,3 ms. A busca de alvo das armas custou **0,04 ms/frame**. Script fora do repo (cronometra `CollisionManager.update` e `encontrar_inimigo_*`).
 

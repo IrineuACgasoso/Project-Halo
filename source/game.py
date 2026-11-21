@@ -131,7 +131,8 @@ class Game:
         entity_manager.items_grupo.empty()
         entity_manager.projeteis_jogador_grupo.empty()
         entity_manager.projeteis_inimigos_grupo.empty()
-        entity_manager.auras_grupo.empty()          
+        entity_manager.auras_grupo.empty()
+        entity_manager.particulas_grupo.empty()
 
         # 3. Estado da partida: objeto novo, nada sobra da anterior
         self.sessao = SessaoJogo()

@@ -22,25 +22,26 @@ TAMANHO_HORDA = 150
 AQUECIMENTO_S = 1     # caches de sprite/HUD se enchem aqui, fora da conta
 FOLGA_AVISO = 0.10    # medida 10% abaixo do teto: avisa para baixar o teto
 
-# Alocações por frame (update + draw) medidas na A2. Só podem descer.
+# Alocações por frame (update + draw). Medidas na A2; baixadas na C3 (máscaras e efeitos em
+# cache: a horda caiu de 20,0 para 8,0). Só podem descer.
 TETOS = {
-    'horda_150': 20.0,
-    'fase0': 8.2,
+    'horda_150': 8.1,
+    'fase0': 8.1,
     'boss_hunter': 9.1,
-    'boss_zealot': 9.3,
-    'boss_guilty': 10.1,
+    'boss_zealot': 9.1,
+    'boss_guilty': 9.1,
     'boss_scarab': 10.1,
-    'boss_arbiter': 9.2,
-    'boss_tartarus': 9.6,
-    'boss_gravemind': 9.6,
+    'boss_arbiter': 9.1,
+    'boss_tartarus': 9.1,
+    'boss_gravemind': 8.7,
     'boss_knight': 9.1,
-    'boss_didact': 10.1,
-    'boss_warden': 12.0,
-    'boss_guardian': 9.4,
+    'boss_didact': 9.1,
+    'boss_warden': 9.1,
+    'boss_guardian': 9.1,
     'boss_jega': 9.1,
-    'boss_escharum': 10.3,
-    'boss_harbinger': 9.2,
-    'boss_atriox': 9.6,
+    'boss_escharum': 9.1,
+    'boss_harbinger': 9.1,
+    'boss_atriox': 9.1,
 }
 
 

@@ -3,6 +3,7 @@ import pygame
 from source.systems.gameclock import relogio
 from source.feats.items import Items
 from source.enemies.base.enemy_base import BaseEnemy
+from source.utils.superficies import mascara_de
 
 # Importa as 3 Mixins
 from .setup import DidactSetup
@@ -70,7 +71,7 @@ class Didact(DidactAI, BaseEnemy, DidactSetup, DidactAttacks):
 
         # Sincroniza visual sem tremor
         self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = mascara_de(self.image)
 
     def morrer(self, grupos=None):
         Items.spawn_drop(

@@ -1,5 +1,6 @@
 # source/feats/skills/onda_emp/core.py
 import pygame
+from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.entitymanager import entity_manager
 from .config import EMP_PRESETS, EMPConfig
 
@@ -17,7 +18,7 @@ class OndaEMP(pygame.sprite.Sprite):
         self.atingiu_jogador = False
         
         # Elementos padrão para a engine de Sprites do pygame
-        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio
         self.rect = self.image.get_rect(center=self.posicao)
         self.hitbox = self.rect.copy()
 
@@ -59,7 +60,8 @@ class OndaEMP(pygame.sprite.Sprite):
 
     def draw(self, surface, deslocamento=None):
         """
-        Renderização com Surfaces locais dinâmicas para evitar memory leaks.
+        Desenha numa camada reaproveitada (roteiro C3), em coordenadas de tela: mesmos pixels
+        da antiga Surface local, criada a cada frame e de tamanho que crescia com a onda.
         Aceita o parâmetro de deslocamento/câmera nativo do laço do jogo.
         """
         tamanho_aba = int(self.raio_atual + 25)
@@ -67,9 +69,20 @@ class OndaEMP(pygame.sprite.Sprite):
         
         if raio_int <= 0:
             return
-            
-        temp_surface = pygame.Surface((tamanho_aba * 2, tamanho_aba * 2), pygame.SRCALPHA)
-        centro_local = (tamanho_aba, tamanho_aba)
+
+        # Aplicação de Câmera/Deslocamento baseada no motor do seu jogo
+        if deslocamento is not None:
+            # Se o seu jogo passa o vetor de deslocamento diretamente no draw
+            pos_ajustada = self.posicao - deslocamento
+        else:
+            # Fallback caso use o sistema interno de câmera
+            pos_ajustada = self.game.camera.aplicar_posicao(self.posicao) if hasattr(self.game, 'camera') else self.posicao
+
+        x0, y0 = int(pos_ajustada.x - tamanho_aba), int(pos_ajustada.y - tamanho_aba)
+        temp_surface, area = camada_alpha(surface, (x0, y0, tamanho_aba * 2, tamanho_aba * 2))
+        if temp_surface is None:
+            return
+        centro_local = (x0 + tamanho_aba, y0 + tamanho_aba)
         
         # Camada Externa (Brilho Alpha)
         pygame.draw.circle(temp_surface, self.cfg.cor_externa, centro_local, raio_int + 10, 20)
@@ -80,13 +93,5 @@ class OndaEMP(pygame.sprite.Sprite):
         # Camada Interna (Vácuo Residual)
         if raio_int > 20:
             pygame.draw.circle(temp_surface, self.cfg.cor_interna, centro_local, raio_int - 10, 15)
-            
-        # Aplicação de Câmera/Deslocamento baseada no motor do seu jogo
-        if deslocamento is not None:
-            # Se o seu jogo passa o vetor de deslocamento diretamente no draw
-            pos_ajustada = self.posicao - deslocamento
-        else:
-            # Fallback caso use o sistema interno de câmera
-            pos_ajustada = self.game.camera.aplicar_posicao(self.posicao) if hasattr(self.game, 'camera') else self.posicao
-        
-        surface.blit(temp_surface, (pos_ajustada.x - tamanho_aba, pos_ajustada.y - tamanho_aba))
+
+        surface.blit(temp_surface, area.topleft, area)

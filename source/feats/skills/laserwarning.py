@@ -1,4 +1,5 @@
 import pygame
+from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.gameclock import relogio
 
 class LaserWarning(pygame.sprite.Sprite):
@@ -20,7 +21,7 @@ class LaserWarning(pygame.sprite.Sprite):
         self.start_pos = pygame.math.Vector2(owner.posicao)
         self.end_pos = pygame.math.Vector2(alvo.posicao)
         
-        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio
         self.rect = self.image.get_rect()
 
     def update(self, delta_time):
@@ -46,8 +47,8 @@ class LaserWarning(pygame.sprite.Sprite):
         self.end_pos = self.start_pos + direcao * 3000
 
     def draw(self, surface, offset):
-        # O desenho acontece em uma surface temporária para suportar o Alpha da linha
-        temp_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        # Camada reaproveitada do tamanho da tela (roteiro C3), para suportar o alpha da linha
+        temp_surface, area = camada_alpha(surface, surface.get_rect())
         
         start_pos_ajustada = self.start_pos - offset
         end_pos_ajustada = self.end_pos - offset
@@ -63,4 +64,4 @@ class LaserWarning(pygame.sprite.Sprite):
         pygame.draw.line(temp_surface, cor_com_alpha, start_pos_ajustada, end_pos_ajustada, self.largura)
         
         # Cola na superfície principal
-        surface.blit(temp_surface, (0, 0))
+        surface.blit(temp_surface, area.topleft, area)

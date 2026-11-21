@@ -1,4 +1,5 @@
 import pygame
+from source.utils.superficies import SUPERFICIE_VAZIA, rascunho
 from source.systems.gameclock import relogio
 import math
 from source.systems.entitymanager import entity_manager
@@ -26,7 +27,7 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         self.explodiu = False
 
         # Requisitos do Sprite do Pygame
-        self.image = pygame.Surface((1, 1), pygame.SRCALPHA)
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio
         self.rect = self.image.get_rect(center=self.posicao)
         self.hitbox = self.rect.copy()
 
@@ -78,9 +79,11 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         pos_ajustada = self.posicao - offset
         agora = relogio.agora()
         
-        # Cria uma superfície local otimizada quadrada para caber o cone inteiro
+        # Superfície local quadrada para caber o cone inteiro, reaproveitada por tamanho (roteiro
+        # C3). Local, e não a camada da tela: o draw.polygon recortado pela borda da tela muda
+        # pixels da aresta. O raio vem sempre de um preset, então os tamanhos são poucos.
         tamanho_surf = self.cfg.raio * 2
-        temp_surface = pygame.Surface((tamanho_surf, tamanho_surf), pygame.SRCALPHA)
+        temp_surface = rascunho((tamanho_surf, tamanho_surf))
         
         if not self.explodiu:
             progresso = min((agora - self.tempo_criacao) / self.cfg.duracao, 1)
@@ -141,4 +144,4 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         if hasattr(alvo, 'tomar_dano_direto'):
             alvo.tomar_dano_direto(self.cfg.dano)
         elif hasattr(alvo, 'receber_dano'):
-            alvo.receber_dano(self.cfg.dano)
+            alvo.receber_dano(self.cfg.dano)

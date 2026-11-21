@@ -2,35 +2,21 @@ import pygame
 from source.systems.gameclock import relogio
 import random
 from source.feats.assets import *
+from source.feats import particulas
+from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 
-class DustParticle(pygame.sprite.Sprite):
-    def __init__(self, posicao, grupos):
-        super().__init__(grupos)
-        # Tamanho aleatório para variação visual
-        tamanho = random.randint(4, 8)
-        self.image = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
-        
-        # Cor de terra/lodo (marrom esverdeado)
-        cor = random.choice([(70, 50, 30), (40, 60, 30), (100, 80, 50)])
-        pygame.draw.circle(self.image, cor, (tamanho//2, tamanho//2), tamanho//2)
-        
-        self.rect = self.image.get_rect(center=posicao)
-        
-        # Velocidade: explode um pouco para os lados e para cima
-        self.direcao = pygame.math.Vector2(random.uniform(-1, 1), random.uniform(-2, -0.5))
-        self.velocidade = random.uniform(50, 150)
-        self.vida = 255 # Usado para o Alpha (transparência)
+DURACAO_POEIRA_MS = 255 / 400 * 1000   # o alpha caía 400/s a partir de 255
 
-    def update(self, delta_time):
-        # Movimento
-        self.rect.center += self.direcao * self.velocidade * delta_time
-        
-        # Fade out (sumir gradualmente)
-        self.vida -= 400 * delta_time
-        if self.vida <= 0:
-            self.kill()
-        else:
-            self.image.set_alpha(int(self.vida))
+
+def emitir_poeira(posicao, grupos=None):
+    """Partícula de terra/lodo que explode para os lados e para cima e some com fade.
+    Mesma sequência de sorteios da antiga DustParticle (roteiro C3: agora sem Surface própria)."""
+    tamanho = random.randint(4, 8)   # tamanho aleatório para variação visual
+    cor = random.choice([(70, 50, 30), (40, 60, 30), (100, 80, 50)])   # marrom esverdeado
+    direcao = pygame.math.Vector2(random.uniform(-1, 1), random.uniform(-2, -0.5))
+    velocidade = random.uniform(50, 150)
+    return particulas.emitir(posicao, particulas.imagem_pixel(cor, tamanho, 'circulo'),
+                             direcao * velocidade, DURACAO_POEIRA_MS, grupos)
 
 
 class Portal(pygame.sprite.Sprite):
@@ -52,47 +38,36 @@ class RaioEscudo(pygame.sprite.Sprite):
         
         self.duracao = 250 
         self.tempo_criacao = relogio.agora()
-        
-        self.gerar_imagem()
 
-    def gerar_imagem(self):
-        # 1. Usa o rect.center para garantir que o raio saia do meio do inimigo
-        pos_fonte = pygame.math.Vector2(self.fonte.rect.center)
-        pos_alvo = pygame.math.Vector2(self.alvo.rect.center)
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio (roteiro C3: antes, 1 Surface por frame)
+        self.atualizar_caixa()
 
-        # 2. Bounding Box
-        min_x = min(pos_fonte.x, pos_alvo.x)
-        max_x = max(pos_fonte.x, pos_alvo.x)
-        min_y = min(pos_fonte.y, pos_alvo.y)
-        max_y = max(pos_fonte.y, pos_alvo.y)
-
-        # 3. Força valores inteiros na criação da Surface
+    def atualizar_caixa(self):
+        """Caixa do raio no mundo (ordem de desenho e recorte). O raio sai do rect.center."""
+        fonte_x, fonte_y = self.fonte.rect.center
+        alvo_x, alvo_y = self.alvo.rect.center
         padding = 15
-        width = int(max(max_x - min_x + padding * 2, 1))
-        height = int(max(max_y - min_y + padding * 2, 1))
-
-        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
-        
-        # 4. Posição global no mundo
-        topleft_global = pygame.math.Vector2(min_x - padding, min_y - padding)
-        self.rect = self.image.get_rect(topleft=topleft_global)
-        
-        # 5. A câmera precisa do self.posicao para aplicar o offset!
+        self.rect = pygame.Rect(min(fonte_x, alvo_x) - padding, min(fonte_y, alvo_y) - padding,
+                                max(abs(alvo_x - fonte_x) + padding * 2, 1),
+                                max(abs(alvo_y - fonte_y) + padding * 2, 1))
         self.posicao = pygame.math.Vector2(self.rect.center)
 
-        # 6. Calcula a posição local desenhando na Surface
-        local_start = pos_fonte - topleft_global
-        local_end = pos_alvo - topleft_global
-
-        pygame.draw.line(self.image, (*self.cor, 100), local_start, local_end, 15) 
-        pygame.draw.line(self.image, (255, 255, 255), local_start, local_end, 3)
+    def draw(self, surface, offset):
+        camada, area = camada_alpha(surface, self.rect.move(-offset.x, -offset.y))
+        if camada is None:
+            return
+        inicio = pygame.math.Vector2(self.fonte.rect.center) - offset
+        fim = pygame.math.Vector2(self.alvo.rect.center) - offset
+        pygame.draw.line(camada, (*self.cor, 100), inicio, fim, 15)
+        pygame.draw.line(camada, (255, 255, 255), inicio, fim, 3)
+        surface.blit(camada, area.topleft, area)
 
     def update(self, delta_time, paredes=None):
         agora = relogio.agora()
         if agora - self.tempo_criacao > self.duracao or not self.alvo.alive() or not self.fonte.alive():
             self.kill()
         else:
-            self.gerar_imagem()
+            self.atualizar_caixa()
 
 
 

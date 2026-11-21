@@ -1,6 +1,7 @@
 import pygame
 
 from source.feats.assets import ASSETS
+from source.utils.superficies import mascara_de
 
 class EnemySprites:
     GLOBAL_SPRITE_CACHE = {}
@@ -74,24 +75,28 @@ class EnemySprites:
     #====================================================================================== 
     def setup_visual(self, posicao, variante=None):
         self.sprites = self.get_sprites(variante)
-        self.set_image(self.get_current_sprite())
+        self.mostrar_frame_atual()
         self.rect.center = posicao
         self.posicao = pygame.Vector2(self.rect.center)
 
-    def get_current_sprite(self):
+    def mostrar_frame_atual(self):
+        """Mostra uma cópia do frame atual (o alpha é por inimigo); a máscara vem do cache
+        do frame original, em vez de ser recalculada a cada troca de frame (roteiro C3)."""
         frames = self.sprites[self.estado_animacao]
         self.frame_atual %= len(frames)
-        return frames[self.frame_atual].copy()
+        origem = frames[self.frame_atual]
+        self.set_image(origem.copy(), origem=origem)
     
     def trocar_variante(self, variante):
         centro_antigo = self.rect.center
         self.sprites = self.get_sprites(variante)
         self.frame_atual = 0
-        self.set_image(self.get_current_sprite())
+        self.mostrar_frame_atual()
         self.rect.center = centro_antigo
     
-    def update_mask(self):
-        self.mask = pygame.mask.from_surface(self.image)
+    def update_mask(self, origem=None):
+        """`origem`: superfície em cache da qual `self.image` é cópia (mesmos pixels)."""
+        self.mask = mascara_de(origem) if origem is not None else pygame.mask.from_surface(self.image)
 
     def sync_rect(self):
         self.rect.center = (
@@ -99,7 +104,7 @@ class EnemySprites:
             round(self.posicao.y)
         )
 
-    def set_image(self, image):
+    def set_image(self, image, origem=None):
         alpha = getattr(self, "alpha_atual", 255)
         # Primeiro setup (sem rect ainda)
         if not hasattr(self, "rect"):
@@ -107,7 +112,7 @@ class EnemySprites:
             self.image.set_alpha(alpha)
 
             self.rect = self.image.get_rect()
-            self.update_mask()
+            self.update_mask(origem)
             return
 
         # Runtime normal
@@ -116,4 +121,4 @@ class EnemySprites:
         self.image.set_alpha(alpha)
         self.rect = self.image.get_rect(center=centro_antigo)
 
-        self.update_mask()
+        self.update_mask(origem)

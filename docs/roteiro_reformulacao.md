@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A e B, C1 e C2 concluídos; próxima: C3.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A e B, C1 a C3 concluídos; próxima: C4.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -118,6 +118,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **C3 · Projéteis e efeitos sem alocação** (risco: baixo)
 - Muda: a máscara do projétil vai para o `GLOBAL_CACHE` por (sprite, tamanho, ângulo). Fim das `Surface` por frame em `ArtilhariaAviso.draw`, `PlasmaGrenade.update`, `cone_strike`, `onda_emp`, auras e efeitos. Partículas vêm de um pool com teto global.
 - Testes: a catraca desce para o novo teto (meta: zero no `update`).
+- Feito (2026-11-21): horda 20,0 → 8,0 alocações/frame (o grosso era a máscara da animação dos inimigos comuns). Sobra no `update` só aquecimento de cache e o Gravemind (F2/F5). Ver log.
 
 **C4 · Render** (risco: baixo)
 - Muda: culling pela câmera (só ordena e desenha o que intersecta a tela + margem). HUD com camadas estáticas pré-renderizadas, uma `Surface` reutilizada por barra e cache de texto que só renderiza quando o valor muda.

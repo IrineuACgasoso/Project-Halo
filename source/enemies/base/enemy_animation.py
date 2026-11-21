@@ -13,7 +13,7 @@ class EnemyAnimation:
         if agora - self.ultimo_update_animacao > self.velocidade_animacao:
             self.ultimo_update_animacao = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.sprites[self.estado_animacao])
-            self.set_image(self.get_current_sprite())
+            self.mostrar_frame_atual()
 
     def set_sprite_direction(self, direcao_x):
         novo_estado = self.estado_animacao
@@ -26,4 +26,4 @@ class EnemyAnimation:
 
         if novo_estado != self.estado_animacao:
             self.estado_animacao = novo_estado
-            self.set_image(self.get_current_sprite())
+            self.mostrar_frame_atual()

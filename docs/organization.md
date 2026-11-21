@@ -35,10 +35,11 @@ Project-Halo/
     ├── data/
     │   ├── weapon_data.py   # BALANCEAMENTO: WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA (WeaponStats)
     │   └── enemy_data.py    # vazio
-    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float)
+    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float),
+    │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
     ├── systems/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
-    │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite)
+    │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite, inclusive particulas_grupo)
     │   ├── estados.py       # constantes de estado, TRANSICOES, Tela (roteiro B2)
     │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
@@ -71,7 +72,8 @@ Project-Halo/
     │   ├── skills/          # artilharia, cone_strike, onda_emp, purge_grid (config.py + core), beam, mortar, tp...
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
-    │   └── effects.py       # Portal, partículas, faíscas
+    │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
+    │   └── effects.py       # Portal, poeira, raio de escudo, faíscas
     └── windows/             # menu/, ranking/ (ranking_data.py = persistência), settings/ (constantes de tela), colaboradores.py
 ```
 

@@ -5,6 +5,7 @@ import math
 from source.systems.entitymanager import entity_manager
 from source.feats.assets import *
 from source.feats.assets import ASSETS
+from source.utils.superficies import mascara_de
 
 
 #PROJETIL BASE
@@ -49,7 +50,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
             self.image = self.image_base
 
         self.rect = self.image.get_rect(center=self.posicao)
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = mascara_de(self.image)   # cache por imagem (roteiro C3)
 
         # Ativa a colisão circular
         self.usar_circulo = True

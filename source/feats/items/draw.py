@@ -11,7 +11,7 @@ import math
 import random
 
 import pygame
-from source.systems.gameclock import relogio
+from source.feats import particulas
 
 # ------------------------------------------------------------------------ #
 # CONFIG
@@ -132,18 +132,27 @@ def _compor_frame(entrada_cache, alpha_glow=255):
     return frame
 
 
+PASSO_ALPHA_PULSO = 5   # quantização do halo: diferença máxima de 4/255, invisível
+_FRAMES_PULSANDO = {}   # (chave_cache, alpha quantizado) -> frame composto
+
+
 def atualizar_frame_pulsando(chave_cache, fase, agora):
-    """Recalcula o frame do item com o halo pulsando (seno). Chamado a cada
-    frame pelo Items. Alpha nunca cai demais — o neon fica sempre aceso,
-    só varia a intensidade do brilho."""
+    """Frame do item com o halo pulsando (seno). Chamado a cada frame pelo Items. Alpha nunca
+    cai demais — o neon fica sempre aceso, só varia a intensidade do brilho. Cada nível de
+    alpha é composto uma vez (roteiro C3: antes eram 2 cópias de Surface por item por frame)."""
     entrada = GLOBAL_CACHE.get(chave_cache)
     if entrada is None:
         return None
 
     alpha = 190 + math.sin(agora / 240 + fase) * 65  # oscila ~125–255
     alpha = max(0, min(255, int(alpha)))
+    alpha -= alpha % PASSO_ALPHA_PULSO
 
-    return _compor_frame(entrada, alpha_glow=alpha)
+    chave_frame = (chave_cache, alpha)
+    frame = _FRAMES_PULSANDO.get(chave_frame)
+    if frame is None:
+        frame = _FRAMES_PULSANDO[chave_frame] = _compor_frame(entrada, alpha_glow=alpha)
+    return frame
 
 
 def frame_inicial(entrada_cache):
@@ -311,44 +320,14 @@ def _desenhar_upgrade(tamanho_corpo, canvas_tamanho, id_arma=None):
 # PARTÍCULA DE COLETA
 # ------------------------------------------------------------------------ #
 
-class ItemParticulaColeta(pygame.sprite.Sprite):
-    """Pixel de despawn digital: sobe, perde alpha e some sozinho.
-    Disparada quando um item é coletado."""
-
-    def __init__(self, posicao, cor, grupos):
-        super().__init__(grupos)
-
-        tamanho = random.randint(3, 6)
-        self.image = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
-        self.image.fill(cor)
-        self.rect = self.image.get_rect(center=posicao)
-
-        self.posicao = pygame.math.Vector2(posicao)
-        self.velocidade = pygame.math.Vector2(random.uniform(-50, 50), random.uniform(-95, -55))
-
-        self.duracao_ms = random.randint(400, 500)
-        self.spawn_time = relogio.agora()
-
-    def update(self, delta_time):
-        self.posicao += self.velocidade * delta_time
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-
-        decorrido = relogio.agora() - self.spawn_time
-        progresso = min(1.0, decorrido / self.duracao_ms)
-
-        try:
-            self.image.set_alpha(int(255 * (1 - progresso)))
-        except pygame.error:
-            self.kill()
-            return
-
-        if progresso >= 1.0:
-            self.kill()
-
-
 def emitir_particulas_coleta(posicao, tipo, grupos):
+    """Pixels de despawn digital: sobem, perdem alpha e somem sozinhos. Disparados quando um
+    item é coletado. Mesma sequência de sorteios da antiga ItemParticulaColeta (roteiro C3)."""
     if not grupos:
         return
     cor = COR_GLOW_XP if tipo in TIPOS_XP else COR_GLOW_SAUDE
     for _ in range(random.randint(6, 9)):
-        ItemParticulaColeta(posicao, cor, grupos)
+        tamanho = random.randint(3, 6)
+        velocidade = (random.uniform(-50, 50), random.uniform(-95, -55))
+        duracao_ms = random.randint(400, 500)
+        particulas.emitir(posicao, particulas.imagem_pixel(cor, tamanho), velocidade, duracao_ms, grupos)

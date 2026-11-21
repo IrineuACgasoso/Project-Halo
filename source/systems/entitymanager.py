@@ -9,6 +9,7 @@ class EntityManager:
         self.projeteis_inimigos_grupo = pygame.sprite.Group()
         self.items_grupo = pygame.sprite.Group()
         self.auras_grupo = pygame.sprite.Group()
+        self.particulas_grupo = pygame.sprite.Group()   # feats/particulas.py (teto global)
         self.player = None
 
 # Cria uma instância única que será importada por todos
