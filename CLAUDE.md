@@ -31,10 +31,11 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.
 - **Velocidades e dano contínuo:** multiplique por `delta_time` (segundos). Nada de valores "por frame".
 - **Mixins:** a ordem de herança decide quem vence (MRO). Um método de mixin colocado depois de `BaseEnemy` é **silenciosamente ignorado** (já aconteceu, veja @docs/log.md).
-- **Arma nova:** a ordem de `ArmaInfo.grupos` precisa bater com o desempacotamento no `__init__`. Ela também precisa de 2 coisas, e `test_levelup_e_armas.py` verifica as duas:
+- **Arma nova:** a ordem de `ArmaInfo.grupos` precisa bater com o desempacotamento no `__init__`. Ela também precisa de 2 coisas, e `validar_armas` (`source/data/validacao.py`) verifica as duas:
   - um perfil em `weapon_data.py` com a chave igual a `NOME_ASSET`;
   - um `ArmaInfo` em `ARMAS_REGISTRO`.
   - O ícone em `MANIFESTO['icons']` é opcional: sem ele, o HUD desenha um placeholder.
+- **Dados:** `validar_tudo()` (`source/data/validacao.py`) confere armas, pools, bosses, perfis de inimigos, manifesto e mapas; roda em `test_validacao.py` e na abertura com `MCE_DEBUG=1`. Regra de dados nova entra lá, com um caso que falha de propósito.
 - **Boss novo:** precisa de entradas em `PHASE_BOSSES`, `BOSS_CLASSES` e `CRONOGRAMA_BOSSES`, nos três. Todo `while` dentro de uma rotina geradora precisa de `yield`.
 - **Desempenho:** meça com `tools/perf.py` antes de otimizar (depois do bloco C, horda e bosses mais caros ficam em ~4 ms/frame). Não aloque `Surface`/máscara por frame (a catraca está perto de zero e pega): use `utils/superficies.py` (máscara, camada alpha, rascunho) e `feats/particulas.py`.
 - **Fase nova:** precisa de um mapa em `assets/img/map/<n>/` registrado em `MANIFESTO['maps']`, mais um pool e um boss. Sem o mapa, `existe_proxima_fase()` encerra a campanha.

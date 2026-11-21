@@ -11,36 +11,13 @@ from source.feats.items import Items
 from source.systems.collision import CollisionManager
 from source.systems.entitymanager import entity_manager
 from source.systems.spawner import spawner as spawner_mod
-from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES, PHASE_BOSSES
-from source.systems.spawner.spawner_pools import DEFAULT_POOL, PHASE_POOLS
+from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES
 
 V = pygame.math.Vector2
 
 
 # ── Configuração do spawner ─────────────────────────────────────────────────
-def test_cada_boss_por_fase_tem_classe_e_horario():
-    for fase, bosses in PHASE_BOSSES.items():
-        for b in bosses:
-            assert b in BOSS_CLASSES and b in CRONOGRAMA_BOSSES, (fase, b)
-
-
-def test_cronograma_de_bosses_crescente_por_fase():
-    tempos = [CRONOGRAMA_BOSSES[b] for _, bs in sorted(PHASE_BOSSES.items()) for b in bs]
-    assert tempos == sorted(tempos)
-
-
-@pytest.mark.parametrize('fase', sorted(PHASE_POOLS) + ['default'])
-def test_pools_validos(fase):
-    pool = DEFAULT_POOL if fase == 'default' else PHASE_POOLS[fase]
-    assert len(pool['classes']) == len(pool['pesos']) > 0
-    assert all(p > 0 for p in pool['pesos'])
-
-
-def test_toda_fase_com_mapa_tem_pool_e_boss():
-    for chave in ASSETS['maps']:
-        assert int(chave) in PHASE_POOLS and int(chave) in PHASE_BOSSES
-
-
+# Pools e os 3 dicts de bosses: `validar_spawner` (test_validacao.py, roteiro D5).
 def test_intervalo_de_spawn_diminui_com_o_tempo_ate_o_piso(novo_jogo):
     novo_jogo.sessao.timer_jogo = 0
     novo_jogo.spawner.update(0.01)

@@ -2,6 +2,35 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa D5: validação central de dados (bloco D concluído)
+**O que foi feito**
+- `source/data/validacao.py::validar_tudo()` devolve a lista de erros (vazia nos dados reais; 0,03 s; não inicia o pygame nem decodifica imagem). Cada validador recebe os dados como parâmetro (padrão: os do jogo):
+  - `validar_armas`: nome repetido entre armas/companheiros/veículos; stat que não é `WeaponStats`; stat que diminui por nível sem `min_val`; no `ARMAS_REGISTRO`: id × chave, raridade, grupos que existem no `entity_manager`, `NOME_ASSET` com perfil.
+  - `validar_spawner`: pools (classes × pesos, peso > 0, classe é `BaseEnemy`, inclusive o `DEFAULT_POOL`); boss nos **3** dicts; horário > 0; cronograma na ordem das fases.
+  - `validar_inimigos`: vida > 0, dano >= 0, velocidade > 0; cooldown (mín, máx) inteiros com 0 < mín <= máx (`random.randint`); drop de item conhecido e no formato que `Items.spawn_drop` entende (ele ignora em silêncio o que não entende).
+  - `validar_manifesto`: folha que não é `Imagem`, caminho com `\` ou absoluto, arquivo ausente, escala inválida.
+  - `validar_mapas`: `.tmj` legível (lido pelo `MapLoader` do jogo, sem a imagem), camadas `Colisoes` e `SpawnPoints` com objetos, spawn do jogador, portal e pontos de spawn dentro do mapa, fase com pool e boss.
+- `main.py`: com `MCE_DEBUG=1`, imprime cada erro e o total na abertura.
+- Os testes de integridade espalhados saíram (`test_levelup_e_armas.py`: registro, perfil, nomes, `min_val`; `test_sistemas.py`: bosses, cronograma, pools, fase com mapa; `test_assets.py`: arquivos e escalas do manifesto): as regras deles estão na validação, que roda nos dados reais. O smoke de mapas (com o `Mapa` real) continua.
+- Testes: `test_validacao.py` (64): dados reais sem erros, validar sem iniciar o pygame, **um caso que falha de propósito por regra** (mapas com `.tmj` sintético em `tmp_path`) e a abertura com e sem `MCE_DEBUG`. Suíte: **858 verdes + 1 xfail**. Golden e catraca inalterados; nada no loop do jogo mudou.
+
+**Desempenho do bloco D (D3–D5)** (na tomada): a rodada completa do `perf.py` acusou horda, Gravemind, Knight, Warden e Scarab, mas também o `draw` dos bosses e a troca de fase (206 ms; 115 ms na D3, na mesma sessão), que D3–D5 não tocam: o mesmo ruído da B2–C4. A/B alternado com a D2 (`4b059f1`, worktree), 2 rodadas, média em ms/frame:
+| Cenário | D2 | HEAD (D4.3 = loop da D5) |
+|---|---|---|
+| horda_150 | 3,8–6,4 | 4,1–4,3 |
+| boss_gravemind | 3,3–3,9 | 3,7–4,0 |
+| boss_knight | 1,5–1,6 | 1,45–1,6 |
+| boss_warden | 3,0–4,1 (p95 8,0–12,0) | 3,2–4,7 (p95 9,1–14,3) |
+| boss_scarab | 1,5–1,6 | 1,4–1,5 |
+- Sem piora confirmada. O Warden mediu um pouco acima nas 2 rodadas, mas o código dele não usa nada da D4 (só ganha `tabela_drop` ao nascer) e o HEAD sempre rodou depois da D2 em cada rodada. **`perf_base.json` segue sem regravar** (pendência desde a C4).
+
+**Difere do roteiro (decisão pendente, sua):** "spawn dentro da navegação" e "portal obrigatório" **não** viraram regra. Medido nos `.tmj`:
+- Pontos de spawn de inimigo fora das zonas `Navigation`: mapa 0 34/35, 1 25/31, 2 25/25, 3 19/41, 4 7/23, 5 5/22, 6 14/28, 7 5/27 (o 8 tem a camada vazia: tudo vale).
+- Spawn do jogador fora da navegação no mapa 2; portal fora dela no mapa 7. Os mapas 1, 6 e 8 não têm `SpawnPlayer` nem `Portal`: o jogo usa o centro do mapa, que está na navegação (1 e 6) ou num mapa sem navegação (8).
+- No código, `Navigation` só decide onde o Knight e o Zealot podem teleportar/invocar (`verificar_posicao_valida`); o spawn de inimigos não a consulta. Exigir as regras faria `validar_tudo()` acusar os mapas reais. Se a intenção é que valham, é preciso editar os mapas no Tiled (conteúdo) e então ligar as regras.
+
+**Pendências:** a decisão acima (navegação/portal nos mapas); regravar `perf_base.json` (na tomada, sessão fria; absorve a troca de fase da D2); o bug do fim de campanha (xfail, B4); o TODO do Hunter preso nas paredes (C1). Próxima etapa: **E1** (contrato de dano único).
+
 ## 2026-11-21 | Etapa D4: dados de inimigos (um commit por família)
 **O que foi feito**
 - `source/data/enemy_data.py`: `PerfilInimigo` (dataclass frozen: `vida`, `dano` de contato, `velocidade`, `cooldowns` nome → (mín, máx) ms e `drops` no formato dos kwargs de `Items.spawn_drop`) e `INIMIGOS` (nome → perfil). As tabelas são `MappingProxyType` (só leitura). Valores de nível 0; a escala por nível continua em `EnemyScaling`.
@@ -9,7 +38,7 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - **D4.1 Covenant** (Grunt ×3, Jackal, JackalSniper, Elite ×3, Brute): os `morrer()` de Elite e Brute eram cópias do da base com outra tabela e saíram; com isso o `F405` de `brute.py` e `elite.py` saiu do `ruff.toml`. A linha solta `self.game` (sem efeito) do Brute saiu.
 - **Fica na classe:** sprite, variante, velocidade de animação, projéteis (dano e velocidade do tiro), IA e os primeiros cooldowns fixos (Brute 3000 ms, Elite 4000 ms, FloodMarine 2500 ms): trocá-los por uma faixa mudaria a sequência aleatória.
 - **Equivalência:** `tests/golden/inimigos.json`, gravado com os valores antigos antes da troca. Para cada uma das 19 classes comuns: stats logo depois de criada, as faixas pedidas a `novo_cooldown` em 30 s de update perto do jogador e os drops da morte **na ordem** (`spawn_drop` sorteia item por item). Regravar só com `--atualizar-golden`.
-- Testes: `test_dados_inimigos.py`: equivalência, perfil imutável, cada classe usa o seu perfil, mudar o perfil muda o inimigo (prova que não sobrou número na classe), perfil sem o cooldown que a classe usa falha ao criar, inimigo sem perfil usa o drop padrão. Suíte: **844 verdes + 1 xfail**. Golden e catraca inalterados.
+- Testes: `test_dados_inimigos.py`: equivalência, perfil imutável, cada classe usa o seu perfil, mudar o perfil muda o inimigo (prova que não sobrou número na classe), perfil sem o cooldown que a classe usa falha ao criar, inimigo sem perfil usa o drop padrão. Suíte: 844 verdes + 1 xfail na D4.1 e **855 + 1 xfail** no fim da D4. Golden e catraca inalterados.
 
 - **D4.2 Flood** (Infection, FloodElite, FloodCarry, FloodMarine): o `morrer()` do `FloodForm` era cópia do da base e saiu; o do FloodCarry continua (solta os Infection) e usa a tabela do perfil.
 - **D4.3 Forerunner e Prometheans** (Sentinel, SentinelMajor, Crawler, Soldier, Watcher, SuperWatcher): o `Watcher` recebe `perfil=` no lugar de `vida_base=`/`velocidade_base=` (o SuperWatcher passa o dele). Com isso as 19 classes comuns têm perfil, e não sobrou perfil sem classe (teste).

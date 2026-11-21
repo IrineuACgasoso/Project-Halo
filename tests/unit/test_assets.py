@@ -18,7 +18,6 @@ import pytest
 from source.data.manifesto_assets import MANIFESTO, Imagem, folhas, numerados, quadros
 from source.feats import assets as modulo_assets
 from source.feats.assets import ASSETS, MapasSobDemanda, carregar_assets, carregar_imagem
-from source.utils.paths import path
 
 CAMINHO_REGISTRO = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'golden', 'assets.json')
 
@@ -47,23 +46,8 @@ def test_assets_equivalentes_ao_registro(request):
 
 
 # ------------------------------------------------------------------ #
-# Manifesto
+# Manifesto (arquivos existem e escalas válidas: `validar_manifesto`, test_validacao.py)
 # ------------------------------------------------------------------ #
-def test_todo_arquivo_do_manifesto_existe():
-    faltando = sorted({img.arquivo for img in folhas()
-                       if not os.path.isfile(path('assets', 'img', *img.arquivo.split('/')))})
-    assert not faltando
-
-
-def test_manifesto_so_tem_imagens_validas():
-    for img in folhas():
-        assert isinstance(img, Imagem)
-        assert '\\' not in img.arquivo and not img.arquivo.startswith('/')
-        if img.escala is not None:
-            largura, altura = img.escala
-            assert largura > 0 and altura > 0, img
-
-
 def test_folhas_percorre_dicts_e_listas_em_ordem():
     arvore = {'a': Imagem('x.png'), 'b': [Imagem('y.png'), {'c': Imagem('z.png')}]}
     assert [i.arquivo for i in folhas(arvore)] == ['x.png', 'y.png', 'z.png']

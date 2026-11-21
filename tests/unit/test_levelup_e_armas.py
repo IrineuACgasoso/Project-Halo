@@ -1,37 +1,17 @@
-"""Registro de armas, sorteio da tela de upgrade, regras de upgrade e integridade de weapon_data."""
+"""Registro de armas, sorteio da tela de upgrade e regras de upgrade (integridade dos dados: test_validacao.py)."""
 import random
 
 import pygame
 import pytest
 
-from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
-from source.feats.weapons.baseweapon import ALL_DATA, Arma
-from source.systems.entitymanager import entity_manager
-from source.systems.levelup import ARMAS_REGISTRO, MAX_ARMAS, PALETA_RARIDADE, TelaDeUpgrade
+from source.data.weapon_data import WEAPON_DATA, WeaponStats
+from source.feats.weapons.baseweapon import Arma
+from source.systems.levelup import ARMAS_REGISTRO, MAX_ARMAS, TelaDeUpgrade
 
 IDS = sorted(ARMAS_REGISTRO)
 
 
-# ── Integridade do registro ──────────────────────────────────────────────────
-@pytest.mark.parametrize('id_arma', IDS)
-def test_registro_consistente(id_arma):
-    info = ARMAS_REGISTRO[id_arma]
-    assert info.id == id_arma
-    assert info.raridade in PALETA_RARIDADE
-    for nome in info.grupos:                       # EventManager faz getattr(entity_manager, nome)
-        assert isinstance(getattr(entity_manager, nome), pygame.sprite.AbstractGroup)
-
-
-@pytest.mark.parametrize('id_arma', IDS)
-def test_classe_registrada_tem_perfil_de_dados(id_arma):
-    classe = ARMAS_REGISTRO[id_arma].classe
-    assert classe.NOME_ASSET in ALL_DATA
-
-
-def test_nomes_de_dados_nao_colidem_entre_categorias():
-    assert not (set(WEAPON_DATA) & set(COMPANION_DATA))
-    assert not (set(WEAPON_DATA) & set(VEHICLES_DATA))
-    assert not (set(COMPANION_DATA) & set(VEHICLES_DATA))
+# Integridade do registro e de weapon_data: `validar_armas` (test_validacao.py, roteiro D5).
 
 
 # ── WeaponStats / _deve_melhorar ─────────────────────────────────────────────
@@ -56,18 +36,6 @@ def test_aplicar_upgrades_respeita_minimo(player):
         rifle.upgrade()
     if meta.min_val is not None:
         assert rifle.cooldown >= meta.min_val
-
-
-def test_stats_com_increase_negativo_tem_minimo():
-    """Não há teto de nível: sem min_val um cooldown chega a 0/negativo (brick, nível 21)."""
-    sem_piso = [
-        f'{nome}.{attr}'
-        for dados in (WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA)
-        for nome, perfil in dados.items()
-        for attr, meta in perfil.stats.items()
-        if meta.increase and meta.increase < 0 and meta.label and meta.min_val is None
-    ]
-    assert sem_piso == []
 
 
 # ── TelaDeUpgrade ────────────────────────────────────────────────────────────

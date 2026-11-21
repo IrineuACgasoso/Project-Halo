@@ -35,7 +35,8 @@ Project-Halo/
     ├── data/
     │   ├── weapon_data.py   # BALANCEAMENTO: WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA (WeaponStats)
     │   ├── enemy_data.py    # BALANCEAMENTO dos inimigos comuns: INIMIGOS (PerfilInimigo: vida, dano, velocidade, cooldowns, drops)
-    │   └── manifesto_assets.py # MANIFESTO: toda imagem (arquivo, escala, alpha, espelhar), no formato de ASSETS
+    │   ├── manifesto_assets.py # MANIFESTO: toda imagem (arquivo, escala, alpha, espelhar), no formato de ASSETS
+    │   └── validacao.py     # validar_tudo(): lista de erros dos dados (armas, pools, bosses, inimigos, manifesto, mapas) (D5)
     ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float),
     │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
     ├── systems/
@@ -97,5 +98,6 @@ Project-Halo/
 | Nova tela ou estado | Constante e transições em `systems/estados.py`, `tratar_<estado>` em `eventmanager.py`, `desenhar_<estado>` em `renderer.py` e a linha em `Game._registrar_telas` |
 | HUD | `systems/hud/hud_draw.py` |
 | Resolução ou FPS | `windows/settings/settings_constants.py` |
+| Regra de integridade de dados | `source/data/validacao.py` + um caso que falha em `tests/unit/test_validacao.py` |
 | Testes | `tests/unit/` (lógica) ou `tests/integration/` (loop real) |
 | Medir desempenho | `tools/perf.py` (cenários em `listar_cenarios()`) |

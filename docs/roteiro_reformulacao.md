@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B e C concluídos, D1 a D4 feitas; próxima: D5.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D concluídos; próxima: E1.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -151,6 +151,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **D5 · Validação central de dados** (risco: nenhum)
 - Muda: `data/validacao.py::validar_tudo()` devolve a lista de erros de `weapon_data`, `ARMAS_REGISTRO`, pools, os 3 dicts de bosses, perfis de inimigos, manifesto e mapas (camadas obrigatórias, spawn dentro da navegação, portal). Roda nos testes (lista vazia) e na abertura do jogo com `MCE_DEBUG=1`.
 - Testes: cada regra tem um caso que falha de propósito. Os testes de integridade espalhados hoje passam a chamar a validação.
+- Feito (2026-11-21): dados reais sem erros. **Difere do roteiro:** "spawn dentro da navegação" e "portal" obrigatório não entraram: os mapas reais não seguem essas regras e o código não as exige (ver log; decisão pendente).
 
 ### E. Entidades
 **E1 · Contrato de dano único** (risco: alto)
