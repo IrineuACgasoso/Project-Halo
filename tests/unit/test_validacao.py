@@ -114,21 +114,36 @@ def _brick_com_cooldown(**troca):
     return {**WEAPON_DATA, 'brick': WeaponProfile(stats=stats)}
 
 
-def test_min_val_inalcancavel_no_nivel_maximo():
-    # Brick é lendária (máximo 5: 4 subidas). Com -100 por nível, 2000 só chega a 1600: o piso 1000 era de mentira.
+def test_min_val_que_nunca_e_alcancado():
+    # Brick é lendária (máximo 5: 4 subidas). Com -100 por nível, 2000 só chega a 1600: o piso 1000 é de mentira.
     um_erro(_armas(armas=_brick_com_cooldown(increase=-100)),
-            'brick.cooldown: min_val 1000 inalcançável (no nível máximo 5 chega a 1600; precisa de increase <= -250)')
+            'brick.cooldown: min_val 1000 não bate com o nível máximo 5 (2000 -100 × 4 = 1600: nunca chega a ele)')
 
 
-def test_min_val_alcancado_exatamente_no_ultimo_nivel_vale():
+def test_min_val_que_trava_antes_do_fim():
+    # -300 × 4 = 1200 > 1000: o limite segura no nível 5, mas o último upgrade dá só 100 (e não 300)
+    um_erro(_armas(armas=_brick_com_cooldown(increase=-300)),
+            'brick.cooldown: min_val 1000 não bate com o nível máximo 5 (2000 -300 × 4 = 800: passa dele e trava')
+
+
+def test_min_val_exato_no_ultimo_nivel_vale():
     assert _armas(armas=_brick_com_cooldown(increase=-250)) == []          # 2000 - 4 × 250 = 1000
-    assert _armas(armas=_brick_com_cooldown(increase=-300)) == []          # passa do piso: o clamp segura
 
 
-def test_min_val_inalcancavel_depende_do_maximo_da_raridade():
-    # o mesmo dado vale se a raridade tiver mais níveis (lendária com 11: 10 subidas de -100)
+def test_min_val_depende_do_maximo_da_raridade():
+    # o mesmo dado bate se a raridade tiver mais níveis (lendária com 11: 10 subidas de -100)
+    # (registro só com o Brick: as outras lendárias não batem com 11 níveis)
     niveis = {**NIVEL_MAXIMO_POR_RARIDADE, 'lendaria': 11}
-    assert _armas(armas=_brick_com_cooldown(increase=-100), niveis_maximos=niveis) == []
+    so_brick = {'brick': ARMAS_REGISTRO['brick']}
+    assert _armas(armas=_brick_com_cooldown(increase=-100), registro=so_brick, niveis_maximos=niveis) == []
+    um_erro(_armas(armas=_brick_com_cooldown(increase=-250), registro=so_brick, niveis_maximos=niveis),
+            '× 10 = -500: passa dele e trava')
+
+
+def test_min_val_conta_so_os_niveis_do_range_val():
+    # a cada 2 níveis até o 5: sobe nos níveis 2 e 4 (2 subidas) -> 2000 - 2 × 500 = 1000
+    assert _armas(armas=_brick_com_cooldown(increase=-500, range_val=2)) == []
+    um_erro(_armas(armas=_brick_com_cooldown(increase=-250, range_val=2)), '× 2 = 1500: nunca chega a ele')
 
 
 def test_arma_registrada_sem_perfil_de_dados():

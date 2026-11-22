@@ -89,13 +89,14 @@ def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None, n
             erros.append(f'{local}: {info.classe.__name__}.NOME_ASSET "{nome_asset}" sem perfil em weapon_data')
         elif _inteiro(niveis_maximos.get(info.raridade)) and niveis_maximos[info.raridade] >= 1:
             # máximo inválido já foi acusado acima: sem erros em cascata
-            erros += _pisos_inalcancaveis(nome_asset, perfis[nome_asset], niveis_maximos[info.raridade])
+            erros += _pisos_que_nao_batem(nome_asset, perfis[nome_asset], niveis_maximos[info.raridade])
     return erros
 
 
-def _pisos_inalcancaveis(nome_asset, perfil, nivel_maximo):
-    """Stat que desce até um `min_val` que nunca é alcançado até o nível máximo da raridade:
-    o piso seria um valor de mentira (roteiro E6)."""
+def _pisos_que_nao_batem(nome_asset, perfil, nivel_maximo):
+    """Stat que desce até um `min_val` precisa chegar a ele EXATAMENTE no último upgrade até o nível
+    máximo da raridade: valor + subidas × increase == min_val. Se não chega, o piso é de mentira; se
+    passa, o limite do `aplicar_upgrades` trava o stat antes e os níveis seguintes não dão nada."""
     erros = []
     for atributo, meta in perfil.stats.items():
         if not isinstance(meta, WeaponStats) or not meta.label or meta.min_val is None:
@@ -104,10 +105,10 @@ def _pisos_inalcancaveis(nome_asset, perfil, nivel_maximo):
             continue
         subidas = sum(1 for nivel in range(2, nivel_maximo + 1) if Arma._deve_melhorar(meta.range_val, nivel))
         final = meta.value + subidas * meta.increase
-        if final > meta.min_val:
-            erros.append(f'dados: {nome_asset}.{atributo}: min_val {meta.min_val} inalcançável (no nível '
-                         f'máximo {nivel_maximo} chega a {final:g}; precisa de increase <= '
-                         f'{(meta.min_val - meta.value) / max(subidas, 1):g})')
+        if final != meta.min_val:
+            situacao = 'nunca chega a ele' if final > meta.min_val else 'passa dele e trava antes do fim'
+            erros.append(f'dados: {nome_asset}.{atributo}: min_val {meta.min_val} não bate com o nível máximo '
+                         f'{nivel_maximo} ({meta.value:g} {meta.increase:+g} × {subidas} = {final:g}: {situacao})')
     return erros
 
 

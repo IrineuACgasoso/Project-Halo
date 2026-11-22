@@ -2,6 +2,14 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Balanceamento: todo min_val bate exato no nível máximo (muda o jogo, decisão do usuário)
+- O commit anterior só garantia "alcançável": 7 dos 13 ajustados passavam do piso, e o limite (`max(min_val, ...)`) segurava (ex.: Energy Sword 7000 − 9×225 = 4975 com piso 5000; o último nível dava só 175). As 11 comuns, incomuns e raras passavam muito e travavam por volta do nível 11 (Mjolnir 1500 − 24×100 = −900). O usuário notou.
+- **Decisão do usuário:** todos os 18 exatos, com `increase` redondo e o `min_val` trocado pelo ponto final real. Agora valor + subidas × increase == min_val nos 24 stats com piso (o Assault Rifle chega no nível 24, porque o cooldown só sobe nos níveis pares).
+  - Comuns e incomuns (curva mais lenta, ganho até o fim): Assault Rifle −15/320, Mjolnir −40/540, MK2 regen −100/2600, Sidekick −12/912, Needler −25/1525, Shotgun −50/2050, Dizimator −125/2625, Warthog tiro −8/148 e reuso −500/40500.
+  - Raras e épicas: Carabin −70/2520, Marine −35/510, Grenade Launcher −150/5900, Energy Sword −225/4975, Árbitro −60/460, Sniper −350/8850, Fuel Rod −450/7950, Pelican tiro −17/147 e reuso −1200/39200.
+- A regra do `validar_armas` virou "bate exato": acusa "nunca chega a ele" e "passa dele e trava antes do fim", com a conta na mensagem. Com os dados do commit anterior: 18 erros. Casos novos em `test_validacao.py` (os dois lados, exato, `range_val` a cada 2 níveis, máximo da raridade diferente). **Suíte: 1209 verdes + 1 xfail.** Golden inalterado.
+- **Não validado:** a sensação das comuns e incomuns, que agora ficam mais lentas no meio do jogo (antes chegavam ao piso no nível 11).
+
 ## 2026-11-22 | Balanceamento: nenhum min_val de mentira (muda o jogo, decisão do usuário)
 - Com o teto da E6, 13 cooldowns nunca chegavam ao `min_val` (ex.: Spartan Laser parava em 9000 com piso 7500; sniper do Noble, em 9800 com piso 5000). **Decisão do usuário:** manter o piso (o alvo desenhado) e aumentar o `increase` só desses 13, para chegar ao piso no nível máximo da raridade. As comuns e incomuns, que já chegavam ao piso por volta do nível 11, não mudaram.
 - Novos `increase` (piso alcançado no nível máximo): Brick −250, Spartan Laser −625, Light Rifle −625, Machine Gun −1250, Noble rifle −125 e sniper −1250 (nível 5); Energy Sword −225, Sniper −350, Fuel Rod −450, Árbitro −60, Pelican tiro −17 e reuso −1200 (nível 10); Grenade Launcher −150 (nível 15).
