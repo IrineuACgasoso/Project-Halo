@@ -508,3 +508,18 @@ def test_queimadura_corta_o_orbe_de_vida(novo_jogo):
     aplicar(player, Queimadura(1, 10 ** 6, reducao_cura=0.5))
     Items(player.posicao, 'life_orb', (entity_manager.items_grupo,)).coletar(player)
     assert player.vida_atual == 100 + player.vida_maxima / 2
+
+
+# ── Cortana (S3) ────────────────────────────────────────────────────────────
+def test_cortana_da_buff_de_velocidade_pelo_sistema_sem_mexer_na_velocidade(novo_jogo):
+    from source.systems.status import BuffVelocidade as BV
+    player = novo_jogo.player
+    novo_jogo.event_manager._aplicar_escolha_de_upgrade('cortana')
+    cortana = player.armas['cortana']
+    base = player.velocidade
+    assert player.status.mult_velocidade == 1.0          # nível 1: sem bônus (como antes)
+    for nivel in range(2, 6):
+        cortana.upgrade()
+        assert player.status.mult_velocidade == pytest.approx(1 + 0.02 * (nivel - 1))
+    assert player.velocidade == base                       # a velocidade-base não muda
+    assert [e for e, _, _ in player.status.ativos() if isinstance(e, BV)] == [BV(0.08)]   # um só lugar

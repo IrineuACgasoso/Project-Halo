@@ -1,5 +1,6 @@
 from source.feats.weapons import Arma
 from .companion import Companheiro
+from source.systems.status import BuffVelocidade, aplicar
 
 
 class Cortana(Arma):
@@ -31,7 +32,11 @@ class Cortana(Arma):
     def upgrade(self):
         super().upgrade()
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
-        self.jogador.velocidade += 10
+        # O bônus é um buff sem fim pelo sistema de status; a chave é esta Cortana: reaplicar só atualiza
+        dono_stats = self.sprite_companion if self.sprite_companion is not None else self
+        bonus = dono_stats.jogador_speed_bonus
+        if bonus > 0:
+            aplicar(self.jogador, BuffVelocidade(bonus / 100), chave=self)
 
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET, target=self.sprite_companion)

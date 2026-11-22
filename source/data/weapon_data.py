@@ -223,7 +223,8 @@ COMPANION_DATA: Dict[str, CompanionProfile] = {
             'pode_atirar':               WeaponStats(value=False, label=None,                              increase=0,   range_val=0),
             'velocidade_animacao':       WeaponStats(value=200,   label=None,                              increase=0,   range_val=0),
             'distancia_maxima_retorno':  WeaponStats(value=500,   label=None,                              increase=0,   range_val=0),
-            'jogador_speed_bonus':       WeaponStats(value=0,     label='Bônus de Velocidade do Jogador',  increase=10,  range_val=1),
+            # Em pontos percentuais: vira um BuffVelocidade sem fim no jogador (sistema de status)
+            'jogador_speed_bonus':       WeaponStats(value=0,     label='Bônus de Velocidade do Jogador (%)', increase=2, range_val=1),
         }
     ),
 

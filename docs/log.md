@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Sistema de status (S3): bônus da Cortana como buff (muda o jogo)
+- Antes: cada upgrade da Cortana fazia `jogador.velocidade += 10`, com o número fixo no código. O stat `jogador_speed_bonus` (+10/nível) só aparecia no card de upgrade e não era lido.
+- Agora o stat manda: `jogador_speed_bonus` em **pontos percentuais** (+2 por nível, label "(%)"), e a Cortana aplica `BuffVelocidade(bonus / 100)` sem fim, com `chave=self` (reaplicar só atualiza). A velocidade-base do jogador não muda mais.
+- **Muda o jogo (declarado):** +2% equivale a +10 na velocidade inicial (500). Como o level-up também soma +10 na velocidade-base, o bônus da Cortana agora cresce junto: no nível 20 do jogador (690), cada +2% vale +13,8.
+- Teste em `test_status.py` (nível 1 sem bônus, +2% por nível, um lugar só, velocidade-base intacta). Suíte: **1001 verdes + 1 xfail**. Golden inalterado (a fase 0 do golden não tem Cortana). **Não validado:** a sensação no jogo.
+
 ## 2026-11-21 | Sistema de status (S2): curas e escudos pelo sistema
 **O que foi feito** (refatoração: golden inalterado)
 - Orbe de vida e cura do level-up → `aplicar(alvo, Cura(...))`; escudo cheio do level-up e regeneração do MK2 → `aplicar(alvo, Escudo(...))`; transferência do Watcher → `aplicar(aliado, Escudo(t), fonte=watcher)`. Agora a queimadura corta essas curas (teste).
