@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Cheats pelo menu de pausa (recurso novo, pedido do usuário)
+- A pausa ganhou o botão **ATIVAR CHEATS** (entre RESUME e EXIT TO MENU). Ele alterna `Teclado.cheats` (`Game.alternar_cheats`); o rótulo vira DESATIVAR CHEATS e, ligado, a pausa mostra as teclas (L: subir de nível, P: portal, B: boss). Vale até fechar o jogo (sobrevive a voltar ao menu). `MCE_DEBUG=1` continua abrindo com os cheats ligados (e só ele liga o overlay de paredes e a validação na abertura).
+- `Teclado(debug=)` virou `Teclado(cheats=)`; `Game.teclado` guarda a fonte padrão (os testes trocam `Game.entrada` por um `Roteiro` sem perder o estado dos cheats).
+- Testes (`test_entrada.py`): começa desligado; o botão liga e desliga e a tela continua na pausa; do botão até o efeito (L sobe o nível só depois de ligar); desenho com a dica. Suíte: **1098 verdes + 1 xfail**. Golden inalterado.
+- **Atenção:** partida com cheats entra no ranking como qualquer outra (não há marca). **Não validado:** o botão e a dica na tela real.
+
 ## 2026-11-22 | Etapa E4: armas pegam os grupos do entity_manager (refatoração: golden inalterado)
 - `Arma` ganhou as propriedades `all_sprites`, `inimigos_grupo`, `items_grupo` e `auras_grupo`, lidas do `entity_manager` (só leitura). Saíram `ArmaInfo.grupos`, o parâmetro `grupos` dos 22 construtores (armas, companheiros, veículos) e o desempacotamento posicional: a classe de bug do Fuel Rod mirando nos itens não existe mais. O construtor é `classe(jogador, game)`. Os nomes soltos (`grupo_inimigos`, `auras_grupos`, `item_grupo`) viraram os do `entity_manager`; o `projeteis_grupo` guardado e nunca usado saiu.
 - `ArmaDeRajada` (`baseweapon.py`): a lógica de rajada copiada em Needler, Carabin, Dizimator, Machine Gun e Light Rifle. A subclasse só implementa `atirar(alvo)`; o Light Rifle troca `buscar_alvo()` (o mais forte). O Light Rifle buscava o alvo 2× por tiro; agora 1× (mesmo resultado no mesmo passo).

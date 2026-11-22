@@ -15,7 +15,7 @@ class PlayerInput:
 
     # --- ÁREA DOS HACKS ---
     def executar_hacks(self):
-        # O Teclado só produz hacks com MCE_DEBUG=1: no build final eles não existem.
+        # O Teclado só produz hacks com os cheats ligados (MCE_DEBUG=1 ou o botão da pausa).
         comando = self.comando
 
         # Hack L: Level Up

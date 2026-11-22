@@ -20,7 +20,7 @@ class ComandoJogador:
     """O que o jogador quer fazer neste passo.
     direcao: (x, y) com y para baixo; o jogador normaliza (diagonal não anda mais rápido).
     veiculo: tecla de entrar/sair do veículo pressionada.
-    hack_*: atalhos de depuração pressionados (o `Teclado` só os produz com MCE_DEBUG=1)."""
+    hack_*: atalhos de cheat pressionados (o `Teclado` só os produz com `cheats` ligado)."""
     direcao: tuple = (0, 0)
     veiculo: bool = False
     hack_nivel: bool = False
@@ -49,14 +49,15 @@ class FonteEntrada:
 
 
 class Teclado(FonteEntrada):
-    """WASD anda, V entra/sai do veículo; L/P/B são os hacks (só com `debug`)."""
+    """WASD anda, V entra/sai do veículo; L/P/B são os cheats (subir de nível, portal, boss).
+    `cheats` começa ligado com MCE_DEBUG=1 e o botão da pausa o alterna (`Game.alternar_cheats`)."""
 
-    def __init__(self, debug=DEBUG):
-        self.debug = debug
+    def __init__(self, cheats=DEBUG):
+        self.cheats = cheats
 
     def ler(self):
         t = pygame.key.get_pressed()
-        hacks = self.debug
+        hacks = self.cheats
         return ComandoJogador(
             direcao=(int(t[pygame.K_d]) - int(t[pygame.K_a]),
                      int(t[pygame.K_s]) - int(t[pygame.K_w])),

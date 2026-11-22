@@ -125,4 +125,4 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
 - **`Renderer` engole exceções de desenho** e loga cada uma só uma vez: um sprite quebrado não derruba o jogo. Por isso os testes conferem `renderer._erros_logados`.
 - **`RankingData`** grava de forma atômica (arquivo `.tmp` + `os.replace`), sanitiza os dados e faz backup de um JSON corrompido. Nunca lança exceção.
 - **`MAX_INIMIGOS_VIVOS = 250`**: evita a espiral de morte da colisão O(projéteis × inimigos).
-- **Cheats só com `MCE_DEBUG=1`** (`source/debug.py`).
+- **Cheats (L: subir de nível, P: portal, B: boss):** desligados por padrão. Ligam com `MCE_DEBUG=1` (`source/debug.py`) ou, a qualquer momento, pelo botão **ATIVAR CHEATS** da pausa (`Game.alternar_cheats`, vale até fechar o jogo). Quem decide é o `Teclado.cheats`; o `Roteiro` produz o que estiver nele.

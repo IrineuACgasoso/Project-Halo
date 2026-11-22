@@ -56,6 +56,8 @@ class EventManager:
         escolha = g.menu_pausa.handle_event(evento)
         if escolha == 'RESUME':
             g.mudar_estado(JOGANDO)
+        elif escolha == 'CHEATS':
+            g.alternar_cheats()   # continua na pausa: o menu mostra as teclas
         elif escolha == 'EXIT TO MENU':
             g.mudar_estado(MENU_PRINCIPAL)
             g.menu_principal = type(g.menu_principal)(g)  # Recria sem hardcode

@@ -51,7 +51,8 @@ class Game:
         self.player = None
         self.sessao = None                 # SessaoJogo da partida atual (roteiro B3)
         self.hud = None                    # recriada a cada partida: guarda tempos da sessão
-        self.entrada = Teclado()           # FonteEntrada lida 1x por passo (roteiro E3)
+        self.teclado = Teclado()           # fonte padrão; guarda se os cheats L/P/B estão ligados
+        self.entrada = self.teclado        # FonteEntrada lida 1x por passo (roteiro E3)
 
         # Sistemas que vivem para sempre (não resetam entre jogos)
         self._inicializar_sistemas_permanentes()
@@ -74,6 +75,14 @@ class Game:
             RANKING:        Tela(ev.tratar_ranking,        r.desenhar_ranking),
             GAME_OVER:      Tela(ev.tratar_game_over,      r.desenhar_game_over),
         }
+
+    @property
+    def cheats(self):
+        return self.teclado.cheats
+
+    def alternar_cheats(self):
+        """Botão da pausa: liga/desliga os cheats L/P/B do teclado até fechar o jogo."""
+        self.teclado.cheats = not self.teclado.cheats
 
     @property
     def estado_do_jogo(self):

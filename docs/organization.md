@@ -96,6 +96,7 @@ Project-Halo/
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |
+| Cheats L/P/B (ligar/desligar, novo cheat) | Botão em `windows/menu/pause_menu.py`, estado em `Teclado.cheats` (`Game.alternar_cheats`), efeito em `player/player_input.py::executar_hacks` |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
 | Buff ou debuff (aplicar, novo efeito, imunidade de boss) | `systems/status/` (`aplicar(alvo, efeito, fonte, chave)`); efeito novo = dataclass em `efeitos.py` + o cálculo em `StatusEntidade._recalcular` |
 | Regra de dano própria de um inimigo (costas, imunidade) | `ajustar_dano_recebido` na classe dele (contrato em `systems/dano.py`) |

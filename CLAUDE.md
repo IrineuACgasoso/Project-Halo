@@ -8,7 +8,7 @@ O código e os identificadores estão em **português**. Mantenha esse padrão.
 ```powershell
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # deps (pygame + pytest)
 .venv\Scripts\python.exe main.py                                  # rodar o jogo
-$env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: hacks L/P/B + overlay de paredes
+$env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: cheats L/P/B + overlay de paredes (os cheats também ligam na pausa)
 .venv\Scripts\python.exe -m pytest                                # suíte completa (~65 s; na bateria, até o dobro)
 .venv\Scripts\python.exe -m pytest tests/unit                     # só unitários
 .venv\Scripts\python.exe -m pytest -m "not integration"           # pula as simulações longas

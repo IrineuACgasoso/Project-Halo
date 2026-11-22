@@ -79,28 +79,28 @@ def test_fonte_base_exige_ler():
 ])
 def test_teclado_mapeia_wasd(monkeypatch, teclas, direcao):
     _apertar(monkeypatch, *teclas)
-    assert Teclado(debug=False).ler().direcao == direcao
+    assert Teclado(cheats=False).ler().direcao == direcao
 
 
 def test_teclado_mapeia_v_para_o_veiculo(monkeypatch):
     _apertar(monkeypatch, pygame.K_v)
-    assert Teclado(debug=False).ler() == ComandoJogador(veiculo=True)
+    assert Teclado(cheats=False).ler() == ComandoJogador(veiculo=True)
 
 
-def test_teclado_sem_debug_nao_produz_hacks(monkeypatch):
+def test_teclado_sem_cheats_nao_produz_hacks(monkeypatch):
     _apertar(monkeypatch, pygame.K_l, pygame.K_p, pygame.K_b)
-    assert Teclado(debug=False).ler() == PARADO
+    assert Teclado(cheats=False).ler() == PARADO
 
 
-def test_teclado_com_debug_mapeia_os_hacks(monkeypatch):
+def test_teclado_com_cheats_mapeia_os_hacks(monkeypatch):
     _apertar(monkeypatch, pygame.K_l, pygame.K_p, pygame.K_b)
-    c = Teclado(debug=True).ler()
+    c = Teclado(cheats=True).ler()
     assert c.hack_nivel and c.hack_portal and c.hack_boss and not c.veiculo
 
 
 def test_teclado_ignora_outras_teclas(monkeypatch):
     _apertar(monkeypatch, pygame.K_UP, pygame.K_SPACE, pygame.K_e)
-    assert Teclado(debug=True).ler() == PARADO
+    assert Teclado(cheats=True).ler() == PARADO
 
 
 def test_ninguem_mais_le_o_teclado_direto():
@@ -226,3 +226,61 @@ def test_hack_de_boss_pelo_comando(novo_jogo, monkeypatch):
     monkeypatch.setattr(novo_jogo, 'entrada', Roteiro([(1, ComandoJogador(hack_boss=True))]))
     novo_jogo.update(DT)
     assert chamadas == [1]
+
+
+# ── Cheats pelo botão da pausa ──────────────────────────────────────────────
+def _tecla(tecla):
+    return pygame.event.Event(pygame.KEYDOWN, key=tecla, mod=0)
+
+
+def _ir_para_pausa_e_escolher_cheats(game):
+    from source.systems.estados import PAUSA
+    game.telas[game.estado_do_jogo].evento(_tecla(pygame.K_ESCAPE))
+    assert game.estado_do_jogo == PAUSA
+    menu = game.menu_pausa
+    menu.selecionada = 0
+    game.telas[PAUSA].evento(_tecla(pygame.K_s))       # RESUME -> CHEATS
+    assert menu.opcoes[menu.selecionada] == 'CHEATS'
+    game.telas[PAUSA].evento(_tecla(pygame.K_RETURN))
+
+
+def test_jogo_comeca_sem_cheats_e_a_entrada_padrao_e_o_teclado(game):
+    assert game.cheats is False                       # o conftest remove MCE_DEBUG
+    assert game.entrada is game.teclado
+
+
+def test_botao_da_pausa_liga_e_desliga_os_cheats(novo_jogo, monkeypatch):
+    from source.systems.estados import PAUSA
+    monkeypatch.setattr(novo_jogo.teclado, 'cheats', False)   # o Game vive a sessão de testes toda
+    menu = novo_jogo.menu_pausa
+    assert menu.rotulo('CHEATS') == 'ATIVAR CHEATS'
+
+    _ir_para_pausa_e_escolher_cheats(novo_jogo)
+    assert novo_jogo.cheats is True
+    assert novo_jogo.estado_do_jogo == PAUSA          # fica na pausa, mostrando as teclas
+    assert menu.rotulo('CHEATS') == 'DESATIVAR CHEATS'
+    menu.draw(novo_jogo.tela)                          # com a dica das teclas
+
+    novo_jogo.telas[PAUSA].evento(_tecla(pygame.K_RETURN))
+    assert novo_jogo.cheats is False
+    assert menu.rotulo('CHEATS') == 'ATIVAR CHEATS'
+    menu.draw(novo_jogo.tela)
+
+
+def test_cheats_ligados_na_pausa_valem_no_jogo(novo_jogo, monkeypatch):
+    """Do botão até o efeito: com o L apertado, o jogador sobe de nível no passo seguinte."""
+    from source.systems.estados import JOGANDO
+    monkeypatch.setattr(novo_jogo.teclado, 'cheats', False)
+    _apertar(monkeypatch, pygame.K_l)
+    nivel = novo_jogo.player.contador_niveis
+    novo_jogo.update(DT)
+    assert novo_jogo.player.contador_niveis == nivel   # desligado: L não faz nada
+
+    _ir_para_pausa_e_escolher_cheats(novo_jogo)
+    novo_jogo.mudar_estado(JOGANDO)
+    novo_jogo.update(DT)
+    assert novo_jogo.player.contador_niveis == nivel + 1
+
+
+def test_rotulo_das_outras_opcoes_e_o_proprio_id(game):
+    assert [game.menu_pausa.rotulo(o) for o in ('RESUME', 'EXIT TO MENU')] == ['RESUME', 'EXIT TO MENU']
