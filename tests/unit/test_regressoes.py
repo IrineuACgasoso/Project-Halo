@@ -403,3 +403,23 @@ def test_companheiros_vao_para_o_spawn_do_mapa_novo(novo_jogo):
     assert all(c.posicao == spawn and c.rect.center == (round(spawn.x), round(spawn.y))
                for c in companheiros)
     assert novo_jogo.player.posicao == spawn
+
+
+@pytest.mark.parametrize('id_veiculo', ['warhog', 'pelican'])
+@pytest.mark.parametrize('embarcado', [True, False])
+def test_veiculo_sobrevive_a_troca_de_fase(novo_jogo, id_veiculo, embarcado):
+    """O veículo saía dos grupos (kill) na troca de fase, mas a arma continuava atualizando o sprite:
+    invisível, seguia atirando e atropelando, e o jogador continuava "no veículo"."""
+    novo_jogo.event_manager._aplicar_escolha_de_upgrade(id_veiculo)
+    veiculo = novo_jogo.player.armas[id_veiculo].sprite_veiculo
+    if embarcado:
+        veiculo.entrar()
+    novo_jogo.stage_manager._trocar_dados_fase()
+    assert veiculo.alive() and veiculo in entity_manager.all_sprites   # desenhado de novo
+    assert veiculo.embarcado == embarcado and novo_jogo.player.in_veicule == embarcado
+    spawn = V(novo_jogo.mapa.get_player_spawn_pos())
+    assert veiculo.posicao == spawn   # estacionado: vem junto, não fica nas coordenadas do mapa velho
+    novo_jogo.update(1 / 60)
+    assert veiculo.alive()
+    if embarcado:
+        assert veiculo.posicao == novo_jogo.player.posicao

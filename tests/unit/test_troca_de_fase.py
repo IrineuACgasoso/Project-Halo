@@ -1,7 +1,6 @@
 """Persistência entre fases (roteiro E5): na troca de fase sobrevivem exatamente os sprites
-cuja classe declara `sobrevive_troca_de_fase = True` (jogador, companheiros, aura do MK2)."""
+cuja classe declara `sobrevive_troca_de_fase = True` (jogador, companheiros, veículos, aura do MK2)."""
 import pygame
-import pytest
 from pygame.math import Vector2 as V
 
 from source.enemies.standard.grunt import GruntRed
@@ -26,7 +25,7 @@ def _sprites_de_arma(game, atributo):
             if getattr(arma, atributo, None) is not None}
 
 
-def test_sobrevivem_exatamente_jogador_companheiros_e_aura(novo_jogo):
+def test_sobrevivem_exatamente_jogador_companheiros_veiculos_e_aura(novo_jogo):
     _equipar_todas(novo_jogo)
     p = novo_jogo.player
     GruntRed(posicao=p.posicao + V(300, 0), game=novo_jogo)
@@ -35,8 +34,8 @@ def test_sobrevivem_exatamente_jogador_companheiros_e_aura(novo_jogo):
     Portal(p.posicao + V(0, 200), entity_manager.all_sprites)
     marines = list(p.armas['marine'].companions)
     esperados = ({p} | set(marines) | _sprites_de_arma(novo_jogo, 'sprite_companion')
-                 | _sprites_de_arma(novo_jogo, 'area_de_dano'))
-    assert len(esperados) == 1 + 4 + 1   # jogador, Árbitro/Cortana/Marine/Noble, aura do MK2
+                 | _sprites_de_arma(novo_jogo, 'sprite_veiculo') | _sprites_de_arma(novo_jogo, 'area_de_dano'))
+    assert len(esperados) == 1 + 4 + 2 + 1   # jogador, Árbitro/Cortana/Marine/Noble, Warthog/Pelican, MK2
 
     _trocar_fase(novo_jogo)
 
@@ -76,16 +75,6 @@ def test_quem_sobrevive_continua_nos_outros_grupos(novo_jogo):
     aura = novo_jogo.player.armas['mk2_shield'].area_de_dano
     _trocar_fase(novo_jogo)
     assert aura.groups() and set(aura.groups()) == {entity_manager.all_sprites, entity_manager.auras_grupo}
-
-
-@pytest.mark.parametrize('id_veiculo', ['warhog', 'pelican'])
-@pytest.mark.xfail(strict=True, reason='bug conhecido (docs/log.md, E5): o veículo sai dos grupos na '
-                                       'troca de fase, mas a arma continua atualizando o sprite invisível')
-def test_veiculo_sobrevive_a_troca_de_fase(novo_jogo, id_veiculo):
-    novo_jogo.event_manager._aplicar_escolha_de_upgrade(id_veiculo)
-    veiculo = novo_jogo.player.armas[id_veiculo].sprite_veiculo
-    _trocar_fase(novo_jogo)
-    assert veiculo.alive()
 
 
 def test_companheiro_tem_posicao_propria_depois_da_troca(novo_jogo):

@@ -54,7 +54,7 @@ class StageManager:
         game.sessao.fase_atual += 1
         
         # Só sobrevive quem declara `sobrevive_troca_de_fase = True` na classe (roteiro E5):
-        # jogador, companheiros e aura do MK2. O resto (inimigos, projéteis, itens, portal) sai.
+        # jogador, companheiros, veículos e aura do MK2. O resto (inimigos, projéteis, itens, portal) sai.
         sobreviventes = []
         for sprite in list(entity_manager.all_sprites):
             if getattr(sprite, 'sobrevive_troca_de_fase', False):
@@ -80,8 +80,8 @@ class StageManager:
         game.player.rect.center = nova_pos
         game.camera.update(game.player.posicao)
 
-        # Companheiros junto do jogador, no spawn do mapa NOVO (antes liam o do mapa antigo e
-        # cruzavam o mapa voando até ele)
+        # Companheiros e veículos (Vehicle herda de Companheiro) junto do jogador, no spawn do
+        # mapa NOVO (antes liam o do mapa antigo e cruzavam o mapa voando até ele)
         for sprite in sobreviventes:
             if isinstance(sprite, Companheiro):
                 sprite.posicao = pygame.math.Vector2(nova_pos)

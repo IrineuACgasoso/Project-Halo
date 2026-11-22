@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Correção: veículo sobrevive à troca de fase
+- O Warthog e o Pelican saíam dos grupos na troca de fase, mas a arma continuava atualizando o sprite: invisível, o veículo seguia atirando e atropelando, e o jogador continuava "no veículo". O `Vehicle` deixou de recusar a flag (herda `sobrevive_troca_de_fase = True` do `Companheiro`) e, como companheiro, vai para o spawn novo junto do jogador (estacionado ou destruído; embarcado, ele já gruda no jogador). **Muda o jogo:** o veículo continua visível e utilizável nas fases seguintes. Achado na E5; commit próprio.
+- Regressão em `test_regressoes.py::test_veiculo_sobrevive_a_troca_de_fase` (Warthog e Pelican, embarcado e estacionado; os 4 falharam antes); o teste do conjunto de sobreviventes da E5 passou a incluir os veículos. Suíte: **1108 verdes + 1 xfail**. Golden inalterado.
+- **Achado (não corrigido):** o veículo é atualizado 2× por passo (pela arma e pelo laço do `all_sprites` em `Game._atualizar_entidades`), como já acontecia na fase 0. Hoje é inofensivo (tiro, atropelamento e animação usam cooldown pelo relógio, e a posição só gruda no jogador), mas um efeito por chamada no `Vehicle.update` contaria em dobro.
+- **Não validado:** o veículo depois da troca na tela real (estacionado ao lado do spawn, embarcado, destruído).
+
 ## 2026-11-22 | Correção: companheiros no spawn do mapa novo
 - O `StageManager` lia `get_player_spawn_pos()` **antes** de trocar o mapa: os companheiros iam para o spawn do mapa antigo e cruzavam o mapa voando até o jogador. Agora o reposicionamento vem depois do mapa novo, com a mesma posição do jogador (cópia própria do `Vector2`). **Muda o jogo:** os companheiros começam a fase ao lado do jogador. Achado na E5; commit próprio (roteiro §2, regra 6).
 - Regressão em `test_regressoes.py::test_companheiros_vao_para_o_spawn_do_mapa_novo` (falhou antes da correção); `test_troca_de_fase.py` confere que o companheiro não divide o `Vector2` do spawn. Suíte: **1104 verdes + 3 xfail**. Golden inalterado (a fase 0 não troca de fase). **Não validado:** a troca de fase na tela real.
@@ -14,7 +20,7 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - **Achados (bugs, `xfail(strict=True)` em `test_troca_de_fase.py`):**
   - **Veículo some na troca de fase:** o Warthog e o Pelican saem dos grupos (`kill`), mas a arma continua atualizando o sprite: invisível, ele segue atirando e atropelando, e o jogador continua "no veículo".
   - **Companheiros vão para o spawn do mapa antigo:** a posição é lida antes de trocar o mapa (na fase 0→1: companheiro em (2302, 2048), jogador em (1536, 1024)), e eles cruzam o mapa voando até o jogador.
-- Próxima: as 2 correções acima (um commit cada) e depois **E6** (raridade de fato).
+- Próxima: as 2 correções acima (feitas, entradas acima) e depois **E6** (raridade de fato).
 
 ## 2026-11-22 | Cheats pelo menu de pausa (recurso novo, pedido do usuário)
 - A pausa ganhou o botão **ATIVAR CHEATS** (entre RESUME e EXIT TO MENU). Ele alterna `Teclado.cheats` (`Game.alternar_cheats`); o rótulo vira DESATIVAR CHEATS e, ligado, a pausa mostra as teclas (L: subir de nível, P: portal, B: boss). Vale até fechar o jogo (sobrevive a voltar ao menu). `MCE_DEBUG=1` continua abrindo com os cheats ligados (e só ele liga o overlay de paredes e a validação na abertura).

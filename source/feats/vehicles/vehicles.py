@@ -23,10 +23,6 @@ class Vehicle(Companheiro):
     diferente do padrão (dano por contato + cooldown por inimigo).
     """
 
-    # Herdaria True do Companheiro. Hoje o veículo some na troca de fase (a arma continua
-    # atualizando o sprite fora dos grupos): bug conhecido, ver docs/log.md (E5).
-    sobrevive_troca_de_fase = False
-
     # ---- Dados/atributos ---------------------------------------------------
     def configurar_atributos(self):
         config = VEHICLES_DATA.get(self.nome_asset, VEHICLES_DATA['warhog'])
