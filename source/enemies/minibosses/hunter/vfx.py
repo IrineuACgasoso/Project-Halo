@@ -2,9 +2,9 @@
 
 - Brilho: uma silhueta vermelha por frame de sprite (criada 1× e guardada em cache), desenhada por
   cima dele no `draw_extras` com alpha pulsando. Por frame, só `set_alpha` e um blit: zero alocação.
-- Poeira: padrões sobre `particulas.emitir` (imagens em cache, teto global de partículas). As funções
-  de módulo recebem o aviso da habilidade (gancho `ao_explodir`), não o Hunter: a poeira sai mesmo
-  se ele já tiver morrido quando o morteiro cai.
+- Poeira: padrões sobre `particulas.emitir` (imagens em cache, teto global de partículas).
+- Impactos: as funções `impacto_*` recebem o aviso da habilidade (gancho `ao_explodir`), não o Hunter:
+  a poeira e o tremor da câmera saem mesmo se ele já tiver morrido quando o morteiro cai.
 """
 import math
 import random
@@ -73,14 +73,16 @@ def poeira_na_area_do_cone(origem, direcao, raio, abertura_graus, quantidade):
         particulas.emitir(ponto, particulas.imagem_pixel(cor, tamanho, 'circulo'), vel, duracao)
 
 
-def poeira_da_explosao(aviso):
-    """Gancho `ao_explodir` do morteiro: anel de poeira na borda da explosão."""
+def impacto_do_canhao(aviso):
+    """Gancho `ao_explodir` do morteiro: anel de poeira na borda da explosão e tremor forte."""
     poeira(aviso.posicao, V2(1, 0), CFG.poeira_explosao, 360, velocidade=(80, 200))
+    aviso.game.camera.shake(intensidade=CFG.shake_canhao)
 
 
-def poeira_do_slam(cone):
-    """Gancho `ao_explodir` do shield slam: poeira em toda a área do cone."""
+def impacto_do_slam(cone):
+    """Gancho `ao_explodir` do shield slam: poeira em toda a área do cone e tremor médio."""
     poeira_na_area_do_cone(cone.posicao, cone.direcao, cone.cfg.raio, cone.cfg.angulo_spray, CFG.poeira_slam)
+    cone.game.camera.shake(intensidade=CFG.shake_slam)
 
 
 class HunterVFX:

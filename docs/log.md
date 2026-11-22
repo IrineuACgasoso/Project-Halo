@@ -2,6 +2,18 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Hunter: camera shake nos ataques + balanceamento do usuário (muda o jogo)
+- Tremores pelo `camera.shake` existente, intensidades em `HunterConfig` (`shake_burst/slam/canhao`):
+  - **burst:** 1, renovado a cada tiro com a duração do intervalo (cobre a rajada e para junto com ela);
+  - **slam:** 3, no golpe;
+  - **canhão:** 5, na explosão (mesmo com o Hunter morto).
+- Os ganchos `ao_explodir` viraram `impacto_do_canhao`/`impacto_do_slam` (`vfx.py`): poeira + tremor.
+- **Balanceamento do usuário:** vida 120 (era 800), dano de contato 50, velocidade 65, costas ±40° (era 30°), cooldowns do canhão (6–10 s), do burst (3–7 s) e do dash (7–10 s), intervalo do burst 130 ms.
+- **Decisão do usuário:** a vida 120 é proposital. O Hunter virou exceção declarada em `test_boss_tem_vida_de_boss`, com piso próprio de 100. O teste das costas agora lê `CFG.costas_graus` (1° dentro e 1° fora da borda), em vez de 30° fixos.
+- Testes: +3 em `test_hunter.py` (o burst treme do 1º ao último tiro e depois para; o slam só treme no golpe; o canhão treme com o Hunter morto). **Suíte: 1292 verdes + 1 xfail.** Golden inalterado.
+- **Limite conhecido:** o `shake` antigo vale "o último ganha". Se o morteiro explodir durante uma rajada, o próximo tiro corta o tremor 5 para 1 (no máximo 130 ms depois).
+- **Não validado:** a sensação dos tremores e do balanceamento na tela real.
+
 ## 2026-11-22 | Hunter reformulado (muda o jogo, pedido do usuário)
 - Padrão novo (como o Arbiter, ainda sem `BossBase`): `config.py` (`HunterConfig` frozen: todos os números), `setup.py`, `states.py` (IA, orientação, vulnerabilidade, movimento), `attacks.py` (rotinas geradoras) e `vfx.py`. Adianta o Hunter da F5: falta só migrar para a `BossBase` quando ela existir.
 - **Armadura:** `Defesa(90%)` sem fim; **vulnerável** = jogador nas costas, dentro de ±30° do eixo x (`no_cone`, só multiplicações). Vulnerável tira a Defesa e acende o brilho vermelho; sair devolve as duas coisas. **Decisões do usuário:** "vulnerável" = tirar a Defesa (sem debuff novo); o `MULT_COSTAS ×8` saiu (de costas = dano normal, de frente = 10%; vida continua 800).

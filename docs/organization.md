@@ -96,7 +96,7 @@ Project-Halo/
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
-| Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns) | `enemies/minibosses/hunter/config.py` |
+| Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |

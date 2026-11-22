@@ -11,7 +11,7 @@ from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.entitymanager import entity_manager
 
 from .config import CFG
-from .vfx import poeira_da_explosao, poeira_do_slam
+from .vfx import impacto_do_canhao, impacto_do_slam
 
 
 class HunterAttacks:
@@ -28,13 +28,16 @@ class HunterAttacks:
             game=self.game,
             dono='INIMIGO', fonte=self,
             preset_artilharia=CFG.canhao_preset,
-            ao_explodir=poeira_da_explosao,
+            ao_explodir=impacto_do_canhao,
         )
         self.agendar_cooldown('canhao')
         yield
 
     def rotina_burst(self):
+        """Tremor fraco renovado a cada tiro, com a duração do intervalo: cobre a rajada inteira
+        e para junto com ela (inclusive se a rotina for interrompida)."""
         for _ in range(CFG.burst_tiros):
+            self.game.camera.shake(intensidade=CFG.shake_burst, duracao=CFG.burst_intervalo_ms)
             PlasmaGun(
                 posicao_inicial=self.posicao,
                 grupos=(entity_manager.all_sprites,),
@@ -79,7 +82,7 @@ class HunterAttacks:
         self.movimento_livre = False
         cone = ConeStrikeAviso(
             self.posicao.copy(), pygame.math.Vector2(self.lado, 0), (entity_manager.all_sprites,), self.game,
-            dono='BOSS', preset=CFG.slam_preset, fonte=self, ao_explodir=poeira_do_slam,
+            dono='BOSS', preset=CFG.slam_preset, fonte=self, ao_explodir=impacto_do_slam,
         )
         while not cone.explodiu and cone.alive():
             yield

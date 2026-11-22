@@ -9,6 +9,7 @@ from helpers import DT, blindar_jogador, contar_alocacoes
 from source.enemies.minibosses.hunter.config import CFG, HunterConfig
 from source.enemies.minibosses.hunter import vfx
 from source.feats.projetil import PlasmaGun
+from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.skills.cone_strike import ConeStrikeAviso
 from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.dano import PROJETIL, Dano
@@ -62,17 +63,19 @@ def _vida_tirada(h, valor=100):
 
 
 # ── Armadura e costas ────────────────────────────────────────────────────────
+COSTAS = V(-300, 0)
 @pytest.mark.parametrize('lado, deslocamento, vulneravel', [
-    (1, V(300, 0), False),       # olhando para a direita, jogador na frente
-    (1, V(-300, 0), True),       # costas, no eixo
-    (1, V(-300, 170), True),     # costas, ~29,5°
-    (1, V(-300, -170), True),
-    (1, V(-300, 180), False),    # costas, ~31°: fora do cone
-    (1, V(0, 300), False),       # de lado
-    (-1, V(300, 0), True),       # olhando para a esquerda: costas = +x
+    (1, V(300, 0), False),                                # olhando para a direita, jogador na frente
+    (1, COSTAS, True),                                    # costas, no eixo
+    (1, COSTAS.rotate(CFG.costas_graus - 1), True),       # costas, 1° dentro da borda do cone
+    (1, COSTAS.rotate(-(CFG.costas_graus - 1)), True),
+    (1, COSTAS.rotate(CFG.costas_graus + 1), False),      # costas, 1° fora do cone
+    (1, COSTAS.rotate(-(CFG.costas_graus + 1)), False),
+    (1, V(0, 300), False),                                # de lado
+    (-1, V(300, 0), True),                                # olhando para a esquerda: costas = +x
     (-1, V(-300, 0), False),
 ])
-def test_vulneravel_so_nas_costas_dentro_de_30_graus(hunter, lado, deslocamento, vulneravel):
+def test_vulneravel_so_nas_costas_dentro_do_cone(hunter, lado, deslocamento, vulneravel):
     _parar_ia(hunter)
     _jogador_em(hunter, deslocamento)
     _olhando_para(hunter, lado)
@@ -227,7 +230,7 @@ def test_canhao_dispara_com_poeira_na_explosao_e_segue_andando(hunter):
     _iniciar(hunter, 'canhao')
     _passos(hunter, DT)
     canhoes = [s for s in entity_manager.all_sprites if isinstance(s, CanhaoParabolico)]
-    assert len(canhoes) == 1 and canhoes[0].ao_explodir is vfx.poeira_da_explosao
+    assert len(canhoes) == 1 and canhoes[0].ao_explodir is vfx.impacto_do_canhao
     assert canhoes[0].fonte is hunter and hunter.movimento_livre
 
 
@@ -240,6 +243,55 @@ def test_burst_dispara_todos_os_tiros_andando(hunter):
     tiros = [s for s in entity_manager.all_sprites if isinstance(s, PlasmaGun) and s.fonte is hunter]
     assert len(tiros) == CFG.burst_tiros
     assert hunter.posicao.x > inicio.x                # andou em direção ao jogador enquanto atirava
+
+
+# ── Camera shake ─────────────────────────────────────────────────────────────
+def _tremendo(camera):
+    return relogio.agora() < camera.shake_timer
+
+
+def test_burst_treme_fraco_durante_toda_a_rajada_e_para_no_fim(hunter):
+    camera = hunter.game.camera
+    _jogador_em(hunter, V(800, 0))
+    _iniciar(hunter, 'burst')
+    _passos(hunter, DT)
+    for _ in range(CFG.burst_tiros * CFG.burst_intervalo_ms // round(DT * 1000) - 2):
+        assert _tremendo(camera) and camera.shake_intensidade == CFG.shake_burst
+        _passos(hunter, DT)
+    _passos(hunter, 0.1)
+    assert hunter.rotina is None and not _tremendo(camera)
+
+
+def test_slam_treme_na_hora_do_golpe(hunter):
+    camera = hunter.game.camera
+    _olhando_para(hunter, 1)
+    _jogador_em(hunter, V(150, 0))
+    hunter.movimento_livre = False
+    _iniciar(hunter, 'slam')
+    _passos(hunter, DT)
+    cone = next(s for s in entity_manager.all_sprites if isinstance(s, ConeStrikeAviso))
+    while not cone.explodiu:
+        assert not _tremendo(camera)                  # na carga, nada
+        relogio.avancar(DT)
+        cone.update(DT)
+    assert _tremendo(camera) and camera.shake_intensidade == CFG.shake_slam
+
+
+def test_canhao_treme_forte_na_explosao_mesmo_com_o_hunter_morto(hunter):
+    camera = hunter.game.camera
+    _jogador_em(hunter, V(200, 0))
+    _iniciar(hunter, 'canhao')
+    _passos(hunter, DT)
+    hunter.kill()
+    canhao = next(s for s in entity_manager.all_sprites if isinstance(s, CanhaoParabolico))
+    for _ in range(round(2 / DT)):                    # voo + carga da artilharia
+        relogio.avancar(DT)
+        for s in [canhao, *(s for s in entity_manager.all_sprites if isinstance(s, ArtilhariaAviso))]:
+            if s.alive():
+                s.update(DT)
+        if _tremendo(camera):
+            break
+    assert _tremendo(camera) and camera.shake_intensidade == CFG.shake_canhao
 
 
 def test_movimento_lateral_e_perpendicular(hunter):

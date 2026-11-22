@@ -9,13 +9,13 @@ from source.systems.status import Defesa
 @dataclass(frozen=True)
 class HunterConfig:
     # --- atributos ---
-    vida: int = 800
-    dano_contato: int = 40
-    velocidade: float = 40
+    vida: int = 120
+    dano_contato: int = 50
+    velocidade: float = 65
 
     # --- armadura: Defesa sem fim, tirada enquanto o jogador está nas costas (vulnerável) ---
     defesa: float = 0.9
-    costas_graus: float = 30            # meia-abertura do cone das costas (±30° do eixo x dele)
+    costas_graus: float = 40            # meia-abertura do cone das costas (em volta do eixo x dele)
 
     # --- virar o sprite com atraso (o timer não reinicia com spam de lado) ---
     atraso_virar_ms: int = 1500
@@ -31,7 +31,7 @@ class HunterConfig:
         'canhao': 1, 'burst': 1, 'dash': 6, 'slam': 8})
     # cooldowns (min, max) em ms, sorteados no FIM da habilidade
     cooldown: Dict[str, Tuple[int, int]] = field(default_factory=lambda: {
-        'canhao': (6000, 12000), 'burst': (4000, 9000), 'dash': (8000, 14000), 'slam': (4000, 7000)})
+        'canhao': (6000, 10000), 'burst': (3000, 7000), 'dash': (7000, 10000), 'slam': (4000, 7000)})
     cooldown_inicial: Dict[str, int] = field(default_factory=lambda: {
         'canhao': 1500, 'burst': 2500, 'dash': 3000, 'slam': 1500})
 
@@ -41,7 +41,7 @@ class HunterConfig:
 
     # --- burst (plasma) ---
     burst_tiros: int = 10
-    burst_intervalo_ms: int = 150
+    burst_intervalo_ms: int = 130
     burst_dano: int = 15
     burst_velocidade: float = 500
     burst_spread: float = 0.15
@@ -67,6 +67,10 @@ class HunterConfig:
     poeira_dash_por_lado: int = 1
     poeira_explosao: int = 14
     poeira_slam: int = 26
+    # camera shake (intensidade em px): burst durante toda a rajada; slam e canhão no golpe
+    shake_burst: float = 1
+    shake_slam: float = 3
+    shake_canhao: float = 5
 
     def __post_init__(self):
         if set(self.pesos_longe) != set(self.cooldown) or set(self.pesos_perto) != set(self.cooldown) \
