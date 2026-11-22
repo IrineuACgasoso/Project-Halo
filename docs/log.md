@@ -2,6 +2,11 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Correção: upgrade de alcance do Light Rifle não fazia efeito
+- O perfil `light_rifle` tem `raio_maximo` ("Alcance", +50 por nível), mas a classe mirava com a constante `RAIO_ALVO = 1000`: o card mostrava o alcance subindo e no jogo ele ficava em 1000. Agora usa `self.raio_maximo` (nível 1 = 1000: sem mudança até o 1º upgrade). **Muda o jogo:** o alcance cresce com o nível.
+- Regressão em `test_regressoes.py::test_upgrade_de_alcance_muda_o_alcance_de_verdade`, para toda arma com `raio_maximo` no perfil (Fuel Rod, Grenade Launcher, Light Rifle, Spartan Laser; só o Light Rifle falhou antes). As outras armas têm o alcance fixo no código, sem stat (Assault Rifle, Sidekick, Shotgun, Sniper, Brick e o `RAIO_ALVO` de Needler, Dizimator, Carabin e Machine Gun).
+- Suíte: 1003 verdes + 1 xfail; as 3 falhas restantes (`test_hunter_pelas_costas`, `test_fraqueza_e_a_regra_das_costas_do_hunter_se_somam`) vêm de uma mudança local não commitada em `hunter/core.py` (costas ×4 → ×8), fora deste commit. Não validado no jogo real.
+
 ## 2026-11-21 | Sistema de status (S3): bônus da Cortana como buff (muda o jogo)
 - Antes: cada upgrade da Cortana fazia `jogador.velocidade += 10`, com o número fixo no código. O stat `jogador_speed_bonus` (+10/nível) só aparecia no card de upgrade e não era lido.
 - Agora o stat manda: `jogador_speed_bonus` em **pontos percentuais** (+2 por nível, label "(%)"), e a Cortana aplica `BuffVelocidade(bonus / 100)` sem fim, com `chave=self` (reaplicar só atualiza). A velocidade-base do jogador não muda mais.

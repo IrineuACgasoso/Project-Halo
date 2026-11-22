@@ -140,6 +140,31 @@ def test_pelican_usa_o_proprio_perfil(novo_jogo):
     assert pelican.sprite_veiculo.vida_maxima == VEHICLES_DATA['pelican'].stats['vida_maxima'].value
 
 
+def _tem_stat_de_alcance(info):
+    perfil = WEAPON_DATA.get(getattr(info.classe, 'NOME_ASSET', None))
+    return perfil is not None and 'raio_maximo' in perfil.stats
+
+
+ARMAS_COM_STAT_DE_ALCANCE = sorted(i for i, info in ARMAS_REGISTRO.items() if _tem_stat_de_alcance(info))
+
+
+def test_light_rifle_esta_entre_as_armas_com_stat_de_alcance():
+    assert 'light_rifle' in ARMAS_COM_STAT_DE_ALCANCE
+
+
+@pytest.mark.parametrize('id_arma', ARMAS_COM_STAT_DE_ALCANCE)
+def test_upgrade_de_alcance_muda_o_alcance_de_verdade(novo_jogo, id_arma):
+    """Light Rifle mirava com RAIO_ALVO fixo (1000): o card mostrava 'Alcance' subindo e nada mudava."""
+    arma = _equipar(novo_jogo, id_arma)
+    base = arma.raio_maximo
+    _inimigo(novo_jogo, novo_jogo.player.posicao + V(base + 25, 0))
+    assert not arma.disparar()
+
+    arma.upgrade()
+    assert arma.raio_maximo == base + 50
+    assert arma.disparar()
+
+
 ARMAS_DE_RAJADA = ['dizimator', 'needler', 'carabin', 'light_rifle', 'machine_gun']
 
 
