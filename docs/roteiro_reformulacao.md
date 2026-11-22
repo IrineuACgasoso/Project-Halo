@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3 e a E4 concluídos; próxima: E5.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4 e a E5 concluídos; próxima: E6.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -176,6 +176,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **E5 · Persistência entre fases explícita** (risco: baixo)
 - Muda: a flag `sobrevive_troca_de_fase` nos sprites (player, companions, auras, veículos) substitui a cadeia de `hasattr` do `StageManager`.
 - Testes: depois da troca, sobrevivem exatamente os sprites marcados (veículos inclusos: comportamento atual TODO: confirmar).
+- Feito (2026-11-22): flag de classe em `Player`, `Companheiro` e `PlayerAura`; golden inalterado. Confirmado: hoje o veículo **não** sobrevive (some, mas continua ativo) e os companheiros vão para o spawn do mapa antigo; os dois são bugs (`xfail`, ver log), corrigidos em commits próprios.
 
 **E6 · Raridade de fato** (recurso novo; pode ser antecipada logo após D5, porque não depende do resto de E)
 - Hoje: `ArmaInfo.raridade` (4 comuns, 4 incomuns, 3 raras, 5 épicas, 6 lendárias, contando companions e veículos) só muda a cor no HUD e no level-up. O sorteio de `gerar_opcoes_aleatorias` é uniforme e não há nível máximo.

@@ -2,6 +2,16 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa E5: persistência entre fases explícita (refatoração: golden inalterado)
+- Na troca de fase sobrevive quem declara `sobrevive_troca_de_fase = True` na classe: `Player`, `Companheiro` (Árbitro, Cortana, Marines, Noble) e `PlayerAura` (MK2). O `StageManager` não conhece mais arma nem dono: os 4 `hasattr` (`companions`, `sprite_companion`, `area_de_dano`) saíram. O reposicionamento usa `isinstance(sprite, Companheiro)`.
+- **Equivalência:** o teste do conjunto de sobreviventes (todas as armas do registro, inimigo, item e portal) passa igual no código antigo; `Vehicle` declara `False` de propósito para manter o comportamento de hoje (ver o 1º achado).
+- Testes (`test_troca_de_fase.py`): sobrevivem exatamente jogador, 4 companheiros e aura; todos os Marines; a flag decide sozinha (sprite solto marcado fica, a instância pode recusar); a aura continua no `auras_grupo`. **Suíte: 1102 verdes + 4 xfail** (3 novos, abaixo). Golden inalterado.
+- Desempenho: só a troca de fase (na tomada, A/B alternado com o HEAD, 2 rodadas): 238/234 × 236/236 ms. Igual. O `perf.py` acusa +15000% contra a base antiga (1,56 ms), esperado desde a D2 (decodifica o mapa); a base continua para regravar.
+- **Achados (bugs, `xfail(strict=True)` em `test_troca_de_fase.py`):**
+  - **Veículo some na troca de fase:** o Warthog e o Pelican saem dos grupos (`kill`), mas a arma continua atualizando o sprite: invisível, ele segue atirando e atropelando, e o jogador continua "no veículo".
+  - **Companheiros vão para o spawn do mapa antigo:** a posição é lida antes de trocar o mapa (na fase 0→1: companheiro em (2302, 2048), jogador em (1536, 1024)), e eles cruzam o mapa voando até o jogador.
+- Próxima: as 2 correções acima (um commit cada) e depois **E6** (raridade de fato).
+
 ## 2026-11-22 | Cheats pelo menu de pausa (recurso novo, pedido do usuário)
 - A pausa ganhou o botão **ATIVAR CHEATS** (entre RESUME e EXIT TO MENU). Ele alterna `Teclado.cheats` (`Game.alternar_cheats`); o rótulo vira DESATIVAR CHEATS e, ligado, a pausa mostra as teclas (L: subir de nível, P: portal, B: boss). Vale até fechar o jogo (sobrevive a voltar ao menu). `MCE_DEBUG=1` continua abrindo com os cheats ligados (e só ele liga o overlay de paredes e a validação na abertura).
 - `Teclado(debug=)` virou `Teclado(cheats=)`; `Game.teclado` guarda a fonte padrão (os testes trocam `Game.entrada` por um `Roteiro` sem perder o estado dos cheats).

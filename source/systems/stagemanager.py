@@ -4,6 +4,7 @@ from source.systems.entitymanager import entity_manager
 from source.systems.eventos import eventos, FASE_TROCADA
 from source.utils.paths import path
 from source.systems.spawner import Spawner
+from source.feats.buddies import Companheiro
 
 class StageManager:
     def __init__(self, game):
@@ -52,37 +53,21 @@ class StageManager:
         game = self.game
         game.sessao.fase_atual += 1
         
-        # Criamos uma lista de quem DEVE sobreviver
-        sobreviventes = [game.player]
-        
-        for arma in game.player.armas.values():
-            # Suporte para armas com múltiplos companions (Marine)
-            if hasattr(arma, 'companions'):
-                for companion in arma.companions:
-                    sobreviventes.append(companion)
-            # Suporte para Árbitro e Cortana (companion único)
-            elif hasattr(arma, 'sprite_companion') and arma.sprite_companion:
-                sobreviventes.append(arma.sprite_companion)
-            
-            # Salva a Aura/Área de Dano do Escudo
-            if hasattr(arma, 'area_de_dano') and arma.area_de_dano:
-                sobreviventes.append(arma.area_de_dano)
-
-        # Limpeza: Só mata quem NÃO está na lista de sobreviventes
+        # Só sobrevive quem declara `sobrevive_troca_de_fase = True` na classe (roteiro E5):
+        # jogador, companheiros e aura do MK2. O resto (inimigos, projéteis, itens, portal) sai.
+        sobreviventes = []
         for sprite in list(entity_manager.all_sprites):
-            if sprite not in sobreviventes: 
+            if getattr(sprite, 'sobrevive_troca_de_fase', False):
+                sobreviventes.append(sprite)
+            else:
                 sprite.kill()
 
-        # Coloca os companheiros na mesma posição nova do jogador para não cruzarem o mapa voando
+        # Coloca os companheiros junto do spawn para não cruzarem o mapa voando
         nova_pos = game.mapa.get_player_spawn_pos()
-        for arma in game.player.armas.values():
-            if hasattr(arma, 'companions'):
-                for companion in arma.companions:
-                    companion.posicao = pygame.math.Vector2(nova_pos)
-                    companion.rect.center = nova_pos
-            elif hasattr(arma, 'sprite_companion') and arma.sprite_companion:
-                arma.sprite_companion.posicao = pygame.math.Vector2(nova_pos)
-                arma.sprite_companion.rect.center = nova_pos
+        for sprite in sobreviventes:
+            if isinstance(sprite, Companheiro):
+                sprite.posicao = pygame.math.Vector2(nova_pos)
+                sprite.rect.center = nova_pos
 
         game.sessao.portal_atual = None             # Remove a referência do portal antigo
         game.sessao.spawnar_portal_em_breve = False # Garante que a flag de espera suma

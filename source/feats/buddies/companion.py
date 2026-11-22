@@ -12,6 +12,8 @@ from source.feats.projetil import BurstRifle, HeavyBurst
 
 
 class Companheiro(pygame.sprite.Sprite):
+    sobrevive_troca_de_fase = True   # StageManager (roteiro E5)
+
     def __init__(self, jogador, grupos, inimigos_grupo, item_grupo, nome_asset):
         super().__init__(grupos)
         # Referências básicas

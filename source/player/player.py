@@ -18,6 +18,7 @@ class Player(
     PlayerScaling,
     PlayerSetup,
     ):
+    sobrevive_troca_de_fase = True   # StageManager (roteiro E5)
 
     def __init__(self, posicao_inicial, grupos, game):
         """

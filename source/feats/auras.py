@@ -77,6 +77,8 @@ class EnergyAura(pygame.sprite.Sprite):
 
 
 class PlayerAura(pygame.sprite.Sprite):
+    sobrevive_troca_de_fase = True   # StageManager (roteiro E5)
+
     def __init__(self, jogador, raio, dano_por_segundo, grupos):
         super().__init__(grupos)
         self.jogador = jogador

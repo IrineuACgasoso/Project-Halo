@@ -49,7 +49,7 @@ Cada passo é um método nomeado; `test_eventos.py::test_update_roda_os_passos_n
    - coleta de itens;
    - auras (DPS × dt);
    - morte dos inimigos (`morrer` gera os drops; se o inimigo saiu do mundo, emite `inimigo_morreu`).
-7. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner, mata os sprites que não sobrevivem (player, companions, aura) e emite `fase_trocada`.
+7. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner, mata os sprites cuja classe não declara `sobrevive_troca_de_fase = True` (hoje: `Player`, `Companheiro`, `PlayerAura`) e emite `fase_trocada`.
 8. `_checar_game_over`: se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
 
 ## Eventos de jogo (`systems/eventos.py`)

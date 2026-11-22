@@ -93,6 +93,7 @@ Project-Halo/
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
+| Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |
