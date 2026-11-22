@@ -8,6 +8,12 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - **Muda o jogo (declarado):** +2% equivale a +10 na velocidade inicial (500). Como o level-up também soma +10 na velocidade-base, o bônus da Cortana agora cresce junto: no nível 20 do jogador (690), cada +2% vale +13,8.
 - Teste em `test_status.py` (nível 1 sem bônus, +2% por nível, um lugar só, velocidade-base intacta). Suíte: **1001 verdes + 1 xfail**. Golden inalterado (a fase 0 do golden não tem Cortana). **Não validado:** a sensação no jogo.
 
+**Pendências da sessão (E1 + status):**
+- Decisões suas: "invulnerável" centralizado no contrato de dano (ver E1); indicador de status no HUD e feedback visual no alvo (ver S1).
+- Ainda nenhuma arma nem inimigo aplica lentidão, atordoamento, queimadura, fraqueza, cegueira ou buff de dano: o sistema está pronto para o conteúdo.
+- Bug do Hunter preso nas paredes (diagnóstico na E1). Bug do fim de campanha (xfail, B4). Regravar `perf_base.json` na tomada, numa sessão fria.
+- Próxima etapa do roteiro: **E2** (estado de alvo unificado).
+
 ## 2026-11-21 | Sistema de status (S2): curas e escudos pelo sistema
 **O que foi feito** (refatoração: golden inalterado)
 - Orbe de vida e cura do level-up → `aplicar(alvo, Cura(...))`; escudo cheio do level-up e regeneração do MK2 → `aplicar(alvo, Escudo(...))`; transferência do Watcher → `aplicar(aliado, Escudo(t), fonte=watcher)`. Agora a queimadura corta essas curas (teste).
