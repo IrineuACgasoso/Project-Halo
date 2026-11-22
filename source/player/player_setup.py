@@ -66,8 +66,6 @@ class PlayerSetup:
         self.status = StatusEntidade(self, eh_jogador=True)   # buffs e debuffs (systems/status)
         self.vida_maxima = 500
         self.vida_atual = self.vida_maxima
-        self.buff_timer = 0
-        self.buff_cooldown_ativo = False
 
     def setup_xp(self):
         self.contador_niveis = 1

@@ -12,6 +12,7 @@ from source.systems.gameclock import relogio
 
 from . import draw
 from source.systems.entitymanager import entity_manager
+from source.systems.status import Cura, aplicar
 
 
 class Items(pygame.sprite.Sprite):
@@ -165,7 +166,7 @@ class Items(pygame.sprite.Sprite):
             player.pontuacao += 50
             
         elif self.tipo == 'life_orb':
-            player.curar(player.vida_maxima)
+            aplicar(player, Cura(player.vida_maxima))
             player.pontuacao += 100
             
         elif self.tipo == 'upgrade':

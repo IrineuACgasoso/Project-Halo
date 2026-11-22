@@ -2,6 +2,16 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Sistema de status (S2): curas e escudos pelo sistema
+**O que foi feito** (refatoração: golden inalterado)
+- Orbe de vida e cura do level-up → `aplicar(alvo, Cura(...))`; escudo cheio do level-up e regeneração do MK2 → `aplicar(alvo, Escudo(...))`; transferência do Watcher → `aplicar(aliado, Escudo(t), fonte=watcher)`. Agora a queimadura corta essas curas (teste).
+- `curar` saiu (a guarda de "jogador fora do mundo" da correção anterior está no próprio `aplicar`). Nenhuma cura nem ganho de escudo direto sobrou em `source/` (grep).
+- O buff de cooldown antigo saiu: `adicionar_tempo_buff`, `atualizar_buff`, `buff_timer` e `buff_cooldown_ativo` **não tinham chamador** (o item "café" não tem efeito em `_aplicar_efeito`), e ele mexia em `arma.cooldown` com uma flag por arma. A cadência agora é o `BuffCadencia`. Os 2 testes dele viraram testes do `BuffCadencia` (mudança de especificação: o mecanismo foi trocado, não enfraquecido).
+- **Equivalência:** os valores são os mesmos, porque `Escudo`/`Cura` fazem `min(atual + v, máximo)`, igual ao `+=` seguido do clamp de antes. Única diferença possível: o Watcher somava sem clamp e podia passar do máximo por 1 ulp de float; agora para no máximo.
+- Testes: +5 (`test_player`: level-up cura 1/4 e enche o escudo; `test_status`: Watcher pelo sistema, sem passar do máximo, queimadura cortando o orbe de vida). Suíte: **1000 verdes + 1 xfail**. Golden e catraca inalterados.
+
+**Fica para depois (não migrado):** os buffs internos dos bosses (velocidade temporária do Warden, `buff_ofensivo_mult` do Harbinger) e o "derrete escudo" do EMP são mecânicas do próprio boss, com movimento e ataques próprios; entram na F5 (`BossBase`).
+
 ## 2026-11-21 | Correção: cura não ressuscita o jogador morto no mesmo frame
 - A coleta de itens (passo 4 do `CollisionManager`) vem depois do dano (passos 2 e 3). Morrer e, no mesmo frame, pegar um orbe de vida ou subir de nível com XP devolvia a vida a um jogador que já tinha saído dos grupos de sprite (`kill`): sem game over, a partida seguia com ele invisível. Agora `curar` não age em jogador fora do mundo. Achado ao planejar as migrações do sistema de status; commit próprio (roteiro §2, regra 6).
 - Regressão em `test_regressoes.py` (orbe de vida e level-up; os dois falharam antes da correção). Suíte: **996 verdes + 1 xfail**. Golden inalterado.

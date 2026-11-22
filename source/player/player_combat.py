@@ -1,7 +1,7 @@
 from source.systems.gameclock import relogio
 from source.systems.dano import Dano, CONTATO
 from source.systems.eventos import eventos, DANO_CAUSADO
-from source.systems.status import multiplicador_de_dano
+from source.systems.status import Escudo, aplicar, multiplicador_de_dano
 
 class PlayerCombat:
     def adicionar_escudo(self, valor):
@@ -23,14 +23,10 @@ class PlayerCombat:
             self.regenerando_escudo = True
         # Regenera
         if self.regenerando_escudo:
-
-            self.escudo_atual += (
-                self.velocidade_regen_escudo * delta_time
-            )
-            # Clamp
+            ganho = self.velocidade_regen_escudo * delta_time
+            if ganho > 0:
+                aplicar(self, Escudo(ganho))   # para no máximo
             if self.escudo_atual >= self.escudo_maximo:
-
-                self.escudo_atual = self.escudo_maximo
                 self.regenerando_escudo = False
 
     def atualizar_veiculo(self, delta_time):
@@ -137,14 +133,9 @@ class PlayerCombat:
         from source.feats.effects import EfeitoFaiscas
         EfeitoFaiscas(posicao=self.posicao, grupos=(grupo,))
                 
-    def curar(self, quantidade):
-        # Morto no mesmo frame (a coleta de itens vem depois do dano): curar o "ressuscitava" fora dos grupos
-        if not self.alive():
-            return
-        self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
-
     def receber_cura(self, quantidade):
-        """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura."""
+        """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura e
+        recusa alvo fora do mundo (morto no mesmo frame: a cura o "ressuscitava" fora dos grupos)."""
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
 
     def receber_escudo(self, quantidade):

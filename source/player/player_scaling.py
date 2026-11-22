@@ -2,6 +2,7 @@ import random
 import pygame
 from source.systems.levelup import TelaDeUpgrade
 from source.systems.estados import LEVEL_UP
+from source.systems.status import Cura, Escudo, aplicar
 
 class PlayerScaling:
     def ganhar_xp(self, quantidade):
@@ -18,8 +19,10 @@ class PlayerScaling:
         self.vida_maxima += 25
         self.velocidade += 10
         self.pontuacao += 100
-        self.curar(self.vida_maxima / 4)
-        self.escudo_atual = self.escudo_maximo
+        aplicar(self, Cura(self.vida_maxima / 4))
+        falta_escudo = self.escudo_maximo - self.escudo_atual
+        if falta_escudo > 0:
+            aplicar(self, Escudo(falta_escudo))   # enche: o Escudo para no máximo
         self.experiencia_level_up = self.experiencia_level_up_base + 10 * self.contador_niveis
 
         self._enfileirar_upgrade(None)
@@ -51,36 +54,3 @@ class PlayerScaling:
         self.game.sessao.tela_de_upgrade_ativa = TelaDeUpgrade(
             self.game.tela, self, self.game, id_arma_forcada=id_forcado
         )
-
-    # ── Buff de cooldown ───────────────────────────────────────────────────
-    def adicionar_tempo_buff(self, segundos):
-        self.buff_timer += segundos
-
-    @staticmethod
-    def _aplicar_buff_cooldown(arma):
-        cd = getattr(arma, 'cooldown', None)
-        if cd is None or cd == float('inf') or getattr(arma, '_buff_cd_aplicado', False):
-            return
-        arma.cooldown = cd / 2
-        arma._buff_cd_aplicado = True
-
-    @staticmethod
-    def _remover_buff_cooldown(arma):
-        if getattr(arma, '_buff_cd_aplicado', False):
-            arma.cooldown *= 2
-            arma._buff_cd_aplicado = False
-
-    def atualizar_buff(self, delta_time):
-        if self.buff_timer > 0:
-            self.buff_timer -= delta_time
-            self.buff_cooldown_ativo = True
-            # Idempotente: armas obtidas DURANTE o buff também recebem o bônus.
-            for arma in self.armas.values():
-                self._aplicar_buff_cooldown(arma)
-
-        elif self.buff_cooldown_ativo:
-            self.buff_timer = 0
-            self.buff_cooldown_ativo = False
-            # Antes: restaurava `cooldown_original`, apagando upgrades feitos durante o buff.
-            for arma in self.armas.values():
-                self._remover_buff_cooldown(arma)

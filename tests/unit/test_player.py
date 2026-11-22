@@ -1,8 +1,8 @@
-"""Dano, escudo, veículo, espinhos, XP/level-up e buff de cooldown do Player real."""
-import pytest
+"""Dano, escudo, veículo, espinhos, XP/level-up e buff de cadência do Player real."""
 
 from source.systems.gameclock import relogio
 from source.systems.dano import Dano, DIRETO
+from source.systems.status import BuffCadencia, Cura, aplicar, atualizar_status
 
 
 # ── receber_dano (a matriz completa do contrato está em test_dano.py) ──
@@ -71,8 +71,18 @@ def test_game_over_quando_vida_zera(novo_jogo):
 
 def test_curar_nao_passa_do_maximo(player):
     player.receber_dano(Dano(10, DIRETO, ignora_iframes=True))
-    player.curar(10 ** 6)
+    aplicar(player, Cura(10 ** 6))
     assert player.vida_atual == player.vida_maxima
+
+
+def test_level_up_cura_um_quarto_e_enche_o_escudo(player):
+    player.adicionar_escudo(80)
+    player.escudo_atual = 30
+    player.receber_dano(Dano(400, DIRETO, ignora_iframes=True))   # escudo 0, vida 500 - 370
+    vida = player.vida_atual
+    player.level_up()
+    assert player.vida_atual == vida + player.vida_maxima / 4
+    assert player.escudo_atual == 80
 
 
 # ── Escudo: regeneração ─────────────────────────────────────────────────────
@@ -157,25 +167,18 @@ def test_upgrade_forcado_sem_armas_vira_level_up(player):
     assert player.contador_niveis == 2
 
 
-# ── Buff de cooldown (item café) ─────────────────────────────────────────────
-def test_buff_reduz_cooldown_pela_metade_e_restaura(player):
+# ── Buff de cadência (sistema de status; substituiu o buff de cooldown sem chamador) ──
+def test_cadencia_corta_o_cooldown_sem_mexer_na_arma_e_acaba(player):
     arma = player.armas['assault_rifle']
     original = arma.cooldown
-    player.adicionar_tempo_buff(1.0)
-    player.atualizar_buff(0.5)
-    player.atualizar_buff(0.1)          # idempotente: não reduz de novo
-    assert arma.cooldown == pytest.approx(original / 2)
-    player.atualizar_buff(1.0)          # zera o timer
-    player.atualizar_buff(0.1)          # remove o buff
-    assert arma.cooldown == pytest.approx(original)
-    assert not player.buff_cooldown_ativo
+    aplicar(player, BuffCadencia(0.5, 1000))
+    assert player.status.mult_cooldown == 0.5 and arma.cooldown == original   # a arma não muda
+    for _ in range(70):
+        relogio.avancar(1 / 60)
+        atualizar_status(1 / 60)
+    assert player.status.mult_cooldown == 1.0
 
 
-def test_buff_ignora_arma_com_cooldown_infinito(player):
-    class ArmaPassiva:
-        cooldown = float('inf')
-
-    player.armas['passiva'] = ArmaPassiva()
-    player.adicionar_tempo_buff(1.0)
-    player.atualizar_buff(0.1)
-    assert player.armas['passiva'].cooldown == float('inf')
+def test_cadencia_mantem_cooldown_infinito(player):
+    aplicar(player, BuffCadencia(0.9))
+    assert float('inf') * player.status.mult_cooldown == float('inf')

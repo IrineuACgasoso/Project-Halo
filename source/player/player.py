@@ -65,8 +65,6 @@ class Player(
 
         self.atualizar_void(delta_time)
 
-        self.atualizar_buff(delta_time)
-
         self.atualizar_invencibilidade()
 
         self.atualizar_animacao()

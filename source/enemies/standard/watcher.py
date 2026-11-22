@@ -5,6 +5,7 @@ from source.feats.effects import RaioEscudo
 from source.feats.auras import EnergyAura
 from source.systems.entitymanager import entity_manager
 from source.data.enemy_data import INIMIGOS
+from source.systems.status import Escudo, aplicar
 
 class Watcher(BaseEnemy):
     def __init__(self, posicao, game, perfil=INIMIGOS['watcher'], intervalo=2000, porcentagem=0.05, min_esc=15, max_esc=40, cor_raio=(255, 120, 0), sprite_key='watcher', variante='default'):
@@ -65,7 +66,7 @@ class Watcher(BaseEnemy):
                     espaco_disponivel = self.alvo_protegido.escudo_maximo - self.alvo_protegido.escudo_atual
                     transferencia = min(transferencia, espaco_disponivel)
                     
-                    self.alvo_protegido.escudo_atual += transferencia
+                    aplicar(self.alvo_protegido, Escudo(transferencia), fonte=self)
                     
                     if transferencia > 0:
                         RaioEscudo(

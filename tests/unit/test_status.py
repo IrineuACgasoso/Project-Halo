@@ -475,3 +475,36 @@ def test_cegueira_pinta_de_preto_tudo_fora_do_degrade(centro):
                 assert tela.get_at((x, y))[:3] == (0, 0, 0), (x, y)
             elif d < raio - 1:
                 assert tela.get_at((x, y))[:3] == (255, 255, 255), (x, y)
+
+
+# ── Quem já usa o sistema (S2) ──────────────────────────────────────────────
+def test_watcher_da_escudo_ao_aliado_pelo_sistema(novo_jogo):
+    from source.enemies.standard.watcher import Watcher
+    aliado = _grunt(novo_jogo, V(600, 0))
+    watcher = Watcher(posicao=aliado.posicao + V(100, 0), game=novo_jogo)
+    watcher.alvo_protegido = aliado
+    watcher.ultimo_escudo = relogio.agora() - watcher.intervalo_escudo
+    watcher.aplicar_escudo()
+    transferencia = max(watcher.min_escudo, min(aliado.escudo_maximo * watcher.porcentagem_escudo, watcher.max_escudo))
+    esperado = min(transferencia, aliado.escudo_maximo)   # limitado ao espaço livre
+    assert aliado.escudo_maximo == aliado.vida_base and aliado.escudo_atual == pytest.approx(esperado)
+
+
+def test_watcher_nao_passa_do_maximo(novo_jogo):
+    from source.enemies.standard.watcher import Watcher
+    aliado = _grunt(novo_jogo, V(600, 0))
+    aliado.escudo_maximo, aliado.escudo_atual = 100, 99.5
+    watcher = Watcher(posicao=aliado.posicao + V(100, 0), game=novo_jogo)
+    watcher.alvo_protegido = aliado
+    watcher.ultimo_escudo = relogio.agora() - watcher.intervalo_escudo
+    watcher.aplicar_escudo()
+    assert aliado.escudo_atual == 100
+
+
+def test_queimadura_corta_o_orbe_de_vida(novo_jogo):
+    from source.feats.items import Items
+    player = novo_jogo.player
+    player.vida_atual = 100
+    aplicar(player, Queimadura(1, 10 ** 6, reducao_cura=0.5))
+    Items(player.posicao, 'life_orb', (entity_manager.items_grupo,)).coletar(player)
+    assert player.vida_atual == 100 + player.vida_maxima / 2
