@@ -1,6 +1,7 @@
 import pygame
 from source.systems.entitymanager import entity_manager
 from source.systems.eventos import eventos, INIMIGO_MORREU
+from source.systems.dano import Dano, CONTATO, AURA
 
 # Inimigo com colisão circular (Scarab) é candidato de toda consulta: o círculo do
 # collide_circle passa da borda do rect, e esses inimigos são raros (bosses).
@@ -140,7 +141,8 @@ class CollisionManager:
             if getattr(inimigo, 'inofensivo', False):
                 continue
             if not getattr(inimigo, 'invulneravel', False):
-                player.tomar_dano(inimigo, colisao = True)
+                player.receber_dano(Dano(inimigo.dano, CONTATO, inimigo))
+                player.contra_atacar_com_espinhos(inimigo)
 
         # 4. Coleta de itens
         itens_coletados = pygame.sprite.spritecollide(player, entity_manager.items_grupo, True)
@@ -158,7 +160,7 @@ class CollisionManager:
             for inimigo, auras in colisoes_aura.items():
                 if not getattr(inimigo, 'invulneravel', False):
                     total_dano = sum(aura.dano_por_segundo for aura in auras if aura.ativa)
-                    inimigo.receber_dano(total_dano * delta_time)
+                    inimigo.receber_dano(Dano(total_dano * delta_time, AURA, player))
 
         # 6. Check de Morte
         for inimigo in entity_manager.inimigos_grupo:

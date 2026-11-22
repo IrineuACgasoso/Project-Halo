@@ -1,6 +1,7 @@
 import pygame
 from .projetil import ProjetilUniversal
 from source.windows.settings import largura_tela, altura_tela
+from source.systems.dano import Dano, PROJETIL
 
 class Brick(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, direcao, dano, velocidade, rebatidas):
@@ -84,9 +85,8 @@ class Brick(ProjetilUniversal):
 
     def ao_atingir_alvo(self, alvo):
         if alvo and not getattr(alvo, 'invulneravel', False) and alvo not in self.inimigos_atingidos:
-            if hasattr(alvo, 'receber_dano'):
-                alvo.receber_dano(self.dano)
-                self.inimigos_atingidos.add(alvo)
+            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+            self.inimigos_atingidos.add(alvo)
 
         
 

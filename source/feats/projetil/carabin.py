@@ -1,15 +1,17 @@
 import pygame
 from .projetil import ProjetilUniversal
+from source.systems.dano import Dano, PROJETIL
 
 class Carabin(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, duracao=2000, is_Banished=False):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, duracao=2000, is_Banished=False, fonte=None):
         s_key = 'bcarabin' if is_Banished else 'carabin'
         # Agora é um projétil circular (glow), não precisa mais de rotação
         super().__init__(
             posicao_inicial = posicao_inicial,
             grupos = grupos,
             game = game,
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key = s_key,
             tamanho = tamanho,
             dano = dano,
@@ -45,10 +47,6 @@ class Carabin(ProjetilUniversal):
         if alvo and not getattr(alvo, 'invulneravel', False):
             if hasattr(alvo, 'escudo_atual') and alvo.escudo_atual > 0:
                 qtd *= 3
-            if hasattr(alvo, 'receber_dano'):
-                alvo.receber_dano(qtd)
-            # Tenta o padrão que você usa no Player
-            elif hasattr(alvo, 'tomar_dano'):
-                alvo.tomar_dano(self)
+            alvo.receber_dano(Dano(qtd, PROJETIL, self.fonte))
         self.kill()
         

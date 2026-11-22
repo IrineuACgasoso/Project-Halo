@@ -1,5 +1,6 @@
 import pygame
 from source.utils.collision_utils import sair_das_paredes
+from source.systems.dano import Dano, VOID
 
 class PlayerMovement:    
     def mover_com_colisao(self, delta_time, grade_paredes):
@@ -26,8 +27,8 @@ class PlayerMovement:
             # para "por segundo" (x60) para não variar com o FPS.
             self.posicao += forca * (60 * delta_time)
 
-            self.tomar_dano_direto(60 * delta_time)
+            self.receber_dano(Dano(60 * delta_time, VOID, ignora_iframes=True))
 
             # Se o player chegar muito perto do VoidPoint ele morre
             if dist < 15:
-                self.tomar_dano_direto(99999)
+                self.receber_dano(Dano(99999, VOID, ignora_iframes=True))

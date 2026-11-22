@@ -78,6 +78,7 @@ class PurgeGrid(pygame.sprite.Sprite):
                 grupos=(entity_manager.all_sprites,), # <-- Coloque o grupo de perigo real do seu jogo
                 game=self.game,
                 dono='BOSS',
+                fonte=self.caster,
                 custom_config=config_do_purge # Passa os dados sobreescrevendo os presets padrões da artilharia
             )
             spawns_neste_frame += 1

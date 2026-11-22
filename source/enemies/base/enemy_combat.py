@@ -2,6 +2,7 @@ import pygame
 import random
 
 from source.feats.items import Items
+from source.systems.eventos import eventos, DANO_CAUSADO
 
 class EnemyCombat:
     def adicionar_escudo(self, valor):
@@ -31,10 +32,24 @@ class EnemyCombat:
                 
         return direcao
 
-    def receber_dano(self, quantidade):
-        """Gerencia o dano, retirando do escudo primeiro e o restante da vida."""
+    def receber_dano(self, dano):
+        """Contrato de dano dos inimigos (roteiro E1). A regra própria do alvo entra por
+        `ajustar_dano_recebido`; o que o valor final tira do escudo e da vida, por `absorver_dano`."""
+        valor = self.ajustar_dano_recebido(dano.valor, dano)
+        if valor is None:
+            return
+        self.absorver_dano(valor)
+        eventos.emitir(DANO_CAUSADO, alvo=self, dano=dano, valor=valor)
+
+    def ajustar_dano_recebido(self, valor, dano):
+        """Gancho da regra do próprio alvo (ex.: golpe pelas costas do Hunter, sentinelas do Guilty).
+        Devolve o valor final, ou None para ignorar o golpe (sem dano e sem evento)."""
+        return valor
+
+    def absorver_dano(self, valor):
+        """Tira do escudo primeiro e o restante da vida."""
         if self.escudo_atual > 0:
-            self.escudo_atual = self.escudo_atual - quantidade
+            self.escudo_atual = self.escudo_atual - valor
             if self.escudo_atual < 0:
                 # Se o dano for maior que o escudo, o que sobra vai para a vida
                 dano_restante = abs(self.escudo_atual)
@@ -42,7 +57,7 @@ class EnemyCombat:
                 self.vida = max(0, self.vida - dano_restante)
         else:
             # Se não tem escudo, toma dano direto na vida
-            self.vida = max(0, self.vida - quantidade)
+            self.vida = max(0, self.vida - valor)
 
     def novo_cooldown(self, minimal, maximum):
         updated_cooldown = random.randint(minimal, maximum)

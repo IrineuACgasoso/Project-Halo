@@ -2,6 +2,32 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Etapa E1: contrato de dano único
+**Decisões do usuário (desta sessão):** as regras "spawn dentro da navegação" e "portal obrigatório" da D5 **não** serão adotadas (pendência fechada). Novo recurso aprovado: o **sistema de status** (buffs e debuffs), logo depois da E1; decisões no roteiro §8 (itens 8–11).
+
+**O que foi feito**
+- `source/systems/dano.py`: `Dano(valor, tipo, fonte, ignora_iframes)` (frozen; valor >= 0, infinito vale, NaN não; tipo conhecido). Tipos: `projetil`, `contato`, `aura`, `area` (novo: explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte_do_dono(dono, fonte)`: sem fonte explícita, o que é do jogador é dele.
+- `receber_dano(dano)` no jogador (mesma ordem de antes: i-frames → veículo → escudo → vida) e nos inimigos, com 2 ganchos: `ajustar_dano_recebido(valor, dano)` (regra do alvo; `None` = ignora o golpe) e `absorver_dano(valor)` (escudo → vida). Os 4 overrides viraram ganchos: Guilty, Hunter, Scarab (que também sobrescreve `absorver_dano`: defensivo = só escudo) e a consciência do Warden.
+- `tomar_dano`, `tomar_dano_direto` e `ignorar_invencibilidade` saíram; os espinhos viraram `contra_atacar_com_espinhos`, chamado pelo `CollisionManager` no contato (antes vinham dentro do `tomar_dano`). Os `hasattr(alvo, 'receber_dano'/'tomar_dano')` dos pontos migrados saíram. Migração completa no mesmo commit: sem shims.
+- **Fonte:** projéteis, granadas, morteiro, artilharia e cone guardam `fonte`; os 39 ataques inimigos passam `fonte=self` (o projétil que vira artilharia repassa a sua). É o que vai permitir o buff de dano de quem ataca e a atribuição da F3.
+- `dano_causado` (`alvo`, `dano`, `valor`) é emitido quando o golpe entra.
+- O `import pygame` morto do `player_combat.py` saiu, e com ele a exceção `F401` do `ruff.toml`.
+- Testes: `test_dano.py` (52): validação do `Dano`, a matriz escudo × i-frames × `ignora_iframes` × transbordo (jogador e inimigo), ganchos, evento, os 4 overrides, a fonte de projéteis e habilidades e **um teste por AST: todo ataque inimigo passa `fonte=`**. `test_player`/`test_sistemas` migrados para a API nova. Suíte: **911 verdes + 1 xfail**. Golden e catraca inalterados.
+
+**Difere do roteiro:** "invulnerável" não entrou no contrato. Hoje quem respeita `invulneravel` (invisível, proteção de spawn) é quem causa o dano: projéteis e auras checam; **artilharia, cone, companheiro corpo a corpo, atropelamento do veículo e espinhos não** (acertam inimigo invisível). Centralizar mudaria o jogo: decisão sua.
+
+**Achados (não corrigidos)**
+- A névoa do Gravemind faz `vida_atual -= 300` direto (sem escudo, veículo nem `kill`): corrigida no commit seguinte, pelo contrato.
+- Granada e morteiro inimigos (dano 0 no voo) que encostam no jogador chamam `receber_dano(0)`: ligam os i-frames (100 ms) e interrompem a regeneração do escudo. Verificado com um Spike.
+- O golpe letal do Tartarus (`inf`) é absorvido pelo veículo (sem transbordo) e bloqueado pelos i-frames, se cair na janela de 100 ms.
+- Loader de mapa: na camada `Colisoes`, elipse vira o retângulo em volta dela (8 no mapa 0) e ponto vira 4 segmentos de comprimento zero (4 no mapa 0).
+
+**Desempenho** (**na bateria**): a rodada completa acusou Knight e Warden (p95) e a troca de fase (esperada desde a D2). A/B alternado com a D5 (worktree), 2 rodadas: Knight 1,65–1,81 × 1,64–2,06 ms/frame (p95 4,0–4,5 × 4,1–4,7; na 2ª rodada, iguais); Warden 3,5–3,6 × 3,6 (p95 8,5–9,0 × 8,8–9,1); horda 4,2–5,5 × **4,0–4,2**. Sem piora.
+
+**Bug do Hunter preso (C1), diagnóstico desta sessão, não reproduzido:** a camada `Colisoes` já tem polígonos fechados, mas o código só usa as arestas (que empurram); o Hunter usa o raio padrão de colisão com o mapa (15 px), apesar do sprite enorme. Se o centro nascer dentro de um polígono, as arestas o empurram para dentro. Correção provável no código, sem editar o Tiled: "dentro do polígono → sai pela aresta mais próxima" + spawn longe das paredes. Fica para depois do sistema de status, com um teste `xfail` primeiro.
+
+**Pendências:** a decisão sobre "invulnerável"; regravar `perf_base.json` (na tomada, sessão fria); o bug do fim de campanha (xfail, B4); o Hunter preso (acima). Próximo: correção da névoa do Gravemind e o **sistema de status**.
+
 ## 2026-11-21 | Etapa D5: validação central de dados (bloco D concluído)
 **O que foi feito**
 - `source/data/validacao.py::validar_tudo()` devolve a lista de erros (vazia nos dados reais; 0,03 s; não inicia o pygame nem decodifica imagem). Cada validador recebe os dados como parâmetro (padrão: os do jogo):

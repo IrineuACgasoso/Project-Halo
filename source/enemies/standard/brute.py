@@ -39,7 +39,7 @@ class Brute(BaseEnemy):
             grupos              = (entity_manager.all_sprites,),
             jogador             = self.jogador,
             game                = self.game,
-            dono                = 'INIMIGO',
+            dono                = 'INIMIGO', fonte=self,
             tamanho             = (48,48),
             dano                = 15,
             velocidade          = 800,

@@ -1,6 +1,7 @@
 # enemies/didact/states.py
 import pygame
 import random
+from source.systems.dano import Dano, AREA
 
 class DidactAI:
     """Mixin que contém a máquina de estados, transição de fases e decisões (IA) do Didact."""
@@ -64,7 +65,7 @@ class DidactAI:
         elif self.estado_habilidade == 'ataque_pull':
             self.velocidade = 0
             if agora - self.tempo_ultimo_dano_pull >= self.intervalo_dano_pull:
-                self.jogador.tomar_dano_direto(self.dano_pull)
+                self.jogador.receber_dano(Dano(self.dano_pull, AREA, self, ignora_iframes=True))
                 self.tempo_ultimo_dano_pull = agora
                 
             if agora - self.tempo_inicio_pull >= self.duracao_pull:

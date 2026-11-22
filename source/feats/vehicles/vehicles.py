@@ -1,5 +1,6 @@
 import pygame
 from source.systems.gameclock import relogio
+from source.systems.dano import Dano, CONTATO
 from source.feats.assets import ASSETS
 from source.data.weapon_data import VEHICLES_DATA
 from source.feats.buddies import Companheiro
@@ -151,7 +152,7 @@ class Vehicle(Companheiro):
 
             ultimo_hit = self._ultimo_hit_atropelamento.get(id(inimigo), 0)
             if agora - ultimo_hit >= self.cooldown_atropelamento:
-                inimigo.receber_dano(dano)
+                inimigo.receber_dano(Dano(dano, CONTATO, self.jogador))
                 self._ultimo_hit_atropelamento[id(inimigo)] = agora
 
     def decidir_disparo_veiculo(self, agora):

@@ -6,12 +6,13 @@ class HeavyBurst(ProjetilUniversal):
     comum, com um núcleo super brilhante e uma cauda energética — visual de
     'tiro que dói', condizente com o dano tremendo da SniperRifle."""
 
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, piercing=1):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, piercing=1, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial,
             grupos=grupos,
             game=game,
             dono=dono,
+            fonte=fonte,
             sprite_key='heavy_burst',
             tamanho=tamanho,      # ex: (46, 14) — mais comprido que o BurstRifle padrão
             dano=dano,

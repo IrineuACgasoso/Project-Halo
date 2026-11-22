@@ -2,13 +2,14 @@ import pygame
 from .projetil import ProjetilUniversal
 
 class PlasmaGun(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, vai_rotacionar):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, vai_rotacionar, fonte=None):
         # Plasma é uma bola/glow, não precisa de rotação 360 (rotacionar=False)
         super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='plasma', 
             tamanho=tamanho, 
             dano=dano, 

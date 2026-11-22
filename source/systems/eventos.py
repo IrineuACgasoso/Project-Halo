@@ -12,7 +12,7 @@ Uso:  from source.systems.eventos import eventos, INIMIGO_MORREU
 
 # nome -> dados enviados (por palavra-chave)
 INIMIGO_MORREU = 'inimigo_morreu'   # inimigo: morreu em combate e saiu do mundo (CollisionManager)
-DANO_CAUSADO = 'dano_causado'       # emitido a partir da E1 (contrato de dano único)
+DANO_CAUSADO = 'dano_causado'       # alvo, dano (Dano), valor final: o golpe entrou (receber_dano, E1)
 BOSS_DERROTADO = 'boss_derrotado'   # boss, fase: o boss da fase caiu (Game.boss_derrotado)
 FASE_TROCADA = 'fase_trocada'       # fase: a fase nova, no meio do fade (StageManager)
 

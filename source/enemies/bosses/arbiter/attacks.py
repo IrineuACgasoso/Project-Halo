@@ -60,7 +60,7 @@ class ArbiterAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono=CFG.dono_projetil,
+            dono=CFG.dono_projetil, fonte=self,
             tamanho=(20, 20),
             dano=dano,
             velocidade=CFG.carabina_vel_proj,

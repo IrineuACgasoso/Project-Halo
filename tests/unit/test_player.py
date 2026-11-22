@@ -2,44 +2,45 @@
 import pytest
 
 from source.systems.gameclock import relogio
+from source.systems.dano import Dano, DIRETO
 
 
-# ── receber_dano ─────────────────────────────────────────────────────────────
+# ── receber_dano (a matriz completa do contrato está em test_dano.py) ──
 def test_dano_direto_na_vida_sem_escudo(player):
-    player.receber_dano(100)
+    player.receber_dano(Dano(100, DIRETO))
     assert player.vida_atual == player.vida_maxima - 100
 
 
 def test_iframes_bloqueiam_segundo_hit_imediato(player):
-    player.receber_dano(100)
-    player.receber_dano(100)
+    player.receber_dano(Dano(100, DIRETO))
+    player.receber_dano(Dano(100, DIRETO))
     assert player.vida_atual == player.vida_maxima - 100
 
 
 def test_iframes_expiram_apos_duracao(player):
-    player.receber_dano(100)
+    player.receber_dano(Dano(100, DIRETO))
     relogio.avancar((player.duracao_invencibilidade + 1) / 1000)
     player.atualizar_invencibilidade()
-    player.receber_dano(100)
+    player.receber_dano(Dano(100, DIRETO))
     assert player.vida_atual == player.vida_maxima - 200
 
 
 def test_dano_direto_ignora_invencibilidade(player):
-    player.receber_dano(10)
-    player.tomar_dano_direto(10)
+    player.receber_dano(Dano(10, DIRETO))
+    player.receber_dano(Dano(10, DIRETO, ignora_iframes=True))
     assert player.vida_atual == player.vida_maxima - 20
 
 
 def test_escudo_absorve_e_transborda_para_vida(player):
     player.adicionar_escudo(50)
-    player.receber_dano(80)
+    player.receber_dano(Dano(80, DIRETO))
     assert player.escudo_atual == 0
     assert player.vida_atual == player.vida_maxima - 30
 
 
 def test_escudo_absorve_dano_parcial_sem_tocar_vida(player):
     player.adicionar_escudo(50)
-    player.receber_dano(20)
+    player.receber_dano(Dano(20, DIRETO))
     assert player.escudo_atual == 30 and player.vida_atual == player.vida_maxima
 
 
@@ -52,24 +53,24 @@ def test_veiculo_absorve_todo_o_dano_e_e_destruido(player):
 
     v = VeiculoFake()
     player.entrar_veiculo(v, vida_maxima=50)
-    player.receber_dano(80)
+    player.receber_dano(Dano(80, DIRETO))
     assert v.destruido and player.vida_veiculo_atual == 0
     assert player.vida_atual == player.vida_maxima   # sem transbordo
 
 
 def test_morte_clampa_vida_e_remove_sprite(player):
-    player.tomar_dano_direto(10 ** 6)
+    player.receber_dano(Dano(10 ** 6, DIRETO, ignora_iframes=True))
     assert player.vida_atual == 0 and not player.alive()
 
 
 def test_game_over_quando_vida_zera(novo_jogo):
-    novo_jogo.player.tomar_dano_direto(10 ** 6)
+    novo_jogo.player.receber_dano(Dano(10 ** 6, DIRETO, ignora_iframes=True))
     novo_jogo.update(1 / 60)
     assert novo_jogo.estado_do_jogo == 'game_over'
 
 
 def test_curar_nao_passa_do_maximo(player):
-    player.tomar_dano_direto(10)
+    player.receber_dano(Dano(10, DIRETO, ignora_iframes=True))
     player.curar(10 ** 6)
     assert player.vida_atual == player.vida_maxima
 
@@ -78,7 +79,7 @@ def test_curar_nao_passa_do_maximo(player):
 def test_escudo_regenera_apos_tempo_sem_dano(player):
     player.adicionar_escudo(100)
     player.shield_regen, player.velocidade_regen_escudo = 1000, 50
-    player.receber_dano(60)
+    player.receber_dano(Dano(60, DIRETO))
     player.atualizar_escudo(1.0)
     assert player.escudo_atual == 40               # ainda no delay
     relogio.avancar(1.0)
@@ -95,15 +96,15 @@ class _Alvo:
     def __init__(self):
         self.recebido = 0
 
-    def receber_dano(self, q):
-        self.recebido += q
+    def receber_dano(self, dano):
+        self.recebido += dano.valor
 
 
 def test_espinhos_contra_atacam_e_entram_em_cooldown(player):
     player.configurar_espinhos(dano=30, cooldown=1000)
     player.espinho_disponivel = True
     alvo = _Alvo()
-    player.tomar_dano(alvo, colisao=True)
+    player.contra_atacar_com_espinhos(alvo)
     assert alvo.recebido == 30 and not player.espinho_disponivel
     player.atualizar_espinhos()
     assert not player.espinho_disponivel
@@ -114,7 +115,7 @@ def test_espinhos_contra_atacam_e_entram_em_cooldown(player):
 
 def test_sem_espinhos_configurados_nao_contra_ataca(player):
     alvo = _Alvo()
-    player.tomar_dano(alvo, colisao=True)
+    player.contra_atacar_com_espinhos(alvo)
     assert alvo.recebido == 0
 
 

@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 import math
+from source.systems.dano import Dano, AREA
 
 class ContinuousBeam:
     def __init__(self, owner, color=(255, 0, 0), largura_base=4, dano_por_segundo=50, suavizacao=0.1):
@@ -23,7 +24,7 @@ class ContinuousBeam:
         # Lógica de Dano (Área de impacto na ponta do laser)
         distancia_ponta = (self.mira_atual - self.game.player.posicao).length()
         if distancia_ponta < 50: # Raio de dano da ponta do feixe
-            self.game.player.tomar_dano_direto(self.dano_por_segundo * delta_time)
+            self.game.player.receber_dano(Dano(self.dano_por_segundo * delta_time, AREA, self.owner, ignora_iframes=True))
 
     def draw(self, superficie, deslocamento, origem_offset=None):
         # Define o ponto de partida (se o inimigo tiver um canhão específico)

@@ -22,37 +22,32 @@ class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
         
         self.inicializar_sistemas()
 
-    def receber_dano(self, quantidade):
-        dano_final = quantidade
-
-        # 1. FASE VULNERÁVEL (STUN) -> Dano direto na vida
+    def ajustar_dano_recebido(self, valor, dano):
+        # 1. FASE VULNERÁVEL (STUN): "Backstab" (x10 de dano nas costas)
         if self.estado_combate == 'STUNNED':
             player_x = self.jogador.posicao.x
             scarab_x = self.posicao.x
-            
-            # Checa o "Backstab" (x10 de dano nas costas)
             if self.estado_animacao == 'right' and player_x < scarab_x:
-                dano_final *= 10
+                valor *= 10
             elif self.estado_animacao == 'left' and player_x > scarab_x:
-                dano_final *= 10
-                
-            super().receber_dano(dano_final)
+                valor *= 10
 
-        # 2. FASE DEFENSIVA -> Dano vai pro escudo
-        else:
-            # Checa o eixo Y: Se o player estiver "abaixo" do centro do Scarab (atirando nas pernas)
-            if self.jogador.posicao.y > self.posicao.y:
-                dano_final *= 5
-                
-            self.escudo_atual -= dano_final
-            
-            # Verifica se o escudo quebrou
-            if self.escudo_atual <= 0:
-                self.escudo_atual = 0
-                self.iniciar_stun()
+        # 2. FASE DEFENSIVA: se o player estiver "abaixo" do centro do Scarab (atirando nas pernas)
+        elif self.jogador.posicao.y > self.posicao.y:
+            valor *= 5
+        return valor
 
-    def tomar_dano_direto(self, quantidade):
-        self.receber_dano(quantidade)
+    def absorver_dano(self, valor):
+        # Vulnerável (stun): escudo e vida, como qualquer inimigo
+        if self.estado_combate == 'STUNNED':
+            super().absorver_dano(valor)
+            return
+
+        # Defensivo: o dano vai só para o escudo (sem transbordo); escudo quebrado = stun
+        self.escudo_atual -= valor
+        if self.escudo_atual <= 0:
+            self.escudo_atual = 0
+            self.iniciar_stun()
 
     def iniciar_stun(self):
         """Congela o Scarab e o deixa vulnerável"""

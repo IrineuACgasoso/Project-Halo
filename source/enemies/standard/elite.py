@@ -51,7 +51,7 @@ class EliteBase(BaseEnemy):
             grupos=(entity_manager.all_sprites,), # A base adiciona o grupo de inimigos sozinha agora
             jogador=self.jogador,
             game=self.game,
-            dono = 'INIMIGO',
+            dono = 'INIMIGO', fonte=self,
             tamanho=(32, 32), 
             dano=10,
             velocidade=600,

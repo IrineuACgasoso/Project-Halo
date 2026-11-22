@@ -22,7 +22,7 @@ class KnightAttacks:
                 grupos=(entity_manager.all_sprites,),
                 jogador=self.jogador,
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 tamanho=(128, 24),
                 dano=self.dano_base * 2.5,
                 velocidade=1500,
@@ -183,7 +183,7 @@ class KnightAttacks:
                 direcao=self.direcao_cleave_travada,
                 grupos=[entity_manager.all_sprites],
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 preset='cleave_knight' 
             )
 

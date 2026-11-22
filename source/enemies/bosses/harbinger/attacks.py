@@ -77,7 +77,7 @@ class HarbingerAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             tamanho=tamanho,
             dano=dano,
             velocidade=velocidade * self.buff_ofensivo_mult,
@@ -101,7 +101,7 @@ class HarbingerAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             tamanho=tamanho,
             dano=dano,
             velocidade=velocidade * self.buff_ofensivo_mult,
@@ -141,6 +141,7 @@ class HarbingerAttacks:
             alvo=self.jogador.posicao,
             game=self.game,
             velocidade=750 * self.buff_ofensivo_mult,
+            fonte=self,
         )
 
         self.energy_blast_restante -= 1

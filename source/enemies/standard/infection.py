@@ -119,7 +119,7 @@ class FloodMarine(FloodForm):
             grupos          = (entity_manager.all_sprites,),
             jogador         = self.jogador,
             game            = self.game,
-            dono            = 'INIMIGO',
+            dono            = 'INIMIGO', fonte=self,
             tamanho         = (32, 32),
             dano            = 8,
             velocidade      = 700,

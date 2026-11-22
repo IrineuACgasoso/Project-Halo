@@ -29,6 +29,6 @@ class GuardianAttacks:
             posicao=alvo,
             grupos=[entity_manager.all_sprites],
             game=self.game,
-            dono='INIMIGO',    
+            dono='INIMIGO', fonte=self,    
             preset='didact_collapse'
             )

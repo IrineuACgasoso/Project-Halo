@@ -9,6 +9,7 @@ from source.feats.assets import ASSETS
 from source.feats.grenades import Spike
 from source.feats.items import Items
 from source.systems.collision import CollisionManager
+from source.systems.dano import Dano, DIRETO
 from source.systems.entitymanager import entity_manager
 from source.systems.spawner import spawner as spawner_mod
 from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES
@@ -96,7 +97,7 @@ def test_projetil_inimigo_usa_hitbox_do_jogador():
 def test_inimigo_morto_e_removido_e_dropa(novo_jogo):
     random.seed(0)
     inimigo = GruntRed(posicao=novo_jogo.player.posicao + V(300, 0), game=novo_jogo)
-    inimigo.receber_dano(inimigo.vida + inimigo.escudo_atual + 1)
+    inimigo.receber_dano(Dano(inimigo.vida + inimigo.escudo_atual + 1, DIRETO))
     novo_jogo.collision_manager.update(1 / 60)
     assert not inimigo.alive()
     assert len(entity_manager.items_grupo) >= 1     # exp_shard tem 100% de chance
@@ -106,11 +107,11 @@ def test_dano_no_inimigo_consome_escudo_antes_da_vida(novo_jogo):
     inimigo = GruntRed(posicao=novo_jogo.player.posicao + V(300, 0), game=novo_jogo)
     inimigo.escudo_maximo = inimigo.escudo_atual = 20
     inimigo.vida = 100
-    inimigo.receber_dano(15)
+    inimigo.receber_dano(Dano(15, DIRETO))
     assert inimigo.escudo_atual == 5 and inimigo.vida == 100
-    inimigo.receber_dano(30)
+    inimigo.receber_dano(Dano(30, DIRETO))
     assert inimigo.escudo_atual == 0 and inimigo.vida == 75
-    inimigo.receber_dano(1000)
+    inimigo.receber_dano(Dano(1000, DIRETO))
     assert inimigo.vida == 0
 
 
@@ -153,7 +154,7 @@ def test_config_de_drop_invalida_e_ignorada(novo_jogo):
     ('life_orb', lambda p, a: p.vida_atual == p.vida_maxima),
 ])
 def test_coletar_item_aplica_efeito(player, tipo, efeito):
-    player.tomar_dano_direto(100)
+    player.receber_dano(Dano(100, DIRETO, ignora_iframes=True))
     antes = {'xp': player.experiencia_atual}
     item = Items(player.posicao, tipo, (entity_manager.items_grupo,))
     item.coletar(player)

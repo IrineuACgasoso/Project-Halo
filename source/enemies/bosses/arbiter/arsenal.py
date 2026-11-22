@@ -25,7 +25,7 @@ class ArbiterArsenal:
             direcao=direcao,
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono=CFG.dono_skills,
+            dono=CFG.dono_skills, fonte=self,
             preset=preset,
             custom_config=custom,
         )
@@ -92,7 +92,7 @@ class ArbiterArsenal:
             posicao_alvo=alvo,
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono=CFG.dono_skills,
+            dono=CFG.dono_skills, fonte=self,
             inimigos_grupo=self.jogador,       # sprite unico: gruda no JOGADOR (igual ao Spike)
             preset=CFG.granada_preset,
         )

@@ -101,7 +101,7 @@ class WardenAttacks:
                 direcao=self.direcao_chop_travada,
                 grupos=[entity_manager.all_sprites],
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 preset='warden_chop' # Chama a configuração visual/dano que criamos
             )
 
@@ -133,7 +133,7 @@ class WardenAttacks:
                 posicao=self.posicao.copy(),
                 grupos=[entity_manager.all_sprites],
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 preset='warden_bruiser_leap'
             )
 
@@ -174,7 +174,7 @@ class WardenAttacks:
                 grupos=[entity_manager.all_sprites, entity_manager.projeteis_inimigos_grupo],
                 jogador=self.jogador,
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 tamanho=(96, 96),                
                 dano=self.dano_base * 2.5,        
                 velocidade=1200,                    

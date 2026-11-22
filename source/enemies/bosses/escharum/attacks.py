@@ -32,7 +32,7 @@ class TartarusAttacks:
                 posicao=self.posicao, 
                 grupos=(entity_manager.all_sprites,), 
                 game=self.game,
-                dono='BOSS',
+                dono='BOSS', fonte=self,
                 preset='tartarus_run'
             )
 
@@ -87,7 +87,7 @@ class TartarusAttacks:
                 posicao=self.posicao, 
                 grupos=(entity_manager.all_sprites,), 
                 game=self.game,
-                dono='BOSS',
+                dono='BOSS', fonte=self,
                 preset='tartarus_leap'
                 )
             return
@@ -140,7 +140,7 @@ class TartarusAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             tamanho=(32, 32),
             dano=20,
             velocidade=800,
@@ -176,7 +176,7 @@ class TartarusAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             preset='jega_spike'
         )
 

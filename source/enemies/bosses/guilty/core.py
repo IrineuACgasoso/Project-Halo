@@ -21,22 +21,17 @@ class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
         
         self.inicializar_habilidades()
 
-    def receber_dano(self, quantidade):
+    def ajustar_dano_recebido(self, valor, dano):
         self.sentinelas_majors = [s for s in self.sentinelas_majors if s.alive()]
 
         # INTERCEPTAÇÃO: DEFESA DAS SENTINELAS MAJORS (Fase 2)
         if self.estado_fase == 'RAGE_F2' and len(self.sentinelas_majors) > 0:
-            quantidade *= 0.40
+            valor *= 0.40
 
-        # Se estiver na transição, ele ignora completamente o dano (Terminais ativos)
-        if self.estado_fase == 'TRANSICAO':
-            return
-
-        if not self.imune:
-            super().receber_dano(quantidade)
-
-    def tomar_dano_direto(self, quantidade):
-        self.receber_dano(quantidade)
+        # Na transição (terminais ativos) ou imune, ignora completamente o dano
+        if self.estado_fase == 'TRANSICAO' or self.imune:
+            return None
+        return valor
 
     def update(self, delta_time, paredes=None):
         agora = relogio.agora()

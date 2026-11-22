@@ -2,6 +2,7 @@ import pygame
 from source.utils.vetores import direcao_segura
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, CONTATO
 import math
 import random
 from source.windows.settings import *
@@ -234,8 +235,7 @@ class Companheiro(pygame.sprite.Sprite):
                 if dist_sq < 60**2:  # Dist ao quadrado
                     agora = relogio.agora()
                     if agora - self.ultimo_dano_tempo > self.cooldown:
-                        if hasattr(self.alvo, 'receber_dano'):
-                            self.alvo.receber_dano(self.dano)
+                        self.alvo.receber_dano(Dano(self.dano, CONTATO, self.jogador))
                         self.ultimo_dano_tempo = agora
 
         elif self.estado_logico == 'COLETANDO':

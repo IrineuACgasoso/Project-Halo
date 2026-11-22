@@ -47,7 +47,7 @@ class JegaAttacks:
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             tamanho=(24, 24),
             dano=40,
             velocidade=650,
@@ -100,7 +100,7 @@ class JegaAttacks:
                 grupos=(entity_manager.all_sprites,),
                 jogador=self.jogador,
                 game=self.game,
-                dono='INIMIGO',
+                dono='INIMIGO', fonte=self,
                 preset='jega_spike'
             )
 

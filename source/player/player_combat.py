@@ -1,5 +1,6 @@
-import pygame
 from source.systems.gameclock import relogio
+from source.systems.dano import Dano, CONTATO
+from source.systems.eventos import eventos, DANO_CAUSADO
 
 class PlayerCombat:
     def adicionar_escudo(self, valor):
@@ -53,25 +54,24 @@ class PlayerCombat:
         self.has_entered = False
         self.vida_veiculo_atual = 0
 
-    def receber_dano(self, dano, ignorar_invencibilidade=False):
-        """
-        Sistema central de dano do player.
-        """
+    def receber_dano(self, dano):
+        """Contrato de dano do jogador (roteiro E1): i-frames, veículo, escudo e vida, nessa ordem."""
         # Invencibilidade
-        if self.invencivel and not ignorar_invencibilidade:
+        if self.invencivel and not dano.ignora_iframes:
             return
         # Ativa iframe
-        if not ignorar_invencibilidade:
+        if not dano.ignora_iframes:
             self.invencivel = True
             self.tempo_ultimo_dano = relogio.agora()
 
         # Interrompe Regeneração de Escudo
         self.ultimo_dano_sofrido = relogio.agora()
         self.regenerando_escudo = False
-        
+
+        valor = dano.valor
         # ===== VEÍCULO =====
         if self.in_veicule and self.vida_veiculo_atual > 0:
-            self.vida_veiculo_atual -= dano
+            self.vida_veiculo_atual -= valor
             if self.vida_veiculo_atual <= 0:
                 self.vida_veiculo_atual = 0
                 # O veículo absorve todo o dano (sem transbordo para escudo/vida).
@@ -82,7 +82,7 @@ class PlayerCombat:
 
         # ===== ESCUDO =====
         elif self.escudo_atual > 0:
-            self.escudo_atual -= dano
+            self.escudo_atual -= valor
             # Sobrou dano
             if self.escudo_atual < 0:
                 dano_restante = abs(self.escudo_atual)
@@ -91,30 +91,14 @@ class PlayerCombat:
                 self.vida_atual -= dano_restante
         # ===== VIDA =====
         else:
-            self.vida_atual -= dano
+            self.vida_atual -= valor
         # Clamp
         if self.vida_atual < 0:
             self.vida_atual = 0
         # Morte
         if self.vida_atual <= 0:
             self.kill()
-            
-
-    def tomar_dano(self, inimigo, colisao=False):
-        """
-        Compatibilidade com projéteis/inimigos antigos.
-        """
-        self.receber_dano(inimigo.dano)
-        if colisao:
-            self._contra_atacar_com_espinhos(inimigo)
-
-
-    def tomar_dano_direto(self, dano):
-        """
-        Compatibilidade com código antigo.
-        Ignora invencibilidade.
-        """
-        self.receber_dano(dano, ignorar_invencibilidade=True)
+        eventos.emitir(DANO_CAUSADO, alvo=self, dano=dano, valor=valor)
 
     # ===== ESPINHOS (contra-ataque, ex: Mjolnir Punch) =====
     def configurar_espinhos(self, dano, cooldown):
@@ -132,12 +116,12 @@ class PlayerCombat:
             self.espinho_disponivel = True
 
 
-    def _contra_atacar_com_espinhos(self, inimigo):
-        """Consome o espinho disponível (se houver) causando dano de volta ao inimigo."""
+    def contra_atacar_com_espinhos(self, inimigo):
+        """Chamado pelo CollisionManager quando um inimigo encosta (mesmo durante os i-frames).
+        Consome o espinho disponível (se houver) causando dano de volta ao inimigo."""
         if self.dano_espinhos <= 0 or not self.espinho_disponivel:
             return
-        if hasattr(inimigo, 'receber_dano'):
-            inimigo.receber_dano(self.dano_espinhos)
+        inimigo.receber_dano(Dano(self.dano_espinhos, CONTATO, self))
         self._spawnar_faiscas_espinhos()
         self.espinho_disponivel = False
         self.ultimo_espinho_carregado = relogio.agora()

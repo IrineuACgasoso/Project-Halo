@@ -72,7 +72,7 @@ class JegaClone(BaseEnemy):
             posicao=self.posicao,
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             preset='jega_decoy_explosion'
         )
         self.kill()

@@ -1,17 +1,19 @@
 import pygame
 from .projetil import ProjetilUniversal
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, PROJETIL
 
 class LaserBlast(ProjetilUniversal):
     """Feixe do Spartan Laser: núcleo branco-quente, envolto por um glow
     vermelho contínuo, com leve alargamento/flare na ponta de impacto."""
 
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, piercing=1):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, piercing=1, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial,
             grupos=grupos,
             game=game,
             dono=dono,
+            fonte=fonte,
             sprite_key='spartan_laser',
             tamanho=tamanho,     # ex: (260, 16) — comprido e fino
             dano=dano,
@@ -74,16 +76,13 @@ class LaserBlast(ProjetilUniversal):
         if getattr(alvo, 'invulneravel', False):
             return
 
-        if hasattr(alvo, 'receber_dano'):
-            alvo.receber_dano(self.dano)
-        elif hasattr(alvo, 'tomar_dano'):
-            alvo.tomar_dano(self)
+        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
 
         ArtilhariaAviso(
             posicao=alvo.posicao,
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono=self.dono,
+            dono=self.dono, fonte=self.fonte,
             preset='spartan_laser'
         )
 

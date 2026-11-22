@@ -3,13 +3,16 @@ from source.utils.superficies import SUPERFICIE_VAZIA, rascunho
 from source.systems.gameclock import relogio
 import math
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, AREA, fonte_do_dono
 from .config import CONE_STRIKE_PRESETS, ConeStrikeConfig
 
 class ConeStrikeAviso(pygame.sprite.Sprite):
-    def __init__(self, posicao, direcao, grupos, game, dono='BOSS', preset='padrao', custom_config: ConeStrikeConfig = None):
+    def __init__(self, posicao, direcao, grupos, game, dono='BOSS', preset='padrao', custom_config: ConeStrikeConfig = None,
+                 fonte=None):
         super().__init__(grupos)
         self.game = game
         self.dono = dono
+        self.fonte = fonte_do_dono(dono, fonte)   # quem causou (contrato de dano, E1)
         self.posicao = pygame.math.Vector2(posicao)
         
         # Define a direção apontada (converte para vetor normalizado)
@@ -141,7 +144,4 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
 
     def _aplicar_dano(self, alvo):
         """ Auxiliar interno para despachar o dano respeitando os métodos do objeto """
-        if hasattr(alvo, 'tomar_dano_direto'):
-            alvo.tomar_dano_direto(self.cfg.dano)
-        elif hasattr(alvo, 'receber_dano'):
-            alvo.receber_dano(self.cfg.dano)
+        alvo.receber_dano(Dano(self.cfg.dano, AREA, self.fonte, ignora_iframes=True))

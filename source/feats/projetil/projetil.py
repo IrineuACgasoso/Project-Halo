@@ -6,6 +6,7 @@ from source.systems.entitymanager import entity_manager
 from source.feats.assets import *
 from source.feats.assets import ASSETS
 from source.utils.superficies import mascara_de
+from source.systems.dano import Dano, PROJETIL, fonte_do_dono
 
 
 #PROJETIL BASE
@@ -14,7 +15,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
 
     def __init__(self, posicao_inicial, grupos, game, dono, sprite_key, 
                  tamanho=(20, 20), velocidade=500, dano=10, duracao=2000, 
-                 direcao_custom=None, piercing=1, rotacionar=True): 
+                 direcao_custom=None, piercing=1, rotacionar=True, fonte=None):
         # Definimos os grupos baseados em quem é o dono
         meus_grupos = list(grupos) # Ex: [all_sprites]
         
@@ -27,6 +28,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         
         self.game = game
         self.dono = dono # 'PLAYER' ou 'INIMIGO'
+        self.fonte = fonte_do_dono(dono, fonte)   # quem disparou (contrato de dano, E1)
         self.sprite_key = sprite_key
         self.dano = dano
         self.velocidade = velocidade
@@ -85,12 +87,8 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         """
         # Checa se o alvo existe e se NÃO está invulnerável
         if alvo and not getattr(alvo, 'invulneravel', False):
-            if hasattr(alvo, 'receber_dano'):
-                alvo.receber_dano(self.dano)
-            # Tenta o padrão que você usa no Player
-            elif hasattr(alvo, 'tomar_dano'):
-                alvo.tomar_dano(self)
-                
+            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+
             # Lógica de Piercing: só reduz se de fato atingiu algo vulnerável
             if self.piercing <= 1:
                 self.kill()
@@ -110,11 +108,12 @@ class ProjetilUniversal(pygame.sprite.Sprite):
 
         
 class M50(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='m50', 
             tamanho=tamanho, 
             dano=dano, 
@@ -124,13 +123,14 @@ class M50(ProjetilUniversal):
             rotacionar=False)
         
 class DizimatorBullet(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         # O Dizimator geralmente é uma esfera de energia pesada
         super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='dizimator', 
             tamanho=tamanho, 
             dano=dano, 
@@ -141,11 +141,12 @@ class DizimatorBullet(ProjetilUniversal):
         )
 
 class BurstRifle(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='ar', 
             tamanho=tamanho, 
             dano=dano, 
@@ -156,12 +157,13 @@ class BurstRifle(ProjetilUniversal):
         )
 
 class LightBullet(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         # Projétil de luz sólida: precisa de rotação para alinhar a "lâmina" de luz
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='light_bullet', 
             tamanho=tamanho, 
             dano=dano, 
@@ -172,12 +174,13 @@ class LightBullet(ProjetilUniversal):
             )
         
 class AcidBreath(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         # Ácido é fumaça/bolhas, rotacionar isso é desperdício de RAM
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='acid_breath', 
             tamanho=tamanho, 
             dano=dano, 
@@ -188,12 +191,13 @@ class AcidBreath(ProjetilUniversal):
             )
         
 class LaserBeam(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, vai_rotacionar, color='red'):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, vai_rotacionar, color='red', fonte=None):
         s_key = f"{color}_laser"
         super().__init__(posicao_inicial=posicao_inicial, 
             grupos          = grupos, 
             game            = game, 
-            dono            = dono, 
+            dono            = dono,
+            fonte=fonte,
             sprite_key      = s_key, 
             tamanho         = tamanho, 
             dano            = dano, 

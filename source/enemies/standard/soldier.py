@@ -98,7 +98,7 @@ class Soldier(BaseEnemy):
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono = 'INIMIGO',
+            dono = 'INIMIGO', fonte=self,
             tamanho=self.tamanho,
             dano=self.dano_rifle,
             velocidade=self.velocidade_rifle,

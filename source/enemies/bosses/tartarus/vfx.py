@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, DIRETO
 
 class ProtocoloHalo(pygame.sprite.Sprite):
     def __init__(self, game, boss, tempo_limite_ms=180000):
@@ -47,7 +48,7 @@ class ProtocoloHalo(pygame.sprite.Sprite):
             if self.alpha_branco >= 255:
                 self.alpha_branco = 255
                 # O player recebe dano letal quando o fade termina
-                entity_manager.player.receber_dano(float('inf'))
+                entity_manager.player.receber_dano(Dano(float('inf'), DIRETO, self.boss))
 
     def hud_draw(self, surface):
         """Chamado exclusivamente pela HUD para desenhar UI e overlays"""

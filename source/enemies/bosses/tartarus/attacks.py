@@ -30,7 +30,7 @@ class TartarusAttacks:
                 posicao=self.posicao, 
                 grupos=(entity_manager.all_sprites,), 
                 game=self.game,
-                dono='BOSS',
+                dono='BOSS', fonte=self,
                 preset='tartarus_run'
             )
 
@@ -85,7 +85,7 @@ class TartarusAttacks:
                 posicao=self.posicao, 
                 grupos=(entity_manager.all_sprites,), 
                 game=self.game,
-                dono='BOSS',
+                dono='BOSS', fonte=self,
                 preset='tartarus_leap'
                 )
             return

@@ -58,9 +58,15 @@ Barramento síncrono `eventos`: `assinar(nome, funcao)`, `emitir(nome, **dados)`
 | `inimigo_morreu` | `inimigo` | `CollisionManager` (passo 6), só se `morrer()` tirou o inimigo do mundo |
 | `boss_derrotado` | `boss`, `fase` | `Game.boss_derrotado` |
 | `fase_trocada` | `fase` (a nova) | `StageManager._trocar_dados_fase` |
-| `dano_causado` | definido na E1 | ainda ninguém: entra com o contrato de dano único (E1) |
+| `dano_causado` | `alvo`, `dano` (o `Dano`), `valor` (final, depois da regra do alvo) | `receber_dano` do jogador e dos inimigos, só quando o golpe entra (i-frames e golpe ignorado pelo alvo não emitem) |
 
 Ainda não há assinantes no jogo: os consumidores previstos são a memória dos bosses (F3), o áudio (G4) e a pontuação.
+
+## Dano (`systems/dano.py`, roteiro E1)
+Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes))`. Tipos: `projetil`, `contato`, `aura`, `area` (explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte` é a entidade que causou (jogador, inimigo ou `None` para o mapa): projéteis, granadas e habilidades a guardam (`fonte_do_dono`: o que é do jogador é dele; o inimigo passa `fonte=self`, e um teste por AST exige isso).
+- **Jogador:** i-frames (ignorados com `ignora_iframes`, que também não os liga) → veículo → escudo → vida.
+- **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Hunter, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab defensivo sobrescreve: só escudo, quebra = stun). Não há i-frames.
+- **Invulnerável** (`invulneravel`: invisível, proteção de spawn) é checado por quem causa o dano, não pelo contrato: projéteis e auras checam; artilharia, cone, companheiro, atropelamento e espinhos não (achado da E1, ver log).
 
 ## Singletons e estado global
 - `entity_manager` (`systems/entitymanager.py`): guarda os grupos `all_sprites`, `inimigos_grupo`, `projeteis_jogador_grupo`, `projeteis_inimigos_grupo`, `items_grupo`, `auras_grupo` e o `player`. `Game._resetar_estado_jogo` esvazia esses grupos. Os grupos se acessam só por aqui (os aliases `game.<grupo>` foram removidos na B3).
@@ -75,7 +81,7 @@ Ainda não há assinantes no jogo: os consumidores previstos são a memória dos
 ## Entidades
 | Entidade | Composição | Notas |
 |---|---|---|
-| `Player` | `Sprite` + mixins `Input/Movement/Animation/Combat/Scaling/Setup` | dano: veículo → escudo → vida; i-frames de 100 ms |
+| `Player` | `Sprite` + mixins `Input/Movement/Animation/Combat/Scaling/Setup` | dano (`receber_dano(Dano)`): i-frames de 100 ms → veículo (absorve tudo) → escudo → vida; os espinhos são chamados pelo `CollisionManager` no contato |
 | `BaseEnemy` | `Sprite` + `EnemySetup/Sprites/Animation/Movement/Collision/Combat/Scaling/Effects` | escala no construtor pelo nível do player: `1 + nivel/10` (vida e dano) e `1 + nivel/100` (velocidade) |
 | Bosses | `class X(BaseEnemy, XSetup, XAI, XAttacks)` | máquina de estados por string com timestamps de `relogio`. O Arbiter (em andamento) usa rotinas geradoras e `config.py` |
 | Armas | `Arma(ABC)` em `feats/weapons/baseweapon.py` | `update` controla a cadência; `disparar()` devolve `True` quando atirou; `upgrade()` faz `nivel += 1` e depois `aplicar_upgrades` |

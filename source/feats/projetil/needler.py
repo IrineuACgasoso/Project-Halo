@@ -1,14 +1,16 @@
 from .projetil import ProjetilUniversal
 from source.systems.entitymanager import entity_manager
 from source.utils.vetores import direcao_segura
+from source.systems.dano import Dano, PROJETIL
 
 class ProjetilNeedler(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, alvo):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, alvo, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono,  
+            dono=dono,
+            fonte=fonte,
             sprite_key='needler', 
             tamanho=tamanho, 
             dano=dano, 
@@ -44,7 +46,7 @@ class ProjetilNeedler(ProjetilUniversal):
             alvo.agulhas_presas = 0
         
         alvo.agulhas_presas += 1
-        alvo.receber_dano(self.dano)
+        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
 
         if alvo.agulhas_presas >= 7:
             # Efeito de explosão (Dano massivo)
@@ -52,7 +54,7 @@ class ProjetilNeedler(ProjetilUniversal):
                 posicao             = alvo.posicao,
                 grupos              = entity_manager.all_sprites,
                 game                = self.game, 
-                dono                = self.dono,
+                dono                = self.dono, fonte=self.fonte,
                 preset='needler_supercombine'
                 )
             alvo.agulhas_presas = 0

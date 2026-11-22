@@ -81,7 +81,7 @@ class Crawler(BaseEnemy):
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono = 'INIMIGO',
+            dono = 'INIMIGO', fonte=self,
             tamanho=(32, 32),
             dano=5,
             velocidade=800,

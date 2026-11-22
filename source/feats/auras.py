@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, AURA
 
 class EnergyAura(pygame.sprite.Sprite):
     def __init__(self, owner, raio, dano_contato, game, cor_base=(0, 150, 255), impenetravel=True):
@@ -68,12 +69,7 @@ class EnergyAura(pygame.sprite.Sprite):
             agora = relogio.agora()
             if agora - self.ultimo_dano >= self.cooldown_dano:
                 self.ultimo_dano = agora
-                if hasattr(player, 'receber_dano'):
-                    player.receber_dano(self.dano_contato)
-                elif hasattr(player, 'tomar_dano'):
-                    player.tomar_dano(self)
-                else:
-                    player.vida_atual -= self.dano_contato
+                player.receber_dano(Dano(self.dano_contato, AURA, self.owner))
 
 
 class PlayerAura(pygame.sprite.Sprite):

@@ -2,12 +2,13 @@ import pygame
 from .projetil import ProjetilUniversal
 
 class ProjetilShotgun(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread):
+    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial, 
             grupos=grupos, 
             game=game, 
-            dono=dono, 
+            dono=dono,
+            fonte=fonte,
             sprite_key='shotgun_shard', 
             tamanho=tamanho, 
             dano=dano, 

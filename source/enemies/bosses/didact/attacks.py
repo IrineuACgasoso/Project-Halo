@@ -34,7 +34,7 @@ class DidactAttacks:
             grupos          = (entity_manager.all_sprites,),
             jogador         = self.jogador, 
             game            = self.game, 
-            dono            = 'INIMIGO', 
+            dono            = 'INIMIGO', fonte=self, 
             tamanho         = (128, 128),
             dano            = self.dano_base * 4, 
             velocidade      = 1500,
@@ -85,6 +85,6 @@ class DidactAttacks:
             posicao=alvo,
             grupos=[entity_manager.all_sprites],
             game=self.game,
-            dono='INIMIGO',    
+            dono='INIMIGO', fonte=self,    
             preset='didact_collapse'
             )

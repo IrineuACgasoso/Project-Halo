@@ -38,23 +38,17 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
             self.mask = mascara_de(self.image)
             self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
 
-    def receber_dano(self, quantidade):
-        dano_final = quantidade
-        
+    def ajustar_dano_recebido(self, valor, dano):
         if self.estado_habilidade == 'stun':
             player_x = self.jogador.posicao.x
             hunter_x = self.posicao.x
-            
+
             # Multiplicador de Dano nas costas (Armadura Exposta)
             if self.estado_animacao == 'right' and player_x < hunter_x:
-                dano_final *= 4  
+                valor *= 4
             elif self.estado_animacao == 'left' and player_x > hunter_x:
-                dano_final *= 4  
-                
-        super().receber_dano(dano_final)
-
-    def tomar_dano_direto(self, quantidade):
-        self.receber_dano(quantidade)
+                valor *= 4
+        return valor
 
     def morrer(self, grupos=None):
         Items.spawn_drop(

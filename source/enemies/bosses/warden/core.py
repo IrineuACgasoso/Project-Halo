@@ -154,9 +154,9 @@ class DomainConsciousness(BaseEnemy):
         """Permite que o construtor da classe mãe configure a vida inicial sem quebrar."""
         pass
 
-    def receber_dano(self, quantidade):
+    def ajustar_dano_recebido(self, valor, dano):
         # A mente do domínio não pode ser atingida diretamente por tiros
-        pass
+        return None
 
     def update(self, delta_time, paredes=None):
         # O manager apenas monitora se a presença física do Warden foi eliminada

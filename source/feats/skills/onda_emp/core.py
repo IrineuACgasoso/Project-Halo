@@ -2,6 +2,7 @@
 import pygame
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, AREA
 from .config import EMP_PRESETS, EMPConfig
 
 class OndaEMP(pygame.sprite.Sprite):
@@ -53,10 +54,7 @@ class OndaEMP(pygame.sprite.Sprite):
                     jogador.escudo_atual = 0
                 
                 # Aplicação do dano nativo
-                if hasattr(jogador, 'receber_dano'):
-                    jogador.receber_dano(self.cfg.dano)
-                elif hasattr(jogador, 'tomar_dano_direto'):
-                    jogador.tomar_dano_direto(self.cfg.dano)
+                jogador.receber_dano(Dano(self.cfg.dano, AREA, self.atacante))
 
     def draw(self, surface, deslocamento=None):
         """

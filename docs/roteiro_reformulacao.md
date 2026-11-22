@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D concluídos; próxima: E1.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D e a E1 concluídos; em andamento: o sistema de status (§7.1), depois E2.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -157,6 +157,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **E1 · Contrato de dano único** (risco: alto)
 - Muda: `Dano` (dataclass: valor, fonte, tipo `projetil|contato|aura|void|direto`, `ignora_iframes`) e `receber_dano(dano)` em jogador e inimigos. As APIs antigas viram `# SHIM(E1)` finos e somem no fim da etapa. Os 4 overrides (Guilty, Warden, Hunter, Scarab) migram. Emite `dano_causado`.
 - Testes: matriz escudo × i-frames × invulnerável × transbordo, para jogador e inimigo; um teste por override; golden inalterado.
+- Feito (2026-11-21): golden inalterado. Tipos: os 5 + `area` (explosão, cone, onda, puxão, feixe). Migração completa no mesmo commit, sem shims (como na B3). O inimigo ganhou 2 ganchos: `ajustar_dano_recebido` (a regra do alvo) e `absorver_dano` (só o Scarab sobrescreve). `fonte` em projéteis, granadas e habilidades (39 ataques inimigos passam `fonte=self`). **Difere do roteiro:** "invulnerável" não entrou no contrato: hoje só projéteis e auras o respeitam, e centralizar mudaria o jogo (ver log).
 
 **E2 · Estado de alvo unificado** (risco: baixo)
 - Muda: propriedades `alvejavel` e `vivo` substituem as checagens repetidas de alpha/`invis_phase` nas armas e a mistura `vida`/`vida_atual`.
@@ -241,6 +242,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 ## 7.1 Depois do roteiro (recursos aprovados para o futuro)
 - **G4 · Áudio central** (descrito no bloco G).
 - **Itens temporários e boosts do personagem:** substituem os casos provisórios da E6 (item `upgrade` e level-up sem opções quando tudo está no máximo). Usam os eventos de B4 e os dados validados de D5. Desenho: TODO, a definir quando começar.
+- **Sistema de status (buffs e debuffs)** (pedido em 2026-11-21; entra logo depois da E1, antes da E2): um ponto único `aplicar(alvo, efeito)` para jogador e inimigos. Debuffs: lentidão, atordoamento, queimadura (DPS + corte na cura), fraqueza (+% de dano recebido), cegueira (só no jogador). Buffs: dano, velocidade, cadência (só no jogador), escudo e vida (instantâneos). Curas, escudos de aliados (Watcher), regeneração do MK2 e o bônus da Cortana passam por ele. Decisões na §8 (itens 8–11).
 
 ## 8. Decisões tomadas (2026-11-21)
 1. **A0:** commitar o trabalho pendente como linha de base: **sim** (feito).
@@ -248,6 +250,9 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 3. **G4:** áudio de efeitos: **sim, mas no futuro** (depois de H2).
 4. **E6:** nível máximo **por raridade**: comum 25, incomum 20, rara 15, épica 10, lendária 5. A raridade também passa a ter efeito real (peso no sorteio).
 5. **F3:** a memória adaptativa do boss **reseta a cada luta**.
-
 6. **E6:** pesos de sorteio de arma nova: comum 40, incomum 25, rara 20, épica 10, lendária 5.
 7. **E6:** item `upgrade` e level-up sem opções (tudo no máximo) serão resolvidos pelos **itens temporários e boosts** (§7.1). Até lá, o comportamento provisório da E6 vale.
+8. **Status:** bosses e minibosses **não** podem ser atordoados por fora (o stun do Scarab e do Hunter é mecânica própria deles). Lentidão em bosses: também não, por ora (pode ser ligada na F5, com o movimento centralizado na `BossBase`).
+9. **Status:** acúmulo **por tipo**: a mesma fonte só renova a duração; entre fontes diferentes, lentidão = a mais forte, queimadura = DPS soma, buffs de dano/velocidade e fraqueza = % somam, cadência = multiplica (nunca zera o cooldown), atordoamento e cegueira = a maior duração.
+10. **Status:** o buff de escudo é **limitado ao escudo máximo** do alvo.
+11. **Status:** fraqueza é incondicional; a regra "só pelas costas" do Hunter/Scarab continua no gancho `ajustar_dano_recebido` do próprio boss.

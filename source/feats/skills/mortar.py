@@ -10,7 +10,7 @@ class CanhaoParabolico(ProjetilUniversal):
     def __init__(self, start_pos, target_pos, game, dono, 
                  sprite_key='green_laser', tamanho=(96, 96), 
                  velocidade=400, altura_maxima=250, 
-                 preset_artilharia='padrao'):
+                 preset_artilharia='padrao', fonte=None):
         
         dir_vec = target_pos - start_pos
         direcao = dir_vec.normalize() if dir_vec.length() > 0 else pygame.math.Vector2(1, 0)
@@ -26,8 +26,9 @@ class CanhaoParabolico(ProjetilUniversal):
             dano=0, # O dano acontece na explosão da artilharia, não no voo
             duracao=5000,
             direcao_custom=direcao,
-            piercing=float('inf'),    
-            rotacionar=True
+            piercing=float('inf'),
+            rotacionar=True,
+            fonte=fonte
         )
         self.start_pos = pygame.math.Vector2(start_pos)
         self.target_pos = pygame.math.Vector2(target_pos)
@@ -55,6 +56,7 @@ class CanhaoParabolico(ProjetilUniversal):
             grupos=(entity_manager.all_sprites,), 
             game=self.game,
             dono=self.dono,
+            fonte=self.fonte,
             preset=self.preset_artilharia # Agora ele usa o preset que você passar!
         )
         self.kill()

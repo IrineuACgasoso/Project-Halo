@@ -6,7 +6,7 @@ from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.entitymanager import entity_manager
 
 class HunterMortarProjectile(ProjetilUniversal):
-    def __init__(self, start_pos, target_pos, game, dono):
+    def __init__(self, start_pos, target_pos, game, dono, fonte=None):
         # Calcula a direção para o alvo
         dir_vec = target_pos - start_pos
         if dir_vec.length() > 0:
@@ -26,7 +26,8 @@ class HunterMortarProjectile(ProjetilUniversal):
             duracao=5000,
             direcao_custom=direcao,
             piercing=float('inf'),    # Passa varando todos os alvos sem morrer
-            rotacionar=True
+            rotacionar=True,
+            fonte=fonte
         )
         self.start_pos = pygame.math.Vector2(start_pos)
         self.target_pos = pygame.math.Vector2(target_pos)
@@ -56,7 +57,7 @@ class HunterMortarProjectile(ProjetilUniversal):
             posicao=self.target_pos, 
             grupos=(entity_manager.all_sprites,), 
             game=self.game,
-            dono=self.dono,
+            dono=self.dono, fonte=self.fonte,
             preset='hunter_cannon'
         )
         entity_manager.all_sprites.add(aviso)
@@ -117,7 +118,7 @@ class HunterAttacks:
                     grupos          = (entity_manager.all_sprites,),
                     jogador         = self.jogador,
                     game            = self.game,
-                    dono            = 'INIMIGO',
+                    dono            = 'INIMIGO', fonte=self,
                     dano            = 15,
                     velocidade      = 500,
                     tamanho         = (36, 36),
@@ -135,7 +136,7 @@ class HunterAttacks:
             start_pos=self.posicao.copy(), 
             target_pos=self.jogador.posicao.copy(), 
             game=self.game, 
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self,
             preset_artilharia='hunter_cannon'
         )
         

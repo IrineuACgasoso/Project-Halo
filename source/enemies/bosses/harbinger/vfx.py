@@ -59,7 +59,7 @@ class EnergyBlastShot(ProjetilUniversal):
 
     def __init__(self, posicao_inicial, alvo, game, jogador=None,
                  dono='INIMIGO', tamanho=(46, 46), dano=140,
-                 velocidade=750, duracao=4000):
+                 velocidade=750, duracao=4000, fonte=None):
         posicao_inicial = pygame.math.Vector2(posicao_inicial)
         alvo = pygame.math.Vector2(alvo)
 
@@ -84,6 +84,7 @@ class EnergyBlastShot(ProjetilUniversal):
             direcao_custom=direcao,
             piercing=1,
             rotacionar=False,  # é um glow redondo, não precisa girar
+            fonte=fonte,
         )
 
         self.percorrido = 0
@@ -136,7 +137,7 @@ class EnergyBlastShot(ProjetilUniversal):
             posicao=self.posicao.copy(),
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono='INIMIGO',
+            dono='INIMIGO', fonte=self.fonte,
             preset='harbinger_energy_blast',
         )
         self.kill()
@@ -153,7 +154,7 @@ class TeleportBurstShot(ProjetilUniversal):
 
     def __init__(self, posicao_inicial, grupos, jogador, game, dono,
                  tamanho=(110, 110), dano=110, velocidade=850,
-                 direcao_spread=None, duracao=2500):
+                 direcao_spread=None, duracao=2500, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial,
             grupos=grupos,
@@ -166,6 +167,7 @@ class TeleportBurstShot(ProjetilUniversal):
             duracao=duracao,
             direcao_custom=direcao_spread,
             rotacionar=False,
+            fonte=fonte,
         )
 
     def obter_imagem_base(self, sprite_key, tamanho):

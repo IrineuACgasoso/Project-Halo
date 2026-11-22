@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from source.systems.dano import Dano, CONTATO
 
 class ZealotAttacks:
     def realizar_teleporte(self):
@@ -32,7 +33,7 @@ class ZealotAttacks:
         self.posicao += self.dash_direcao * self.dash_speed * delta_time
         
         if dist_sq < 4000: 
-            self.jogador.receber_dano(self.dano_base * 1.5)
+            self.jogador.receber_dano(Dano(self.dano_base * 1.5, CONTATO, self))
             self.estado_habilidade = 'idle'
             self.last_dash = agora
             

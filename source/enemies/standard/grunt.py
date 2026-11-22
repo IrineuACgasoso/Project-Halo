@@ -47,7 +47,7 @@ class GruntBase(BaseEnemy):
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
-            dono = 'INIMIGO',
+            dono = 'INIMIGO', fonte=self,
             tamanho=(24, 24),
             dano=5,
             velocidade=450,

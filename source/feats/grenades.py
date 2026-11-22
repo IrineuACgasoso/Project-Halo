@@ -16,7 +16,7 @@ class GrenadeBase(ProjetilUniversal):
     def __init__(
             self, posicao_inicial, posicao_alvo, grupos, game, dono, preset,
             sprite_key, tamanho, colisao_alvo, max_height=250, velocidade=600,
-            duracao=8000, raio_contato=40, rotacionar=True, custom_config=None):
+            duracao=8000, raio_contato=40, rotacionar=True, custom_config=None, fonte=None):
         
         self.preset = preset
         self.custom_config = custom_config
@@ -43,7 +43,8 @@ class GrenadeBase(ProjetilUniversal):
             duracao=duracao,
             direcao_custom=direcao,
             piercing=float('inf'),  # atravessa quem não for o alvo de grude
-            rotacionar=rotacionar
+            rotacionar=rotacionar,
+            fonte=fonte
         )
 
         self.grudado = False
@@ -114,6 +115,7 @@ class GrenadeBase(ProjetilUniversal):
             grupos=(entity_manager.all_sprites,),
             game=self.game,
             dono=self.dono,
+            fonte=self.fonte,
             preset=self.preset,
             custom_config=self.custom_config,
             grude=True,
@@ -136,6 +138,7 @@ class GrenadeBase(ProjetilUniversal):
             grupos=(entity_manager.all_sprites,),
             game=self.game,
             dono=self.dono,
+            fonte=self.fonte,
             preset=self.preset,
             custom_config=self.custom_config,
             grude=False
@@ -145,7 +148,7 @@ class GrenadeBase(ProjetilUniversal):
 class Spike(GrenadeBase):
     """Spike do Jega/Banished: gruda no JOGADOR se tocar nele durante o voo."""
 
-    def __init__(self, posicao_inicial, posicao_alvo, grupos, jogador, game, dono, preset):
+    def __init__(self, posicao_inicial, posicao_alvo, grupos, jogador, game, dono, preset, fonte=None):
         self.jogador = jogador
         super().__init__(
             posicao_inicial=posicao_inicial,
@@ -161,7 +164,8 @@ class Spike(GrenadeBase):
             velocidade=600,
             duracao=8000,
             raio_contato=40,
-            rotacionar=True
+            rotacionar=True,
+            fonte=fonte
         )
 
 class PlasmaGrenade(GrenadeBase):
@@ -174,7 +178,7 @@ class PlasmaGrenade(GrenadeBase):
     PASSO_ALPHA_PULSO = 10   # quantização do alpha da auréola (cache das compostas)
 
     def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo,
-                 custom_config=None, preset='plasma_grenade'):
+                 custom_config=None, preset='plasma_grenade', fonte=None):
         # `inimigos_grupo` aceita grupo/lista OU um sprite unico (ex.: o jogador, quando
         # quem lanca e um inimigo como o Arbiter) — ver GrenadeBase._checar_colisao.
         super().__init__(
@@ -192,7 +196,8 @@ class PlasmaGrenade(GrenadeBase):
             duracao=3000,
             raio_contato=30,
             rotacionar=False,
-            custom_config=custom_config
+            custom_config=custom_config,
+            fonte=fonte
         )
         self.tempo_criacao_pulso = relogio.agora()
 

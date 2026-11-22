@@ -63,7 +63,7 @@ class ScarabAttacks:
                 grupos          = (entity_manager.all_sprites,),
                 jogador         = self.jogador,
                 game            = self.game,
-                dono            = 'INIMIGO',
+                dono            = 'INIMIGO', fonte=self,
                 tamanho         = (96, 16), # Plasma "Heavy"
                 dano            = 20,
                 velocidade      = 750,
