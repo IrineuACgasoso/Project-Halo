@@ -2,12 +2,14 @@ import pygame
 from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
 from source.systems.status import StatusEntidade
+from source.systems.entrada import PARADO
 
 # Seta todo o init do Player
 class PlayerSetup:
     def setup_movimento(self):
         self.direcao = pygame.math.Vector2()
         self.velocidade = 500
+        self.comando = PARADO   # ComandoJogador do passo, entregue pelo Game (roteiro E3)
 
     def setup_animacao(self, posicao_inicial):
         self.sprites = {}

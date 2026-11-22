@@ -66,9 +66,8 @@ class Pelican(Arma):
 
     def _checar_tecla_chamada(self):
         """Detecta a borda de subida da tecla V (evita alternar 60x/s
-        enquanto o jogador segura a tecla)."""
-        teclas = pygame.key.get_pressed()
-        pressionada = teclas[pygame.K_v]
+        enquanto o jogador segura a tecla). O comando vem do Game (roteiro E3)."""
+        pressionada = self.jogador.comando.veiculo
 
         if pressionada and not self._tecla_v_pressionada_anterior:
             self._alternar_veiculo()

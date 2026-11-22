@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1) e a E2 concluídos; próxima: E3.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2 e a E3 concluídos; próxima: E4.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -167,6 +167,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **E3 · Entrada desacoplada** (risco: médio)
 - Muda: `ComandoJogador` (direção + ações) vem de uma `FonteEntrada`: `Teclado`, `Roteiro` (replay) ou `Bot` (F4). `Player.update` lê o comando; os hacks de debug viram comandos.
 - Testes: replay de um roteiro gera o mesmo golden 2×; teclado mapeado corretamente.
+- Feito (2026-11-22): `systems/entrada.py`; o `Game` lê `game.entrada` 1× por passo e entrega `player.comando`. O comando diz o que está **pressionado** (a borda do V continua no veículo). Os hacks só saem do `Teclado` com debug. Golden inalterado; só `entrada.py` chama `get_pressed` (teste).
 
 **E4 · Armas** (risco: médio)
 - Muda: as armas pegam os grupos do `entity_manager`; `ArmaInfo.grupos` e o desempacotamento posicional somem, eliminando a classe de bug que fez o Fuel Rod mirar nos itens. Helpers comuns para rajada e spread; busca de alvo via C2 (se existir). O nível máximo fica para E6 (é recurso novo, não refatoração).

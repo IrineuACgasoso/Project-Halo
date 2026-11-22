@@ -41,7 +41,7 @@ Cada passo é um método nomeado; `test_eventos.py::test_update_roda_os_passos_n
 2. `_atualizar_portal`: o portal aparece 2000 ms depois que o boss morre. `_checar_boss_derrotado` → `boss_derrotado()`. `_checar_portal_tocado`: encostar nele chama `StageManager.iniciar_transicao()`.
 3. `_atualizar_spawner`: `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
 4. `_atualizar_status`: conta o tempo dos buffs e debuffs e aplica a queimadura, só nas entidades com efeito ativo (`systems/status`). Vem antes das entidades para o atordoamento já valer neste passo.
-5. `_atualizar_entidades`: `Player.update(dt, paredes)`, depois cada arma `.update(dt)` (nenhuma, se o jogador estiver atordoado), depois os sprites (os inimigos recebem `paredes`; inimigo atordoado não é atualizado). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
+5. `_atualizar_entidades`: `player.comando = game.entrada.ler()` (um `ComandoJogador` por passo; a fonte é `Teclado`, `Roteiro` ou, na F4, o bot: `systems/entrada.py`), `Player.update(dt, paredes)`, depois cada arma `.update(dt)` (nenhuma, se o jogador estiver atordoado), depois os sprites (os inimigos recebem `paredes`; inimigo atordoado não é atualizado). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
 6. `CollisionManager.update`, nesta ordem:
    - projétil do jogador contra inimigos (o mais próximo primeiro; perfuração finita acerta cada alvo uma vez só);
    - projétil inimigo contra a hitbox do jogador;
@@ -74,7 +74,7 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
 | Efeito | Onde age |
 |---|---|
 | `Lentidao`, `BuffVelocidade` | `mult_velocidade` no movimento: `PlayerMovement.mover_com_colisao`, `EnemyMovement.velocidade_atual()` (usada pelo `mover` e pelos 4 inimigos comuns que se movem sozinhos). Bosses movem-se por conta própria: buff de velocidade neles ainda não tem efeito (F5) |
-| `Atordoamento` | o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador não lê o input; `inofensivo` (sem dano de contato); espinhos, aura do MK2, veículo e aura de energia do dono param |
+| `Atordoamento` | o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador ignora a direção do comando; `inofensivo` (sem dano de contato); espinhos, aura do MK2, veículo e aura de energia do dono param |
 | `Queimadura` | dano `STATUS` a cada 0,25 s em nome da `fonte` (ignora i-frames sem ligá-los) + corte na `Cura` |
 | `Fraqueza`, `BuffDano` | `multiplicador_de_dano(dano, alvo)` no `receber_dano` (buff da fonte × fraqueza do alvo), antes da regra do alvo |
 | `BuffCadencia` (só jogador) | `mult_cooldown` em `Arma.update`, no ciclo da Energy Sword e na recarga dos espinhos (companheiros e veículos não) |

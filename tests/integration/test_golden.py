@@ -14,6 +14,7 @@ import pytest
 
 from helpers import DT, blindar_jogador, voltar_ao_menu
 from source.systems.entitymanager import entity_manager
+from source.systems.entrada import ComandoJogador, Roteiro
 from source.systems.gameclock import _OFFSET_INICIAL_MS, relogio
 
 CAMINHO_GOLDEN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -43,22 +44,30 @@ def _amostra(game, segundo):
     }
 
 
-def simular_golden(game):
-    """Partida nova da fase 0 e uma amostra por segundo de jogo (a do segundo 0 inclusa)."""
+def simular_golden(game, segundos=PARAMETROS['segundos'], roteiro=None):
+    """Partida nova da fase 0 e uma amostra por segundo de jogo (a do segundo 0 inclusa).
+    Sem `roteiro`, a fonte é o Teclado (nada pressionado no SDL dummy)."""
     random.seed(PARAMETROS['seed'])
     voltar_ao_menu(game)
     game.iniciar_novo_jogo()
     game.renderer._erros_logados.clear()
     blindar_jogador(game.player)
-    quadros_por_segundo = round(1 / DT)
-    amostras = [_amostra(game, 0)]
-    for segundo in range(1, PARAMETROS['segundos'] + 1):
-        for _ in range(quadros_por_segundo):
-            game.update(DT)
-        amostras.append(_amostra(game, segundo))
-    assert game.estado_do_jogo == 'jogando', 'a simulação parou: o golden não valeria'
-    voltar_ao_menu(game)
-    return {**PARAMETROS, 'amostras': amostras}
+    entrada_original = game.entrada
+    if roteiro is not None:
+        roteiro.reiniciar()
+        game.entrada = roteiro
+    try:
+        quadros_por_segundo = round(1 / DT)
+        amostras = [_amostra(game, 0)]
+        for segundo in range(1, segundos + 1):
+            for _ in range(quadros_por_segundo):
+                game.update(DT)
+            amostras.append(_amostra(game, segundo))
+        assert game.estado_do_jogo == 'jogando', 'a simulação parou: o golden não valeria'
+    finally:
+        game.entrada = entrada_original
+        voltar_ao_menu(game)
+    return {**PARAMETROS, 'segundos': segundos, 'amostras': amostras}
 
 
 # ------------------------------------------------------------------ #
@@ -178,6 +187,31 @@ def test_simulacao_e_deterministica(game, primeira_rodada):
     """Duas partidas seguidas no mesmo processo dão o mesmo resultado (sem estado vazando
     de uma partida para a outra nem aleatoriedade fora da seed)."""
     assert primeira_divergencia(primeira_rodada, simular_golden(game)) is None
+
+
+def _roteiro_de_teste():
+    """20 s: anda nas 4 direções e na diagonal, para, chama o veículo (sem veículo equipado)."""
+    s = round(1 / DT)   # passos por segundo
+    return Roteiro([
+        (2 * s, ComandoJogador(direcao=(1, 0))),
+        (2 * s, ComandoJogador(direcao=(0, 1))),
+        (3 * s, ComandoJogador(direcao=(-1, -1))),
+        (1 * s, ComandoJogador()),
+        (5, ComandoJogador(veiculo=True)),
+        (2 * s, ComandoJogador(direcao=(0, -1))),
+        (4 * s, ComandoJogador(direcao=(-1, 1))),
+    ])
+
+
+@pytest.mark.integration
+def test_replay_de_um_roteiro_e_deterministico(game, primeira_rodada):
+    """Roteiro E3: o mesmo roteiro dá a mesma partida 2x, e o comando chega de fato ao jogador
+    (a posição sai da do golden sem input já no 1º segundo)."""
+    a = simular_golden(game, 20, _roteiro_de_teste())
+    b = simular_golden(game, 20, _roteiro_de_teste())
+    assert primeira_divergencia(a, b) is None
+    sem_input = primeira_rodada['amostras'][1]
+    assert (a['amostras'][1]['x'], a['amostras'][1]['y']) != (sem_input['x'], sem_input['y'])
 
 
 def test_nova_partida_zera_o_relogio(game):

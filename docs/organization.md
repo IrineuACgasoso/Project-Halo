@@ -45,6 +45,7 @@ Project-Halo/
     │   ├── estados.py       # constantes de estado, TRANSICOES, Tela (roteiro B2)
     │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
+    │   ├── entrada.py       # ComandoJogador + FonteEntrada (Teclado, Roteiro): o jogador lê o comando, não o teclado (roteiro E3)
     │   ├── dano.py          # Dano (valor, tipo, fonte, ignora_iframes): contrato único de dano (roteiro E1)
     │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py (desenho)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
@@ -58,7 +59,7 @@ Project-Halo/
 │   │                    # grade_paredes.py: GradeParedes (segmentos por célula de 128 px, roteiro C1)
     │   ├── levelup/         # constants.py (ARMAS_REGISTRO, MAX_ARMAS=6, paletas), levelup.py (TelaDeUpgrade), draw.py
     │   └── hud/             # hud_system.py (estado) + hud_draw.py (desenho; barras, fundos e textos em cache: C4)
-    ├── player/              # Player + mixins: input, movement, animation, combat (dano/escudo/espinhos),
+    ├── player/              # Player + mixins: input (aplica o ComandoJogador), movement, animation, combat (dano/escudo/espinhos),
     │                        # scaling (XP/level-up/buff), setup (valores iniciais)
     ├── enemies/
     │   ├── base/            # BaseEnemy + mixins (setup, sprites, animation, movement, collision, combat, scaling, effects)
@@ -94,6 +95,7 @@ Project-Halo/
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
+| Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
 | Buff ou debuff (aplicar, novo efeito, imunidade de boss) | `systems/status/` (`aplicar(alvo, efeito, fonte, chave)`); efeito novo = dataclass em `efeitos.py` + o cálculo em `StatusEntidade._recalcular` |
 | Regra de dano própria de um inimigo (costas, imunidade) | `ajustar_dano_recebido` na classe dele (contrato em `systems/dano.py`) |

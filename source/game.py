@@ -21,6 +21,7 @@ from source.systems.estados import (ESTADOS, TRANSICOES, Tela, TransicaoInvalida
 from source.systems.sessao import SessaoJogo
 from source.systems.eventos import eventos, BOSS_DERROTADO
 from source.systems.status import atualizar_status, limpar_status
+from source.systems.entrada import Teclado
 from source.debug import DEBUG
 # FEATS
 from source.feats.buddies import *
@@ -50,6 +51,7 @@ class Game:
         self.player = None
         self.sessao = None                 # SessaoJogo da partida atual (roteiro B3)
         self.hud = None                    # recriada a cada partida: guarda tempos da sessão
+        self.entrada = Teclado()           # FonteEntrada lida 1x por passo (roteiro E3)
 
         # Sistemas que vivem para sempre (não resetam entre jogos)
         self._inicializar_sistemas_permanentes()
@@ -236,6 +238,7 @@ class Game:
             return
         # Cada entidade consulta a grade na própria posição (roteiro C1)
         paredes = self.mapa.grade_paredes
+        self.player.comando = self.entrada.ler()   # antes das armas: os veículos leem a tecla V
         self.player.update(delta_time, paredes)
         self.camera.update(self.player.posicao)
 

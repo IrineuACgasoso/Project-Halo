@@ -54,7 +54,7 @@ class Player(
         if self.status.atordoado:   # atordoado: não anda (as armas param no Game)
             self.direcao.update(0, 0)
         else:
-            self.input()
+            self.aplicar_direcao_do_comando()
 
         self.atualizar_veiculo(delta_time)
 
@@ -69,6 +69,6 @@ class Player(
 
         self.atualizar_animacao()
 
-        self.debug_hacks()
+        self.executar_hacks()
             
             

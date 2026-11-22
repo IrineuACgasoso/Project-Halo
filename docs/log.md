@@ -2,6 +2,14 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa E3: entrada desacoplada (refatoração: golden inalterado)
+- `source/systems/entrada.py`: `ComandoJogador` (frozen e validado: `direcao` + `veiculo`, `hack_nivel`, `hack_portal`, `hack_boss`), `FonteEntrada` com `Teclado` (WASD, V; L/P/B só com debug) e `Roteiro` (replay por segmentos `(passos, comando)`, parado no fim). `Game.entrada` (padrão `Teclado`) é lida 1× por passo em `_atualizar_entidades` e vira `player.comando`.
+- O jogador (`aplicar_direcao_do_comando`, `executar_hacks`) e o Warthog/Pelican (tecla V) leem o comando; só `entrada.py` chama `get_pressed` (teste). O comando diz o que está **pressionado**: a borda do V continua no veículo, então nada muda no jogo. Saiu o `hasattr(game, 'spawner')` do hack B.
+- Testes: `test_entrada.py` (48) e, no `test_golden.py`, um roteiro de 20 s tocado 2× dá a mesma partida. O teste do jogador atordoado (`test_status`) passou a usar um `Roteiro` em vez de sobrescrever o `input`. **Suíte: 1081 verdes + 1 xfail em 62 s.** Golden inalterado.
+- Desempenho (na tomada): horda 4,95 ms/frame (−5% da base), fase 0 1,5 (−10%).
+- **Não validado:** WASD, V e os hacks L/P/B no jogo real (cobertos só com teclado falso).
+- Próxima etapa: **E4** (armas pegam os grupos do `entity_manager`). Pendências da E1/status continuam (abaixo).
+
 ## 2026-11-22 | Etapa E2: estado de alvo unificado + balanceamento do usuário (golden regravado)
 - `BaseEnemy.vivo` (`vida > 0`) e `alvejavel` (vivo e não `invisivel`). As buscas de alvo das armas (`encontrar_inimigo_mais_proximo`/`_mais_forte`) e a checagem de morte do `CollisionManager` usam as propriedades; os `getattr` de alpha/`invis_phase` e a mistura `vida_atual`/`vida` saíram (só `BaseEnemy` entra em `inimigos_grupo`). Sozinha, a E2 deixa o golden inalterado (conferido com o balanceamento fora).
 - **Balanceamento do usuário (muda o jogo, golden regravado por ele):** AR (velocidade do tiro 2400, alcance 600 +25/nível), Sidekick (alcance 450 +25), Sniper (alcance +50/nível), Machine Gun (alcance 550 +50), Light Rifle (alcance 700), Spartan Laser (+25/nível), Hunter (vida 800, costas ×8). O ×8 virou `Hunter.MULT_COSTAS`, e os testes leem a constante.

@@ -13,6 +13,7 @@ from source.enemies.standard.grunt import GruntRed
 from source.feats.projetil import PlasmaGun
 from source.systems.dano import CONTATO, DIRETO, PROJETIL, STATUS, Dano
 from source.systems.entitymanager import entity_manager
+from source.systems.entrada import ComandoJogador, Roteiro
 from source.systems.estados import PAUSA
 from source.systems.eventos import DANO_CAUSADO, eventos
 from source.systems.gameclock import relogio
@@ -266,7 +267,7 @@ def test_inimigo_atordoado_nao_causa_dano_de_contato(novo_jogo):
 
 def test_jogador_atordoado_nao_anda_nem_atira(novo_jogo, monkeypatch):
     player = novo_jogo.player
-    monkeypatch.setattr(type(player), 'input', lambda self: self.direcao.update(1, 0))
+    monkeypatch.setattr(novo_jogo, 'entrada', Roteiro([(10 ** 6, ComandoJogador(direcao=(1, 0)))]))
     _grunt(novo_jogo, V(300, 0))
     aplicar(player, Atordoamento(1000))
     pos = V(player.posicao)
