@@ -8,6 +8,7 @@ import pytest
 
 from helpers import MapaSemImagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA
+from source.enemies.base.boss import BossBase
 from source.enemies.base.enemy_base import BaseEnemy
 from source.enemies.bosses.warden.core import BaseWarden
 from source.enemies.standard.grunt import GruntRed
@@ -50,7 +51,7 @@ def _classes_de_inimigos():
 
 @pytest.mark.parametrize('classe', _classes_de_inimigos(), ids=lambda c: c.__name__)
 def test_nenhum_mixin_do_inimigo_e_anulado_por_base_enemy(classe):
-    base = set(BaseEnemy.__mro__)
+    base = set(BaseEnemy.__mro__) | set(BossBase.__mro__)   # a BossBase também é base (F1)
     anulados = []
     for mixin in classe.__mro__:
         if mixin in base or mixin is object:
@@ -61,7 +62,7 @@ def test_nenhum_mixin_do_inimigo_e_anulado_por_base_enemy(classe):
             dono = next(k for k in classe.__mro__ if nome in vars(k))
             if dono is not mixin and dono in base:
                 anulados.append(f'{mixin.__name__}.{nome} (vence {dono.__name__})')
-    assert anulados == [], 'coloque o mixin ANTES de BaseEnemy na herança'
+    assert anulados == [], 'coloque o mixin ANTES de BaseEnemy/BossBase na herança'
 
 
 def test_didact_colide_pela_hitbox(novo_jogo):

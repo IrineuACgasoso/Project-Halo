@@ -1,25 +1,27 @@
 import pygame
-from source.systems.gameclock import relogio
-from source.enemies.base.enemy_base import BaseEnemy
+from source.enemies.base.boss import BossBase
 from source.feats.items import Items
 
-from .config import CFG
+from .config import CFG, FASES
 from .setup import ArbiterSetup
-from .states import ArbiterAI
+from .states import ESTADOS, ArbiterAI
 from .attacks import ArbiterAttacks
 from .arsenal import ArbiterArsenal
 from .movement import ArbiterMovement
-from source.systems.status import IMUNIDADES_CHEFE
 
 
-class BossArbiter(ArbiterMovement, BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks, ArbiterArsenal):
-    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
-    # ArbiterMovement ANTES de BaseEnemy: precisa sobrescrever `mover` (ver movement.py)
+class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, ArbiterSetup, BossBase):
+    """Mixins ANTES de BossBase: os overrides deles (`mover`, `perceber`, `_esperar`...) precisam vencer na MRO."""
+    FASES = FASES
+    COOLDOWNS = CFG.cooldown
+    COOLDOWN_INICIAL = CFG.cooldown_inicial
+    ESTADOS = ESTADOS
+    ANTISTUCK = CFG.antistuck
+
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=2500, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
 
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
-        self.is_boss = True
 
         self.setup_animation(estado_inicial='right', velocidade_animacao=200)
 
@@ -45,29 +47,6 @@ class BossArbiter(ArbiterMovement, BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAt
         if self.invisivel:
             return not (CFG.vulneravel_ao_revelar and self.revelado)
         return False
-
-    def update(self, delta_time, paredes=None):
-        agora = relogio.agora()
-        self._agora = agora
-        self._dt = delta_time
-
-        self._atualizar_percepcao(delta_time, agora)
-        self._checar_fase()
-
-        dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
-
-        # Maquina de Estados / Inteligencia
-        self.executar_estados(agora, delta_time, dist_sq)
-
-        # Mira sempre pro jogador independente da habilidade
-        direcao_x = self.jogador.posicao.x - self.posicao.x
-        self.set_sprite_direction(direcao_x)
-
-        # Movimento e Fisica (a velocidade/direcao decididas nas rotinas reagem aqui)
-        super().update(delta_time, paredes)
-
-        self.animar()
-        self.hitbox.center = self.rect.center
 
     def morrer(self, grupos=None):
         Items.spawn_drop(

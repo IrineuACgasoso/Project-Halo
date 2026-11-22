@@ -3,13 +3,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
+from source.enemies.base.boss import ConfigTravamento, FaseBoss
+
 
 @dataclass(frozen=True)
-class FaseArbiter:
-    nome: str
-    limiar_vida: float          # fase ativa quando vida / vida_maxima <= limiar
-    mult_cooldown: float        # < 1 = habilidades voltam mais rápido
-    mult_velocidade: float
+class FaseArbiter(FaseBoss):
+    # nome, limiar_vida, mult_cooldown e mult_velocidade vêm de FaseBoss (nesta ordem)
     carabina_tiros: int
     carabina_rastreio: float    # 0..1: quanto a rajada "puxa" pro jogador a cada tiro
     lamina_golpes: int          # combo da espada de energia
@@ -94,10 +93,8 @@ class ArbiterConfig:
     furtivo_mult_vel: float = 4.0
     emboscada_dist: float = 205          # dist. p/ cortar o sprint e dar o golpe de espada
 
-    # --- Anti-stuck ---
-    antistuck_janela: int = 1500
-    antistuck_caminho_min: float = 40           # caminho percorrido < 40 px em 1.5 s (livre)
-    antistuck_dist_min_sq: float = 40000        # e longe do jogador (> 200 px)
+    # --- Anti-stuck: caminho percorrido < 40 px em 1,5 s (livre) e longe do jogador (> 200 px) ---
+    antistuck: ConfigTravamento = ConfigTravamento(janela_ms=1500, caminho_min=40, dist_min=200)
     antistuck_tiros: int = 20
     antistuck_intervalo: int = 45
     antistuck_dano: int = 15

@@ -64,6 +64,7 @@ Project-Halo/
     │                        # scaling (XP/level-up/buff), setup (valores iniciais)
     ├── enemies/
     │   ├── base/            # BaseEnemy + mixins (setup, sprites, animation, movement, collision, combat, scaling, effects)
+    │   │   └── boss/        # BossBase (motor: rotinas, cooldowns, fases, anti-stuck), ContextoCombate, FaseBoss, DetectorTravamento (F1)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
     │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: padrão novo, rotinas geradoras), zealot, scarab, knight
     │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
@@ -94,7 +95,8 @@ Project-Halo/
 | Novo companion ou veículo | `feats/buddies/` ou `feats/vehicles/`, com `COMPANION_DATA`/`VEHICLES_DATA` e `ARMAS_REGISTRO` |
 | Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), perfil em `INIMIGOS` (`data/enemy_data.py`), sprites em `MANIFESTO['enemies']`, peso em `spawner_pools.py` |
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |
-| Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
+| Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Herde de `BossBase` (`enemies/base/boss/`; contrato no docstring de `boss_base.py`; exemplo: o Arbiter). Desenho em `docs/plano_bosses.md` |
+| Motor comum dos bosses (ciclo do frame, cooldowns, fases, anti-stuck, mira antecipada) | `enemies/base/boss/boss_base.py`; percepção em `contexto.py` |
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
 | Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |

@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4, a E5 e a E6 concluídos; próximo: bloco F.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4, a E5, a E6 e a F1 concluídos; próximo: F2 (Animador).
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -196,7 +196,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 ### F. Bosses (detalhe em `docs/plano_bosses.md`)
 | Etapa | Entrega | Pronto quando |
 |---|---|---|
-| **F1** BossBase + ContextoCombate | extraídos do Arbiter, sobre o contrato de dano de E1 | Arbiter igual (smoke + regressão); testes do motor (cooldown, fases, interrupção, anti-stuck) |
+| **F1** BossBase + ContextoCombate | extraídos do Arbiter, sobre o contrato de dano de E1 | Arbiter igual (smoke + regressão); testes do motor (cooldown, fases, interrupção, anti-stuck). **Feito (2026-11-22):** golden próprio do Arbiter (`tests/golden/arbiter.json`, gravado antes) inalterado |
 | **F2** Animador | clips declarativos, hit frames, cache de máscaras | update de boss com zero alocação (catraca) |
 | **F3** IA de utilidade + memória | `decisao.py`, alimentada por `dano_causado` (B4) | teste determinístico: contexto X → habilidade Y |
 | **F4** Bot jogador | `FonteEntrada` Bot (E3) que esquiva e kita | métricas por boss no log: tempo para matar, % de acerto, uso de cada habilidade |

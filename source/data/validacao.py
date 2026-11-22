@@ -14,6 +14,7 @@ import pygame
 from source.data.enemy_data import INIMIGOS, PerfilInimigo
 from source.data.manifesto_assets import MANIFESTO, Imagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
+from source.enemies.base.boss import BossBase, FaseBoss
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.weapons.baseweapon import Arma
 from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE, PALETA_RARIDADE,
@@ -151,6 +152,37 @@ def validar_spawner(pools=None, pool_padrao=None, bosses_por_fase=None, classes_
     for (t1, f1, n1), (t2, f2, n2) in zip(tempos, tempos[1:]):
         if t2 < t1:
             erros.append(f'boss "{n2}" (fase {f2}, {t2} s) vem antes de "{n1}" (fase {f1}, {t1} s)')
+    return erros
+
+
+def validar_motor_de_bosses(classes_de_boss=None):
+    """Bosses sobre a BossBase (roteiro F1): fases em ordem e faixas de cooldown sorteáveis."""
+    classes_de_boss = BOSS_CLASSES if classes_de_boss is None else classes_de_boss
+    erros = []
+    for nome, classe in sorted(classes_de_boss.items()):
+        if not (isinstance(classe, type) and issubclass(classe, BossBase)):
+            continue
+        local = f'boss "{nome}"'
+        fases = classe.FASES
+        if not fases or not all(isinstance(f, FaseBoss) for f in fases):
+            erros.append(f'{local}: FASES precisa ser uma sequência não vazia de FaseBoss')
+            continue
+        if fases[0].limiar_vida != 1.0:
+            erros.append(f'{local}: a 1ª fase precisa ter limiar_vida 1.0 (tem {fases[0].limiar_vida})')
+        for anterior, fase in zip(fases, fases[1:]):
+            if fase.limiar_vida >= anterior.limiar_vida:
+                erros.append(f'{local}: limiar da fase "{fase.nome}" ({fase.limiar_vida}) não é menor '
+                             f'que o de "{anterior.nome}" ({anterior.limiar_vida})')
+        for habilidade, faixa in sorted(classe.COOLDOWNS.items()):
+            if not (isinstance(faixa, tuple) and len(faixa) == 2 and all(_inteiro(v) for v in faixa)
+                    and 0 <= faixa[0] <= faixa[1]):
+                erros.append(f'{local}: cooldown de "{habilidade}" {faixa!r} (precisa ser (min, max) '
+                             'inteiros com 0 <= min <= max)')
+        for habilidade, ms in sorted(classe.COOLDOWN_INICIAL.items()):
+            if habilidade not in classe.COOLDOWNS:
+                erros.append(f'{local}: cooldown inicial de "{habilidade}" sem faixa em COOLDOWNS')
+            if not _inteiro(ms) or ms < 0:
+                erros.append(f'{local}: cooldown inicial de "{habilidade}" {ms!r} (precisa ser inteiro >= 0)')
     return erros
 
 
@@ -303,5 +335,5 @@ def validar_mapas(chaves=None, pools=None, bosses_por_fase=None):
 
 def validar_tudo():
     """Todos os erros de dados do jogo, numa lista só (vazia = tudo certo)."""
-    return (validar_armas() + validar_spawner() + validar_inimigos() + validar_manifesto()
-            + validar_mapas())
+    return (validar_armas() + validar_spawner() + validar_motor_de_bosses() + validar_inimigos()
+            + validar_manifesto() + validar_mapas())

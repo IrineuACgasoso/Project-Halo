@@ -15,8 +15,9 @@ from source.data import validacao
 from source.data.enemy_data import DROP_PADRAO, INIMIGOS, PerfilInimigo, _fixo
 from source.data.manifesto_assets import Imagem
 from source.data.validacao import (validar_armas, validar_inimigos, validar_manifesto, validar_mapas,
-                                   validar_spawner, validar_tudo)
+                                   validar_motor_de_bosses, validar_spawner, validar_tudo)
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponProfile, WeaponStats
+from source.enemies.base.boss import BossBase, FaseBoss
 from source.enemies.standard.grunt import GruntRed
 from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE,
                                               PESO_SORTEIO_POR_RARIDADE)
@@ -205,6 +206,53 @@ def test_horario_de_boss_invalido():
 def test_cronograma_fora_da_ordem_das_fases():
     um_erro(_spawner(cronograma={**CRONOGRAMA_BOSSES, 'zealot': 30}),
             'boss "zealot" (fase 1, 30 s) vem antes de "hunter"')
+
+
+# ------------------------------------------------------------------ #
+# Motor de bosses (F1)
+# ------------------------------------------------------------------ #
+def _boss(**atributos):
+    """Classe de boss sobre a BossBase com os atributos trocados (não é instanciada)."""
+    base = {'FASES': (FaseBoss('A', 1.0, 1.0, 1.0), FaseBoss('B', 0.5, 1.0, 1.0)),
+            'COOLDOWNS': {'golpe': (1000, 2000)}, 'COOLDOWN_INICIAL': {'golpe': 500}}
+    return validar_motor_de_bosses({'teste': type('BossTeste', (BossBase,), {**base, **atributos})})
+
+
+def test_motor_de_bosses_valido():
+    assert _boss() == []
+    assert validar_motor_de_bosses() == []
+
+
+def test_motor_ignora_boss_fora_da_base():
+    assert validar_motor_de_bosses({'grunt': GruntRed, 'lixo': 3}) == []
+
+
+@pytest.mark.parametrize('fases, trecho', [
+    ((), 'sequência não vazia de FaseBoss'),
+    (('A',), 'sequência não vazia de FaseBoss'),
+    ((FaseBoss('A', 0.9, 1.0, 1.0),), '1ª fase precisa ter limiar_vida 1.0 (tem 0.9)'),
+    ((FaseBoss('A', 1.0, 1.0, 1.0), FaseBoss('B', 1.0, 1.0, 1.0)), 'limiar da fase "B" (1.0) não é menor'),
+    ((FaseBoss('A', 1.0, 1.0, 1.0), FaseBoss('B', 0.3, 1.0, 1.0), FaseBoss('C', 0.6, 1.0, 1.0)),
+     'limiar da fase "C" (0.6) não é menor que o de "B" (0.3)'),
+])
+def test_fases_de_boss_invalidas(fases, trecho):
+    erros = _boss(FASES=fases)
+    um_erro(erros, trecho)
+    assert erros[0].startswith('boss "teste": ')
+
+
+@pytest.mark.parametrize('faixa', [(2000, 1000), (-1, 10), (1.5, 10), [1000, 2000], (1000,), (True, 10)])
+def test_faixa_de_cooldown_invalida(faixa):
+    um_erro(_boss(COOLDOWNS={'golpe': faixa}), 'cooldown de "golpe"')
+
+
+def test_cooldown_inicial_sem_faixa():
+    um_erro(_boss(COOLDOWN_INICIAL={'golpe': 500, 'outro': 100}), 'cooldown inicial de "outro" sem faixa')
+
+
+@pytest.mark.parametrize('ms', [-1, 1.5, '500'])
+def test_cooldown_inicial_invalido(ms):
+    um_erro(_boss(COOLDOWN_INICIAL={'golpe': ms}), f'cooldown inicial de "golpe" {ms!r}')
 
 
 # ------------------------------------------------------------------ #

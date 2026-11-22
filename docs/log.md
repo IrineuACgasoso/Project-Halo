@@ -2,6 +2,18 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa F1: BossBase + ContextoCombate (refatoração: golden inalterado)
+- `source/enemies/base/boss/`, extraído do Arbiter:
+  - `BossBase(BaseEnemy)`: ciclo do frame (perceber → fase → pensar/avançar a rotina → orientar → mover → animar), rotina ativa (`iniciar`, `finalizar_rotina` e `interromper_rotina`, nova, que fecha o gerador), cooldowns (`cd`, `pronto`, `agendar` com o `mult_cooldown` da fase), `wait`, decisão padrão (anti-stuck > wait > transição > `escolher_habilidade`), `hitbox` padrão (cópia do `rect`), imunidades de chefe e `is_boss`;
+  - `ContextoCombate` (1× por frame: distância, velocidade suavizada do jogador, % de vida), `FaseBoss` (frozen, validada; a `FaseArbiter` herda), `ConfigTravamento` + `DetectorTravamento` (o anti-stuck por caminho).
+- O boss declara `FASES`, `COOLDOWNS`, `COOLDOWN_INICIAL`, `ESTADOS` (com `rotina_<nome>` para cada um) e `ANTISTUCK`, e implementa `escolher_habilidade`. O Arbiter ficou só com o que é dele (strafe, camuflagem, rotinas, pesos); os mixins vêm **antes** da `BossBase` (o teste de MRO agora considera as duas bases).
+- **Equivalência:** golden novo `tests/golden/arbiter.json` (60 s na fase 4, as 3 fases, 5 habilidades), gravado com o código antigo **antes** da extração, e inalterado depois. Ele pega até 0,01 na suavização da mira (mutação conferida). Golden da fase 0 e catraca inalterados.
+- `validar_motor_de_bosses` (em `validar_tudo`): fases começando em 1,0 com limiares decrescentes, faixas de cooldown `(min, max)` inteiras e cooldown inicial com faixa. Casos que falham em `test_validacao.py`.
+- Testes: `test_boss_base.py` (56) e `test_golden_arbiter.py` (3). A exceção `F401` do `arbiter/movement.py` saiu do `ruff.toml` (o import morto foi junto). **Suíte: 1373 verdes + 1 xfail.**
+- Desempenho (na tomada, A/B alternado com o HEAD em worktree, 2 rodadas): boss_arbiter 1,48/1,48 × 1,45/1,40 ms/frame (p95 2,03/2,15 × 2,04/1,90). Igual.
+- **Não validado:** nada muda na tela (refatoração); o Arbiter na tela real não foi aberto.
+- Próxima: **F2** (Animador). O Hunter e os outros bosses migram na F5.
+
 ## 2026-11-22 | Hunter: camera shake nos ataques + balanceamento do usuário (muda o jogo)
 - Tremores pelo `camera.shake` existente, intensidades em `HunterConfig` (`shake_burst/slam/canhao`):
   - **burst:** 1, renovado a cada tiro com a duração do intervalo (cobre a rajada e para junto com ela);

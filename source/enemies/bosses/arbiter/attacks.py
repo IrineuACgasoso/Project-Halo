@@ -75,7 +75,7 @@ class ArbiterAttacks:
         yield from self._esperar(CFG.carabina_mira, strafe=0.35)
 
         leque = self.fase >= 2 and random.random() < 0.5
-        base = self._direcao_antecipada(CFG.carabina_vel_proj, CFG.carabina_antecipacao)
+        base = self.direcao_antecipada(CFG.carabina_vel_proj, CFG.carabina_antecipacao)
 
         for i in range(n):
             if leque:
@@ -86,14 +86,14 @@ class ArbiterAttacks:
             self.atirar_carabina(CFG.carabina_spread, direcao=direcao)
 
             if not leque:   # rajada em linha "puxa" de leve pro jogador (pressao sem ser sniper)
-                alvo = self._direcao_antecipada(CFG.carabina_vel_proj, CFG.carabina_antecipacao)
+                alvo = self.direcao_antecipada(CFG.carabina_vel_proj, CFG.carabina_antecipacao)
                 mix = base * (1 - f.carabina_rastreio) + alvo * f.carabina_rastreio
                 base = mix.normalize() if mix.length_squared() > 1e-6 else alvo
 
             yield from self._esperar(CFG.carabina_intervalo, strafe=0.45)
 
         yield from self._esperar(CFG.carabina_recuperacao, strafe=0.3)
-        self._agendar('carabina')
+        self.agendar('carabina')
         self.wait = 600
 
     # ================================================================ invocacao
@@ -129,7 +129,7 @@ class ArbiterAttacks:
         yield from self._esperar(CFG.invocacao_canal)
         nasceram = self._invocar_elites(self.fase_cfg.elites_por_invocacao)
         if nasceram:
-            self._agendar('invocacao')
+            self.agendar('invocacao')
         else:   # nao achou chao valido: tenta de novo logo, sem queimar o cooldown inteiro
             self.cd['invocacao'] = self._agora + 3000
         self.wait = 1500
@@ -158,13 +158,13 @@ class ArbiterAttacks:
                 teleportou = True
 
             if teleportou and not emboscou and fase in ('hold', 'fade_in') \
-                    and self._dist_jogador() <= CFG.emboscada_dist:
+                    and self.dist_jogador() <= CFG.emboscada_dist:
                 emboscou = True
                 yield from self.rotina_lamina(emboscada=True)
                 continue
             yield
 
-        self._agendar('furtivo')
+        self.agendar('furtivo')
         self.wait = 900
 
     # ================================================================ anti-stuck
@@ -192,7 +192,7 @@ class ArbiterAttacks:
     def rotina_transicao(self):
         """Mudanca de fase: onda de choque azul 360 (expulsa quem esta colado), escudo novo e reforcos."""
         self.adicionar_escudo(self.fase_cfg.escudo_transicao)
-        cfg = self._lancar_cone('arbiter_nova', self._dir_jogador())
+        cfg = self._lancar_cone('arbiter_nova', self.dir_jogador())
         yield from self._esperar(cfg.duracao + 200)
         self._invocar_elites(self.fase_cfg.elites_por_invocacao)
         self.wait = 800

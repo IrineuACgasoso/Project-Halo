@@ -33,11 +33,11 @@ class ArbiterArsenal:
 
     def _avancar(self, ms, mult):
         """Investida curta em direcao ao jogador (fecha o gap entre golpes do combo)."""
-        if self._dist_jogador() < 90:
+        if self.dist_jogador() < 90:
             return
         fim = self._agora + ms
         while self._agora < fim:
-            self._ir(self._dir_jogador(), mult)
+            self._ir(self.dir_jogador(), mult)
             self.velocidade_animacao = 80
             yield
 
@@ -45,7 +45,7 @@ class ArbiterArsenal:
         """Combo de espada de energia: 1 golpe (fase 1), 2 (fase 2), 3 (fase 3).
         Cada golpe: cone azul telegrafado (mira travada no inicio) -> dano -> avanco -> proximo golpe (mais rapido)."""
         for i in range(self.fase_cfg.lamina_golpes):
-            direcao = self._dir_jogador()
+            direcao = self.dir_jogador()
             cfg = self._lancar_cone(CFG.lamina_preset, direcao, CFG.lamina_combo_mult ** i)
 
             if emboscada or self.invisivel:     # golpear o revela: janela de contra-ataque
@@ -58,7 +58,7 @@ class ArbiterArsenal:
                 yield from self._esperar(CFG.lamina_pausa)
 
         yield from self._esperar(CFG.lamina_recuperacao)
-        self._agendar('lamina')
+        self.agendar('lamina')
         if not emboscada:
             self.wait = 500
 
@@ -67,7 +67,7 @@ class ArbiterArsenal:
         """Garante distancia minima/maxima de arremesso e que o ponto de queda esteja em chao valido."""
         to = alvo - self.posicao
         dist = to.length()
-        direcao = to.normalize() if dist > 1e-6 else self._dir_jogador()
+        direcao = to.normalize() if dist > 1e-6 else self.dir_jogador()
         dist = max(CFG.granada_dist_min, min(CFG.granada_dist_max, dist))
         alvo = self.posicao + direcao * dist
 
@@ -79,9 +79,9 @@ class ArbiterArsenal:
 
     def _alvo_granada(self, indice):
         """1a granada: onde o jogador vai estar. Seguintes: fecham o cerco pelos lados."""
-        base = self._ponto_antecipado(CFG.granada_vel, CFG.granada_antecipacao)
+        base = self.ponto_antecipado(CFG.granada_vel, CFG.granada_antecipacao)
         if indice > 0:
-            d = self._dir_jogador()
+            d = self.dir_jogador()
             lado = 1 if indice % 2 else -1
             base = base + V2(-d.y, d.x) * lado * CFG.granada_offset_lateral
         return self._validar_alvo_granada(base)
@@ -105,5 +105,5 @@ class ArbiterArsenal:
             if i < n - 1:
                 yield from self._esperar(CFG.granada_intervalo, strafe=0.25)
         yield from self._esperar(CFG.granada_recuperacao, strafe=0.4)
-        self._agendar('granada')
+        self.agendar('granada')
         self.wait = 600
