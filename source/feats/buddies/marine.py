@@ -23,10 +23,9 @@ class CompanheiroMarine(Companheiro):
 class Marine(Arma):
     NOME_ASSET = 'marine'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
         self.sprite_companion = None
 
         self.itens_reservados = set() # Itens que já têm um Marine indo buscar
@@ -45,7 +44,7 @@ class Marine(Arma):
     def adicionar_soldado(self):
         novo_marine = CompanheiroMarine(
             self.jogador, self.all_sprites, 
-            self.inimigos_grupo, self.item_grupo, 
+            self.inimigos_grupo, self.items_grupo, 
             'marine' 
         )
         novo_marine.arma_parent = self # Referência para gerenciar reservas

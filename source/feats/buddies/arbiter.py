@@ -4,11 +4,10 @@ from .companion import Companheiro
 class Arbitro(Arma):
     NOME_ASSET = 'arbiter'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         deve_criar = kwargs.get('criar_sprite', True)
         self.game = game
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
         self.nome = "Árbitro"
         self.descricao = "Um elite aliado que caça inimigos próximos."
         self.sprite_companion = None 
@@ -21,7 +20,7 @@ class Arbitro(Arma):
             # Passamos 'arbiter' para ele buscar na pasta assets/img/arbiter
             self.sprite_companion = Companheiro(
                 self.jogador, self.all_sprites, 
-                self.inimigos_grupo, self.item_grupo, 
+                self.inimigos_grupo, self.items_grupo, 
                 'arbiter' 
             )
             self.sprite_companion.dano = self.dano

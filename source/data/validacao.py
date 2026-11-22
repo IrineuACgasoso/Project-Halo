@@ -15,7 +15,6 @@ from source.data.enemy_data import INIMIGOS, PerfilInimigo
 from source.data.manifesto_assets import MANIFESTO, Imagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
 from source.enemies.base.enemy_base import BaseEnemy
-from source.systems.entitymanager import entity_manager
 from source.systems.levelup.constants import ARMAS_REGISTRO, PALETA_RARIDADE
 from source.systems.mapmanager.map_loader import MapLoader
 from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES, PHASE_BOSSES
@@ -68,9 +67,6 @@ def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None):
             erros.append(f'{local}: id "{info.id}" diferente da chave')
         if info.raridade not in PALETA_RARIDADE:
             erros.append(f'{local}: raridade "{info.raridade}" fora de PALETA_RARIDADE')
-        for grupo in info.grupos:   # o EventManager faz getattr(entity_manager, grupo)
-            if not isinstance(getattr(entity_manager, grupo, None), pygame.sprite.AbstractGroup):
-                erros.append(f'{local}: grupo "{grupo}" não existe no entity_manager')
         nome_asset = getattr(info.classe, 'NOME_ASSET', None)
         if nome_asset not in perfis:
             erros.append(f'{local}: {info.classe.__name__}.NOME_ASSET "{nome_asset}" sem perfil em weapon_data')

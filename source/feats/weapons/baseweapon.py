@@ -6,6 +6,7 @@ from source.windows.settings import *
 from source.feats.assets import ASSETS
 from source.data.weapon_data import *
 from source.utils.vetores import direcao_segura
+from source.systems.entitymanager import entity_manager
 
 # Fusão dos dicionários de Dataclasses
 ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA, **VEHICLES_DATA}
@@ -22,6 +23,26 @@ class Arma(ABC):
         self._proxima_busca = 0   # throttle da busca de alvo quando não há inimigo no alcance
         self.nome = ""
         self.descricao = ""
+
+    # ── Grupos de sprite (roteiro E4) ───────────────────────────────────────────
+    # A arma lê os grupos do entity_manager pelo nome: não há lista posicional para errar
+    # (era assim que o Fuel Rod recebia items_grupo no lugar de inimigos_grupo).
+
+    @property
+    def all_sprites(self):
+        return entity_manager.all_sprites
+
+    @property
+    def inimigos_grupo(self):
+        return entity_manager.inimigos_grupo
+
+    @property
+    def items_grupo(self):
+        return entity_manager.items_grupo
+
+    @property
+    def auras_grupo(self):
+        return entity_manager.auras_grupo
 
     # ── Core ────────────────────────────────────────────────────────────────────
 
@@ -210,3 +231,41 @@ class Arma(ABC):
 
     def equipar(self): 
         pass
+
+
+class ArmaDeRajada(Arma):
+    """Uma ativação (cooldown) dispara `burst_count` tiros, um a cada `burst_interval` ms (stats do
+    perfil). A rajada só começa com alvo no alcance e para se o alvo sumir: sem alvo, o cooldown
+    não é gasto. A subclasse diz como achar o alvo (`buscar_alvo`) e como atirar (`atirar`)."""
+
+    def __init__(self, jogador, **kwargs):
+        super().__init__(jogador=jogador, **kwargs)
+        self.tiros_restantes = 0
+        self.ultimo_tiro_burst = 0
+
+    def buscar_alvo(self):
+        return self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.raio_maximo)
+
+    @abstractmethod
+    def atirar(self, alvo):
+        """Cria o projétil de um tiro da rajada contra `alvo`."""
+
+    def disparar(self) -> bool:
+        if self.tiros_restantes > 0 or self.buscar_alvo() is None:
+            return False
+        self.tiros_restantes = self.burst_count
+        return True
+
+    def update(self, delta_time):
+        super().update(delta_time)
+        if self.tiros_restantes <= 0:
+            return
+        agora = relogio.agora()
+        if agora - self.ultimo_tiro_burst > self.burst_interval:
+            alvo = self.buscar_alvo()
+            if alvo is None:
+                self.tiros_restantes = 0
+                return
+            self.atirar(alvo)
+            self.tiros_restantes -= 1
+            self.ultimo_tiro_burst = agora

@@ -4,12 +4,11 @@ from ...projetil import LaserBlast
 class SpartanLaser(Arma):
     NOME_ASSET = 'spartan_laser'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = 'Spartan Laser'
         self.descricao = """Feixe de energia concentrada de altíssimo alcance"""
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):

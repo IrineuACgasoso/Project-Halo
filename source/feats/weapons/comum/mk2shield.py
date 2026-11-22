@@ -4,9 +4,8 @@ from ...auras import PlayerAura
 class MK2_Shield(Arma):
     NOME_ASSET = 'mk2_shield'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs) 
-        self.all_sprites, self.auras_grupos, self.inimigos_grupo = grupos
         self.nome = "Escudo MK-2"
         self.descricao = "Gera um escudo e causa dano por segundo ao redor do jogador."
         self.area_de_dano = None
@@ -22,7 +21,7 @@ class MK2_Shield(Arma):
                 jogador=self.jogador,
                 raio=self.raio,
                 dano_por_segundo=self.dano_por_segundo,
-                grupos=(self.all_sprites, self.auras_grupos)
+                grupos=(self.all_sprites, self.auras_grupo)
             )
 
     def disparar(self): 

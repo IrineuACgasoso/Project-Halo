@@ -35,11 +35,10 @@ class VehiclePelican(Vehicle):
 class Pelican(Arma):
     NOME_ASSET = 'pelican'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         deve_criar = kwargs.get('criar_sprite', True)
         self.game = game
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
         self.nome = "Pelican"
         self.descricao = "Aeronave UNSC com metralhadora pesada. Aperte V para entrar ou sair."
         self.sprite_veiculo = None
@@ -51,7 +50,7 @@ class Pelican(Arma):
         if not self.sprite_veiculo:
             self.sprite_veiculo = VehiclePelican(
                 self.jogador, self.all_sprites,
-                self.inimigos_grupo, self.item_grupo,
+                self.inimigos_grupo, self.items_grupo,
                 self.NOME_ASSET
             )
     

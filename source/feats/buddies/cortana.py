@@ -6,11 +6,10 @@ from source.systems.status import BuffVelocidade, aplicar
 class Cortana(Arma):
     NOME_ASSET = 'cortana'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         deve_criar = kwargs.get('criar_sprite', True)
-        self.all_sprites, self.inimigos_grupo, self.item_grupo = grupos
         self.nome = "Cortana"
         self.descricao = "Busca itens e XP próximos a você, além de conceder um bônus de velocidade."
 
@@ -24,7 +23,7 @@ class Cortana(Arma):
             # Passamos 'cortana' para ele buscar na pasta assets/img/cortana
             self.sprite_companion = Companheiro(
                 self.jogador, self.all_sprites, 
-                self.inimigos_grupo, self.item_grupo, 
+                self.inimigos_grupo, self.items_grupo, 
                 'cortana'
             )
             self.sprite_companion.arma_parent = self

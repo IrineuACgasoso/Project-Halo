@@ -110,7 +110,7 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
   2. O `while` processa todos os níveis devidos.
   3. Cada nível vai para `fila_upgrades`.
   4. Abre-se uma `TelaDeUpgrade` por vez (estado `level_up`).
-  5. `EventManager._aplicar_escolha_de_upgrade` faz `upgrade()` numa arma que o jogador já tem, ou instancia `ArmaInfo.classe(player, grupos, game, criar_sprite=True)`.
+  5. `EventManager._aplicar_escolha_de_upgrade` faz `upgrade()` numa arma que o jogador já tem, ou instancia `ArmaInfo.classe(player, game)`. A arma lê os grupos do `entity_manager` pelas propriedades da `Arma` (E4).
 - **Upgrade de stats:** cada `WeaponStats(value, label, increase, range_val, min_val)` sobe quando `_deve_melhorar(range_val, nivel)` é verdadeiro. `range_val` pode ser um int (a cada N níveis) ou uma lista (níveis exatos). Não existe teto de nível.
 - **Drops:** `Items.spawn_drop(pos, grupos, tipo=(qtd, prob, escala) | ((qtds), (probs), escala))`. Quando as probabilidades somam menos que a escala, o que falta vai para a opção mais provável.
 - **Fases:**

@@ -5,12 +5,11 @@ import random
 class Shotgun(Arma):
     NOME_ASSET = 'shotgun'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Shotgun"
         self.descricao = "Dispara uma salva de estilhaços superaquecidos com leve dispersão."
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
         
     def disparar(self) -> bool:

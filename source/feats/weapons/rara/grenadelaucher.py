@@ -7,12 +7,11 @@ from dataclasses import replace
 class GrenadeLauncher(Arma):
     NOME_ASSET = 'grenade_launcher'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Lança-Granadas de Plasma"
         self.descricao = "Arremessa granadas de plasma que grudam no primeiro inimigo tocado."
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):

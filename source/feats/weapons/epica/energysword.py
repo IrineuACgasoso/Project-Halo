@@ -7,12 +7,11 @@ from ...projetil import EnergySwordProj
 class EnergySword(Arma):
     NOME_ASSET = 'energy_sword'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Energy Sword"
         self.descricao = "Lâminas de energia para ataques de curta distância."
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
         self.tempo_fim_ciclo = 0
 

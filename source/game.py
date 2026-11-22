@@ -158,14 +158,7 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        rifle = AssaultRifle(
-            jogador=self.player,
-            grupos=(entity_manager.all_sprites,
-                    entity_manager.projeteis_jogador_grupo,
-                    entity_manager.inimigos_grupo),
-            game=self
-        )
-        self.player.armas['assault_rifle'] = rifle
+        self.player.armas['assault_rifle'] = AssaultRifle(jogador=self.player, game=self)
 
         # Spawner — depois do player para não explodir no primeiro spawn
         self.spawner      = Spawner(self)

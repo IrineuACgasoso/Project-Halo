@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2 e a E3 concluídos; próxima: E4.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3 e a E4 concluídos; próxima: E5.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)

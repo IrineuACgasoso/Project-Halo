@@ -2,6 +2,15 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa E4: armas pegam os grupos do entity_manager (refatoração: golden inalterado)
+- `Arma` ganhou as propriedades `all_sprites`, `inimigos_grupo`, `items_grupo` e `auras_grupo`, lidas do `entity_manager` (só leitura). Saíram `ArmaInfo.grupos`, o parâmetro `grupos` dos 22 construtores (armas, companheiros, veículos) e o desempacotamento posicional: a classe de bug do Fuel Rod mirando nos itens não existe mais. O construtor é `classe(jogador, game)`. Os nomes soltos (`grupo_inimigos`, `auras_grupos`, `item_grupo`) viraram os do `entity_manager`; o `projeteis_grupo` guardado e nunca usado saiu.
+- `ArmaDeRajada` (`baseweapon.py`): a lógica de rajada copiada em Needler, Carabin, Dizimator, Machine Gun e Light Rifle. A subclasse só implementa `atirar(alvo)`; o Light Rifle troca `buscar_alvo()` (o mais forte). O Light Rifle buscava o alvo 2× por tiro; agora 1× (mesmo resultado no mesmo passo).
+- `validar_armas` perdeu a regra de grupo (o campo não existe); os 2 casos dela saíram do `test_validacao` junto com o campo. 6 exceções do `ruff.toml` saíram (imports mortos nas rajadas e no `constants.py`).
+- **Difere do roteiro:** sem helper de spread (só a Shotgun espalha; um helper para um uso seria abstração sem ganho) e sem busca de alvo pela broadphase (a C2 decidiu: a busca custa 0,04 ms/frame).
+- Testes (`test_levelup_e_armas.py`): ninguém recebe `grupos`; grupo da arma não pode ser trocado; rajada dispara `burst_count` tiros espaçados, não reinicia no meio, para quando o alvo some e não atira fora do alcance; Light Rifle mira no mais forte; cada rajada real cria 1 projétil por tiro. A regressão dos grupos (`test_regressoes`) confere os 4 grupos de todas as armas. **Suíte: 1094 verdes + 1 xfail em 79 s.** Golden inalterado.
+- Desempenho (na tomada, A/B alternado com o HEAD em worktree, 2 rodadas): horda 5,94/4,25 (HEAD) × 5,75/4,20 ms/frame; fase 0 2,33/1,59 × 2,11/1,45. Sem piora.
+- Próxima etapa: **E5** (persistência entre fases explícita). Pendências da E1/status continuam.
+
 ## 2026-11-22 | Etapa E3: entrada desacoplada (refatoração: golden inalterado)
 - `source/systems/entrada.py`: `ComandoJogador` (frozen e validado: `direcao` + `veiculo`, `hack_nivel`, `hack_portal`, `hack_boss`), `FonteEntrada` com `Teclado` (WASD, V; L/P/B só com debug) e `Roteiro` (replay por segmentos `(passos, comando)`, parado no fim). `Game.entrada` (padrão `Teclado`) é lida 1× por passo em `_atualizar_entidades` e vira `player.comando`.
 - O jogador (`aplicar_direcao_do_comando`, `executar_hacks`) e o Warthog/Pelican (tecla V) leem o comando; só `entrada.py` chama `get_pressed` (teste). O comando diz o que está **pressionado**: a borda do V continua no veículo, então nada muda no jogo. Saiu o `hasattr(game, 'spawner')` do hack B.

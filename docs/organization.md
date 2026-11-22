@@ -69,7 +69,7 @@ Project-Halo/
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
     │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto (chamado pelo main.py; import limpo, D3); MapasSobDemanda (D2)
-    │   ├── weapons/         # baseweapon.py (Arma) + pastas por raridade: comum/incomum/rara/epica/lendaria
+    │   ├── weapons/         # baseweapon.py (Arma: grupos via entity_manager; ArmaDeRajada) + pastas por raridade: comum/incomum/rara/epica/lendaria
     │   ├── projetil/        # ProjetilUniversal + subclasses (brick, carabin, needler, laserblast...)
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI
     │   ├── vehicles/        # Vehicle + Warhog, Pelican (tecla V)
@@ -86,7 +86,7 @@ Project-Halo/
 | Tarefa | Onde |
 |---|---|
 | Balancear arma, companion ou veículo | `source/data/weapon_data.py` |
-| Nova arma | Classe em `feats/weapons/<raridade>/` com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `MANIFESTO['icons']` (`data/manifesto_assets.py`) |
+| Nova arma | Classe em `feats/weapons/<raridade>/` (construtor `(jogador, game, **kwargs)`; rajada: `ArmaDeRajada`) com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `MANIFESTO['icons']` (`data/manifesto_assets.py`) |
 | Novo companion ou veículo | `feats/buddies/` ou `feats/vehicles/`, com `COMPANION_DATA`/`VEHICLES_DATA` e `ARMAS_REGISTRO` |
 | Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), perfil em `INIMIGOS` (`data/enemy_data.py`), sprites em `MANIFESTO['enemies']`, peso em `spawner_pools.py` |
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |

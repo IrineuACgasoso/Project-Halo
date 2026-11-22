@@ -7,12 +7,11 @@ from dataclasses import replace
 class FuelRod(Arma):
     NOME_ASSET = 'fuel_rod'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Fuel-Rod"
         self.descricao = "Dispara cargas que explodem e deixam uma nuvem venenosa. Se errar, quicam para outro inimigo."
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):

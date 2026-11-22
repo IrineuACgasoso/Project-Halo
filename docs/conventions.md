@@ -3,7 +3,8 @@
 ## Código
 - **Idioma:** identificadores, comentários e docstrings em português (`vida_atual`, `receber_dano`, `inimigos_grupo`). Há exceções herdadas em inglês (`update`, `draw`, `handle_event`, `setup_*`). Mantenha o padrão do arquivo onde você está mexendo.
 - **Nomes:** `snake_case` para funções e atributos, `PascalCase` para classes, `MAIUSCULAS` para constantes e configs de módulo (`MAX_ARMAS`, `PHASE_POOLS`, `CRONOGRAMA_BOSSES`).
-- **Grupos de uma arma:** a ordem de `ArmaInfo.grupos` precisa bater com o desempacotamento no `__init__` da classe. Já houve uma troca que fez o Fuel Rod mirar nos itens; `test_arma_mira_no_grupo_de_inimigos` cobre isso.
+- **Grupos de uma arma:** use as propriedades da `Arma` (`self.inimigos_grupo` etc.), que leem o `entity_manager` pelo nome; não passe grupos ao construtor. A lista posicional antiga (`ArmaInfo.grupos`) fez o Fuel Rod mirar nos itens e saiu na E4.
+- **Rajada:** arma que dispara `burst_count` tiros a cada `burst_interval` ms herda de `ArmaDeRajada` (`baseweapon.py`), implementa `atirar(alvo)` e, se a mira não for o mais próximo, `buscar_alvo()`.
 - **Mixins em vez de herança profunda:** cada arquivo define uma classe sem `__init__` que manipula `self` (por exemplo, `PlayerCombat` e `EnemyCombat`). O `__init__` real chama os `setup_*` explicitamente.
   - **Boss:** `class X(BaseEnemy, XSetup, XAI, XAttacks)`. Quem vem antes na MRO vence. Para sobrescrever um método de `BaseEnemy`, o mixin precisa vir **antes** dela (como faz o Arbiter com `ArbiterMovement`).
 - **Dados separados da lógica:** os números de balanceamento ficam em `data/weapon_data.py` ou em `config.py` (dataclasses frozen + dict de presets, como em `skills/*/config.py` e `bosses/arbiter/config.py`). Prefira esse padrão para código novo.

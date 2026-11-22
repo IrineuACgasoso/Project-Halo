@@ -3,10 +3,9 @@ from ..baseweapon import Arma
 class MjolnirPunch(Arma):
     NOME_ASSET = 'mjolnir_punch'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.nome = "Mjolnir Punch"
         self.descricao = "Contra-ataque Spartan rápido que neutraliza rapidamente pequenas ameaças."
         self.inicializar_stats(self.NOME_ASSET)

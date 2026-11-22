@@ -4,12 +4,11 @@ from ...projetil import HeavyBurst
 class SidekickPistol(Arma):
     NOME_ASSET = 'sidekick_pistol'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = 'Sidekick Pistol'
         self.descricao = """Pistola padrão de elite, causa um grande dano com uma frequência alta."""
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):

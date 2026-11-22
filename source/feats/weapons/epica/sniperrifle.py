@@ -4,12 +4,11 @@ from ...projetil import HeavyBurst
 class SniperRifle(Arma):
     NOME_ASSET = 'sniper_rifle'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = 'Sniper Rifle'
         self.descricao = """Rifle de precisão UNSC, cadência lenta e dano devastador"""
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):

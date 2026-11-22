@@ -80,8 +80,6 @@ def test_stat_sem_label_pode_diminuir_sem_piso():
 @pytest.mark.parametrize('troca, trecho', [
     ({'id': 'outro'}, 'id "outro" diferente da chave'),
     ({'raridade': 'mitica'}, 'raridade "mitica" fora de PALETA_RARIDADE'),
-    ({'grupos': ['inimigos_grupo', 'nao_existe_grupo']}, 'grupo "nao_existe_grupo" não existe'),
-    ({'grupos': ['player']}, 'grupo "player" não existe'),   # existe, mas não é grupo
 ])
 def test_registro_invalido(troca, trecho):
     info = dataclasses.replace(ARMAS_REGISTRO['assault_rifle'], **troca)

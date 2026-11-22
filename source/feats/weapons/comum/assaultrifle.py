@@ -4,12 +4,11 @@ from ...projetil import BurstRifle
 class AssaultRifle(Arma):
     NOME_ASSET = 'assault_rifle'
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = 'Rifle de Assalto'
         self.descricao = """Rifle UNSC de cadência elevada"""
-        self.all_sprites, self.projeteis_grupo, self.inimigos_grupo = grupos
         self.inicializar_stats(self.NOME_ASSET)
         
     def disparar(self):

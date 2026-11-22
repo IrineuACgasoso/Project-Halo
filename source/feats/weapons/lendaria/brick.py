@@ -4,16 +4,15 @@ from ...projetil import Brick
 class BrickLauch(Arma):
     NOME_ASSET = 'brick' # Removido o acento perigoso
 
-    def __init__(self, jogador, grupos, game, **kwargs):
+    def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Tijolo"
         self.descricao = """Arma canônicamente associada ao Master Chief."""
-        self.all_sprites, self.grupo_projeteis, self.grupo_inimigos = grupos
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):
-        inimigo = self.encontrar_inimigo_mais_proximo(self.grupo_inimigos, raio_maximo=self.raio_maximo)        
+        inimigo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.raio_maximo)        
         if inimigo:
             direcao_tiro = self.direcao_para(inimigo)
             Brick(

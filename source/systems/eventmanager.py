@@ -1,6 +1,5 @@
 import pygame
 from source.systems.levelup import ARMAS_REGISTRO
-from source.systems.entitymanager import entity_manager
 from source.systems.estados import (MENU_PRINCIPAL, JOGANDO, PAUSA, CONFIGURACOES,
                                     COLABORADORES, RANKING)
 
@@ -85,11 +84,7 @@ class EventManager:
             g.player.armas[id_da_arma].upgrade()
             return
 
-        dados = ARMAS_REGISTRO[id_da_arma]
-        # Nome do grupo -> grupo real do entity_manager
-        grupos = tuple(getattr(entity_manager, nome) for nome in dados.grupos)
-
-        nova_arma = dados.classe(g.player, grupos, g, criar_sprite=True)
+        nova_arma = ARMAS_REGISTRO[id_da_arma].classe(g.player, g)
         if hasattr(nova_arma, 'equipar'):
             nova_arma.equipar()
         g.player.armas[id_da_arma] = nova_arma

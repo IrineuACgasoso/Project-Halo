@@ -13,6 +13,7 @@ from source.enemies.bosses.warden.core import BaseWarden
 from source.enemies.standard.grunt import GruntRed
 from source.enemies.standard.watcher import SuperWatcher
 from source.feats.grenades import FuelRodGrenade
+from source.feats.weapons import Arma
 from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.skills.artilharia.config import ArtilhariaConfig
 from source.feats.skills.onda_emp.core import OndaEMP
@@ -111,8 +112,9 @@ def test_super_watcher_usa_variante_omega(novo_jogo):
 def test_arma_mira_no_grupo_de_inimigos(novo_jogo, id_arma):
     """Fuel Rod recebia items_grupo no lugar de inimigos_grupo (ordem errada em ARMAS_REGISTRO)."""
     arma = novo_jogo.player.armas.get(id_arma) or _equipar(novo_jogo, id_arma)
-    if hasattr(arma, 'inimigos_grupo'):
-        assert arma.inimigos_grupo is entity_manager.inimigos_grupo
+    # Desde a E4 os grupos vêm do entity_manager pelo nome (não há mais lista posicional).
+    for nome in ('all_sprites', 'inimigos_grupo', 'items_grupo', 'auras_grupo'):
+        assert getattr(arma, nome) is getattr(entity_manager, nome)
 
 
 def test_nenhum_range_val_lista_nivel_1_inalcancavel():
@@ -145,8 +147,15 @@ def _perfil(info):
     return WEAPON_DATA.get(getattr(info.classe, 'NOME_ASSET', None))
 
 
+def _procura_alvo(classe):
+    """O código da classe (ou de uma base dela, como a ArmaDeRajada) chama uma busca de alvo.
+    A `Arma` fica de fora: é ela que define as buscas."""
+    return any('encontrar_inimigo_' in inspect.getsource(c)
+               for c in classe.__mro__ if issubclass(c, Arma) and c is not Arma)
+
+
 ARMAS_QUE_MIRAM = sorted(i for i, info in ARMAS_REGISTRO.items()
-                         if _perfil(info) and 'encontrar_inimigo_' in inspect.getsource(info.classe))
+                         if _perfil(info) and _procura_alvo(info.classe))
 
 
 def test_toda_arma_que_mira_tem_alcance_no_weapon_data():

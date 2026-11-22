@@ -1,4 +1,6 @@
 """Registro de armas, sorteio da tela de upgrade e regras de upgrade (integridade dos dados: test_validacao.py)."""
+import dataclasses
+import inspect
 import random
 
 import pygame
@@ -6,8 +8,11 @@ import pytest
 
 from source.data.weapon_data import WEAPON_DATA, WeaponStats
 from source.enemies.standard.grunt import GruntRed
-from source.feats.weapons.baseweapon import Arma
+from source.feats.weapons.baseweapon import Arma, ArmaDeRajada
+from source.systems.entitymanager import entity_manager
+from source.systems.gameclock import relogio
 from source.systems.levelup import ARMAS_REGISTRO, MAX_ARMAS, TelaDeUpgrade
+from source.systems.levelup.constants import ArmaInfo
 
 IDS = sorted(ARMAS_REGISTRO)
 
@@ -153,3 +158,107 @@ def test_mais_forte_e_escolhido_por_vida_dentro_do_raio(novo_jogo):
     fraco.vida, forte.vida, fora.vida = 10, 50, 999
     arma = _mira(novo_jogo)
     assert arma.encontrar_inimigo_mais_forte([fraco, forte, fora], raio_maximo=500) is forte
+
+
+# ── Grupos pelo nome e rajada (roteiro E4) ───────────────────────────────────
+GRUPOS_DA_ARMA = ('all_sprites', 'inimigos_grupo', 'items_grupo', 'auras_grupo')
+
+
+def test_ninguem_recebe_grupos_por_posicao():
+    """A lista posicional de grupos (que fez o Fuel Rod mirar nos itens) não existe mais."""
+    assert 'grupos' not in {f.name for f in dataclasses.fields(ArmaInfo)}
+    com_grupos = [i for i, info in ARMAS_REGISTRO.items()
+                  if 'grupos' in inspect.signature(info.classe).parameters]
+    assert com_grupos == []
+
+
+@pytest.mark.parametrize('nome', GRUPOS_DA_ARMA)
+def test_grupo_da_arma_nao_pode_ser_trocado(novo_jogo, nome):
+    rifle = novo_jogo.player.armas['assault_rifle']
+    with pytest.raises(AttributeError):
+        setattr(rifle, nome, pygame.sprite.Group())
+    assert getattr(rifle, nome) is getattr(entity_manager, nome)
+
+
+class _RajadaFalsa(ArmaDeRajada):
+    """Rajada com stats fixos que só anota os tiros (sem projétil)."""
+    def __init__(self, jogador):
+        super().__init__(jogador=jogador)
+        self.cooldown, self.burst_count, self.burst_interval, self.raio_maximo = 1000, 3, 100, 500
+        self.tiros = []
+
+    def atirar(self, alvo):
+        self.tiros.append((relogio.agora(), alvo))
+
+
+def _rodar(arma, segundos):
+    for _ in range(round(segundos * 60)):
+        relogio.avancar(1 / 60)
+        arma.update(1 / 60)
+
+
+def test_rajada_dispara_burst_count_tiros_espacados(novo_jogo):
+    arma = _RajadaFalsa(novo_jogo.player)
+    grunt, = _grunts(novo_jogo, 200)
+    _rodar(arma, 0.9)                       # 1 ativação (cooldown de 1 s)
+    assert [alvo for _, alvo in arma.tiros] == [grunt] * 3
+    instantes = [t for t, _ in arma.tiros]
+    assert all(b - a > arma.burst_interval for a, b in zip(instantes, instantes[1:]))
+    assert arma.tiros_restantes == 0
+
+    _rodar(arma, 0.5)                       # a ativação seguinte só vem depois do cooldown (1 s)
+    assert len(arma.tiros) == 6
+
+
+def test_rajada_em_andamento_nao_reinicia(novo_jogo):
+    arma = _RajadaFalsa(novo_jogo.player)
+    _grunts(novo_jogo, 200)
+    assert arma.disparar() and arma.tiros_restantes == 3
+    assert not arma.disparar()              # no meio da rajada, disparar não recarrega os tiros
+    assert arma.tiros_restantes == 3
+
+
+def test_rajada_para_quando_o_alvo_some(novo_jogo):
+    arma = _RajadaFalsa(novo_jogo.player)
+    grunt, = _grunts(novo_jogo, 200)
+    _rodar(arma, 0.05)
+    assert len(arma.tiros) == 1 and arma.tiros_restantes == 2
+    grunt.kill()
+    _rodar(arma, 0.5)
+    assert len(arma.tiros) == 1 and arma.tiros_restantes == 0
+
+
+def test_rajada_sem_alvo_no_alcance_nao_atira(novo_jogo):
+    arma = _RajadaFalsa(novo_jogo.player)
+    _grunts(novo_jogo, 600)                 # fora do raio_maximo (500)
+    _rodar(arma, 1.0)
+    assert arma.tiros == [] and arma.ultimo_tiro == 0
+
+
+def test_light_rifle_mira_no_mais_forte(novo_jogo):
+    """Única rajada que troca a busca: o mais forte no alcance, não o mais próximo."""
+    novo_jogo.event_manager._aplicar_escolha_de_upgrade('light_rifle')
+    arma = novo_jogo.player.armas['light_rifle']
+    fraco, forte = _grunts(novo_jogo, 100, 400)
+    fraco.vida, forte.vida = 10, 500
+    assert arma.buscar_alvo() is forte
+
+
+@pytest.mark.parametrize('id_arma', ['dizimator', 'needler', 'carabin', 'light_rifle', 'machine_gun'])
+def test_rajada_real_cria_um_projetil_por_tiro(novo_jogo, id_arma):
+    novo_jogo.player.armas.pop('assault_rifle').ultimo_tiro = float('inf')
+    novo_jogo.event_manager._aplicar_escolha_de_upgrade(id_arma)
+    arma = novo_jogo.player.armas[id_arma]
+    assert isinstance(arma, ArmaDeRajada)
+    grunt, = _grunts(novo_jogo, 150)
+    grunt.vida = grunt.escudo_atual = 10 ** 9
+    antes = set(entity_manager.projeteis_jogador_grupo)
+    assert arma.disparar()
+    for _ in range(arma.burst_count * (arma.burst_interval // 16 + 2)):
+        relogio.avancar(1 / 60)
+        ArmaDeRajada.update(arma, 1 / 60)   # sem o cooldown da base disparar outra ativação
+        if arma.tiros_restantes == 0:
+            break
+    novos = [p for p in entity_manager.projeteis_jogador_grupo if p not in antes]
+    assert len(novos) == arma.burst_count
+
