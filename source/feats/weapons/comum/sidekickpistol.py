@@ -13,7 +13,7 @@ class SidekickPistol(Arma):
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):
-        inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=600)
+        inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.raio_maximo)
         if inimigo_alvo and inimigo_alvo.alive():
             direcao_vetor = self.direcao_para(inimigo_alvo)
 

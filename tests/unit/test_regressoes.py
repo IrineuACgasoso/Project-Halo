@@ -1,4 +1,5 @@
 """Regressões dos bugs corrigidos em 2026-11-21 (ver docs/log.md). Cada teste falhava antes da correção."""
+import inspect
 import os
 import sys
 
@@ -140,29 +141,40 @@ def test_pelican_usa_o_proprio_perfil(novo_jogo):
     assert pelican.sprite_veiculo.vida_maxima == VEHICLES_DATA['pelican'].stats['vida_maxima'].value
 
 
-def _tem_stat_de_alcance(info):
-    perfil = WEAPON_DATA.get(getattr(info.classe, 'NOME_ASSET', None))
-    return perfil is not None and 'raio_maximo' in perfil.stats
+def _perfil(info):
+    return WEAPON_DATA.get(getattr(info.classe, 'NOME_ASSET', None))
 
 
-ARMAS_COM_STAT_DE_ALCANCE = sorted(i for i, info in ARMAS_REGISTRO.items() if _tem_stat_de_alcance(info))
+ARMAS_QUE_MIRAM = sorted(i for i, info in ARMAS_REGISTRO.items()
+                         if _perfil(info) and 'encontrar_inimigo_' in inspect.getsource(info.classe))
 
 
-def test_light_rifle_esta_entre_as_armas_com_stat_de_alcance():
-    assert 'light_rifle' in ARMAS_COM_STAT_DE_ALCANCE
+def test_toda_arma_que_mira_tem_alcance_no_weapon_data():
+    assert len(ARMAS_QUE_MIRAM) == 13
+    sem_alcance = [i for i in ARMAS_QUE_MIRAM if 'raio_maximo' not in _perfil(ARMAS_REGISTRO[i]).stats]
+    assert sem_alcance == []
 
 
-@pytest.mark.parametrize('id_arma', ARMAS_COM_STAT_DE_ALCANCE)
-def test_upgrade_de_alcance_muda_o_alcance_de_verdade(novo_jogo, id_arma):
-    """Light Rifle mirava com RAIO_ALVO fixo (1000): o card mostrava 'Alcance' subindo e nada mudava."""
+@pytest.mark.parametrize('id_arma', ARMAS_QUE_MIRAM)
+def test_alcance_da_arma_vem_do_stat(novo_jogo, id_arma):
+    """Light Rifle mirava com RAIO_ALVO fixo (1000): o card mostrava 'Alcance' subindo e nada mudava.
+    Mudar o stat (upgrade ou weapon_data) precisa mudar o alcance de verdade."""
     arma = _equipar(novo_jogo, id_arma)
     base = arma.raio_maximo
     _inimigo(novo_jogo, novo_jogo.player.posicao + V(base + 25, 0))
     assert not arma.disparar()
 
-    arma.upgrade()
-    assert arma.raio_maximo == base + 50
+    arma.raio_maximo = base + 50
     assert arma.disparar()
+
+
+@pytest.mark.parametrize('id_arma', [i for i in ARMAS_QUE_MIRAM
+                                     if _perfil(ARMAS_REGISTRO[i]).stats['raio_maximo'].increase])
+def test_upgrade_de_alcance_soma_no_stat(novo_jogo, id_arma):
+    arma = _equipar(novo_jogo, id_arma)
+    base = arma.raio_maximo
+    arma.upgrade()
+    assert arma.raio_maximo == base + _perfil(ARMAS_REGISTRO[id_arma]).stats['raio_maximo'].increase
 
 
 ARMAS_DE_RAJADA = ['dizimator', 'needler', 'carabin', 'light_rifle', 'machine_gun']

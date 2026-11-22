@@ -2,6 +2,10 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Alcance de todas as armas no weapon_data (refatoração: golden inalterado)
+- As 9 armas que tinham o alcance no código (número solto no `disparar` ou `RAIO_ALVO` na classe) ganharam o stat `raio_maximo` no perfil, com o mesmo valor e sem upgrade (`label=None`, `increase=0`): Assault Rifle 700, Sidekick 600, Shotgun 500, Sniper 1200, Brick 1200, Needler 500, Dizimator 550, Carabin 650, Machine Gun 850. As classes leem `self.raio_maximo`; `RAIO_ALVO` saiu. Para o alcance subir por nível, basta dar `label` e `increase` no perfil.
+- Testes (`test_regressoes.py`): toda arma cujo código procura alvo (13) tem `raio_maximo` no perfil; mudar o stat muda o alcance de verdade (as 13); o upgrade soma o `increase` (as 4 com upgrade). Suíte: 1016 verdes + 1 xfail; as mesmas 3 falhas do Hunter da entrada abaixo (mudança local, fora do commit).
+
 ## 2026-11-21 | Correção: upgrade de alcance do Light Rifle não fazia efeito
 - O perfil `light_rifle` tem `raio_maximo` ("Alcance", +50 por nível), mas a classe mirava com a constante `RAIO_ALVO = 1000`: o card mostrava o alcance subindo e no jogo ele ficava em 1000. Agora usa `self.raio_maximo` (nível 1 = 1000: sem mudança até o 1º upgrade). **Muda o jogo:** o alcance cresce com o nível.
 - Regressão em `test_regressoes.py::test_upgrade_de_alcance_muda_o_alcance_de_verdade`, para toda arma com `raio_maximo` no perfil (Fuel Rod, Grenade Launcher, Light Rifle, Spartan Laser; só o Light Rifle falhou antes). As outras armas têm o alcance fixo no código, sem stat (Assault Rifle, Sidekick, Shotgun, Sniper, Brick e o `RAIO_ALVO` de Needler, Dizimator, Carabin e Machine Gun).

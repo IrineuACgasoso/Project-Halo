@@ -15,7 +15,7 @@ class Shotgun(Arma):
         
     def disparar(self) -> bool:
         # Encontra alvos próximos (Shotguns operam melhor à queima-roupa)
-        inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=500)
+        inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.raio_maximo)
         if inimigo_alvo and inimigo_alvo.alive():
             direcao_base = self.direcao_para(inimigo_alvo)
             
