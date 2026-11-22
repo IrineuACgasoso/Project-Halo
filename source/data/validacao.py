@@ -15,7 +15,8 @@ from source.data.enemy_data import INIMIGOS, PerfilInimigo
 from source.data.manifesto_assets import MANIFESTO, Imagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
 from source.enemies.base.enemy_base import BaseEnemy
-from source.systems.levelup.constants import ARMAS_REGISTRO, PALETA_RARIDADE
+from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE, PALETA_RARIDADE,
+                                              PESO_SORTEIO_POR_RARIDADE)
 from source.systems.mapmanager.map_loader import MapLoader
 from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES, PHASE_BOSSES
 from source.systems.spawner.spawner_pools import DEFAULT_POOL, PHASE_POOLS
@@ -36,12 +37,27 @@ def _inteiro(valor):
 # ------------------------------------------------------------------ #
 # Armas, companheiros e veículos
 # ------------------------------------------------------------------ #
-def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None):
+def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None, niveis_maximos=None,
+                  pesos=None):
     armas = WEAPON_DATA if armas is None else armas
     companheiros = COMPANION_DATA if companheiros is None else companheiros
     veiculos = VEHICLES_DATA if veiculos is None else veiculos
     registro = ARMAS_REGISTRO if registro is None else registro
+    niveis_maximos = NIVEL_MAXIMO_POR_RARIDADE if niveis_maximos is None else niveis_maximos
+    pesos = PESO_SORTEIO_POR_RARIDADE if pesos is None else pesos
     erros = []
+
+    # Raridade (roteiro E6): toda raridade com cor também tem nível máximo e peso no sorteio
+    for nome_dic, dic in (('NIVEL_MAXIMO_POR_RARIDADE', niveis_maximos), ('PESO_SORTEIO_POR_RARIDADE', pesos)):
+        for raridade in sorted(set(PALETA_RARIDADE) ^ set(dic)):
+            onde = 'falta em' if raridade in PALETA_RARIDADE else 'sobra em'
+            erros.append(f'raridade "{raridade}": {onde} {nome_dic} (as chaves são as de PALETA_RARIDADE)')
+    for raridade, nivel in sorted(niveis_maximos.items()):
+        if not _inteiro(nivel) or nivel < 1:
+            erros.append(f'raridade "{raridade}": nível máximo {nivel!r} (precisa ser inteiro >= 1)')
+    for raridade, peso in sorted(pesos.items()):
+        if not _numero(peso) or not 0 < peso < float('inf'):   # NaN também falha
+            erros.append(f'raridade "{raridade}": peso no sorteio {peso!r} (precisa ser > 0 e finito)')
 
     categorias = {'armas': armas, 'companheiros': companheiros, 'veículos': veiculos}
     nomes = list(categorias.items())

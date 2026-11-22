@@ -2,6 +2,15 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa E6: raridade de fato (recurso novo: muda o jogo)
+- `constants.py`: `NIVEL_MAXIMO_POR_RARIDADE` (comum 25, incomum 20, rara 15, épica 10, lendária 5) e `PESO_SORTEIO_POR_RARIDADE` (40/25/20/10/5, por arma). `ArmaInfo.criar(jogador, game)` cria a arma com o `nivel_maximo` (o `Game` e o `EventManager` criam por ele; arma criada fora do registro não tem teto).
+- `Arma.upgrade()` é o único ponto de subida: no máximo devolve `False` e não muda nada. As subclasses implementam o gancho `aplicar_nivel()`; as 14 armas que só aplicavam o perfil perderam o `upgrade` copiado (o padrão da base faz isso).
+- Sorteio (`gerar_opcoes`): até 2 upgrades entre as armas **abaixo do máximo**, armas novas com peso por raridade (`sortear_armas_novas`, sem reposição), e mais upgrades se faltar. Sem opção nenhuma não abre tela: `recompensa_sem_upgrade()` (provisório, `TODO(itens temporários)`; o nível sobe normalmente). O item `upgrade` só mira arma abaixo do máximo; com tudo no máximo, dá só os +200 pontos. O upgrade forçado é revalidado ao sair da fila (a arma pode ter chegado ao máximo numa tela anterior).
+- HUD: "MAX" na cor da raridade no lugar de `L<n>`; card: "(Nv. MAX)" no upgrade que leva ao máximo. `validar_armas` confere que toda raridade tem máximo (inteiro >= 1) e peso (> 0, finito).
+- Testes: cada arma para exatamente no máximo e `upgrade()` acima dele não muda nada; pesos (10 mil sorteios, seed fixa); sem tela vazia (level-up, vários níveis, item, fila); MAX no card e no HUD; 11 casos da validação. **Mudança de especificação:** "sobe cada arma até o nível 21" (unit) e "cada arma no nível 10 em combate" (integração) viraram "até o máximo da raridade" (o `while < 10` travava a suíte com a lendária parada no 5). **Suíte: 1182 verdes + 1 xfail em 83 s.** Golden inalterado (o jogador blindado não sobe de nível).
+- Desempenho: não medido (fora do laço quente; o HUD lê 1 propriedade por slot).
+- **Não validado:** a sensação do teto e dos pesos no jogo, o "MAX" na tela real.
+
 ## 2026-11-22 | Correção: veículo sobrevive à troca de fase
 - O Warthog e o Pelican saíam dos grupos na troca de fase, mas a arma continuava atualizando o sprite: invisível, o veículo seguia atirando e atropelando, e o jogador continuava "no veículo". O `Vehicle` deixou de recusar a flag (herda `sobrevive_troca_de_fase = True` do `Companheiro`) e, como companheiro, vai para o spawn novo junto do jogador (estacionado ou destruído; embarcado, ele já gruda no jogador). **Muda o jogo:** o veículo continua visível e utilizável nas fases seguintes. Achado na E5; commit próprio.
 - Regressão em `test_regressoes.py::test_veiculo_sobrevive_a_troca_de_fase` (Warthog e Pelican, embarcado e estacionado; os 4 falharam antes); o teste do conjunto de sobreviventes da E5 passou a incluir os veículos. Suíte: **1108 verdes + 1 xfail**. Golden inalterado.

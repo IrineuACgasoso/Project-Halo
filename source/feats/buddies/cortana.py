@@ -28,8 +28,7 @@ class Cortana(Arma):
             )
             self.sprite_companion.arma_parent = self
 
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
         # O bônus é um buff sem fim pelo sistema de status; a chave é esta Cortana: reaplicar só atualiza
         dono_stats = self.sprite_companion if self.sprite_companion is not None else self

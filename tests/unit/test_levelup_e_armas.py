@@ -2,6 +2,8 @@
 import dataclasses
 import inspect
 import random
+from collections import Counter
+from types import SimpleNamespace
 
 import pygame
 import pytest
@@ -11,8 +13,12 @@ from source.enemies.standard.grunt import GruntRed
 from source.feats.weapons.baseweapon import Arma, ArmaDeRajada
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
-from source.systems.levelup import ARMAS_REGISTRO, MAX_ARMAS, TelaDeUpgrade
+from source.systems.hud import hud_draw
+from source.systems.levelup import (ARMAS_REGISTRO, MAX_ARMAS, NIVEL_MAXIMO_POR_RARIDADE,
+                                   PESO_SORTEIO_POR_RARIDADE, TelaDeUpgrade, gerar_opcoes,
+                                   sortear_armas_novas)
 from source.systems.levelup.constants import ArmaInfo
+from source.systems.levelup.draw import titulo_da_opcao
 
 IDS = sorted(ARMAS_REGISTRO)
 
@@ -57,7 +63,7 @@ def test_opcoes_aleatorias_validas(player, semente):
 
 def test_com_arsenal_cheio_so_oferece_upgrades(player):
     for id_arma in IDS[:MAX_ARMAS]:
-        player.armas[id_arma] = object()
+        player.armas[id_arma] = SimpleNamespace(no_maximo=False)
     for semente in range(10):
         random.seed(semente)
         tela = TelaDeUpgrade(player.game.tela, player, player.game)
@@ -97,16 +103,164 @@ def test_escolher_arma_possuida_faz_upgrade(novo_jogo):
 
 
 @pytest.mark.parametrize('id_arma', [i for i in IDS if i != 'assault_rifle'])
-def test_escolher_arma_nova_equipa_e_sobe_de_nivel(novo_jogo, id_arma):
+def test_escolher_arma_nova_equipa_e_sobe_ate_o_maximo(novo_jogo, id_arma):
+    # Antes da E6 subia até o nível 21 (sem teto); agora para exatamente no máximo da raridade.
     em = novo_jogo.event_manager
     em._aplicar_escolha_de_upgrade(id_arma)
     arma = novo_jogo.player.armas[id_arma]
-    assert isinstance(arma, ARMAS_REGISTRO[id_arma].classe)
-    for _ in range(20):
+    info = ARMAS_REGISTRO[id_arma]
+    assert isinstance(arma, info.classe) and arma.nivel_maximo == info.nivel_maximo
+    while arma.nivel < info.nivel_maximo:
+        assert not arma.no_maximo
+        # a tela de upgrade (preview de stats do próximo nível) não pode quebrar em nível alto
+        TelaDeUpgrade(novo_jogo.tela, novo_jogo.player, novo_jogo, id_arma_forcada=id_arma).draw(novo_jogo.tela)
         em._aplicar_escolha_de_upgrade(id_arma)
-    assert arma.nivel == 21
-    # a tela de upgrade (preview de stats do próximo nível) não pode quebrar em nível alto
-    TelaDeUpgrade(novo_jogo.tela, novo_jogo.player, novo_jogo, id_arma_forcada=id_arma).draw(novo_jogo.tela)
+    assert arma.nivel == info.nivel_maximo and arma.no_maximo
+    em._aplicar_escolha_de_upgrade(id_arma)
+    assert arma.nivel == info.nivel_maximo
+
+
+# ── Raridade de fato (roteiro E6) ────────────────────────────────────────────
+def test_maximos_e_pesos_decididos():
+    # roteiro §8, itens 4 e 6
+    assert NIVEL_MAXIMO_POR_RARIDADE == {'comum': 25, 'incomum': 20, 'rara': 15, 'epica': 10, 'lendaria': 5}
+    assert PESO_SORTEIO_POR_RARIDADE == {'comum': 40, 'incomum': 25, 'rara': 20, 'epica': 10, 'lendaria': 5}
+
+
+@pytest.mark.parametrize('id_arma', IDS)
+def test_criar_passa_o_maximo_da_raridade(novo_jogo, id_arma):
+    info = ARMAS_REGISTRO[id_arma]
+    arma = info.criar(novo_jogo.player, novo_jogo)
+    assert isinstance(arma, info.classe)
+    assert arma.nivel == 1 and arma.nivel_maximo == NIVEL_MAXIMO_POR_RARIDADE[info.raridade]
+
+
+def test_arma_inicial_nasce_com_o_maximo(novo_jogo):
+    assert novo_jogo.player.armas['assault_rifle'].nivel_maximo == 25
+
+
+def _ate_o_maximo(arma):
+    while arma.upgrade():
+        pass
+    return arma
+
+
+def _criar_no_maximo(game, id_arma):
+    return _ate_o_maximo(ARMAS_REGISTRO[id_arma].criar(game.player, game))
+
+
+def _numeros(arma):
+    return {k: v for k, v in vars(arma).items() if isinstance(v, (int, float))}
+
+
+@pytest.mark.parametrize('id_arma', IDS)
+def test_upgrade_no_maximo_nao_faz_nada(novo_jogo, id_arma):
+    arma = _criar_no_maximo(novo_jogo, id_arma)
+    assert arma.nivel == ARMAS_REGISTRO[id_arma].nivel_maximo
+    antes = _numeros(arma)
+    assert arma.upgrade() is False
+    assert _numeros(arma) == antes
+
+
+def test_arma_criada_fora_do_registro_nao_tem_teto(novo_jogo):
+    arma = ARMAS_REGISTRO['brick'].classe(novo_jogo.player, novo_jogo)
+    for _ in range(30):
+        assert arma.upgrade() is True
+    assert arma.nivel == 31 and not arma.no_maximo
+
+
+def test_upgrade_aplica_os_stats_do_nivel(novo_jogo):
+    # a subida passa pelo gancho aplicar_nivel: o perfil dá +1 de dano no nível 2
+    rifle = novo_jogo.player.armas['assault_rifle']
+    dano = rifle.dano
+    assert rifle.upgrade() is True
+    assert rifle.nivel == 2 and rifle.dano == dano + 1
+
+
+def test_arma_no_maximo_sai_do_sorteio_de_upgrade(novo_jogo):
+    p = novo_jogo.player
+    p.armas['assault_rifle'] = _criar_no_maximo(novo_jogo, 'assault_rifle')
+    p.armas['brick'] = ARMAS_REGISTRO['brick'].criar(p, novo_jogo)
+    for semente in range(50):
+        ids = gerar_opcoes(p, random.Random(semente))
+        assert 'assault_rifle' not in ids and len(ids) == 3 and len(set(ids)) == 3
+
+
+def test_arsenal_cheio_com_uma_abaixo_do_maximo_oferece_so_ela(novo_jogo):
+    p = novo_jogo.player
+    p.armas.clear()
+    for id_arma in IDS[:MAX_ARMAS - 1]:
+        p.armas[id_arma] = _criar_no_maximo(novo_jogo, id_arma)
+    p.armas[IDS[MAX_ARMAS - 1]] = ARMAS_REGISTRO[IDS[MAX_ARMAS - 1]].criar(p, novo_jogo)
+    for semente in range(20):
+        assert gerar_opcoes(p, random.Random(semente)) == [IDS[MAX_ARMAS - 1]]
+
+
+def test_tudo_no_maximo_e_arsenal_cheio_nao_ha_opcao(novo_jogo):
+    p = novo_jogo.player
+    p.armas.clear()
+    for id_arma in IDS[:MAX_ARMAS]:
+        p.armas[id_arma] = _criar_no_maximo(novo_jogo, id_arma)
+    assert gerar_opcoes(p) == []
+    with pytest.raises(ValueError, match='sem opções'):
+        TelaDeUpgrade(novo_jogo.tela, p, novo_jogo, ids_das_opcoes=[])
+
+
+def test_tudo_no_maximo_com_vaga_so_oferece_armas_novas(novo_jogo):
+    p = novo_jogo.player
+    p.armas['assault_rifle'] = _criar_no_maximo(novo_jogo, 'assault_rifle')
+    for semente in range(20):
+        ids = gerar_opcoes(p, random.Random(semente))
+        assert len(ids) == 3 and not set(ids) & set(p.armas)
+
+
+def test_sorteio_de_armas_novas_respeita_os_pesos():
+    # Uma arma de um pool com todas: a chance de cada uma é o peso dela / soma dos pesos.
+    rng = random.Random(1234)
+    n = 10_000
+    contagem = Counter(sortear_armas_novas(IDS, 1, rng)[0] for _ in range(n))
+    total = sum(ARMAS_REGISTRO[i].peso_sorteio for i in IDS)
+    for id_arma in IDS:
+        esperado = ARMAS_REGISTRO[id_arma].peso_sorteio / total
+        assert abs(contagem[id_arma] / n - esperado) < 0.012, id_arma
+    por_raridade = Counter()
+    for id_arma, vezes in contagem.items():
+        por_raridade[ARMAS_REGISTRO[id_arma].raridade] += vezes
+    for raridade, peso in PESO_SORTEIO_POR_RARIDADE.items():
+        qtd = sum(1 for i in IDS if ARMAS_REGISTRO[i].raridade == raridade)
+        assert abs(por_raridade[raridade] / n - qtd * peso / total) < 0.02, raridade
+
+
+def test_sorteio_de_armas_novas_sem_repeticao_e_com_limite():
+    rng = random.Random(0)
+    for k in range(len(IDS) + 2):
+        escolhidas = sortear_armas_novas(IDS, k, rng)
+        assert len(escolhidas) == min(k, len(IDS)) and len(set(escolhidas)) == len(escolhidas)
+    assert sortear_armas_novas([], 3, rng) == []
+
+
+def test_card_mostra_max_no_upgrade_que_leva_ao_maximo(novo_jogo):
+    p = novo_jogo.player
+    rifle = p.armas['assault_rifle']
+
+    def titulo():
+        return titulo_da_opcao(TelaDeUpgrade(novo_jogo.tela, p, novo_jogo, id_arma_forcada='assault_rifle').opcoes[0])
+
+    assert titulo() == 'Rifle de Assalto (Nv. 2)'
+    while rifle.nivel < rifle.nivel_maximo - 1:
+        rifle.upgrade()
+    assert titulo() == 'Rifle de Assalto (Nv. MAX)'
+
+
+def test_hud_mostra_max_na_arma_no_maximo(novo_jogo):
+    p = novo_jogo.player
+    rifle = p.armas['assault_rifle']
+    fonte = pygame.font.Font(None, 16)
+    hud_draw._draw_weapon_slots(novo_jogo.tela, p, fonte)
+    assert hud_draw._TEXTOS[('slot', 0)][0] == 'L1'
+    _ate_o_maximo(rifle)
+    hud_draw._draw_weapon_slots(novo_jogo.tela, p, fonte)
+    assert hud_draw._TEXTOS[('slot', 0)][0] == 'MAX'
 
 
 # ── Estado de alvo (roteiro E2) ──────────────────────────────────────────────

@@ -42,10 +42,6 @@ class Shotgun(Arma):
             return True
         return False
 
-    def upgrade(self):
-        super().upgrade()
-        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
-
     def ver_proximo_upgrade(self):
         return self.ver_proximos_upgrades(self.nivel + 1, self.NOME_ASSET)
 

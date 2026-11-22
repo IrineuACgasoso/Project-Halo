@@ -18,7 +18,8 @@ from source.data.validacao import (validar_armas, validar_inimigos, validar_mani
                                    validar_spawner, validar_tudo)
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponProfile, WeaponStats
 from source.enemies.standard.grunt import GruntRed
-from source.systems.levelup.constants import ARMAS_REGISTRO
+from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE,
+                                              PESO_SORTEIO_POR_RARIDADE)
 from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES, PHASE_BOSSES
 
 
@@ -84,6 +85,27 @@ def test_stat_sem_label_pode_diminuir_sem_piso():
 def test_registro_invalido(troca, trecho):
     info = dataclasses.replace(ARMAS_REGISTRO['assault_rifle'], **troca)
     um_erro(_armas(registro={**ARMAS_REGISTRO, 'assault_rifle': info}), trecho)
+
+
+@pytest.mark.parametrize('dicionario, troca, trecho', [
+    ('niveis_maximos', {'mitica': 3}, '"mitica": sobra em NIVEL_MAXIMO_POR_RARIDADE'),
+    ('niveis_maximos', {'rara': None}, '"rara": falta em NIVEL_MAXIMO_POR_RARIDADE'),
+    ('niveis_maximos', {'rara': 0}, 'nível máximo 0'),
+    ('niveis_maximos', {'rara': 2.5}, 'nível máximo 2.5'),
+    ('niveis_maximos', {'rara': True}, 'nível máximo True'),
+    ('pesos', {'epica': None}, '"epica": falta em PESO_SORTEIO_POR_RARIDADE'),
+    ('pesos', {'epica': 0}, 'peso no sorteio 0'),
+    ('pesos', {'epica': -5}, 'peso no sorteio -5'),
+    ('pesos', {'epica': float('nan')}, 'peso no sorteio nan'),
+    ('pesos', {'epica': float('inf')}, 'peso no sorteio inf'),
+    ('pesos', {'epica': '10'}, "peso no sorteio '10'"),
+])
+def test_raridade_invalida(dicionario, troca, trecho):
+    # roteiro E6: nível máximo e peso de sorteio por raridade
+    original = {'niveis_maximos': NIVEL_MAXIMO_POR_RARIDADE, 'pesos': PESO_SORTEIO_POR_RARIDADE}[dicionario]
+    dic = {**original, **troca}
+    dic = {k: v for k, v in dic.items() if v is not None}
+    um_erro(_armas(**{dicionario: dic}), trecho)
 
 
 def test_arma_registrada_sem_perfil_de_dados():

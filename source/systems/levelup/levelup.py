@@ -19,18 +19,22 @@ class TelaDeUpgrade:
     `id_arma_forcada`: se informado, ignora o sorteio normal e mostra
     APENAS essa arma como opção única (usado, por ex., pelo item
     'upgrade', que força o upgrade de uma arma específica já possuída).
+    `ids_das_opcoes`: opções já sorteadas (`gerar_opcoes`); sem elas, sorteia aqui.
     """
 
-    def __init__(self, tela, jogador, game, id_arma_forcada=None):
+    def __init__(self, tela, jogador, game, id_arma_forcada=None, ids_das_opcoes=None):
         self.tela = tela
         self.jogador = jogador
         self.game = game
         self.opcao_selecionada = 0
 
         self.modo_unico = id_arma_forcada is not None
-        self.ids_das_opcoes = (
-            [id_arma_forcada] if self.modo_unico else self.gerar_opcoes_aleatorias()
-        )
+        if self.modo_unico:
+            self.ids_das_opcoes = [id_arma_forcada]
+        else:
+            self.ids_das_opcoes = list(ids_das_opcoes) if ids_das_opcoes is not None else gerar_opcoes(jogador)
+        if not self.ids_das_opcoes:
+            raise ValueError('tela de upgrade sem opções (quem abre a tela checa antes: recompensa_sem_upgrade)')
         # Fontes em cache (antes: 5 leituras de .otf/.ttf do disco a CADA level-up, e atributos
         # inexistentes quando o arquivo de fonte faltava -> AttributeError no meio do jogo).
         self.fonte_grande = carregar_fonte(FONTE_TITULO_TELA, 24, fallback_tamanho=28)
@@ -69,32 +73,6 @@ class TelaDeUpgrade:
             for i in range(num_opcoes)
         ]
 
-    def gerar_opcoes_aleatorias(self):
-        opcoes_upgrade = list(self.jogador.armas.keys())
-
-        opcoes_novas = []
-        if len(self.jogador.armas) < MAX_ARMAS:
-            for id_total in ARMAS_REGISTRO.keys():
-                if id_total not in self.jogador.armas:
-                    opcoes_novas.append(id_total)
-
-        pool_final = []
-
-        upgrades_escolhidos = random.sample(opcoes_upgrade, min(2, len(opcoes_upgrade)))
-        pool_final.extend(upgrades_escolhidos)
-
-        vagas_restantes = 3 - len(pool_final)
-        novas_escolhidas = random.sample(opcoes_novas, min(vagas_restantes, len(opcoes_novas)))
-        pool_final.extend(novas_escolhidas)
-
-        vagas_restantes = 3 - len(pool_final)
-        if vagas_restantes > 0:
-            upgrades_restantes = [u for u in opcoes_upgrade if u not in pool_final]
-            mais_upgrades = random.sample(upgrades_restantes, min(vagas_restantes, len(upgrades_restantes)))
-            pool_final.extend(mais_upgrades)
-
-        return pool_final
-
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             # Navegação só faz sentido com mais de uma opção na tela
@@ -110,6 +88,35 @@ class TelaDeUpgrade:
 
     def draw(self, surface):
         draw.draw_tela_upgrade(surface, self)
+
+
+def sortear_armas_novas(ids, quantidade, rng=random):
+    """Até `quantidade` armas distintas de `ids`, cada uma com o peso da sua raridade
+    (PESO_SORTEIO_POR_RARIDADE): sorteio ponderado sem reposição."""
+    restantes = list(ids)
+    escolhidas = []
+    while restantes and len(escolhidas) < quantidade:
+        pesos = [ARMAS_REGISTRO[i].peso_sorteio for i in restantes]
+        escolhida = rng.choices(restantes, weights=pesos)[0]
+        escolhidas.append(escolhida)
+        restantes.remove(escolhida)
+    return escolhidas
+
+
+def gerar_opcoes(jogador, rng=random):
+    """Até 3 opções do level-up: até 2 upgrades (armas abaixo do máximo, sorteio uniforme),
+    completadas com armas novas (peso por raridade, se houver vaga no arsenal) e, faltando,
+    com mais upgrades. Lista vazia = nada a oferecer (todas as armas no máximo e arsenal cheio)."""
+    opcoes_upgrade = [i for i, arma in jogador.armas.items() if not arma.no_maximo]
+    opcoes_novas = []
+    if len(jogador.armas) < MAX_ARMAS:
+        opcoes_novas = [i for i in ARMAS_REGISTRO if i not in jogador.armas]
+
+    escolhidas = rng.sample(opcoes_upgrade, min(2, len(opcoes_upgrade)))
+    escolhidas += sortear_armas_novas(opcoes_novas, 3 - len(escolhidas), rng)
+    restantes = [u for u in opcoes_upgrade if u not in escolhidas]
+    escolhidas += rng.sample(restantes, min(3 - len(escolhidas), len(restantes)))
+    return escolhidas
 
 
 class OpcaoDeUpgrade:

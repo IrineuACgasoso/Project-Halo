@@ -13,9 +13,10 @@ ALL_DATA = {**WEAPON_DATA, **COMPANION_DATA, **VEHICLES_DATA}
 
 
 class Arma(ABC):
-    def __init__(self, jogador, **kwargs):
+    def __init__(self, jogador, nivel_maximo=None, **kwargs):
         self.jogador = jogador
         self.nivel = 1
+        self.nivel_maximo = nivel_maximo   # da raridade (ArmaInfo.criar, roteiro E6); None = sem teto
         self.dano = 0
         self.velocidade = 0
         self.cooldown = 0
@@ -226,8 +227,23 @@ class Arma(ABC):
         """Deve retornar True se o disparo foi realizado com sucesso para resetar o cooldown"""
         pass
     
-    def upgrade(self): 
-        self.nivel += 1 
+    @property
+    def no_maximo(self) -> bool:
+        return self.nivel_maximo is not None and self.nivel >= self.nivel_maximo
+
+    def upgrade(self) -> bool:
+        """Sobe 1 nível e aplica os ganhos dele. No nível máximo não faz nada e devolve False
+        (o sorteio já não oferece a arma; isto é a defesa em profundidade da E6)."""
+        if self.no_maximo:
+            return False
+        self.nivel += 1
+        self.aplicar_nivel()
+        return True
+
+    def aplicar_nivel(self):
+        """Ganhos do nível recém-alcançado (`self.nivel`). Padrão: os stats do perfil na própria arma.
+        Quem guarda os stats em outro sprite (companheiro, veículo) ou tem efeito extra sobrescreve."""
+        self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
 
     def equipar(self): 
         pass

@@ -49,12 +49,12 @@ class Items(pygame.sprite.Sprite):
 
     @staticmethod
     def _sortear_arma_do_jogador():
-        """Escolhe aleatoriamente uma arma dentre as que o jogador já possui."""
-        from source.systems.entitymanager import entity_manager
+        """Escolhe aleatoriamente uma arma do jogador abaixo do nível máximo (None se não houver)."""
         player = entity_manager.player
-        if not player or not player.armas:
+        if not player:
             return None
-        return random.choice(sorted(player.armas.keys()))
+        candidatas = sorted(i for i, arma in player.armas.items() if not arma.no_maximo)
+        return random.choice(candidatas) if candidatas else None
 
     # ------------------------------------------------------------------ #
     # SPAWN INTELIGENTE POR KWARGS

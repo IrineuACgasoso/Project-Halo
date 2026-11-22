@@ -77,11 +77,13 @@ def test_boss_luta_por_quinze_segundos(novo_jogo, nome, fase):
 
 
 @pytest.mark.parametrize('id_arma', sorted(ARMAS_REGISTRO))
-def test_arma_nivel_10_em_combate(novo_jogo, id_arma):
+def test_arma_no_nivel_maximo_em_combate(novo_jogo, id_arma):
+    # Antes da E6: nível 10 para todas. Agora o máximo da raridade (5 a 25).
     blindar_jogador(novo_jogo.player)
     em = novo_jogo.event_manager
-    while getattr(novo_jogo.player.armas.get(id_arma), 'nivel', 0) < 10:
-        em._aplicar_escolha_de_upgrade(id_arma)   # 1ª escolha equipa (nível 1), as demais sobem
+    maximo = ARMAS_REGISTRO[id_arma].nivel_maximo
+    for _ in range(maximo):   # 1ª escolha equipa (nível 1), as demais sobem; laço com fim
+        em._aplicar_escolha_de_upgrade(id_arma)
     simular(novo_jogo, 8, desenhar_a_cada=30)
-    assert novo_jogo.player.armas[id_arma].nivel == 10
+    assert novo_jogo.player.armas[id_arma].nivel == maximo
     _sem_erros_de_render(novo_jogo)

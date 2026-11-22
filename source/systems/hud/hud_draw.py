@@ -393,8 +393,11 @@ def _draw_weapon_slots(surface, player, fonte):
                     escolhida = faixa
 
             cor_lvl = PALETA_NIVEL[escolhida]
+            rotulo = f"L{arma.nivel}"
+            if arma.no_maximo:   # nível máximo da raridade (roteiro E6): na cor da raridade
+                rotulo, cor_lvl = "MAX", PALETA_RARIDADE[raridade]['decoracao']
 
-            txt_nivel = _texto(('slot', i), fonte, f"L{arma.nivel}", cor_lvl)
+            txt_nivel = _texto(('slot', i), fonte, rotulo, cor_lvl)
             txt_rect = txt_nivel.get_rect(bottomright=(rx + slot_w - 5, ry + slot_h - 3))
             surface.blit(txt_nivel, txt_rect)
 

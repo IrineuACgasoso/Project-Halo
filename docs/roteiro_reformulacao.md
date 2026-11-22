@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4 e a E5 concluídos; próxima: E6.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4, a E5 e a E6 concluídos; próximo: bloco F.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -191,6 +191,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
   - `upgrade()` acima do máximo não faz nada (defesa em profundidade).
 - Testes: cada raridade para exatamente no seu máximo; sorteio respeita os pesos (seed fixa, 10 mil sorteios, tolerância); nenhuma tela vazia; item `upgrade` nunca escolhe arma no máximo. O teste atual que sobe toda arma até o nível 21 passa a subir até o máximo da raridade (é mudança de especificação, registrada no log, não enfraquecimento).
 - Muda o comportamento (declarado): golden regenerado se o sorteio entrar na simulação.
+- Feito (2026-11-22): `ArmaInfo.criar` passa o `nivel_maximo`; `Arma.upgrade()` é o único ponto de subida (as subclasses implementam `aplicar_nivel`). O sorteio não entra no golden (o jogador blindado não sobe de nível): golden inalterado. O upgrade forçado é revalidado ao sair da fila (a arma pode ter chegado ao máximo numa tela anterior).
 
 ### F. Bosses (detalhe em `docs/plano_bosses.md`)
 | Etapa | Entrega | Pronto quando |

@@ -65,8 +65,7 @@ class Marine(Arma):
         if self.sprite_companion is None:
             self.sprite_companion = novo_marine
 
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.companions)
         self.dano = self.companions[0].dano if self.companions else self.dano
         if self._deve_melhorar(

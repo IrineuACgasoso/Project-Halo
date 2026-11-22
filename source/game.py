@@ -167,7 +167,7 @@ class Game:
         entity_manager.player = self.player
 
         # Arma inicial
-        self.player.armas['assault_rifle'] = AssaultRifle(jogador=self.player, game=self)
+        self.player.armas['assault_rifle'] = ARMAS_REGISTRO['assault_rifle'].criar(self.player, self)
 
         # Spawner — depois do player para não explodir no primeiro spawn
         self.spawner      = Spawner(self)

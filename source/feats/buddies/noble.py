@@ -60,8 +60,7 @@ class NobleVI(Arma):
             )
             self.sprite_companion.arma_parent = self
 
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_companion)
 
     def ver_proximo_upgrade(self):

@@ -11,6 +11,7 @@ from source.feats.items import Items
 from source.systems.collision import CollisionManager
 from source.systems.dano import Dano, DIRETO
 from source.systems.entitymanager import entity_manager
+from source.systems.levelup import ARMAS_REGISTRO
 from source.systems.spawner import spawner as spawner_mod
 from source.systems.spawner.spawner_bosses import BOSS_CLASSES, CRONOGRAMA_BOSSES
 
@@ -165,6 +166,35 @@ def test_coletar_item_aplica_efeito(player, tipo, efeito):
 def test_item_upgrade_mira_arma_do_jogador(player):
     item = Items(player.posicao, 'upgrade', (entity_manager.items_grupo,))
     assert item.id_arma_alvo == 'assault_rifle'
+
+
+def _maximizar(arma):
+    while arma.upgrade():
+        pass
+
+
+def test_item_upgrade_nunca_mira_arma_no_maximo(player):
+    # roteiro E6
+    _maximizar(player.armas['assault_rifle'])
+    player.armas['brick'] = ARMAS_REGISTRO['brick'].criar(player, player.game)
+    for semente in range(20):
+        random.seed(semente)
+        assert Items(player.posicao, 'upgrade', (entity_manager.items_grupo,)).id_arma_alvo == 'brick'
+
+
+def test_item_upgrade_com_tudo_no_maximo_so_da_pontos(player):
+    # Provisório da E6 (recompensa_sem_upgrade): os +200 pontos e nenhuma tela
+    _maximizar(player.armas['assault_rifle'])
+    item = Items(player.posicao, 'upgrade', (entity_manager.items_grupo,))
+    assert item.id_arma_alvo is None
+    pontos, nivel = player.pontuacao, player.contador_niveis
+    item.coletar(player)
+    assert player.pontuacao == pontos + 200 and player.contador_niveis == nivel
+    assert _sem_tela(player)
+
+
+def _sem_tela(player):
+    return player.game.estado_do_jogo != 'level_up' and player.game.sessao.tela_de_upgrade_ativa is None
 
 
 # ── Granadas inimigas ────────────────────────────────────────────────────────

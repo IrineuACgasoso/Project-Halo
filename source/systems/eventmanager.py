@@ -86,7 +86,7 @@ class EventManager:
             g.player.armas[id_da_arma].upgrade()
             return
 
-        nova_arma = ARMAS_REGISTRO[id_da_arma].classe(g.player, g)
+        nova_arma = ARMAS_REGISTRO[id_da_arma].criar(g.player, g)
         if hasattr(nova_arma, 'equipar'):
             nova_arma.equipar()
         g.player.armas[id_da_arma] = nova_arma

@@ -17,8 +17,7 @@ class MjolnirPunch(Arma):
     def update(self, delta_time):
         self.jogador.atualizar_espinhos()
 
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
         self.jogador.configurar_espinhos(dano=self.espinhos, cooldown=self.cooldown)
 

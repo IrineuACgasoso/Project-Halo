@@ -57,7 +57,7 @@ Project-Halo/
     │   │                    # spawner_bosses.py (PHASE_BOSSES, BOSS_CLASSES, CRONOGRAMA_BOSSES)
     │   ├── mapmanager/      # Mapa = loader(.tmj) + collision(paredes) + utils(navegação) + feats(void)
 │   │                    # grade_paredes.py: GradeParedes (segmentos por célula de 128 px, roteiro C1)
-    │   ├── levelup/         # constants.py (ARMAS_REGISTRO, MAX_ARMAS=6, paletas), levelup.py (TelaDeUpgrade), draw.py
+    │   ├── levelup/         # constants.py (ARMAS_REGISTRO, MAX_ARMAS=6, máximo e peso por raridade, paletas), levelup.py (gerar_opcoes, TelaDeUpgrade), draw.py
     │   └── hud/             # hud_system.py (estado) + hud_draw.py (desenho; barras, fundos e textos em cache: C4)
     ├── player/              # Player + mixins: input (aplica o ComandoJogador), movement, animation, combat (dano/escudo/espinhos),
     │                        # scaling (XP/level-up/buff), setup (valores iniciais)
@@ -86,7 +86,9 @@ Project-Halo/
 | Tarefa | Onde |
 |---|---|
 | Balancear arma, companion ou veículo | `source/data/weapon_data.py` |
-| Nova arma | Classe em `feats/weapons/<raridade>/` (construtor `(jogador, game, **kwargs)`; rajada: `ArmaDeRajada`) com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `MANIFESTO['icons']` (`data/manifesto_assets.py`) |
+| Nível máximo ou peso no sorteio por raridade | `systems/levelup/constants.py` (`NIVEL_MAXIMO_POR_RARIDADE`, `PESO_SORTEIO_POR_RARIDADE`; a raridade de cada arma fica no `ArmaInfo`) |
+| O que ganhar quando não há upgrade possível (tudo no máximo) | `player/player_scaling.py::recompensa_sem_upgrade` (provisório; `TODO(itens temporários)`) |
+| Nova arma | Classe em `feats/weapons/<raridade>/` (construtor `(jogador, game, **kwargs)`, repassando os `kwargs` à base; ganho de nível próprio em `aplicar_nivel`; rajada: `ArmaDeRajada`) com `NOME_ASSET`, exportada em `weapons/__init__.py`, perfil em `weapon_data.py`, `ArmaInfo` em `systems/levelup/constants.py`, ícone opcional em `MANIFESTO['icons']` (`data/manifesto_assets.py`) |
 | Novo companion ou veículo | `feats/buddies/` ou `feats/vehicles/`, com `COMPANION_DATA`/`VEHICLES_DATA` e `ARMAS_REGISTRO` |
 | Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), perfil em `INIMIGOS` (`data/enemy_data.py`), sprites em `MANIFESTO['enemies']`, peso em `spawner_pools.py` |
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |

@@ -80,8 +80,7 @@ class Pelican(Arma):
         elif veiculo.pode_ser_chamado():
             veiculo.entrar()
 
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET, target=self.sprite_veiculo)
 
     def ver_proximo_upgrade(self):

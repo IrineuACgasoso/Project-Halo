@@ -47,6 +47,16 @@ def draw_tela_upgrade(surface, tela_upgrade):
         draw_opcao(surface, opcao, esta_selecionada)
 
 
+def titulo_da_opcao(opcao):
+    """Nome + o nível que a escolha dá; o upgrade que leva ao máximo da raridade mostra MAX (E6)."""
+    arma = opcao.jogador.armas.get(opcao.id)
+    if not arma:
+        return f"{opcao.dados.nome} (NOVA!)"
+    proximo = arma.nivel + 1
+    rotulo = 'MAX' if proximo >= opcao.dados.nivel_maximo else proximo
+    return f"{opcao.dados.nome} (Nv. {rotulo})"
+
+
 def draw_opcao(surface, opcao, esta_selecionada):
     
     # Coleta as especificações de dados estáticos da arma registrada
@@ -70,12 +80,8 @@ def draw_opcao(surface, opcao, esta_selecionada):
 
     arma_adquirida = opcao.jogador.armas.get(opcao.id)
 
-    if arma_adquirida:
-        texto_titulo = f"{opcao.dados.nome} (Nv. {arma_adquirida.nivel + 1})"
-        cor_titulo = cor_decoracao
-    else:
-        texto_titulo = f"{opcao.dados.nome} (NOVA!)"
-        cor_titulo = (255, 255, 0)
+    texto_titulo = titulo_da_opcao(opcao)
+    cor_titulo = cor_decoracao if arma_adquirida else (255, 255, 0)
 
     corte = 12
     _draw_corner_ornaments(surface, opcao.rect, cor_decoracao, corte)

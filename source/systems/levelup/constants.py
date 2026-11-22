@@ -21,6 +21,12 @@ PALETA_RARIDADE = {
     'lendaria':  {'borda': (241, 196, 15),        'fundo': (60, 45, 10, 140),  'decoracao': (255, 235, 85)}
 }
 
+# ─── RARIDADE DE FATO (roteiro E6; decisões no roteiro §8, itens 4 e 6) ───
+# Nível máximo da arma: no máximo ela sai do sorteio de upgrade e mostra "MAX".
+NIVEL_MAXIMO_POR_RARIDADE = {'comum': 25, 'incomum': 20, 'rara': 15, 'epica': 10, 'lendaria': 5}
+# Peso de cada arma NOVA no sorteio do level-up (por arma, não por raridade inteira).
+PESO_SORTEIO_POR_RARIDADE = {'comum': 40, 'incomum': 25, 'rara': 20, 'epica': 10, 'lendaria': 5}
+
 PALETA_NIVEL = {
     1:  (140, 200, 255),
     5:  (180, 180, 180),
@@ -33,9 +39,21 @@ PALETA_NIVEL = {
 class ArmaInfo:
     id: str
     nome: str
-    classe: Type        # instanciada como classe(jogador, game); os grupos vêm do entity_manager (E4)
+    classe: Type        # instanciada por criar(); os grupos vêm do entity_manager (E4)
     descricao: str
-    raridade: str = 'comum'  # Parâmetro adicionado para o controle de cor
+    raridade: str = 'comum'  # cor no HUD e no level-up, nível máximo e peso no sorteio (E6)
+
+    @property
+    def nivel_maximo(self) -> int:
+        return NIVEL_MAXIMO_POR_RARIDADE[self.raridade]
+
+    @property
+    def peso_sorteio(self) -> int:
+        return PESO_SORTEIO_POR_RARIDADE[self.raridade]
+
+    def criar(self, jogador, game):
+        """A arma pronta para o jogador, com o nível máximo da raridade. Toda arma do jogo nasce aqui."""
+        return self.classe(jogador, game, nivel_maximo=self.nivel_maximo)
 
 
 def _registro(*infos: ArmaInfo) -> dict:

@@ -100,7 +100,7 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
 | `Player` | `Sprite` + mixins `Input/Movement/Animation/Combat/Scaling/Setup` | dano (`receber_dano(Dano)`): i-frames de 100 ms → veículo (absorve tudo) → escudo → vida; os espinhos são chamados pelo `CollisionManager` no contato |
 | `BaseEnemy` | `Sprite` + `EnemySetup/Sprites/Animation/Movement/Collision/Combat/Scaling/Effects` | escala no construtor pelo nível do player: `1 + nivel/10` (vida e dano) e `1 + nivel/100` (velocidade) |
 | Bosses | `class X(BaseEnemy, XSetup, XAI, XAttacks)` | máquina de estados por string com timestamps de `relogio`. O Arbiter (em andamento) usa rotinas geradoras e `config.py` |
-| Armas | `Arma(ABC)` em `feats/weapons/baseweapon.py` | `update` controla a cadência; `disparar()` devolve `True` quando atirou; `upgrade()` faz `nivel += 1` e depois `aplicar_upgrades` |
+| Armas | `Arma(ABC)` em `feats/weapons/baseweapon.py` | `update` controla a cadência; `disparar()` devolve `True` quando atirou; `upgrade()` (só na base) recusa no nível máximo, faz `nivel += 1` e chama o gancho `aplicar_nivel()` (padrão: `aplicar_upgrades` do perfil na própria arma) |
 | Companions e veículos | `Arma` "wrapper" que cria um sprite `Companheiro`/`Vehicle` | ficam em `armas` como qualquer arma |
 | Mapa | `MapLoader/MapCollision/MapUtils/MapFeats` | lê as camadas Tiled `Colisoes`, `SpawnPoints`, `SpawnPlayer`, `Portal`, `Void`, `VoidPoint`, `Navigation`; ao fim da leitura monta `grade_paredes` |
 
@@ -109,9 +109,9 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
   1. Um item é coletado e chama `ganhar_xp`.
   2. O `while` processa todos os níveis devidos.
   3. Cada nível vai para `fila_upgrades`.
-  4. Abre-se uma `TelaDeUpgrade` por vez (estado `level_up`).
-  5. `EventManager._aplicar_escolha_de_upgrade` faz `upgrade()` numa arma que o jogador já tem, ou instancia `ArmaInfo.classe(player, game)`. A arma lê os grupos do `entity_manager` pelas propriedades da `Arma` (E4).
-- **Upgrade de stats:** cada `WeaponStats(value, label, increase, range_val, min_val)` sobe quando `_deve_melhorar(range_val, nivel)` é verdadeiro. `range_val` pode ser um int (a cada N níveis) ou uma lista (níveis exatos). Não existe teto de nível.
+  4. Abre-se uma `TelaDeUpgrade` por vez (estado `level_up`). `gerar_opcoes` oferece até 2 upgrades (só armas abaixo do máximo), completa com armas novas (peso por raridade, `PESO_SORTEIO_POR_RARIDADE`) e, faltando, com mais upgrades. Sem nenhuma opção, não abre tela: `recompensa_sem_upgrade()` (provisório da E6). O upgrade forçado (item) é revalidado ao sair da fila.
+  5. `EventManager._aplicar_escolha_de_upgrade` faz `upgrade()` numa arma que o jogador já tem, ou cria a arma com `ArmaInfo.criar(player, game)`, que passa o `nivel_maximo` da raridade. A arma lê os grupos do `entity_manager` pelas propriedades da `Arma` (E4).
+- **Upgrade de stats:** cada `WeaponStats(value, label, increase, range_val, min_val)` sobe quando `_deve_melhorar(range_val, nivel)` é verdadeiro. `range_val` pode ser um int (a cada N níveis) ou uma lista (níveis exatos). O teto é o nível máximo da raridade (`NIVEL_MAXIMO_POR_RARIDADE`: comum 25, incomum 20, rara 15, épica 10, lendária 5); no máximo, HUD e card mostram MAX.
 - **Drops:** `Items.spawn_drop(pos, grupos, tipo=(qtd, prob, escala) | ((qtds), (probs), escala))`. Quando as probabilidades somam menos que a escala, o que falta vai para a opção mais provável.
 - **Fases:**
   - `PHASE_POOLS[fase]` define os inimigos (`random.choices` com pesos).

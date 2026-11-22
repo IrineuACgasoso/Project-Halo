@@ -27,8 +27,7 @@ class MK2_Shield(Arma):
     def disparar(self): 
         return False
     
-    def upgrade(self):
-        super().upgrade()
+    def aplicar_nivel(self):
         self.aplicar_upgrades(self.nivel, self.NOME_ASSET)
         if self.area_de_dano:
             self.area_de_dano.atualizar_stats(self.raio, self.dano_por_segundo)
