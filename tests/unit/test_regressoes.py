@@ -294,3 +294,23 @@ def test_inimigo_longe_do_jogador_colide_com_a_parede_perto_dele(novo_jogo):
 def test_tela_de_colaboradores_desenha_sem_erro(game):
     """AttributeError a cada frame: o Renderer engolia o erro e mostrava 'Erro ao renderizar'."""
     game.tela_colaboradores.draw(game.tela)
+
+
+# ── Gravemind
+def test_nevoa_do_gravemind_passa_pelo_contrato_de_dano(novo_jogo):
+    """MiasmaGas fazia `vida_atual -= 300` direto: ignorava escudo e veículo e não matava o jogador."""
+    from source.enemies.bosses.gravemind.vfx import MiasmaGas
+    from source.systems.dano import AREA
+    from source.systems.eventos import DANO_CAUSADO, eventos
+
+    player = novo_jogo.player
+    boss = _inimigo(novo_jogo, player.posicao + V(2000, 0))
+    nevoa = MiasmaGas(boss.posicao, raio_seguro=100, game=novo_jogo,
+                      grupos=(entity_manager.all_sprites,), boss=boss)
+    player.adicionar_escudo(1000)
+    recebidos = []
+    eventos.assinar(DANO_CAUSADO, lambda **d: recebidos.append(d))
+    relogio.avancar(1.0)
+    nevoa.update(1 / 60)
+    assert player.escudo_atual == 700 and player.vida_atual == player.vida_maxima
+    assert recebidos[0]['dano'].tipo == AREA and recebidos[0]['dano'].fonte is boss

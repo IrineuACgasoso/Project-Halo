@@ -2,6 +2,10 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Correção: névoa do Gravemind pelo contrato de dano
+- `MiasmaGas` (fora do raio seguro, 300 por segundo) fazia `vida_atual -= 300` direto: ignorava escudo e veículo, não interrompia a regeneração do escudo e não chamava `kill` (o game over vinha só do `_checar_game_over`). Agora é `receber_dano(Dano(300, AREA, boss, ignora_iframes=True))`: **muda o jogo** (o escudo e o veículo passam a absorver a névoa). Achado na E1; commit próprio (roteiro §2, regra 6).
+- Regressão em `test_regressoes.py::test_nevoa_do_gravemind_passa_pelo_contrato_de_dano` (falhou antes da correção). Suíte: **912 verdes + 1 xfail**. Golden inalterado (a fase 0 não tem Gravemind). Não validado no jogo real.
+
 ## 2026-11-21 | Etapa E1: contrato de dano único
 **Decisões do usuário (desta sessão):** as regras "spawn dentro da navegação" e "portal obrigatório" da D5 **não** serão adotadas (pendência fechada). Novo recurso aprovado: o **sistema de status** (buffs e debuffs), logo depois da E1; decisões no roteiro §8 (itens 8–11).
 
@@ -17,7 +21,7 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 **Difere do roteiro:** "invulnerável" não entrou no contrato. Hoje quem respeita `invulneravel` (invisível, proteção de spawn) é quem causa o dano: projéteis e auras checam; **artilharia, cone, companheiro corpo a corpo, atropelamento do veículo e espinhos não** (acertam inimigo invisível). Centralizar mudaria o jogo: decisão sua.
 
 **Achados (não corrigidos)**
-- A névoa do Gravemind faz `vida_atual -= 300` direto (sem escudo, veículo nem `kill`): corrigida no commit seguinte, pelo contrato.
+- A névoa do Gravemind fazia `vida_atual -= 300` direto (sem escudo, veículo nem `kill`): corrigida no commit seguinte.
 - Granada e morteiro inimigos (dano 0 no voo) que encostam no jogador chamam `receber_dano(0)`: ligam os i-frames (100 ms) e interrompem a regeneração do escudo. Verificado com um Spike.
 - O golpe letal do Tartarus (`inf`) é absorvido pelo veículo (sem transbordo) e bloqueado pelos i-frames, se cair na janela de 100 ms.
 - Loader de mapa: na camada `Colisoes`, elipse vira o retângulo em volta dela (8 no mapa 0) e ponto vira 4 segmentos de comprimento zero (4 no mapa 0).

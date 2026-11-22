@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
+from source.systems.dano import Dano, AREA
 from source.feats.skills.artilharia.core import ArtilhariaAviso
 
 class FloodWarning(ArtilhariaAviso):
@@ -76,5 +77,6 @@ class MiasmaGas(pygame.sprite.Sprite):
         agora = relogio.agora()
         if self.game.player.posicao.distance_to(self.posicao_boss) > self.raio_seguro:
             if agora - self.ultimo_dano_tick >= 1000:
-                self.game.player.vida_atual -= self.dano_por_segundo
+                # Pelo contrato: escudo e veículo absorvem e a morte acontece (antes tirava da vida direto)
+                self.game.player.receber_dano(Dano(self.dano_por_segundo, AREA, self.boss, ignora_iframes=True))
                 self.ultimo_dano_tick = agora
