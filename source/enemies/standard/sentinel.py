@@ -54,11 +54,11 @@ class Sentinel(BaseEnemy):
             # Lógica de movimentação
             if distancia > self.distancia_gatilho_orbita:
                 direcao = vetor_player.normalize()
-                self.posicao += direcao * self.velocidade * delta_time
+                self.posicao += direcao * self.velocidade_atual() * delta_time
             elif distancia < self.distancia_minima_seguranca:
                 if distancia > 0:
                     direcao_fuga = -vetor_player.normalize()
-                    self.posicao += direcao_fuga * self.velocidade * delta_time
+                    self.posicao += direcao_fuga * self.velocidade_atual() * delta_time
             
             # Troca para órbita/ataque
             if agora - self.timer_estado >= self.cooldown_pos_ataque:

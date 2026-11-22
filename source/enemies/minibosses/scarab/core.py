@@ -7,8 +7,10 @@ from source.feats.items import Items
 from .setup import ScarabSetup
 from .states import ScarabAI
 from .attacks import ScarabAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Scarab(BaseEnemy, ScarabSetup, ScarabAI, ScarabAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=15000, dano_base=80, velocidade_base=35, 
                          game=game, sprite_key='scarab', flip_sprite=True)

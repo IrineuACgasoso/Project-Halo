@@ -9,9 +9,11 @@ from .states import ArbiterAI
 from .attacks import ArbiterAttacks
 from .arsenal import ArbiterArsenal
 from .movement import ArbiterMovement
+from source.systems.status import IMUNIDADES_CHEFE
 
 
 class BossArbiter(ArbiterMovement, BaseEnemy, ArbiterSetup, ArbiterAI, ArbiterAttacks, ArbiterArsenal):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     # ArbiterMovement ANTES de BaseEnemy: precisa sobrescrever `mover` (ver movement.py)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=2500, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)

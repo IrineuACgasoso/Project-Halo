@@ -3,6 +3,7 @@ import pygame
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.skills.artilharia import ArtilhariaAviso
 from source.systems.entitymanager import entity_manager
+from source.systems.status import IMUNIDADES_CHEFE
 
 
 class JegaClone(BaseEnemy):
@@ -22,6 +23,7 @@ class JegaClone(BaseEnemy):
     sobrescreveria a direção travada e faria o clone se comportar
     exatamente como um Jega de verdade perseguindo o jogador.
     """
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
 
     def __init__(self, posicao, game, jogador, direcao=None, velocidade_base=300, **kwargs):
         super().__init__(posicao, vida_base=1, dano_base=0, velocidade_base=velocidade_base,

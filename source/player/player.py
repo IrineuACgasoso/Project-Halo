@@ -51,7 +51,10 @@ class Player(
 
     def update(self, delta_time, paredes=None):
 
-        self.input()
+        if self.status.atordoado:   # atordoado: não anda (as armas param no Game)
+            self.direcao.update(0, 0)
+        else:
+            self.input()
 
         self.atualizar_veiculo(delta_time)
 

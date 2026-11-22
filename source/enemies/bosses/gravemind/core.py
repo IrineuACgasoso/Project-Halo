@@ -8,10 +8,12 @@ from .animation import GravemindAnimation
 from .states import GravemindAI
 from .attacks import GravemindAttacks
 from .vfx import GravePit, FloodWarning
+from source.systems.status import IMUNIDADES_CHEFE
 
 # GravemindAnimation ANTES de BaseEnemy: senão EnemyAnimation.animar vence na MRO e a animação própria nunca roda.
 class BaseGravemind(GravemindAnimation, BaseEnemy, GravemindSetup, GravemindAI, GravemindAttacks):
     """Herança múltipla"""
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, jogador, variante, vida, dano):
         super().__init__(
             posicao, 

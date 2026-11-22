@@ -7,8 +7,10 @@ from source.feats.items import Items
 from .setup import GuardianSetup
 from .ia import GuardianAI
 from .attacks import GuardianAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Guardian(BaseEnemy, GuardianSetup, GuardianAI, GuardianAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=1000, dano_base=1, velocidade_base=40, game=game, sprite_key='guardian', flip_sprite=False)
         self.titulo = "GUARDIAN, O Anjo Forerunner"

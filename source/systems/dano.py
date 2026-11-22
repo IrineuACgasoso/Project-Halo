@@ -19,8 +19,9 @@ AURA = 'aura'           # área contínua presa a alguém (MK2, aura de energia)
 AREA = 'area'           # habilidade de área: explosão, cone, onda, puxão, feixe contínuo
 VOID = 'void'           # zona de void do mapa
 DIRETO = 'direto'       # sem meio físico (ex.: o golpe letal do Tartarus)
+STATUS = 'status'       # efeito de status contínuo (queimadura)
 
-TIPOS_DANO = frozenset({PROJETIL, CONTATO, AURA, AREA, VOID, DIRETO})
+TIPOS_DANO = frozenset({PROJETIL, CONTATO, AURA, AREA, VOID, DIRETO, STATUS})
 
 
 @dataclass(frozen=True, slots=True)

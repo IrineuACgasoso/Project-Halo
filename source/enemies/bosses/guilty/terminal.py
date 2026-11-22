@@ -5,9 +5,11 @@ from .vfx import GuiltyTeleport
 from source.enemies.base import BaseEnemy
 from source.enemies.standard.sentinel import SentinelMajor
 from source.systems.entitymanager import entity_manager
+from source.systems.status import IMUNIDADES_CHEFE
 
 
 class ForerunnerTerminal(BaseEnemy):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, monitor_pai):
         super().__init__(posicao, vida_base=200, dano_base=30, velocidade_base=0, game=game, sprite_key='terminal', flip_sprite=False)
         self.titulo = "TERMINAL FORERUNNER"

@@ -242,7 +242,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 ## 7.1 Depois do roteiro (recursos aprovados para o futuro)
 - **G4 · Áudio central** (descrito no bloco G).
 - **Itens temporários e boosts do personagem:** substituem os casos provisórios da E6 (item `upgrade` e level-up sem opções quando tudo está no máximo). Usam os eventos de B4 e os dados validados de D5. Desenho: TODO, a definir quando começar.
-- **Sistema de status (buffs e debuffs)** (pedido em 2026-11-21; entra logo depois da E1, antes da E2): um ponto único `aplicar(alvo, efeito)` para jogador e inimigos. Debuffs: lentidão, atordoamento, queimadura (DPS + corte na cura), fraqueza (+% de dano recebido), cegueira (só no jogador). Buffs: dano, velocidade, cadência (só no jogador), escudo e vida (instantâneos). Curas, escudos de aliados (Watcher), regeneração do MK2 e o bônus da Cortana passam por ele. Decisões na §8 (itens 8–11).
+- **Sistema de status (buffs e debuffs)** (pedido em 2026-11-21; entra logo depois da E1, antes da E2): um ponto único `aplicar(alvo, efeito)` para jogador e inimigos. Debuffs: lentidão, atordoamento, queimadura (DPS + corte na cura), fraqueza (+% de dano recebido), cegueira (só no jogador). Buffs: dano, velocidade, cadência (só no jogador), escudo e vida (instantâneos). Curas, escudos de aliados (Watcher), regeneração do MK2 e o bônus da Cortana passam por ele. Decisões na §8 (itens 8–11). Feito (2026-11-21): o núcleo (S1) e as migrações (S2: curas, escudos, buff de cadência antigo; S3: Cortana) em commits separados; ver o log.
 
 ## 8. Decisões tomadas (2026-11-21)
 1. **A0:** commitar o trabalho pendente como linha de base: **sim** (feito).

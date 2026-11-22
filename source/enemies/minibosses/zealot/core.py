@@ -6,8 +6,10 @@ from source.enemies.base.enemy_base import BaseEnemy
 from .setup import ZealotSetup
 from .states import ZealotAI
 from .attacks import ZealotAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=750, dano_base=80, velocidade_base=100, game=game, sprite_key='zealot')
         self.titulo = "ZEALOT, Soldado de Elite Covenant"

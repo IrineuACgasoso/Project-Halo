@@ -8,8 +8,10 @@ from source.feats.items import Items
 from .setup import HunterSetup
 from .states import HunterAI
 from .attacks import HunterAttacks, HunterMortarProjectile
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=1000, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"

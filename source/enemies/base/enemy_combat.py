@@ -3,6 +3,7 @@ import random
 
 from source.feats.items import Items
 from source.systems.eventos import eventos, DANO_CAUSADO
+from source.systems.status import multiplicador_de_dano
 
 class EnemyCombat:
     def adicionar_escudo(self, valor):
@@ -35,7 +36,7 @@ class EnemyCombat:
     def receber_dano(self, dano):
         """Contrato de dano dos inimigos (roteiro E1). A regra própria do alvo entra por
         `ajustar_dano_recebido`; o que o valor final tira do escudo e da vida, por `absorver_dano`."""
-        valor = self.ajustar_dano_recebido(dano.valor, dano)
+        valor = self.ajustar_dano_recebido(dano.valor * multiplicador_de_dano(dano, self), dano)
         if valor is None:
             return
         self.absorver_dano(valor)
@@ -58,6 +59,15 @@ class EnemyCombat:
         else:
             # Se não tem escudo, toma dano direto na vida
             self.vida = max(0, self.vida - valor)
+
+    def receber_cura(self, quantidade):
+        """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura."""
+        self.vida = min(self.vida + quantidade, self.vida_maxima)
+
+    def receber_escudo(self, quantidade):
+        """Só pelo sistema de status (`aplicar(alvo, Escudo(...))`): até o escudo máximo."""
+        if self.escudo_maximo > 0:
+            self.escudo_atual = min(self.escudo_atual + quantidade, self.escudo_maximo)
 
     def novo_cooldown(self, minimal, maximum):
         updated_cooldown = random.randint(minimal, maximum)

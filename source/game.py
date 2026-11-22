@@ -20,6 +20,7 @@ from source.systems.estados import (ESTADOS, TRANSICOES, Tela, TransicaoInvalida
                                     COLABORADORES, RANKING, GAME_OVER)
 from source.systems.sessao import SessaoJogo
 from source.systems.eventos import eventos, BOSS_DERROTADO
+from source.systems.status import atualizar_status, limpar_status
 from source.debug import DEBUG
 # FEATS
 from source.feats.buddies import *
@@ -125,6 +126,7 @@ class Game:
         #    do valor absoluto (cooldowns "prontos" no início), então toda partida começa igual.
         relogio.reiniciar()
         eventos.limpar()   # assinaturas valem por partida
+        limpar_status()    # buffs e debuffs da partida anterior não contam mais
 
         # 2. Limpa todos os grupos de sprite
         entity_manager.all_sprites.empty()
@@ -185,6 +187,7 @@ class Game:
         self._checar_boss_derrotado()
         self._checar_portal_tocado()
         self._atualizar_spawner(delta_time)
+        self._atualizar_status(delta_time)
         self._atualizar_entidades(delta_time)
         self.collision_manager.update(delta_time)
         self.stage_manager.update(delta_time)
@@ -223,6 +226,10 @@ class Game:
             s.timer_jogo += delta_time
             self.spawner.update(delta_time)
 
+    def _atualizar_status(self, delta_time):
+        """Buffs e debuffs (systems/status): antes das entidades, para o atordoamento já valer neste passo."""
+        atualizar_status(delta_time)
+
     def _atualizar_entidades(self, delta_time):
         """Player, câmera, armas e depois os outros sprites (inimigos recebem as paredes)."""
         if not self.player:
@@ -232,14 +239,16 @@ class Game:
         self.player.update(delta_time, paredes)
         self.camera.update(self.player.posicao)
 
-        for arma in self.player.armas.values():
-            arma.update(delta_time)
+        if not self.player.status.atordoado:   # atordoado não ataca
+            for arma in self.player.armas.values():
+                arma.update(delta_time)
 
         for sprite in entity_manager.all_sprites:
             if sprite == self.player:
                 continue
             if sprite in entity_manager.inimigos_grupo:
-                sprite.update(delta_time, paredes)
+                if not sprite.status.atordoado:   # atordoado: nem anda nem ataca
+                    sprite.update(delta_time, paredes)
             else:
                 sprite.update(delta_time)
 

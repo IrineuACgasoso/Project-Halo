@@ -2,6 +2,29 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Sistema de status (S1): núcleo de buffs e debuffs
+**O que foi feito** (recurso novo pedido nesta sessão; decisões no roteiro §8, itens 8–11)
+- `source/systems/status/`: `aplicar(alvo, efeito, fonte=None, chave=None)` é o ponto único, para jogador e inimigos; `remover` tira um buff sem fim.
+  - **Debuffs:** `Lentidao`, `Atordoamento`, `Queimadura` (DPS + `reducao_cura`), `Fraqueza` (+% de dano recebido, pedido nesta sessão) e `Cegueira` (só no jogador).
+  - **Buffs:** `BuffDano`, `BuffVelocidade` (com duração ou sem fim) e `BuffCadencia` (só no jogador).
+  - **Instantâneos:** `Escudo` (até o máximo) e `Cura` (até o máximo, menos o corte da queimadura).
+- **Validação:** dataclasses frozen. Porcentagem é fração (teto de 10 = 1000%, para pegar quem passa 30 querendo dizer 30%). Duração em ms; só os buffs aceitam `None`. Efeito exclusivo do jogador num inimigo, `fonte` que não é entidade e efeito desconhecido lançam exceção.
+- **`fonte` × `chave`:** `fonte` é a entidade que causa (como em `Dano.fonte`: a queimadura dá o dano em nome dela). `chave` é o lugar de acúmulo (padrão: a fonte). Ex.: duas armas do jogador com chaves próprias acumulam queimadura, e o crédito continua sendo do jogador.
+- **Acúmulo (item 9):** o mesmo lugar reaplicando substitui valores e duração. Entre lugares: lentidão = a mais forte; queimadura, fraqueza e buffs de dano/velocidade somam; cadência multiplica; atordoamento e cegueira valem enquanto houver um (cegueira: o menor raio).
+- **Componente `status`** no jogador e em todo inimigo. Os modificadores são recalculados só quando um efeito entra ou sai, e só as entidades com efeito ativo são atualizadas (`Game._atualizar_status`, passo novo antes de `_atualizar_entidades`). A lista é limpa a cada partida.
+- **Onde cada efeito age:** tabela em `docs/architecture.md`.
+  - Atordoamento: o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador ignora o input; `inofensivo`; espinhos, aura do MK2, veículo e aura de energia do dono param.
+  - Queimadura: dano `STATUS` (tipo novo do `Dano`) a cada 0,25 s, ignorando os i-frames sem ligá-los.
+- **Bosses e minibosses (item 8):** as 19 classes das pastas `bosses/` e `minibosses/` declaram `IMUNIDADES_CHEFE` (sem atordoamento e lentidão de fora); um teste varre as pastas. O stun próprio do Scarab e do Hunter não muda.
+- **Cegueira:** buraco com degradê em cache por raio (no máximo 8 raios) + 4 `fill` pretos; desenhada no `_draw_mundo` (vale na pausa e no level-up), por baixo do HUD. Zero alocação por frame (teste).
+- Testes: `test_status.py` (78); `test_eventos.py` ganhou o passo novo na ordem do update. Suíte: **994 verdes + 1 xfail**. Golden e catraca inalterados (sem efeito, todos os multiplicadores são exatamente 1.0).
+
+**Desempenho** (na bateria): A/B alternado com o commit anterior, 2 rodadas: horda 4,1–6,1 × 4,2–4,3 ms/frame; Warden 3,4 × 3,5. Sem piora. Pior caso medido à parte: 150 inimigos com 4 efeitos cada (2 queimaduras) = **0,27 ms/frame** no `atualizar_status`.
+
+**Não incluído (decisão sua, se quiser):** indicador de status no HUD e feedback visual no alvo (cor de queimadura, estrelas de stun). Buff de velocidade em boss não tem efeito: os bosses movem-se por código próprio (entra na F5, com a `BossBase`).
+
+**Não validado:** a cegueira na tela real (o degradê e a sensação) e a sensação de jogo de cada efeito: ainda não há arma nem inimigo que os aplique (só as migrações dos próximos commits).
+
 ## 2026-11-21 | Correção: névoa do Gravemind pelo contrato de dano
 - `MiasmaGas` (fora do raio seguro, 300 por segundo) fazia `vida_atual -= 300` direto: ignorava escudo e veículo, não interrompia a regeneração do escudo e não chamava `kill` (o game over vinha só do `_checar_game_over`). Agora é `receber_dano(Dano(300, AREA, boss, ignora_iframes=True))`: **muda o jogo** (o escudo e o veículo passam a absorver a névoa). Achado na E1; commit próprio (roteiro §2, regra 6).
 - Regressão em `test_regressoes.py::test_nevoa_do_gravemind_passa_pelo_contrato_de_dano` (falhou antes da correção). Suíte: **912 verdes + 1 xfail**. Golden inalterado (a fase 0 não tem Gravemind). Não validado no jogo real.

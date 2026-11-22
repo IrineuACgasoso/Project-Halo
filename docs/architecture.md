@@ -40,16 +40,17 @@ Cada passo é um método nomeado; `test_eventos.py::test_update_roda_os_passos_n
 1. `relogio.avancar(dt)`: este é o **único** lugar onde o relógio de jogo avança.
 2. `_atualizar_portal`: o portal aparece 2000 ms depois que o boss morre. `_checar_boss_derrotado` → `boss_derrotado()`. `_checar_portal_tocado`: encostar nele chama `StageManager.iniciar_transicao()`.
 3. `_atualizar_spawner`: `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
-4. `_atualizar_entidades`: `Player.update(dt, paredes)`, depois cada arma `.update(dt)`, depois os sprites (os inimigos recebem `paredes`). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
-5. `CollisionManager.update`, nesta ordem:
+4. `_atualizar_status`: conta o tempo dos buffs e debuffs e aplica a queimadura, só nas entidades com efeito ativo (`systems/status`). Vem antes das entidades para o atordoamento já valer neste passo.
+5. `_atualizar_entidades`: `Player.update(dt, paredes)`, depois cada arma `.update(dt)` (nenhuma, se o jogador estiver atordoado), depois os sprites (os inimigos recebem `paredes`; inimigo atordoado não é atualizado). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
+6. `CollisionManager.update`, nesta ordem:
    - projétil do jogador contra inimigos (o mais próximo primeiro; perfuração finita acerta cada alvo uma vez só);
    - projétil inimigo contra a hitbox do jogador;
    - contato (com espinhos);
    - coleta de itens;
    - auras (DPS × dt);
    - morte dos inimigos (`morrer` gera os drops; se o inimigo saiu do mundo, emite `inimigo_morreu`).
-6. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner, mata os sprites que não sobrevivem (player, companions, aura) e emite `fase_trocada`.
-7. `_checar_game_over`: se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
+7. `StageManager.update` cuida do fade: no meio dele troca mapa, câmera e spawner, mata os sprites que não sobrevivem (player, companions, aura) e emite `fase_trocada`.
+8. `_checar_game_over`: se `player.vida_atual <= 0`, a partida termina: calcula a pontuação final e vai para `game_over`.
 
 ## Eventos de jogo (`systems/eventos.py`)
 Barramento síncrono `eventos`: `assinar(nome, funcao)`, `emitir(nome, **dados)` (chama na hora, na ordem de assinatura; a exceção do assinante sobe) e `limpar()`, chamado a cada partida nova. Nome fora de `EVENTOS` é `ValueError`.
@@ -67,6 +68,21 @@ Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes))`. Tipo
 - **Jogador:** i-frames (ignorados com `ignora_iframes`, que também não os liga) → veículo → escudo → vida.
 - **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Hunter, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab defensivo sobrescreve: só escudo, quebra = stun). Não há i-frames.
 - **Invulnerável** (`invulneravel`: invisível, proteção de spawn) é checado por quem causa o dano, não pelo contrato: projéteis e auras checam; artilharia, cone, companheiro, atropelamento e espinhos não (achado da E1, ver log).
+
+## Status: buffs e debuffs (`systems/status/`)
+Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e inimigos. Os efeitos (`efeitos.py`) são dataclasses validadas (porcentagem = fração; duração em ms; `None` = sem fim, só nos buffs).
+| Efeito | Onde age |
+|---|---|
+| `Lentidao`, `BuffVelocidade` | `mult_velocidade` no movimento: `PlayerMovement.mover_com_colisao`, `EnemyMovement.velocidade_atual()` (usada pelo `mover` e pelos 4 inimigos comuns que se movem sozinhos). Bosses movem-se por conta própria: buff de velocidade neles ainda não tem efeito (F5) |
+| `Atordoamento` | o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador não lê o input; `inofensivo` (sem dano de contato); espinhos, aura do MK2, veículo e aura de energia do dono param |
+| `Queimadura` | dano `STATUS` a cada 0,25 s em nome da `fonte` (ignora i-frames sem ligá-los) + corte na `Cura` |
+| `Fraqueza`, `BuffDano` | `multiplicador_de_dano(dano, alvo)` no `receber_dano` (buff da fonte × fraqueza do alvo), antes da regra do alvo |
+| `BuffCadencia` (só jogador) | `mult_cooldown` em `Arma.update`, no ciclo da Energy Sword e na recarga dos espinhos (companheiros e veículos não) |
+| `Cegueira` (só jogador) | `Renderer._draw_mundo` desenha `status/cegueira.py` por cima do mundo e embaixo do HUD |
+| `Escudo`, `Cura` | instantâneos: `receber_escudo` (até o máximo) e `receber_cura` (até o máximo, menos o corte da queimadura) |
+- Acúmulo: um lugar por (tipo, chave ou fonte); reaplicar no mesmo lugar substitui. Entre lugares: lentidão = a mais forte; queimadura, fraqueza e buffs de dano/velocidade somam; cadência multiplica; atordoamento e cegueira valem enquanto houver um (cegueira: o menor raio).
+- Bosses e minibosses declaram `imunidades_status = IMUNIDADES_CHEFE` (sem atordoamento e lentidão de fora); um teste confere todas as classes das pastas `bosses/` e `minibosses/`.
+- Custo: os modificadores são recalculados só quando um efeito entra ou sai; sem efeitos, todos são exatamente 1.0 (o golden não muda). 150 inimigos com 4 efeitos cada: 0,27 ms/frame.
 
 ## Singletons e estado global
 - `entity_manager` (`systems/entitymanager.py`): guarda os grupos `all_sprites`, `inimigos_grupo`, `projeteis_jogador_grupo`, `projeteis_inimigos_grupo`, `items_grupo`, `auras_grupo` e o `player`. `Game._resetar_estado_jogo` esvazia esses grupos. Os grupos se acessam só por aqui (os aliases `game.<grupo>` foram removidos na B3).

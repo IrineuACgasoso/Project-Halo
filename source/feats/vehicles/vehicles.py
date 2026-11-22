@@ -122,6 +122,10 @@ class Vehicle(Companheiro):
         self.posicao = self.jogador.posicao.copy()
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
+        if self.jogador.status.atordoado:   # piloto atordoado: o veículo não atropela nem atira
+            self.animar()
+            return
+
         self.atropelar()
 
         agora = relogio.agora()

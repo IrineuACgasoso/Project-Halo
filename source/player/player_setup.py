@@ -1,6 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
+from source.systems.status import StatusEntidade
 
 # Seta todo o init do Player
 class PlayerSetup:
@@ -62,6 +63,7 @@ class PlayerSetup:
         self.veiculo_atual = None          # referência ao Vehicle embarcado
 
     def setup_status(self):
+        self.status = StatusEntidade(self, eh_jogador=True)   # buffs e debuffs (systems/status)
         self.vida_maxima = 500
         self.vida_atual = self.vida_maxima
         self.buff_timer = 0

@@ -11,9 +11,11 @@ from .setup import WardenSetup
 from .states import WardenAI
 from .functions import WardenFunctions
 from .attacks import WardenAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class BaseWarden(BaseEnemy, WardenSetup, WardenAI, WardenAttacks, WardenFunctions):
     """Corpo físico individual do Warden Eternal com função fixa e imutável."""
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, jogador, variante, vida, velocidade, funcao_atual, manager):
         super().__init__(
             posicao, 
@@ -91,6 +93,7 @@ class BaseWarden(BaseEnemy, WardenSetup, WardenAI, WardenAttacks, WardenFunction
 
 class DomainConsciousness(BaseEnemy):
     """Mente abstrata do Domínio. Serve como o Manager invisível e oficial da Boss Fight."""
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, jogador=None):
         # Inicializa o esqueleto básico do BaseEnemy
         super().__init__(

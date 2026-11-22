@@ -20,7 +20,7 @@ class EnergySword(Arma):
         agora = relogio.agora()
         if agora >= self.tempo_fim_ciclo:
             self.disparar()
-            self.tempo_fim_ciclo = (agora + self.duracao + self.cooldown)
+            self.tempo_fim_ciclo = (agora + self.duracao + self.cooldown * self.jogador.status.mult_cooldown)
 
     def disparar(self):
         angulo_step = 360 / self.num_listas

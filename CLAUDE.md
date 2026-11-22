@@ -31,6 +31,7 @@ Não há formatter nem typecheck configurados. Não invente um comando para eles
 - **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.
 - **Velocidades e dano contínuo:** multiplique por `delta_time` (segundos). Nada de valores "por frame".
 - **Dano:** sempre `alvo.receber_dano(Dano(valor, tipo, fonte))` (`source/systems/dano.py`). Nunca mexa em `vida`/`escudo` direto para causar dano. Ataque de inimigo passa `fonte=self` (há teste). Regra própria de um alvo vai em `ajustar_dano_recebido`.
+- **Buffs e debuffs (cura, escudo, velocidade, cadência, stun...):** sempre `aplicar(alvo, efeito, fonte, chave)` (`source/systems/status/`). Não mexa em `velocidade`, `cooldown`, `vida` ou `escudo` para dar bônus ou curar. Boss/miniboss novo declara `imunidades_status = IMUNIDADES_CHEFE`.
 - **Mixins:** a ordem de herança decide quem vence (MRO). Um método de mixin colocado depois de `BaseEnemy` é **silenciosamente ignorado** (já aconteceu, veja @docs/log.md).
 - **Arma nova:** a ordem de `ArmaInfo.grupos` precisa bater com o desempacotamento no `__init__`. Ela também precisa de 2 coisas, e `validar_armas` (`source/data/validacao.py`) verifica as duas:
   - um perfil em `weapon_data.py` com a chave igual a `NOME_ASSET`;

@@ -7,8 +7,10 @@ from source.utils.superficies import mascara_de
 from .setup import GuiltySetup
 from .states import GuiltyAI
 from .attacks import GuiltyAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, grupos=None):
         super().__init__(posicao, vida_base=2000, dano_base=80, velocidade_base=100, 
                         game=game, sprite_key='guilty', flip_sprite=True)

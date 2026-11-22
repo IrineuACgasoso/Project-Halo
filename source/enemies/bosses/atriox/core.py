@@ -9,9 +9,11 @@ from source.enemies.bosses.tartarus.setup import TartarusSetup
 from source.enemies.bosses.tartarus.states import TartarusAI
 from source.enemies.bosses.tartarus.attacks import TartarusAttacks
 from source.enemies.bosses.tartarus.vfx import ProtocoloHalo
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Atriox(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
     """Classe principal do Boss Atriox."""
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, ativar_halo=True, **kwargs):
         super().__init__(posicao, vida_base=4000, dano_base=60, velocidade_base=120, 
                          game=game, sprite_key='atriox', flip_sprite=True)

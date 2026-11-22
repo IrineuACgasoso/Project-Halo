@@ -8,8 +8,10 @@ from source.feats.items import Items
 from .setup import KnightSetup
 from .states import KnightAI
 from .attacks import KnightAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Knight(BaseEnemy, KnightSetup, KnightAI, KnightAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=500, dano_base=60, velocidade_base=50, game=game, sprite_key='knight')
         self.game = game

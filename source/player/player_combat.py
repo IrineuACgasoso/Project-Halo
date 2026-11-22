@@ -1,6 +1,7 @@
 from source.systems.gameclock import relogio
 from source.systems.dano import Dano, CONTATO
 from source.systems.eventos import eventos, DANO_CAUSADO
+from source.systems.status import multiplicador_de_dano
 
 class PlayerCombat:
     def adicionar_escudo(self, valor):
@@ -68,7 +69,7 @@ class PlayerCombat:
         self.ultimo_dano_sofrido = relogio.agora()
         self.regenerando_escudo = False
 
-        valor = dano.valor
+        valor = dano.valor * multiplicador_de_dano(dano, self)   # buff de quem causa × fraqueza
         # ===== VEÍCULO =====
         if self.in_veicule and self.vida_veiculo_atual > 0:
             self.vida_veiculo_atual -= valor
@@ -112,14 +113,14 @@ class PlayerCombat:
         if self.espinho_cooldown <= 0 or self.espinho_disponivel:
             return
         agora = relogio.agora()
-        if agora - self.ultimo_espinho_carregado >= self.espinho_cooldown:
+        if agora - self.ultimo_espinho_carregado >= self.espinho_cooldown * self.status.mult_cooldown:
             self.espinho_disponivel = True
 
 
     def contra_atacar_com_espinhos(self, inimigo):
         """Chamado pelo CollisionManager quando um inimigo encosta (mesmo durante os i-frames).
         Consome o espinho disponível (se houver) causando dano de volta ao inimigo."""
-        if self.dano_espinhos <= 0 or not self.espinho_disponivel:
+        if self.dano_espinhos <= 0 or not self.espinho_disponivel or self.status.atordoado:
             return
         inimigo.receber_dano(Dano(self.dano_espinhos, CONTATO, self))
         self._spawnar_faiscas_espinhos()
@@ -138,6 +139,15 @@ class PlayerCombat:
                 
     def curar(self, quantidade):
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
+
+    def receber_cura(self, quantidade):
+        """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura."""
+        self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
+
+    def receber_escudo(self, quantidade):
+        """Só pelo sistema de status (`aplicar(alvo, Escudo(...))`): até o escudo máximo."""
+        if self.escudo_maximo > 0:
+            self.escudo_atual = min(self.escudo_atual + quantidade, self.escudo_maximo)
 
     def atualizar_invencibilidade(self):
         if self.invencivel:

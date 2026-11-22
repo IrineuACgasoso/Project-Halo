@@ -46,6 +46,7 @@ Project-Halo/
     │   ├── sessao.py        # SessaoJogo: estado de UMA partida, recriado a cada partida (roteiro B3)
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── dano.py          # Dano (valor, tipo, fonte, ignora_iframes): contrato único de dano (roteiro E1)
+    │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py (desenho)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções; culling pela câmera (C4)
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
@@ -94,6 +95,7 @@ Project-Halo/
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
+| Buff ou debuff (aplicar, novo efeito, imunidade de boss) | `systems/status/` (`aplicar(alvo, efeito, fonte, chave)`); efeito novo = dataclass em `efeitos.py` + o cálculo em `StatusEntidade._recalcular` |
 | Regra de dano própria de um inimigo (costas, imunidade) | `ajustar_dano_recebido` na classe dele (contrato em `systems/dano.py`) |
 | Curva de XP e bônus de nível | `player/player_scaling.py::level_up` |
 | Escala de dificuldade dos inimigos | `enemies/base/enemy_scaling.py` |

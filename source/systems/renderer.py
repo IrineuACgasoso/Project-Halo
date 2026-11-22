@@ -10,6 +10,7 @@ import pygame
 
 from source.debug import DEBUG
 from source.systems.entitymanager import entity_manager
+from source.systems.status.cegueira import desenhar_cegueira
 
 
 class Renderer:
@@ -66,6 +67,11 @@ class Renderer:
 
         self._draw_sprites(deslocamento)
         self._draw_efeitos_inimigos(deslocamento)
+
+        # Cegueira (sistema de status): por cima do mundo, embaixo do HUD; vale também na pausa e no level-up
+        raio = game.player.status.raio_cegueira
+        if raio is not None:
+            desenhar_cegueira(tela, game.player.posicao - deslocamento, raio)
 
     def desenhar_jogando(self):
         game = self.game

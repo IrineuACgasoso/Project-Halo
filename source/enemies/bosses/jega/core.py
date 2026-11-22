@@ -7,9 +7,11 @@ from source.feats.items import Items
 from .setup import JegaSetup
 from .ia import JegaAI
 from .attacks import JegaAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 
 class Jega(BaseEnemy, JegaSetup, JegaAI, JegaAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=5000, dano_base=100, velocidade_base=50,
                           game=game, sprite_key='jega', flip_sprite=True)

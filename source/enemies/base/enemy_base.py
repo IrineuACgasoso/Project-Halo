@@ -78,9 +78,9 @@ class BaseEnemy(
     def inofensivo(self):
         """
         Dita se o inimigo perde temporariamente a capacidade de causar dano de contato.
-        Ideal para quando estão no ar (eixo Z falso), atordoados, etc.
+        Ideal para quando estão no ar (eixo Z falso), atordoados (inclusive pelo sistema de status), etc.
         """
-        return getattr(self, 'is_inofensivo', False)
+        return getattr(self, 'is_inofensivo', False) or self.status.atordoado
 
     def update(self, delta_time, paredes=None):
         self.mover(delta_time)

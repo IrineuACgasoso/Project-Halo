@@ -48,6 +48,10 @@ class EnergyAura(pygame.sprite.Sprite):
         
         self.rect.center = (round(self.owner.posicao.x), round(self.owner.posicao.y))
         
+        # Dono atordoado (sistema de status) não causa dano de contato
+        if self.owner.status.atordoado:
+            return
+
         # === LÓGICA DE DANO E COLISÃO ===
         player = self.game.player
         vetor_distancia = player.posicao - self.owner.posicao

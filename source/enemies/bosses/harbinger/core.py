@@ -9,9 +9,11 @@ from source.systems.entitymanager import entity_manager
 from .setup import HarbingerSetup
 from .ia import HarbingerIA
 from .attacks import HarbingerAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 class Harbinger(BaseEnemy, HarbingerSetup, HarbingerIA, HarbingerAttacks):
     """A Rainha Endless. Boss ágil focado em zoneamento dimensional e rajadas de carabina."""
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, jogador=None, **kwargs):
         super().__init__(
             posicao=posicao, 

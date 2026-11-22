@@ -101,7 +101,7 @@ class Watcher(BaseEnemy):
 
         if direcao_movimento.length() > 0:
             direcao_movimento = direcao_movimento.normalize()
-            self.posicao += direcao_movimento * self.velocidade * delta_time
+            self.posicao += direcao_movimento * self.velocidade_atual() * delta_time
             
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 

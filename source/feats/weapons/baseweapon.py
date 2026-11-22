@@ -200,7 +200,8 @@ class Arma(ABC):
         # Sem alvo, disparar() varria TODOS os inimigos a cada frame (por arma). Agora só a cada 100 ms.
         if agora < getattr(self, '_proxima_busca', 0):
             return
-        if agora - self.ultimo_tiro > self.cooldown:
+        # Buff de cadência (systems/status): sem efeito, mult_cooldown é exatamente 1.0
+        if agora - self.ultimo_tiro > self.cooldown * self.jogador.status.mult_cooldown:
             if self.disparar():
                 self.ultimo_tiro = agora
             else:

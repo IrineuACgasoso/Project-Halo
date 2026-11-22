@@ -99,13 +99,13 @@ def test_partida_nova_limpa_as_assinaturas(novo_jogo):
 def test_update_roda_os_passos_na_ordem(novo_jogo, monkeypatch):
     chamados = []
     passos = ['_atualizar_portal', '_checar_boss_derrotado', '_checar_portal_tocado',
-              '_atualizar_spawner', '_atualizar_entidades', '_checar_game_over']
+              '_atualizar_spawner', '_atualizar_status', '_atualizar_entidades', '_checar_game_over']
     for nome in passos:
         monkeypatch.setattr(novo_jogo, nome, lambda *a, _n=nome: chamados.append(_n))
     monkeypatch.setattr(novo_jogo.collision_manager, 'update', lambda dt: chamados.append('colisao'))
     monkeypatch.setattr(novo_jogo.stage_manager, 'update', lambda dt: chamados.append('fase'))
     novo_jogo.update(DT)
-    assert chamados == passos[:5] + ['colisao', 'fase', passos[5]]
+    assert chamados == passos[:6] + ['colisao', 'fase', passos[6]]
 
 
 # ── Eventos emitidos pelo jogo ───────────────────────────────────────────────

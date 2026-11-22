@@ -2,8 +2,11 @@ import pygame
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.data.enemy_data import DROP_PADRAO
+from source.systems.status import StatusEntidade
 
 class EnemySetup:
+    imunidades_status = frozenset()   # bosses e minibosses: IMUNIDADES_CHEFE (systems/status)
+
     def setup_core(self, game, sprite_key, variante):
         self.game = game
         self.sprite_key = sprite_key
@@ -12,6 +15,8 @@ class EnemySetup:
         self.nome_completo = "INIMIGO"
         self.is_boss = False
         self.tabela_drop = DROP_PADRAO   # kwargs de Items.spawn_drop; os comuns trocam pela do perfil
+        # Buffs e debuffs (systems/status); bosses declaram `imunidades_status` na classe
+        self.status = StatusEntidade(self, imunidades=self.imunidades_status)
 
     def setup_stats(self, vida_base, dano_base, velocidade_base):
         # Base

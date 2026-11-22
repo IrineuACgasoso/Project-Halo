@@ -6,7 +6,7 @@ class PlayerMovement:
     def mover_com_colisao(self, delta_time, grade_paredes):
         # 1. Aplicamos o movimento bruto
         dt_seguro = min(delta_time, 0.033)
-        self.posicao += self.direcao * self.velocidade * dt_seguro
+        self.posicao += self.direcao * (self.velocidade * self.status.mult_velocidade) * dt_seguro
 
         # 2. Resolvemos colisões com as paredes perto do jogador. 3 iterações para garantir que,
         # em cantos apertados, um empurrão não nos jogue para dentro de outra linha.

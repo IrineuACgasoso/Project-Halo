@@ -9,10 +9,12 @@ from source.utils.superficies import mascara_de
 from .setup import DidactSetup
 from .states import DidactAI
 from .attacks import DidactAttacks
+from source.systems.status import IMUNIDADES_CHEFE
 
 # A Classe Didact se torna uma junção de: BaseEnemy + Setup + IA + Ataques
 # DidactAI ANTES de BaseEnemy: senão EnemyCollision.collision_rect vence na MRO e a hitbox é ignorada.
 class Didact(DidactAI, BaseEnemy, DidactSetup, DidactAttacks):
+    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=8000, dano_base=60, velocidade_base=50, 
                          game=game, sprite_key='didact', flip_sprite=True)

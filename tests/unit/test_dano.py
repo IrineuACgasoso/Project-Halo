@@ -10,8 +10,8 @@ import pytest
 from source.enemies.standard.grunt import GruntRed
 from source.feats.projetil import BurstRifle, PlasmaGun
 from source.feats.skills.artilharia import ArtilhariaAviso
-from source.systems.dano import (AREA, AURA, CONTATO, DIRETO, PROJETIL, TIPOS_DANO, VOID, Dano,
-                                 fonte_do_dono)
+from source.systems.dano import (AREA, AURA, CONTATO, DIRETO, PROJETIL, STATUS, TIPOS_DANO, VOID,
+                                 Dano, fonte_do_dono)
 from source.systems.entitymanager import entity_manager
 from source.systems.eventos import DANO_CAUSADO, eventos
 from source.systems.gameclock import relogio
@@ -61,7 +61,7 @@ def test_dano_recusa_tipo_desconhecido():
 
 
 def test_tipos_conhecidos():
-    assert TIPOS_DANO == {PROJETIL, CONTATO, AURA, AREA, VOID, DIRETO}
+    assert TIPOS_DANO == {PROJETIL, CONTATO, AURA, AREA, VOID, DIRETO, STATUS}
 
 
 def test_fonte_do_dono(player):

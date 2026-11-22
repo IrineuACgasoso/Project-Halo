@@ -150,7 +150,8 @@ class CollisionManager:
            item.coletar(player)
 
         # 5. Dano de Área (Auras) -> CORRIGIDO para usar aura_collision!
-        if entity_manager.auras_grupo:
+        # As auras deste grupo são do jogador (MK2): atordoado, ele não ataca
+        if entity_manager.auras_grupo and not player.status.atordoado:
             colisoes_aura = pygame.sprite.groupcollide(
                 entity_manager.inimigos_grupo,
                 entity_manager.auras_grupo,

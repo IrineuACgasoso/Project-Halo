@@ -181,7 +181,7 @@ class Crawler(BaseEnemy):
             if direcao_final.length() > 0:
                 direcao_final = direcao_final.normalize()
                 
-            self.posicao += direcao_final * self.velocidade * delta_time
+            self.posicao += direcao_final * self.velocidade_atual() * delta_time
 
         if paredes:
             self.aplicar_colisao_mapa(paredes)
