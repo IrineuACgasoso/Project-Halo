@@ -348,17 +348,6 @@ def test_fraqueza_no_jogador(player):
     assert player.vida_atual == player.vida_maxima - 125
 
 
-def test_fraqueza_e_a_regra_das_costas_do_hunter_se_somam(novo_jogo):
-    novo_jogo.spawner.spawnar('hunter')
-    hunter = novo_jogo.sessao.boss_atual
-    hunter.estado_habilidade, hunter.estado_animacao = 'stun', 'right'
-    hunter.escudo_atual, hunter.vida = 0, 10 ** 6
-    novo_jogo.player.posicao.update(hunter.posicao + V(-100, 0))   # pelas costas
-    aplicar(hunter, Fraqueza(0.5, 1000))
-    hunter.receber_dano(Dano(100, PROJETIL))
-    assert hunter.vida == 10 ** 6 - 100 * 1.5 * hunter.MULT_COSTAS
-
-
 def test_defesa_reduz_o_dano_do_inimigo_e_do_jogador(novo_jogo):
     grunt = _grunt(novo_jogo)
     aplicar(grunt, Defesa(0.9))

@@ -66,7 +66,8 @@ Ainda não há assinantes no jogo: os consumidores previstos são a memória dos
 ## Dano (`systems/dano.py`, roteiro E1)
 Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes))`. Tipos: `projetil`, `contato`, `aura`, `area` (explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte` é a entidade que causou (jogador, inimigo ou `None` para o mapa): projéteis, granadas e habilidades a guardam (`fonte_do_dono`: o que é do jogador é dele; o inimigo passa `fonte=self`, e um teste por AST exige isso).
 - **Jogador:** i-frames (ignorados com `ignora_iframes`, que também não os liga) → veículo → escudo → vida.
-- **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Hunter, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab defensivo sobrescreve: só escudo, quebra = stun). Não há i-frames.
+- **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab defensivo sobrescreve: só escudo, quebra = stun). Não há i-frames.
+- **Hunter:** a armadura é status, não gancho: `Defesa(90%)` sem fim, tirada enquanto o jogador está nas costas (±30° do eixo x, `no_cone`) e posta de volta quando ele sai (`atualizar_vulnerabilidade`, a cada passo; o status só é tocado na troca).
 - **Invulnerável** (`invulneravel`: invisível, proteção de spawn) é checado por quem causa o dano, não pelo contrato: projéteis e auras checam; artilharia, cone, companheiro, atropelamento e espinhos não (achado da E1, ver log).
 
 ## Status: buffs e debuffs (`systems/status/`)

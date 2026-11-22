@@ -1,31 +1,37 @@
 import pygame
 
+from source.systems.status import aplicar
+
+from .config import CFG, DEFESA
+
+
 class HunterSetup:
     def inicializar_habilidades(self):
+        agora = self._agora
+        self.rotina = None
         self.estado_habilidade = 'idle'
-        self.trava_global = 0 
-        
-        self._setup_run()
-        self._setup_burst()
-        self._setup_cannon()
+        self.ultima_habilidade = None
+        self.livre_em = agora                  # pausa entre ataques
+        self.cd = {nome: agora + ms for nome, ms in CFG.cooldown_inicial.items()}
 
-    def _setup_run(self):
-        self.cooldown_run = 7000
-        self.tempo_ultima_run = 0
-        self.duracao_run = 2500          # Tempo (ms) que ele fica correndo em linha reta
-        self.velocidade_corrida = 500    # Mais rápido para ser ameaçador
-        self.vetor_investida = pygame.math.Vector2(0, 0)
-        
-        self.duracao_stun = 2000         # 2 segundos parado recuperando o fôlego
+        # Movimentação livre
+        self.movimento_livre = True
+        self.modo_movimento = 'avancar'        # 'avancar' | 'lateral'
+        self.sentido_lateral = 1
+        self.troca_movimento_em = agora
 
-    def _setup_burst(self):
-        self.cooldown_burst = 4000
-        self.tempo_ultimo_burst = 0
-        self.contagem_burst = 10
-        self.burst_restante = 0
-        self.intervalo_burst = 150
-        self.cronometro_burst = 0
+        # Orientação com atraso
+        self.lado = 1 if self.estado_animacao == 'right' else -1
+        self.virar_em = None                   # ms em que o timer de virar vence (None = parado)
 
-    def _setup_cannon(self):
-        self.cooldown_cannon = 3000
-        self.tempo_ultimo_cannon = 0
+        # Recuperação do dash: parado, inofensivo, sem animar
+        self.is_inofensivo = False
+        self.animacao_congelada = False
+
+        # Armadura: começa protegido
+        self.vulneravel = False
+        aplicar(self, DEFESA, chave=self)
+
+        self._dt = 0.0
+        self._paredes = None
+        self._direcao_mov = pygame.math.Vector2()

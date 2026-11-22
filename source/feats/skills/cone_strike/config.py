@@ -46,6 +46,17 @@ CONE_STRIKE_PRESETS = {
         cor_explosao=(255, 230, 150, 250)  # Clarão branco/dourado no impacto
     ),
 
+    # Shield slam do Hunter: colado nele, 90° à frente, carga mais lenta para dar para desviar.
+    'hunter_shield_slam': ConeStrikeConfig(
+        dano=150,
+        raio=300,
+        angulo_spray=90,
+        duracao=1000,
+        cor_borda=(120, 255, 90, 210),
+        cor_preenchimento=(60, 170, 40, 80),
+        cor_explosao=(200, 255, 170, 240)
+    ),
+
     # === ARBITER (Covenant) — energia azul ===
     # Espada de energia: curtissimo alcance, arco aberto, telegraph rapido.
     'arbiter_energy_sword': ConeStrikeConfig(

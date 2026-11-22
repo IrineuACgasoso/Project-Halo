@@ -6,7 +6,7 @@
 - **Grupos de uma arma:** use as propriedades da `Arma` (`self.inimigos_grupo` etc.), que leem o `entity_manager` pelo nome; não passe grupos ao construtor. A lista posicional antiga (`ArmaInfo.grupos`) fez o Fuel Rod mirar nos itens e saiu na E4.
 - **Rajada:** arma que dispara `burst_count` tiros a cada `burst_interval` ms herda de `ArmaDeRajada` (`baseweapon.py`), implementa `atirar(alvo)` e, se a mira não for o mais próximo, `buscar_alvo()`.
 - **Mixins em vez de herança profunda:** cada arquivo define uma classe sem `__init__` que manipula `self` (por exemplo, `PlayerCombat` e `EnemyCombat`). O `__init__` real chama os `setup_*` explicitamente.
-  - **Boss:** `class X(BaseEnemy, XSetup, XAI, XAttacks)`. Quem vem antes na MRO vence. Para sobrescrever um método de `BaseEnemy`, o mixin precisa vir **antes** dela (como faz o Arbiter com `ArbiterMovement`).
+  - **Boss:** `class X(BaseEnemy, XSetup, XAI, XAttacks, XVFX)`. Quem vem antes na MRO vence. Todo boss novo ou reformulado tem `vfx.py` no pacote para os efeitos visuais próprios (desenho em `draw_extras`, sem alocar por frame; poeira por `particulas.emitir`). Para sobrescrever um método de `BaseEnemy`, o mixin precisa vir **antes** dela (como faz o Arbiter com `ArbiterMovement`).
 - **Dados separados da lógica:** os números de balanceamento ficam em `data/weapon_data.py` ou em `config.py` (dataclasses frozen + dict de presets, como em `skills/*/config.py` e `bosses/arbiter/config.py`). Prefira esse padrão para código novo.
 - **Registro por dict:** `ARMAS_REGISTRO`, `BOSS_CLASSES`, `PHASE_POOLS`, `ASSETS[...]` e os presets. Para adicionar algo, crie a entrada no dict; não espalhe `if tipo == ...`.
 - **Tempo:** usa `relogio.agora()` (ms) e `delta_time` (s). Velocidades em px/s.

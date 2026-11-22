@@ -65,7 +65,7 @@ Project-Halo/
     ├── enemies/
     │   ├── base/            # BaseEnemy + mixins (setup, sprites, animation, movement, collision, combat, scaling, effects)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
-    │   ├── minibosses/      # hunter, zealot, scarab, knight  (core/setup/states/attacks)
+    │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: padrão novo, rotinas geradoras), zealot, scarab, knight
     │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
@@ -95,6 +95,8 @@ Project-Halo/
 | Novo inimigo comum | `enemies/standard/` (herda de `BaseEnemy`), perfil em `INIMIGOS` (`data/enemy_data.py`), sprites em `MANIFESTO['enemies']`, peso em `spawner_pools.py` |
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
+| Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
+| Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns) | `enemies/minibosses/hunter/config.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |

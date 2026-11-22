@@ -58,6 +58,7 @@ def test_mascara_ignora_o_alpha_da_superficie():
 
 def test_mascara_sai_do_cache_com_a_superficie():
     from source.utils import superficies
+    gc.collect()   # lixo cíclico de testes anteriores (ex.: inimigo morto ↔ rotina) não entra na conta
     s = pygame.Surface((3, 3), pygame.SRCALPHA)
     mascara_de(s)
     antes = len(superficies._MASCARAS)

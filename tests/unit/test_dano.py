@@ -211,21 +211,6 @@ def test_guilty(novo_jogo, estado_fase, imune, com_sentinelas, esperado):
     assert _vida_tirada(guilty, Dano(100, PROJETIL)) == pytest.approx(esperado)
 
 
-@pytest.mark.parametrize('estado, olhando, jogador_dx, esperado', [
-    ('stun', 'right', -100, True),   # costas
-    ('stun', 'left', 100, True),
-    ('stun', 'right', 100, False),   # de frente
-    ('run', 'right', -100, False),   # fora do stun
-])
-def test_hunter_pelas_costas(novo_jogo, estado, olhando, jogador_dx, esperado):
-    hunter = _boss(novo_jogo, 'hunter')
-    hunter.estado_habilidade, hunter.estado_animacao = estado, olhando
-    hunter.escudo_atual = 0
-    hunter.vida = 10 ** 6
-    novo_jogo.player.posicao.update(hunter.posicao + V(jogador_dx, 0))
-    assert _vida_tirada(hunter, Dano(100, PROJETIL)) == (100 * hunter.MULT_COSTAS if esperado else 100)
-
-
 def test_scarab_defensivo_so_no_escudo_e_pernas_x5(novo_jogo):
     scarab = _boss(novo_jogo, 'scarab')
     scarab.estado_combate = 'MOVENDO'

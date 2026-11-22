@@ -1,145 +1,86 @@
+"""Rotinas de ataque do Hunter (geradores: `yield` = 1 frame; todo `while` tem `yield`).
+
+Canhão e burst deixam a movimentação livre ligada (ele anda enquanto atira); dash e slam a desligam.
+"""
 import pygame
-import math
-from source.feats.projetil import ProjetilUniversal, PlasmaGun
-from source.feats.skills.artilharia import ArtilhariaAviso 
+
+from source.feats.projetil import PlasmaGun
+from source.feats.skills.cone_strike import ConeStrikeAviso
+from source.feats.skills.dash import Dash
 from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.entitymanager import entity_manager
 
-class HunterMortarProjectile(ProjetilUniversal):
-    def __init__(self, start_pos, target_pos, game, dono, fonte=None):
-        # Calcula a direção para o alvo
-        dir_vec = target_pos - start_pos
-        if dir_vec.length() > 0:
-            direcao = dir_vec.normalize()
-        else:
-            direcao = pygame.math.Vector2(1, 0)
-            
-        super().__init__(
-            posicao_inicial=start_pos,
-            grupos=(entity_manager.all_sprites,),
-            game=game,
-            dono=dono,
-            sprite_key='green_laser', 
-            tamanho=(96, 96),
-            velocidade=400, 
-            dano=0, 
-            duracao=5000,
-            direcao_custom=direcao,
-            piercing=float('inf'),    # Passa varando todos os alvos sem morrer
-            rotacionar=True,
-            fonte=fonte
-        )
-        self.start_pos = pygame.math.Vector2(start_pos)
-        self.target_pos = pygame.math.Vector2(target_pos)
-        self.total_dist = self.start_pos.distance_to(self.target_pos)
-        self.max_height = 250 # Altura máxima do arco parabólico
-
-    def update(self, delta_time):
-        # Movimentação "plana" 2D normal
-        self.posicao += self.direcao * self.velocidade * delta_time
-        distancia_percorrida = self.start_pos.distance_to(self.posicao)
-        
-        # Verifica se chegou no ponto exato (ou passou dele)
-        if distancia_percorrida >= self.total_dist:
-            self.detonar_artilharia()
-            return
-
-        # Progresso vai de 0.0 (início) a 1.0 (fim)
-        progresso = distancia_percorrida / self.total_dist
-        # math.sin(progresso * pi) cria um arco perfeito: sobe e depois desce!
-        altura = math.sin(progresso * math.pi) * self.max_height
-        
-        # Subtrai a altura apenas na representação da TELA (eixo Y inverte pra cima)
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y - altura))
-
-    def detonar_artilharia(self):
-        aviso = ArtilhariaAviso(
-            posicao=self.target_pos, 
-            grupos=(entity_manager.all_sprites,), 
-            game=self.game,
-            dono=self.dono, fonte=self.fonte,
-            preset='hunter_cannon'
-        )
-        entity_manager.all_sprites.add(aviso)
-        self.kill() 
+from .config import CFG
+from .vfx import poeira_da_explosao, poeira_do_slam
 
 
 class HunterAttacks:
-    def iniciar_run(self, agora):
-        self.estado_habilidade = 'run'
-        self.tempo_inicio_run = agora
-        self.tempo_ultima_run = agora
-        self.velocidade_animacao = 250 
-        self.velocidade = self.velocidade_corrida
-        
-        # Calcula e TRAVA o vetor da investida baseada na posição atual do jogador
-        vetor_alvo = self.jogador.posicao - self.posicao
-        if vetor_alvo.length() > 0:
-            self.vetor_investida = vetor_alvo.normalize()
-        else:
-            self.vetor_investida = pygame.math.Vector2(1, 0)
+    def _esperar(self, ms):
+        fim = self._agora + ms
+        while self._agora < fim:
+            yield
 
-    def processar_run(self, agora, delta_time, paredes=None):
-        self.direcao = self.vetor_investida
-
-        self.posicao += self.vetor_investida * self.velocidade_corrida * delta_time
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-
-        if paredes:
-            self.aplicar_colisao_mapa(paredes)
-        
-        if agora - self.tempo_inicio_run >= self.duracao_run:
-            self.is_inofensivo = True
-            self.estado_habilidade = 'stun'
-            self.tempo_inicio_stun = agora
-            self.velocidade_animacao = 900 
-            self.velocidade = 0 
-
-    def processar_stun(self, agora):
-        self.velocidade = 0 # Fica estático
-        
-        if agora - getattr(self, 'tempo_inicio_stun', 0) >= self.duracao_stun:
-            self.is_inofensivo = False
-            self.estado_habilidade = 'idle'
-            self.velocidade = self.velocidade_base
-            self.cooldown_run = self.novo_cooldown(8000, 14000)
-            self.trava_global = agora + 1000 # Dá meio segundo antes de emendar outro golpe
-
-    def processar_burst(self, agora, delta_time):
-        if self.burst_restante > 0:
-            self.cronometro_burst += delta_time * 1000
-            if self.cronometro_burst >= self.intervalo_burst:
-                self.cronometro_burst = 0
-                self.burst_restante -= 1
-                
-                direcao_com_spread = self.calcular_direcao_tiro(0.15)
-                PlasmaGun(
-                    posicao_inicial=self.posicao,
-                    grupos          = (entity_manager.all_sprites,),
-                    jogador         = self.jogador,
-                    game            = self.game,
-                    dono            = 'INIMIGO', fonte=self,
-                    dano            = 15,
-                    velocidade      = 500,
-                    tamanho         = (36, 36),
-                    direcao_spread  = direcao_com_spread,
-                    vai_rotacionar  = False
-                )
-        else:
-            self.estado_habilidade = 'idle'
-            self.cooldown_burst = self.novo_cooldown(4000, 9000)
-            self.trava_global = agora + 1000 # <- A trava de 1000ms antes do próximo ataque!
-
-    def processar_cannon(self, agora):
-        # Dispara o morteiro parabólico passando a posição atual dele e onde o player está
+    # ------------------------------------------------------------- longe
+    def rotina_canhao(self):
         CanhaoParabolico(
-            start_pos=self.posicao.copy(), 
-            target_pos=self.jogador.posicao.copy(), 
-            game=self.game, 
+            start_pos=self.posicao.copy(),
+            target_pos=self.jogador.posicao.copy(),
+            game=self.game,
             dono='INIMIGO', fonte=self,
-            preset_artilharia='hunter_cannon'
+            preset_artilharia=CFG.canhao_preset,
+            ao_explodir=poeira_da_explosao,
         )
-        
-        self.estado_habilidade = 'idle'
-        self.cooldown_cannon = self.novo_cooldown(6000, 12000)
-        self.trava_global = agora + 1000 # Trava de 1000ms antes do próximo ataque
+        self.agendar_cooldown('canhao')
+        yield
+
+    def rotina_burst(self):
+        for _ in range(CFG.burst_tiros):
+            PlasmaGun(
+                posicao_inicial=self.posicao,
+                grupos=(entity_manager.all_sprites,),
+                jogador=self.jogador,
+                game=self.game,
+                dono='INIMIGO', fonte=self,
+                dano=CFG.burst_dano,
+                velocidade=CFG.burst_velocidade,
+                tamanho=CFG.burst_tamanho,
+                direcao_spread=self.calcular_direcao_tiro(CFG.burst_spread),
+                vai_rotacionar=False,
+            )
+            yield from self._esperar(CFG.burst_intervalo_ms)
+        self.agendar_cooldown('burst')
+
+    # ------------------------------------------------------------ físicos
+    def rotina_dash(self):
+        """Corre até o fim do tempo na direção do jogador (travada no início) e depois fica parado,
+        inofensivo e sem animar durante o atraso de virar pós-dash: a janela para pegar as costas."""
+        self.movimento_livre = False
+        self.velocidade_animacao = CFG.dash_animacao_ms
+        dash = Dash(self, self.jogador.posicao, preset=CFG.dash_preset)
+        if dash.direcao.x:
+            self.virar_para(1 if dash.direcao.x > 0 else -1)
+        self.virar_em = None
+        while not dash.atualizar(self._dt, self._paredes):
+            self.poeira_do_dash(self._agora, dash.direcao)
+            yield
+
+        self.estado_habilidade = 'stun'
+        self.is_inofensivo = True
+        self.animacao_congelada = True
+        self.agendar_virada(CFG.atraso_virar_pos_dash_ms)
+        yield from self._esperar(CFG.atraso_virar_pos_dash_ms)
+        self.is_inofensivo = False
+        self.animacao_congelada = False
+        self.velocidade_animacao = self.velocidade_animacao_base
+        self.agendar_cooldown('dash')
+
+    def rotina_slam(self):
+        """Cone de 90° no eixo de frente (não no jogador): dá para sair pelo lado durante a carga."""
+        self.movimento_livre = False
+        cone = ConeStrikeAviso(
+            self.posicao.copy(), pygame.math.Vector2(self.lado, 0), (entity_manager.all_sprites,), self.game,
+            dono='BOSS', preset=CFG.slam_preset, fonte=self, ao_explodir=poeira_do_slam,
+        )
+        while not cone.explodiu and cone.alive():
+            yield
+        self.agendar_cooldown('slam')

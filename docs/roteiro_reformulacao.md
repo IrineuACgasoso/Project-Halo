@@ -200,7 +200,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 | **F2** Animador | clips declarativos, hit frames, cache de máscaras | update de boss com zero alocação (catraca) |
 | **F3** IA de utilidade + memória | `decisao.py`, alimentada por `dano_causado` (B4) | teste determinístico: contexto X → habilidade Y |
 | **F4** Bot jogador | `FonteEntrada` Bot (E3) que esquiva e kita | métricas por boss no log: tempo para matar, % de acerto, uso de cada habilidade |
-| **F5.x** Migração | um commit por boss: Tartarus (+ Atriox e Escharum, que deixam de ser cópias), Harbinger, Jega, Guilty, Didact, Gravemind, Warden, Guardian; depois Hunter, Zealot, Scarab, Knight | smoke + métricas do bot sem piora + catraca zero no update |
+| **F5.x** Migração | um commit por boss: Tartarus (+ Atriox e Escharum, que deixam de ser cópias), Harbinger, Jega, Guilty, Didact, Gravemind, Warden, Guardian; depois Hunter (adiantado em 2026-11-22 sem a `BossBase`: falta só migrar para ela), Zealot, Scarab, Knight | smoke + métricas do bot sem piora + catraca zero no update |
 | **F6** Inimigos comuns no Animador | mesmo motor de animação para `enemies/standard/` | catraca; golden inalterado |
 | **F7** Guia | `docs/bosses.md` + template; apaga `source/docs/BOSS_CREATION.md` | guia validado criando um boss de teste só pelo template |
 
@@ -259,4 +259,4 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 8. **Status:** bosses e minibosses **não** podem ser atordoados por fora (o stun do Scarab e do Hunter é mecânica própria deles). Lentidão em bosses: também não, por ora (pode ser ligada na F5, com o movimento centralizado na `BossBase`).
 9. **Status:** acúmulo **por tipo**: a mesma fonte só renova a duração; entre fontes diferentes, lentidão = a mais forte, queimadura = DPS soma, buffs de dano/velocidade e fraqueza = % somam, cadência = multiplica (nunca zera o cooldown), atordoamento e cegueira = a maior duração.
 10. **Status:** o buff de escudo é **limitado ao escudo máximo** do alvo.
-11. **Status:** fraqueza é incondicional; a regra "só pelas costas" do Hunter/Scarab continua no gancho `ajustar_dano_recebido` do próprio boss.
+11. **Status:** fraqueza é incondicional; a regra "só pelas costas" do Scarab continua no gancho `ajustar_dano_recebido` do próprio boss. O Hunter (reformulado em 2026-11-22) usa `Defesa` em vez do gancho.
