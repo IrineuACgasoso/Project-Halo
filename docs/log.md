@@ -2,6 +2,10 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Correção: companheiros no spawn do mapa novo
+- O `StageManager` lia `get_player_spawn_pos()` **antes** de trocar o mapa: os companheiros iam para o spawn do mapa antigo e cruzavam o mapa voando até o jogador. Agora o reposicionamento vem depois do mapa novo, com a mesma posição do jogador (cópia própria do `Vector2`). **Muda o jogo:** os companheiros começam a fase ao lado do jogador. Achado na E5; commit próprio (roteiro §2, regra 6).
+- Regressão em `test_regressoes.py::test_companheiros_vao_para_o_spawn_do_mapa_novo` (falhou antes da correção); `test_troca_de_fase.py` confere que o companheiro não divide o `Vector2` do spawn. Suíte: **1104 verdes + 3 xfail**. Golden inalterado (a fase 0 não troca de fase). **Não validado:** a troca de fase na tela real.
+
 ## 2026-11-22 | Etapa E5: persistência entre fases explícita (refatoração: golden inalterado)
 - Na troca de fase sobrevive quem declara `sobrevive_troca_de_fase = True` na classe: `Player`, `Companheiro` (Árbitro, Cortana, Marines, Noble) e `PlayerAura` (MK2). O `StageManager` não conhece mais arma nem dono: os 4 `hasattr` (`companions`, `sprite_companion`, `area_de_dano`) saíram. O reposicionamento usa `isinstance(sprite, Companheiro)`.
 - **Equivalência:** o teste do conjunto de sobreviventes (todas as armas do registro, inimigo, item e portal) passa igual no código antigo; `Vehicle` declara `False` de propósito para manter o comportamento de hoje (ver o 1º achado).

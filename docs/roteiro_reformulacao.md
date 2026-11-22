@@ -176,7 +176,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **E5 · Persistência entre fases explícita** (risco: baixo)
 - Muda: a flag `sobrevive_troca_de_fase` nos sprites (player, companions, auras, veículos) substitui a cadeia de `hasattr` do `StageManager`.
 - Testes: depois da troca, sobrevivem exatamente os sprites marcados (veículos inclusos: comportamento atual TODO: confirmar).
-- Feito (2026-11-22): flag de classe em `Player`, `Companheiro` e `PlayerAura`; golden inalterado. Confirmado: hoje o veículo **não** sobrevive (some, mas continua ativo) e os companheiros vão para o spawn do mapa antigo; os dois são bugs (`xfail`, ver log), corrigidos em commits próprios.
+- Feito (2026-11-22): flag de classe em `Player`, `Companheiro` e `PlayerAura`; golden inalterado. Confirmado: hoje o veículo **não** sobrevive (some, mas continua ativo) e os companheiros vão para o spawn do mapa antigo; os dois são bugs (ver log), corrigidos em commits próprios.
 
 **E6 · Raridade de fato** (recurso novo; pode ser antecipada logo após D5, porque não depende do resto de E)
 - Hoje: `ArmaInfo.raridade` (4 comuns, 4 incomuns, 3 raras, 5 épicas, 6 lendárias, contando companions e veículos) só muda a cor no HUD e no level-up. O sorteio de `gerar_opcoes_aleatorias` é uniforme e não há nível máximo.

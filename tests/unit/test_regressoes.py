@@ -385,3 +385,21 @@ def test_level_up_no_frame_da_morte_nao_ressuscita(novo_jogo):
     player.receber_dano(Dano(10 ** 6, DIRETO, ignora_iframes=True))
     player.ganhar_xp(player.experiencia_level_up)
     assert player.vida_atual == 0
+
+
+# ── Troca de fase (achado na E5)
+def test_companheiros_vao_para_o_spawn_do_mapa_novo(novo_jogo):
+    """Liam o spawn do mapa ANTIGO (antes de trocar o mapa) e cruzavam o mapa voando até o jogador."""
+    from source.feats.buddies import Companheiro
+
+    for id_arma in ('arbiter', 'cortana', 'marine', 'noble'):
+        novo_jogo.event_manager._aplicar_escolha_de_upgrade(id_arma)
+    spawn_antigo = V(novo_jogo.mapa.get_player_spawn_pos())
+    novo_jogo.stage_manager._trocar_dados_fase()
+    spawn = V(novo_jogo.mapa.get_player_spawn_pos())
+    assert spawn != spawn_antigo   # senão o teste não distingue os dois mapas
+    companheiros = [s for s in entity_manager.all_sprites if isinstance(s, Companheiro)]
+    assert len(companheiros) == 4
+    assert all(c.posicao == spawn and c.rect.center == (round(spawn.x), round(spawn.y))
+               for c in companheiros)
+    assert novo_jogo.player.posicao == spawn

@@ -62,13 +62,6 @@ class StageManager:
             else:
                 sprite.kill()
 
-        # Coloca os companheiros junto do spawn para não cruzarem o mapa voando
-        nova_pos = game.mapa.get_player_spawn_pos()
-        for sprite in sobreviventes:
-            if isinstance(sprite, Companheiro):
-                sprite.posicao = pygame.math.Vector2(nova_pos)
-                sprite.rect.center = nova_pos
-
         game.sessao.portal_atual = None             # Remove a referência do portal antigo
         game.sessao.spawnar_portal_em_breve = False # Garante que a flag de espera suma
         game.sessao.boss_atual = None
@@ -86,6 +79,13 @@ class StageManager:
         game.player.hitbox.center = nova_pos
         game.player.rect.center = nova_pos
         game.camera.update(game.player.posicao)
+
+        # Companheiros junto do jogador, no spawn do mapa NOVO (antes liam o do mapa antigo e
+        # cruzavam o mapa voando até ele)
+        for sprite in sobreviventes:
+            if isinstance(sprite, Companheiro):
+                sprite.posicao = pygame.math.Vector2(nova_pos)
+                sprite.rect.center = nova_pos
 
         # Reseta spawner
         game.spawner = Spawner(game)

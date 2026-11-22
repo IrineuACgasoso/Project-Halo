@@ -5,7 +5,6 @@ import pytest
 from pygame.math import Vector2 as V
 
 from source.enemies.standard.grunt import GruntRed
-from source.feats.buddies import Companheiro
 from source.feats.effects import Portal
 from source.feats.items import Items
 from source.systems.entitymanager import entity_manager
@@ -89,11 +88,13 @@ def test_veiculo_sobrevive_a_troca_de_fase(novo_jogo, id_veiculo):
     assert veiculo.alive()
 
 
-@pytest.mark.xfail(strict=True, reason='bug conhecido (docs/log.md, E5): os companheiros vão para o '
-                                       'spawn do mapa ANTIGO (lido antes de trocar o mapa)')
-def test_companheiros_vao_para_o_spawn_do_mapa_novo(novo_jogo):
-    _equipar_todas(novo_jogo)
+def test_companheiro_tem_posicao_propria_depois_da_troca(novo_jogo):
+    """O spawn do mapa é um Vector2 guardado: quem o recebe precisa de cópia, senão andar
+    com o companheiro moveria o spawn (e o jogador da próxima troca)."""
+    novo_jogo.event_manager._aplicar_escolha_de_upgrade('arbiter')
     _trocar_fase(novo_jogo)
+    companheiro = novo_jogo.player.armas['arbiter'].sprite_companion
     spawn = V(novo_jogo.mapa.get_player_spawn_pos())
-    companheiros = [s for s in entity_manager.all_sprites if isinstance(s, Companheiro)]
-    assert companheiros and all(c.posicao == spawn for c in companheiros)
+    companheiro.posicao.x += 100
+    assert novo_jogo.mapa.get_player_spawn_pos() == spawn
+    assert companheiro.posicao is not novo_jogo.player.posicao
