@@ -17,7 +17,7 @@ from source.data.manifesto_assets import Imagem
 from source.data.validacao import (validar_armas, validar_inimigos, validar_manifesto, validar_mapas,
                                    validar_motor_de_bosses, validar_spawner, validar_tudo)
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponProfile, WeaponStats
-from source.enemies.base.boss import BossBase, FaseBoss
+from source.enemies.base.boss import BossBase, Clip, FaseBoss
 from source.enemies.standard.grunt import GruntRed
 from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE,
                                               PESO_SORTEIO_POR_RARIDADE)
@@ -253,6 +253,15 @@ def test_cooldown_inicial_sem_faixa():
 @pytest.mark.parametrize('ms', [-1, 1.5, '500'])
 def test_cooldown_inicial_invalido(ms):
     um_erro(_boss(COOLDOWN_INICIAL={'golpe': ms}), f'cooldown inicial de "golpe" {ms!r}')
+
+
+@pytest.mark.parametrize('clips', [{}, None, {'andar': 200}, [Clip(200)], {'andar': Clip(200), 'x': (1, 2)}])
+def test_clips_invalidos(clips):
+    um_erro(_boss(CLIPS=clips, CLIP_INICIAL='andar'), 'CLIPS precisa ser um dict não vazio')
+
+
+def test_clip_inicial_fora_dos_clips():
+    um_erro(_boss(CLIPS={'andar': Clip(200)}, CLIP_INICIAL='correr'), 'CLIP_INICIAL "correr" não está em CLIPS')
 
 
 # ------------------------------------------------------------------ #

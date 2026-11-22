@@ -148,7 +148,7 @@ class ArbiterAttacks:
         while self.invis_phase is not None:
             fase = self.invis_phase
             self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade * CFG.furtivo_mult_vel
-            self.velocidade_animacao = 80 if fase == 'fade_in' else 100
+            self.animador.tocar('reaparecer' if fase == 'fade_in' else 'furtivo')
 
             if fase in ('fade_out', 'hold'):
                 self.checar_colisao_stealth()

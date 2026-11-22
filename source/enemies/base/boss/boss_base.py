@@ -6,6 +6,8 @@ A IA só decide quando não há rotina ativa. O boss declara, na classe:
   - `COOLDOWNS` (nome -> (min, max) ms) e `COOLDOWN_INICIAL` (nome -> ms depois do spawn);
   - `ESTADOS` (nome da habilidade -> `estado_habilidade`) e um `rotina_<nome>` para cada um;
   - `ANTISTUCK` (`ConfigTravamento`, ou None = sem detector; com ele, `rotina_antistuck`);
+  - `CLIPS` (nome -> `Clip`) e `CLIP_INICIAL`: a animação (F2). Rotinas pedem um clip com
+    `self.animador.tocar(nome)` e casam o dano com o quadro usando `_tocar(clip, ate_evento)`;
 e implementa `escolher_habilidade(agora)`. Ganchos opcionais: `perceber`, `preparar_frame`,
 `movimento_ocioso`, `orientar` e `rotina_transicao`.
 
@@ -17,6 +19,7 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.gameclock import relogio
 from source.systems.status import IMUNIDADES_CHEFE
 
+from .animador import Animador, Clip
 from .contexto import ContextoCombate
 from .fases import FASE_UNICA, fase_pela_vida
 from .travamento import DetectorTravamento
@@ -30,6 +33,8 @@ class BossBase(BaseEnemy):
     COOLDOWN_INICIAL = {}
     ESTADOS = {'antistuck': 'antistuck_combat', 'transicao': 'phase_shift'}
     ANTISTUCK = None
+    CLIPS = {'padrao': Clip(200)}      # todos os quadros em loop
+    CLIP_INICIAL = 'padrao'
 
     def __init__(self, posicao, vida_base, dano_base, velocidade_base, game, sprite_key,
                  flip_sprite=False, variante=None):
@@ -38,6 +43,7 @@ class BossBase(BaseEnemy):
         self.is_boss = True
         self.hitbox = self.rect.copy()     # o corpo do boss; ele pode trocar por um retângulo menor
         self.iniciar_motor()
+        self.iniciar_animacao()
 
     def iniciar_motor(self):
         agora = relogio.agora()
@@ -57,6 +63,11 @@ class BossBase(BaseEnemy):
         self.contexto = ContextoCombate(self.jogador.posicao)
         self.travamento = (DetectorTravamento(self.ANTISTUCK, agora, self.posicao)
                            if self.ANTISTUCK is not None else None)
+
+    def iniciar_animacao(self):
+        """As cópias dos quadros nascem aqui (no spawn): por frame, o boss não aloca imagem."""
+        self.animador = Animador(self.sprites, self.CLIPS, self.CLIP_INICIAL, 'right', relogio.agora())
+        self._mostrar_quadro()
 
     # ------------------------------------------------------------ frame
     def update(self, delta_time, paredes=None):
@@ -82,6 +93,23 @@ class BossBase(BaseEnemy):
     def orientar(self):
         """Padrão: olha para o jogador."""
         self.set_sprite_direction(self.jogador.posicao.x - self.posicao.x)
+
+    # ------------------------------------------------------------ animação
+    def set_sprite_direction(self, direcao_x):
+        """O lado vale no `animar` do fim do frame (nada lê a imagem entre os dois)."""
+        self.animador.virar(direcao_x)
+
+    def animar(self):
+        self.animador.atualizar(self._agora)
+        if self.animador.imagem is not self.image:
+            self._mostrar_quadro()
+
+    def _mostrar_quadro(self):
+        imagem = self.animador.imagem
+        imagem.set_alpha(self.alpha_atual)      # o alpha (camuflagem) segue de um quadro ao outro
+        self.image = imagem
+        self.mask = self.animador.mascara
+        self.rect = imagem.get_rect(center=self.rect.center)
 
     # ------------------------------------------------------------ fases
     def checar_fase(self):
@@ -160,6 +188,24 @@ class BossBase(BaseEnemy):
         fim = self._agora + ms
         while self._agora < fim:
             yield
+
+    def _tocar(self, clip, ate_evento=None, limite_ms=5000):
+        """Sub-rotina: toca `clip` do 1º quadro até o hit frame `ate_evento` (ou, sem evento, até
+        o clip sem loop terminar). Devolve True quando chegou; False se passou `limite_ms` (não
+        trava a luta se o clip nunca chegar lá). O evento é visto 1 frame depois do quadro entrar
+        (o `animar` roda no fim do frame, depois da rotina)."""
+        fim = self._agora + limite_ms
+        self.animador.tocar(clip, reiniciar=True)
+        while True:
+            yield
+            if self.animador.clip == clip:
+                if ate_evento is None and self.animador.terminou:
+                    return True
+                if ate_evento is not None and self.animador.evento == ate_evento:
+                    return True
+            if self._agora >= fim:
+                return False
+            self.animador.tocar(clip)
 
     # ------------------------------------------------------------ cooldowns
     def pronto(self, nome):

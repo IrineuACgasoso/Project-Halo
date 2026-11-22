@@ -51,6 +51,10 @@ def _amostra(game, boss, t):
         'wait': round(boss.wait, CASAS),
         'cd': {k: round(v, CASAS) for k, v in sorted(boss.cd.items())},
         'invis': boss.invis_phase,
+        # animação (F2): o quadro mostrado, o lado e o alpha da imagem (camuflagem)
+        'quadro': boss.animador.quadro,
+        'lado': boss.animador.lado,
+        'alpha': boss.image.get_alpha(),
         'elites': len([e for e in boss.elites_invocados if e.alive()]),
         'inimigos': len(entity_manager.inimigos_grupo),
         'projeteis_inimigos': len(entity_manager.projeteis_inimigos_grupo),

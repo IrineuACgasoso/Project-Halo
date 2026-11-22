@@ -38,7 +38,7 @@ class ArbiterArsenal:
         fim = self._agora + ms
         while self._agora < fim:
             self._ir(self.dir_jogador(), mult)
-            self.velocidade_animacao = 80
+            self.animador.tocar('investida')
             yield
 
     def rotina_lamina(self, emboscada=False):

@@ -2,6 +2,23 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Etapa F2: Animador (refatoração: golden inalterado)
+- `enemies/base/boss/animador.py`:
+  - `Clip(ms_por_quadro, quadros=None, loop=True, eventos={})`: frozen e validado; `eventos` = passo do clip -> nome (hit frame);
+  - `Animador`: copia cada quadro **no spawn** (o alpha da camuflagem é de cada instância) e usa a máscara do original no cache. Por frame, só escolhe uma dessas superfícies (antes: `Surface.copy` a cada troca de quadro ou de lado).
+- **Regras de tempo** (as do `animar` antigo): o quadro troca com **mais** de `ms_por_quadro`. Pedir um clip com a mesma sequência só muda o ritmo, sem reiniciar o passo; sequência diferente ou `tocar(..., reiniciar=True)` recomeçam do 1º quadro, e trocar de clip zera o `terminou`. O evento vale no `atualizar` em que o quadro entra.
+- `BossBase`: `CLIPS`/`CLIP_INICIAL` (padrão: todos os quadros a 200 ms), `animar` e `set_sprite_direction` pelo animador (o lado vale no `animar` do fim do frame) e a sub-rotina `_tocar(clip, ate_evento, limite_ms)`. A rotina vê o evento 1 frame depois (o `animar` roda depois dela) e desiste no limite, sem travar a luta.
+- Arbiter: os `velocidade_animacao = N` viraram clips no `config.py` (`andar` 200, `parado` 300, `investida` 80, `furtivo` 100, `reaparecer` 80). Nenhum ataque dele tem quadro próprio: o hit frame fica sem consumidor até a F5 (Didact, Gravemind, Jega).
+- **Equivalência:** o golden do Arbiter ganhou `quadro`, `lado` e `alpha` da imagem, regravado com o código **antigo** (sem os 3 campos, idêntico ao anterior) e inalterado depois. Mutações conferidas: ritmo do `parado` 300 → 260 e alpha sem passar de um quadro ao outro quebram o golden.
+- "Zero alocação no update": a catraca não vê `Surface.copy` (método em C), então o teste é de identidade. Em 20 s de luta, toda imagem e máscara do Arbiter são as do spawn (voltar a copiar quebra o teste).
+- `validar_motor_de_bosses`: `CLIPS` = dict não vazio de `Clip` e `CLIP_INICIAL` dentro dele. Os índices dos quadros o `Animador` confere no spawn (a classe não declara o `sprite_key`).
+- Testes: `test_animador.py` (45) e 6 casos novos em `test_validacao.py`. **Suíte: 1425 verdes + 1 xfail.** Catraca inalterada.
+- Achado na revisão, antes do commit: sair de um clip sem loop já terminado para outro com a mesma sequência (golpe → andar) deixava a animação congelada. Corrigido (trocar de clip zera o `terminou`), com teste.
+- Desempenho (na tomada, A/B alternado com o HEAD em worktree, 2 rodadas): boss_arbiter 1,34/1,49 (HEAD) × 1,42/1,52 ms/frame (p95 1,91/2,04 × 1,92/2,19). Igual.
+- Nos bosses da `BossBase`, `frame_atual`, `estado_animacao` e `velocidade_animacao` (do `EnemyAnimation`) só valem no spawn; quem lê o quadro usa o `animador`.
+- **Não validado:** nada muda na tela (refatoração); o Arbiter na tela real não foi aberto.
+- Próxima: **F3** (IA de utilidade + memória).
+
 ## 2026-11-22 | Etapa F1: BossBase + ContextoCombate (refatoração: golden inalterado)
 - `source/enemies/base/boss/`, extraído do Arbiter:
   - `BossBase(BaseEnemy)`: ciclo do frame (perceber → fase → pensar/avançar a rotina → orientar → mover → animar), rotina ativa (`iniciar`, `finalizar_rotina` e `interromper_rotina`, nova, que fecha o gerador), cooldowns (`cd`, `pronto`, `agendar` com o `mult_cooldown` da fase), `wait`, decisão padrão (anti-stuck > wait > transição > `escolher_habilidade`), `hitbox` padrão (cópia do `rect`), imunidades de chefe e `is_boss`;

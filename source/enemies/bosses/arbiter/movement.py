@@ -25,7 +25,7 @@ class ArbiterMovement:
     def _resetar_movimento(self):
         """Default de TODO frame: perseguir na velocidade da fase. Rotinas sobrescrevem."""
         self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade
-        self.velocidade_animacao = 200
+        self.animador.tocar('andar')
         self._dir_mov = None
 
     def _ir(self, direcao, fator=1.0):
@@ -34,7 +34,7 @@ class ArbiterMovement:
 
     def _parar(self):
         self.velocidade = 0
-        self.velocidade_animacao = 300      # 0 aqui = animar a cada frame, não congelar
+        self.animador.tocar('parado')
 
     def _aproximar(self, fator=1.0):
         self._ir(self.dir_jogador(), fator)

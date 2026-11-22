@@ -14,7 +14,7 @@ import pygame
 from source.data.enemy_data import INIMIGOS, PerfilInimigo
 from source.data.manifesto_assets import MANIFESTO, Imagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
-from source.enemies.base.boss import BossBase, FaseBoss
+from source.enemies.base.boss import BossBase, Clip, FaseBoss
 from source.enemies.base.enemy_base import BaseEnemy
 from source.feats.weapons.baseweapon import Arma
 from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE, PALETA_RARIDADE,
@@ -156,7 +156,8 @@ def validar_spawner(pools=None, pool_padrao=None, bosses_por_fase=None, classes_
 
 
 def validar_motor_de_bosses(classes_de_boss=None):
-    """Bosses sobre a BossBase (roteiro F1): fases em ordem e faixas de cooldown sorteáveis."""
+    """Bosses sobre a BossBase (roteiro F1): fases em ordem, faixas de cooldown sorteáveis e
+    clips de animação (F2; os índices dos quadros o `Animador` confere no spawn)."""
     classes_de_boss = BOSS_CLASSES if classes_de_boss is None else classes_de_boss
     erros = []
     for nome, classe in sorted(classes_de_boss.items()):
@@ -183,6 +184,11 @@ def validar_motor_de_bosses(classes_de_boss=None):
                 erros.append(f'{local}: cooldown inicial de "{habilidade}" sem faixa em COOLDOWNS')
             if not _inteiro(ms) or ms < 0:
                 erros.append(f'{local}: cooldown inicial de "{habilidade}" {ms!r} (precisa ser inteiro >= 0)')
+        clips = classe.CLIPS
+        if not (isinstance(clips, dict) and clips and all(isinstance(c, Clip) for c in clips.values())):
+            erros.append(f'{local}: CLIPS precisa ser um dict não vazio de nome -> Clip')
+        elif classe.CLIP_INICIAL not in clips:
+            erros.append(f'{local}: CLIP_INICIAL "{classe.CLIP_INICIAL}" não está em CLIPS')
     return erros
 
 

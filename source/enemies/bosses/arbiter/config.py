@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
-from source.enemies.base.boss import ConfigTravamento, FaseBoss
+from source.enemies.base.boss import Clip, ConfigTravamento, FaseBoss
 
 
 @dataclass(frozen=True)
@@ -23,6 +23,16 @@ FASES = (
     FaseArbiter('Furia Sangheili', 0.60, 0.80, 1.12, 7, 0.16, 2, 2, 2, 5, 300),
     FaseArbiter('Ultimo Folego',   0.30, 0.65, 1.25, 9, 0.22, 3, 3, 3, 6, 400),
 )
+
+
+# Animação: um ciclo só (4 quadros); os clips só mudam o ritmo, sem reiniciar o passo.
+CLIPS = {
+    'andar': Clip(200),
+    'parado': Clip(300),        # mirando, golpeando, canalizando
+    'investida': Clip(80),      # avanço entre golpes do combo
+    'furtivo': Clip(100),       # sprint camuflado
+    'reaparecer': Clip(80),     # fim da camuflagem (fade-in)
+}
 
 
 @dataclass
