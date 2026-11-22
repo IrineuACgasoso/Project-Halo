@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Skills: dash, cone sem trigonometria e gancho ao_explodir (base do Hunter novo)
+- `feats/skills/dash/`: `Dash(inimigo, alvo, preset|config)` trava a posição do alvo e a direção no início e anda `velocidade × mult_velocidade × dt` por `atualizar(dt, paredes)` (devolve se acabou). `ate_o_alvo=True` para no ponto travado, medido ao longo da direção (deslizar numa parede não teleporta); `False` corre até o fim do tempo. Presets `padrao` e `hunter` (500 px/s, 2000 ms; a run antiga era 500 e 2500).
+- `utils/vetores.py::no_cone(origem, eixo, ponto, cos_meio_angulo)`: ponto dentro de um cone só com multiplicações (sem `acos`, `atan2` nem raiz). Teste de equivalência com o ângulo calculado (7 aberturas, 500 pontos cada). O `ConeStrikeAviso` continua com o `acos` dele (não troquei de passagem).
+- `ao_explodir` (callback opcional, chamado 1× com o aviso) em `ArtilhariaAviso`, `ConeStrikeAviso` e `CanhaoParabolico` (repassa para a artilharia do impacto). Sem ele, nada muda.
+- Testes: `test_skills.py` (13) e `test_core_utils.py` (no_cone). **Suíte: 1255 verdes + 1 xfail** (o lint, que falhou na rodada completa por falta de `__all__` no pacote novo, foi rodado de novo depois da correção). Golden inalterado.
+
 ## 2026-11-22 | Sistema de status: buff Defesa (recurso novo, pedido do usuário)
 - `Defesa(porcentagem, duracao_ms=None)`: o alvo recebe `porcentagem` a menos de dano de todas as fontes (inclusive queimadura). Entra em `mult_dano_recebido` junto da fraqueza: `(1 + fraqueza) × Π(1 − defesa)`.
 - **Decisão do usuário:** entre fontes diferentes, multiplica (como a cadência): 2 × 50% = 75%, e nunca chega a 100% (porcentagem < 1). Base da reformulação do Hunter (Defesa de 90% fora das costas).

@@ -8,7 +8,7 @@ from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos, game, dono='BOSS', preset='padrao', custom_config: ArtilhariaConfig = None,
-                 grude=False, alvo=None, fonte=None):
+                 grude=False, alvo=None, fonte=None, ao_explodir=None):
         super().__init__(grupos)
         self.game = game
         self.dono = dono
@@ -20,6 +20,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
 
         self.tempo_criacao = relogio.agora()
         self.explodiu = False
+        self.ao_explodir = ao_explodir   # chamado 1× com o aviso quando explode (ex.: poeira do boss)
 
         # --- DoT: controla o ciclo de tick de dano contínuo pós-explosão ---
         self.dot_ativo = False
@@ -103,6 +104,8 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         if not self.explodiu and agora - self.tempo_criacao >= self.cfg.duracao:
             self.explodiu = True
             self.tempo_criacao = agora
+            if self.ao_explodir is not None:
+                self.ao_explodir(self)
 
             if self.cfg.dot:
                 # Por padrão não aplica o `dano` de impacto, só liga o ciclo de ticks

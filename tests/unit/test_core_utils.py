@@ -1,5 +1,7 @@
 """GameClock, paths, vetores e geometria de colisão com paredes."""
+import math
 import os
+import random
 import sys
 
 import pygame
@@ -10,7 +12,7 @@ from source.systems.gameclock import (
 )
 from source.utils.collision_utils import empurrao_do_segmento
 from source.utils.paths import path
-from source.utils.vetores import direcao_segura
+from source.utils.vetores import direcao_segura, no_cone
 
 V = pygame.math.Vector2
 
@@ -136,6 +138,37 @@ def test_direcao_segura_normaliza():
 def test_direcao_segura_pontos_iguais_devolve_padrao_sem_erro():
     assert direcao_segura((5, 5), (5, 5)) == V(1, 0)
     assert direcao_segura((5, 5), (5, 5), padrao=(0, -1)) == V(0, -1)
+
+
+@pytest.mark.parametrize('ponto, esperado', [
+    ((100, 0), True), ((100, 57), True), ((100, -57), True),     # no eixo e dentro de ±30° (tan 30° ≈ 0,577)
+    ((100, 58), False), ((100, -58), False), ((0, 100), False),  # fora do ângulo
+    ((-100, 0), False), ((-100, 10), False),                     # atrás do vértice
+    ((0, 0), True),                                               # o próprio vértice
+])
+def test_no_cone_30_graus(ponto, esperado):
+    assert no_cone((0, 0), (1, 0), ponto, math.cos(math.radians(30))) is esperado
+
+
+def test_no_cone_aceita_vector2_e_eixo_qualquer():
+    eixo = V(-1, 1).normalize()
+    assert no_cone(V(50, 50), eixo, V(0, 100), math.cos(math.radians(10)))
+    assert not no_cone(V(50, 50), eixo, V(100, 0), math.cos(math.radians(10)))
+
+
+@pytest.mark.parametrize('graus', [5, 30, 45, 89, 90, 120, 179])
+def test_no_cone_bate_com_o_angulo_calculado(graus):
+    """Equivale a `ângulo(eixo, v) <= θ` pelo acos, para pontos sorteados (fora da borda exata)."""
+    rnd = random.Random(graus)
+    eixo = V(1, 0).rotate(rnd.uniform(0, 360))
+    cos_meio = math.cos(math.radians(graus))
+    for _ in range(500):
+        p = V(rnd.uniform(-500, 500), rnd.uniform(-500, 500))
+        angulo = eixo.angle_to(p) % 360
+        angulo = min(angulo, 360 - angulo)
+        if abs(angulo - graus) < 1e-6:
+            continue
+        assert no_cone((0, 0), eixo, p, cos_meio) is (angulo <= graus)
 
 
 # ── empurrao_do_segmento ─────────────────────────────────────────────────────

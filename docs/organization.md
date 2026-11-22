@@ -37,7 +37,8 @@ Project-Halo/
     │   ├── enemy_data.py    # BALANCEAMENTO dos inimigos comuns: INIMIGOS (PerfilInimigo: vida, dano, velocidade, cooldowns, drops)
     │   ├── manifesto_assets.py # MANIFESTO: toda imagem (arquivo, escala, alpha, espelhar), no formato de ASSETS
     │   └── validacao.py     # validar_tudo(): lista de erros dos dados (armas, pools, bosses, inimigos, manifesto, mapas) (D5)
-    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores, collision_utils (empurrão de parede em float),
+    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores (direcao_segura, no_cone: ponto dentro de um cone sem trigonometria),
+    │                        # collision_utils (empurrão de parede em float),
     │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
     ├── systems/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
@@ -74,7 +75,8 @@ Project-Halo/
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI
     │   ├── vehicles/        # Vehicle + Warhog, Pelican (tecla V)
     │   ├── items/           # Items (drop/coleta) + draw.py (visual/cache)
-    │   ├── skills/          # artilharia, cone_strike, onda_emp, purge_grid (config.py + core), beam, mortar, tp...
+    │   ├── skills/          # artilharia, cone_strike, onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
+│   │                    # artilharia, cone e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx)
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
     │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
@@ -94,6 +96,7 @@ Project-Halo/
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Arquitetura futura em `docs/plano_bosses.md` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
+| Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
