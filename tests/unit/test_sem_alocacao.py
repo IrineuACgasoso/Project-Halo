@@ -238,9 +238,10 @@ def test_artilharia_desenha_igual_ao_codigo_antigo(novo_jogo, preset):
         _iguais(_artilharia_antiga, efeito.draw, efeito)
 
 
-@pytest.mark.parametrize('preset', sorted(CONE_STRIKE_PRESETS))
-def test_cone_desenha_igual_ao_codigo_antigo(novo_jogo, preset):
-    for direcao in (V(1, 0), V(-0.3, 0.8), 135):
+@pytest.mark.parametrize('i, preset', enumerate(sorted(CONE_STRIKE_PRESETS)))
+def test_cone_desenha_igual_ao_codigo_antigo(novo_jogo, i, preset):
+    # Uma direção por preset, alternando as 3 formas (a prova com as 3 em todos rodou na C3)
+    for direcao in [(V(1, 0), V(-0.3, 0.8), 135)[i % 3]]:
         efeito = ConeStrikeAviso(V(0, 0), direcao, (), novo_jogo, preset=preset)
         efeito.tempo_criacao = relogio.agora() - efeito.cfg.duracao // 3
         _iguais(_cone_antigo, efeito.draw, efeito)

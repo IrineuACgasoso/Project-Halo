@@ -165,7 +165,7 @@ class CollisionManager:
 
         # 6. Check de Morte
         for inimigo in entity_manager.inimigos_grupo:
-            if inimigo.vida <= 0:
+            if not inimigo.vivo:
                 inimigo.morrer((entity_manager.all_sprites, entity_manager.items_grupo))
                 # morrer() pode adiar a morte (Warden: a consciência espera os corpos)
                 if not inimigo.alive():

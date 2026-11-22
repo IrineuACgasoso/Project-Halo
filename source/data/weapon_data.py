@@ -44,8 +44,8 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano':                  WeaponStats(value=1,    label='Dano',          increase=1,   range_val=2),
             'cooldown':              WeaponStats(value=500,  label='Cadência (ms)', increase=-20, range_val=2, min_val=300),
             'projeteis_por_disparo': WeaponStats(value=1,    label='Projéteis',     increase=1,   range_val=[3, 5, 7, 9]),
-            'velocidade_projetil':   WeaponStats(value=2000, label=None,            increase=0,   range_val=0),
-            'raio_maximo':           WeaponStats(value=700, label=None, increase=0, range_val=0),
+            'velocidade_projetil':   WeaponStats(value=2400, label=None,            increase=0,   range_val=0),
+            'raio_maximo':           WeaponStats(value=600,  label='Alcance',       increase=25,  range_val=1),
         }
     ),
 
@@ -55,7 +55,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'rebatidas':  WeaponStats(value=3,    label='Rebotes',    increase=1,     range_val=1),
             'velocidade': WeaponStats(value=1000, label='Velocidade', increase=100,   range_val=1),
             'cooldown':   WeaponStats(value=2000, label='Cooldown',   increase=-100,  range_val=1, min_val=1000),
-            'raio_maximo': WeaponStats(value=1200, label=None,       increase=0,     range_val=0),
+            'raio_maximo': WeaponStats(value=1200, label=None,        increase=0,     range_val=0),
         }
     ),
 
@@ -88,7 +88,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'cooldown':       WeaponStats(value=2000, label='Cooldown', increase=-50,   range_val=1, min_val=1500),
             'burst_interval': WeaponStats(value=100,  label=None,       increase=0,     range_val=0),
             'velocidade':     WeaponStats(value=650,  label=None,       increase=0,     range_val=0),
-            'raio_maximo':    WeaponStats(value=500, label=None, increase=0, range_val=0),
+            'raio_maximo':    WeaponStats(value=500,  label=None,       increase=0,     range_val=0,),
         }
     ),
 
@@ -99,18 +99,18 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
                 'cooldown':       WeaponStats(value=3500, label='Cooldown', increase=-100,  range_val=1, min_val=2500),
                 'burst_interval': WeaponStats(value=90,   label=None,       increase=0,     range_val=0),
                 'velocidade':     WeaponStats(value=650,  label=None,       increase=0,     range_val=0),
-                'raio_maximo':    WeaponStats(value=650, label=None, increase=0, range_val=0),
+                'raio_maximo':    WeaponStats(value=650,  label=None,       increase=0,     range_val=0),
             }
         ),
 
     'shotgun': WeaponProfile(
         stats={
             'dano':                     WeaponStats(value=1,    label='Dano',              increase=1,      range_val=1),
-            'cooldown':                 WeaponStats(value=3000, label='Cooldown',          increase=-100,    range_val=1, min_val=2000),
+            'cooldown':                 WeaponStats(value=3000, label='Cooldown',          increase=-100,   range_val=1, min_val=2000),
             'projeteis_por_disparo':    WeaponStats(value=6,    label='N° de Projéteis',   increase=1,      range_val=1),
-            'velocidade_projetil':      WeaponStats(value=1000,  label='Velocidade',       increase=50,     range_val=1),
+            'velocidade_projetil':      WeaponStats(value=1000, label='Velocidade',        increase=50,     range_val=1),
             'spread':                   WeaponStats(value=10,   label='Espalhamento',      increase=2,      range_val=2),
-            'raio_maximo':              WeaponStats(value=500, label=None, increase=0, range_val=0),
+            'raio_maximo':              WeaponStats(value=500,  label=None,                increase=0,      range_val=0),
         }
     ),
 
@@ -128,26 +128,26 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
         stats={
             'dano':         WeaponStats(value=30,   label='Dano',          increase=10,  range_val=1),
             'cooldown':     WeaponStats(value=8000, label='Cadência (ms)', increase=-80, range_val=1, min_val=6000),
-            'raio_maximo':  WeaponStats(value=650,  label='Alcance',       increase=50,  range_val=1),
+            'raio_maximo':  WeaponStats(value=650,  label='Alcance',       increase=25,  range_val=1),
         }
     ),
 
     'sniper_rifle': WeaponProfile(
         stats={
             'dano':               WeaponStats(value=120,  label='Dano',           increase=30,   range_val=1),
-            'cooldown':           WeaponStats(value=12000, label='Cadência (ms)', increase=-300, range_val=1, min_val=9000),
+            'cooldown':           WeaponStats(value=12000,label='Cadência (ms)',  increase=-300, range_val=1, min_val=9000),
             'velocidade_projetil':WeaponStats(value=3000, label=None,             increase=0,    range_val=0),
             'piercing':           WeaponStats(value=1,    label='Perfuração',     increase=1,    range_val=3),
-            'raio_maximo':        WeaponStats(value=1200, label=None, increase=0, range_val=0),
+            'raio_maximo':        WeaponStats(value=1200, label='Alcance',        increase=50,   range_val=1),
         }
     ),
 
     'sidekick_pistol': WeaponProfile(
         stats={
-            'dano':               WeaponStats(value=4,    label='Dano',          increase=2,    range_val=2),
-            'cooldown':           WeaponStats(value=1200, label='Cadência (ms)', increase=-30,  range_val=1, min_val=900),
-            'velocidade_projetil':WeaponStats(value=1800, label='Velocidade',     increase=100, range_val=1),
-            'raio_maximo':        WeaponStats(value=600, label=None, increase=0, range_val=0),
+            'dano':               WeaponStats(value=4,    label='Dano',           increase=2,    range_val=2),
+            'cooldown':           WeaponStats(value=1200, label='Cadência (ms)',  increase=-30,  range_val=1, min_val=900),
+            'velocidade_projetil':WeaponStats(value=1800, label='Velocidade',     increase=100,  range_val=1),
+            'raio_maximo':        WeaponStats(value=450,  label='Alcance',        increase=25,   range_val=1),
         }
     ),
 
@@ -156,7 +156,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'dano':                 WeaponStats(value=1,     label='Dano',          increase=1,     range_val=2),
             'cooldown':             WeaponStats(value=7500,  label='Cadência (ms)', increase=-250,  range_val=1, min_val=5000),
             'velocidade_projetil':  WeaponStats(value=1800,  label=None,            increase=0,     range_val=0),
-            'raio_maximo':          WeaponStats(value=1000,  label='Alcance',       increase=50,    range_val=1),
+            'raio_maximo':          WeaponStats(value=700,   label='Alcance',       increase=50,    range_val=1),
             'burst_count':          WeaponStats(value=10,    label='Rajada',        increase=1,     range_val=1),
             'burst_interval':       WeaponStats(value=100,   label=None,            increase=0,     range_val=0),
             }
@@ -169,7 +169,7 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
             'cooldown':       WeaponStats(value=20000,label='Cooldown', increase=-500,  range_val=1, min_val=15000),
             'burst_interval': WeaponStats(value=60,   label=None,       increase=0,     range_val=0),
             'velocidade':     WeaponStats(value=950,  label=None,       increase=0,     range_val=0),
-            'raio_maximo':    WeaponStats(value=850, label=None, increase=0, range_val=0),
+            'raio_maximo':    WeaponStats(value=550,  label='Alcance',  increase=50,    range_val=1),
         }
     ),
 

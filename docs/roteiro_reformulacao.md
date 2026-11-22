@@ -1,6 +1,6 @@
 # Roteiro de reformulação
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D e a E1 concluídos; em andamento: o sistema de status (§7.1), depois E2.
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1) e a E2 concluídos; próxima: E3.
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -162,6 +162,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 **E2 · Estado de alvo unificado** (risco: baixo)
 - Muda: propriedades `alvejavel` e `vivo` substituem as checagens repetidas de alpha/`invis_phase` nas armas e a mistura `vida`/`vida_atual`.
 - Testes: inimigo invisível nunca é alvo; o mais forte é escolhido por `vida`.
+- Feito (2026-11-22): `vivo` (`vida > 0`) e `alvejavel` (`vivo` e não `invisivel`) no `BaseEnemy` (só ele entra em `inimigos_grupo`); as 2 buscas de alvo das armas e a checagem de morte do `CollisionManager` usam as propriedades. Golden inalterado pela E2. `invulneravel` continua separado (a granada que quica e os projéteis o usam).
 
 **E3 · Entrada desacoplada** (risco: médio)
 - Muda: `ComandoJogador` (direção + ações) vem de uma `FonteEntrada`: `Teclado`, `Roteiro` (replay) ou `Bot` (F4). `Player.update` lê o comando; os hacks de debug viram comandos.

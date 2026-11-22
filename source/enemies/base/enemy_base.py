@@ -64,6 +64,16 @@ class BaseEnemy(
         return alpha == 0 or phase in ['fade_out', 'hold']
 
     @property
+    def vivo(self):
+        """Ainda tem vida. Sair do mundo é `alive()`: a consciência do Warden adia a morte."""
+        return self.vida > 0
+
+    @property
+    def alvejavel(self):
+        """Pode ser escolhido como alvo pelas armas do jogador: vivo e visível."""
+        return self.vivo and not self.invisivel
+
+    @property
     def invulneravel(self):
         """
         Dita se o inimigo pode tomar dano ou colisões físicas.

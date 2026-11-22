@@ -153,11 +153,7 @@ class Arma(ABC):
         inimigo_mais_proximo = None
 
         for inimigo in grupo_inimigos:
-            # TRAVA COMPLETA: Se estiver totalmente invisível OU sumindo/escondido, ignora!
-            alpha = getattr(inimigo, 'alpha_atual', 255)
-            fase_invis = getattr(inimigo, 'invis_phase', 'none')
-            
-            if alpha == 0 or fase_invis in ['fade_out', 'hold']:
+            if not inimigo.alvejavel:
                 continue
 
             dist_sq = self.jogador.posicao.distance_squared_to(inimigo.posicao)
@@ -178,18 +174,15 @@ class Arma(ABC):
         maior_vida = -1
 
         for inimigo in grupo_inimigos:
-            alpha = getattr(inimigo, 'alpha_atual', 255)
-            fase_invis = getattr(inimigo, 'invis_phase', 'none')
-            if alpha == 0 or fase_invis in ['fade_out', 'hold']:
+            if not inimigo.alvejavel:
                 continue
 
             dist_sq = self.jogador.posicao.distance_squared_to(inimigo.posicao)
             if dist_sq > raio_maximo_sq:
                 continue
 
-            vida_atual = getattr(inimigo, 'vida_atual', getattr(inimigo, 'vida', 0))
-            if vida_atual > maior_vida:
-                maior_vida = vida_atual
+            if inimigo.vida > maior_vida:
+                maior_vida = inimigo.vida
                 alvo_mais_forte = inimigo
 
         return alvo_mais_forte

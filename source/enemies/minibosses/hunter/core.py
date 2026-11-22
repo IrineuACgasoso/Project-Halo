@@ -12,8 +12,9 @@ from source.systems.status import IMUNIDADES_CHEFE
 
 class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
     imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
+    MULT_COSTAS = 8                        # dano pelas costas durante o stun (armadura exposta)
     def __init__(self, posicao, game, **kwargs):
-        super().__init__(posicao, vida_base=1000, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
+        super().__init__(posicao, vida_base=800, dano_base=40, velocidade_base=40, game=game, sprite_key='hunter', flip_sprite=True)
         self.titulo = "HUNTER, O Guerreiro Mgalekgolo"
         self.is_boss = True
 
@@ -47,9 +48,9 @@ class Hunter(BaseEnemy, HunterSetup, HunterAI, HunterAttacks):
 
             # Multiplicador de Dano nas costas (Armadura Exposta)
             if self.estado_animacao == 'right' and player_x < hunter_x:
-                valor *= 4
+                valor *= self.MULT_COSTAS
             elif self.estado_animacao == 'left' and player_x > hunter_x:
-                valor *= 4
+                valor *= self.MULT_COSTAS
         return valor
 
     def morrer(self, grupos=None):

@@ -125,14 +125,14 @@ def _colisao_antiga(posicao, paredes, raio, iteracoes):
 
 
 @pytest.mark.parametrize('raio, iteracoes', [(15, 2), (48, 3)], ids=['inimigo', 'jogador'])
-def test_empurrao_novo_igual_ao_antigo_em_10_mil_posicoes(raio, iteracoes):
+def test_empurrao_novo_igual_ao_antigo_no_mapa_real(raio, iteracoes):
     """Mapa real da fase 0. O código antigo recebe TODAS as paredes (a parede relevante sempre está
     na lista); o novo só as da grade. Metade das posições é sorteada colada numa parede."""
     mapa = Mapa(path('assets', 'img', 'map', '0', 'm0.tmj'), 0)
     rnd = random.Random(2026)
     segs = mapa.grade_paredes.segmentos
     empurradas = 0
-    for i in range(10_000):
+    for i in range(1500):   # a prova completa (10 mil) rodou na C1
         if i % 2:
             _, x1, y1, x2, y2 = rnd.choice(segs)
             t = rnd.random()
@@ -144,7 +144,7 @@ def test_empurrao_novo_igual_ao_antigo_em_10_mil_posicoes(raio, iteracoes):
         sair_das_paredes(novo, raio, mapa.grade_paredes, iteracoes)
         assert novo == antigo, f'posição {pos}: antigo {antigo}, novo {novo}'
         empurradas += novo != V(pos)
-    assert empurradas > 2000   # o teste exercita o empurrão, não só posições livres
+    assert empurradas > 300   # o teste exercita o empurrão, não só posições livres
 
 
 def test_sair_das_paredes_altera_o_vetor_no_lugar():

@@ -5,6 +5,7 @@ import pygame
 import pytest
 
 from source.data.weapon_data import WEAPON_DATA, WeaponStats
+from source.enemies.standard.grunt import GruntRed
 from source.feats.weapons.baseweapon import Arma
 from source.systems.levelup import ARMAS_REGISTRO, MAX_ARMAS, TelaDeUpgrade
 
@@ -101,3 +102,54 @@ def test_escolher_arma_nova_equipa_e_sobe_de_nivel(novo_jogo, id_arma):
     assert arma.nivel == 21
     # a tela de upgrade (preview de stats do próximo nível) não pode quebrar em nível alto
     TelaDeUpgrade(novo_jogo.tela, novo_jogo.player, novo_jogo, id_arma_forcada=id_arma).draw(novo_jogo.tela)
+
+
+# ── Estado de alvo (roteiro E2) ──────────────────────────────────────────────
+class _Mira(Arma):
+    """Só as buscas de alvo da base (sem disparo)."""
+    def __init__(self, jogador):
+        self.jogador = jogador
+
+    def disparar(self):
+        return False
+
+
+def _mira(game):
+    return _Mira(game.player)
+
+
+def _grunts(game, *deslocamentos):
+    return [GruntRed(posicao=game.player.posicao + pygame.Vector2(dx, 0), game=game) for dx in deslocamentos]
+
+
+@pytest.mark.parametrize('ajuste, alvejavel', [
+    (lambda g: None, True),
+    (lambda g: setattr(g, 'alpha_atual', 0), False),
+    (lambda g: setattr(g, 'invis_phase', 'fade_out'), False),
+    (lambda g: setattr(g, 'invis_phase', 'hold'), False),
+    (lambda g: setattr(g, 'invis_phase', 'fade_in'), True),   # reaparecendo: já é alvo
+    (lambda g: setattr(g, 'vida', 0), False),
+])
+def test_alvejavel(novo_jogo, ajuste, alvejavel):
+    grunt, = _grunts(novo_jogo, 100)
+    ajuste(grunt)
+    assert grunt.alvejavel is alvejavel
+    assert grunt.vivo is (grunt.vida > 0)
+
+
+def test_invisivel_e_morto_nunca_sao_alvo(novo_jogo):
+    invisivel, morto, longe = _grunts(novo_jogo, 50, 60, 400)
+    invisivel.invis_phase, morto.vida = 'hold', 0
+    arma = _mira(novo_jogo)
+    grupo = [invisivel, morto, longe]
+    assert arma.encontrar_inimigo_mais_proximo(grupo) is longe
+    longe.alpha_atual = 0
+    assert arma.encontrar_inimigo_mais_proximo(grupo) is None
+    assert arma.encontrar_inimigo_mais_forte(grupo) is None
+
+
+def test_mais_forte_e_escolhido_por_vida_dentro_do_raio(novo_jogo):
+    fraco, forte, fora = _grunts(novo_jogo, 100, 200, 900)
+    fraco.vida, forte.vida, fora.vida = 10, 50, 999
+    arma = _mira(novo_jogo)
+    assert arma.encontrar_inimigo_mais_forte([fraco, forte, fora], raio_maximo=500) is forte

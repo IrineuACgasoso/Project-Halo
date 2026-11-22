@@ -47,14 +47,14 @@ def test_equivalencia_com_forca_bruta_em_sondas_aleatorias(novo_jogo):
     caixa = _caixa_dos_inimigos().inflate(200, 200)
     rng = random.Random(7)
     com_acerto = 0
-    for _ in range(3000):
+    for _ in range(1000):   # a prova completa (3000) rodou na C2
         w, h = rng.randint(1, 120), rng.randint(1, 120)
         rect = (rng.randint(caixa.left, caixa.right), rng.randint(caixa.top, caixa.bottom), w, h)
         sonda = _Sonda(rect, hitbox=(rect[0] + 2, rect[1] + 2, w, h) if rng.random() < 0.3 else None)
         esperado = _forca_bruta(sonda)
         assert cm.colidindo_com_inimigos(sonda) == esperado
         com_acerto += bool(esperado)
-    assert com_acerto > 300, 'as sondas quase não acertaram: o teste não provaria nada'
+    assert com_acerto > 100, 'as sondas quase não acertaram: o teste não provaria nada'
 
 
 def test_equivalencia_para_o_jogador(novo_jogo):

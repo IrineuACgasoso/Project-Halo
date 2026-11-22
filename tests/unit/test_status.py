@@ -353,7 +353,7 @@ def test_fraqueza_e_a_regra_das_costas_do_hunter_se_somam(novo_jogo):
     novo_jogo.player.posicao.update(hunter.posicao + V(-100, 0))   # pelas costas
     aplicar(hunter, Fraqueza(0.5, 1000))
     hunter.receber_dano(Dano(100, PROJETIL))
-    assert hunter.vida == 10 ** 6 - 100 * 1.5 * 4
+    assert hunter.vida == 10 ** 6 - 100 * 1.5 * hunter.MULT_COSTAS
 
 
 # ── Queimadura ──────────────────────────────────────────────────────────────
