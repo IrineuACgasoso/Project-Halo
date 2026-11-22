@@ -130,6 +130,18 @@ class BuffCadencia:
         _exigir_duracao(self, True)
 
 
+@dataclass(frozen=True, slots=True)
+class Defesa:
+    """O alvo recebe `porcentagem` a menos de dano de todas as fontes. Entre fontes diferentes,
+    multiplica (2 × 50% = 75%), então a defesa nunca chega a 100% (imunidade não é buff)."""
+    porcentagem: float          # < 1
+    duracao_ms: float | None = None
+
+    def __post_init__(self):
+        _exigir_porcentagem(self, 1.0, aceita_maximo=False)
+        _exigir_duracao(self, True)
+
+
 # ── Instantâneos ─────────────────────────────────────────────────────────────
 @dataclass(frozen=True, slots=True)
 class Escudo:
@@ -150,7 +162,7 @@ class Cura:
 
 
 TEMPORARIOS = frozenset({Lentidao, Atordoamento, Queimadura, Fraqueza, Cegueira,
-                         BuffDano, BuffVelocidade, BuffCadencia})
+                         BuffDano, BuffVelocidade, BuffCadencia, Defesa})
 INSTANTANEOS = frozenset({Escudo, Cura})
 SO_NO_JOGADOR = frozenset({Cegueira, BuffCadencia})
 

@@ -76,11 +76,11 @@ Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e in
 | `Lentidao`, `BuffVelocidade` | `mult_velocidade` no movimento: `PlayerMovement.mover_com_colisao`, `EnemyMovement.velocidade_atual()` (usada pelo `mover` e pelos 4 inimigos comuns que se movem sozinhos). Bosses movem-se por conta própria: buff de velocidade neles ainda não tem efeito (F5) |
 | `Atordoamento` | o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador ignora a direção do comando; `inofensivo` (sem dano de contato); espinhos, aura do MK2, veículo e aura de energia do dono param |
 | `Queimadura` | dano `STATUS` a cada 0,25 s em nome da `fonte` (ignora i-frames sem ligá-los) + corte na `Cura` |
-| `Fraqueza`, `BuffDano` | `multiplicador_de_dano(dano, alvo)` no `receber_dano` (buff da fonte × fraqueza do alvo), antes da regra do alvo |
+| `Fraqueza`, `BuffDano`, `Defesa` | `multiplicador_de_dano(dano, alvo)` no `receber_dano` (buff da fonte × fraqueza × defesa do alvo), antes da regra do alvo; vale também na queimadura |
 | `BuffCadencia` (só jogador) | `mult_cooldown` em `Arma.update`, no ciclo da Energy Sword e na recarga dos espinhos (companheiros e veículos não) |
 | `Cegueira` (só jogador) | `Renderer._draw_mundo` desenha `status/cegueira.py` por cima do mundo e embaixo do HUD |
 | `Escudo`, `Cura` | instantâneos: `receber_escudo` (até o máximo) e `receber_cura` (até o máximo, menos o corte da queimadura) |
-- Acúmulo: um lugar por (tipo, chave ou fonte); reaplicar no mesmo lugar substitui. Entre lugares: lentidão = a mais forte; queimadura, fraqueza e buffs de dano/velocidade somam; cadência multiplica; atordoamento e cegueira valem enquanto houver um (cegueira: o menor raio).
+- Acúmulo: um lugar por (tipo, chave ou fonte); reaplicar no mesmo lugar substitui. Entre lugares: lentidão = a mais forte; queimadura, fraqueza e buffs de dano/velocidade somam; cadência e defesa multiplicam (nunca chegam a 100%); atordoamento e cegueira valem enquanto houver um (cegueira: o menor raio).
 - Bosses e minibosses declaram `imunidades_status = IMUNIDADES_CHEFE` (sem atordoamento e lentidão de fora); um teste confere todas as classes das pastas `bosses/` e `minibosses/`.
 - Custo: os modificadores são recalculados só quando um efeito entra ou sai; sem efeitos, todos são exatamente 1.0 (o golden não muda). 150 inimigos com 4 efeitos cada: 0,27 ms/frame.
 

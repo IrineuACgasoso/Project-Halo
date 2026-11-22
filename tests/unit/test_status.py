@@ -18,7 +18,7 @@ from source.systems.estados import PAUSA
 from source.systems.eventos import DANO_CAUSADO, eventos
 from source.systems.gameclock import relogio
 from source.systems.status import (IMUNIDADES_CHEFE, TICK_QUEIMADURA, Atordoamento, BuffCadencia,
-                                   BuffDano, BuffVelocidade, Cegueira, Cura, Escudo, Fraqueza,
+                                   BuffDano, BuffVelocidade, Cegueira, Cura, Defesa, Escudo, Fraqueza,
                                    Lentidao, Queimadura, aplicar, atualizar_status, remover)
 from source.systems.status import status as modulo_status
 from source.systems.status.cegueira import desenhar_cegueira
@@ -66,6 +66,8 @@ def _ouvir_dano():
     lambda: BuffDano(-0.1), lambda: BuffDano(30), lambda: BuffDano(0.5, 0),
     lambda: BuffVelocidade(0), lambda: BuffVelocidade(0.2, -1),
     lambda: BuffCadencia(1.0), lambda: BuffCadencia(0), lambda: BuffCadencia(0.5, 0),
+    lambda: Defesa(1.0), lambda: Defesa(0), lambda: Defesa(-0.5), lambda: Defesa(90),
+    lambda: Defesa(float('nan')), lambda: Defesa(0.5, 0), lambda: Defesa(0.5, float('inf')),
     lambda: Escudo(0), lambda: Escudo(float('inf')), lambda: Cura(-1), lambda: Cura(float('nan')),
 ])
 def test_efeito_invalido_e_recusado(criar):
@@ -76,7 +78,7 @@ def test_efeito_invalido_e_recusado(criar):
 def test_efeitos_validos_e_imutaveis():
     for efeito in (Lentidao(1.0, 500), Atordoamento(1), Queimadura(5, 100, 1.0), Fraqueza(0.5, 10),
                    Cegueira(150, 2000), BuffDano(0.3), BuffVelocidade(0.2, 100), BuffCadencia(0.99),
-                   Escudo(10), Cura(0.5)):
+                   Defesa(0.9), Defesa(0.5, 100), Escudo(10), Cura(0.5)):
         with pytest.raises(dataclasses.FrozenInstanceError):
             setattr(efeito, dataclasses.fields(efeito)[0].name, 1)
 
@@ -355,6 +357,61 @@ def test_fraqueza_e_a_regra_das_costas_do_hunter_se_somam(novo_jogo):
     aplicar(hunter, Fraqueza(0.5, 1000))
     hunter.receber_dano(Dano(100, PROJETIL))
     assert hunter.vida == 10 ** 6 - 100 * 1.5 * hunter.MULT_COSTAS
+
+
+def test_defesa_reduz_o_dano_do_inimigo_e_do_jogador(novo_jogo):
+    grunt = _grunt(novo_jogo)
+    aplicar(grunt, Defesa(0.9))
+    grunt.receber_dano(Dano(100, PROJETIL, novo_jogo.player))
+    assert grunt.vida == pytest.approx(1000 - 10)
+    player = novo_jogo.player
+    aplicar(player, Defesa(0.25, 1000))
+    player.receber_dano(Dano(100, DIRETO))
+    assert player.vida_atual == pytest.approx(player.vida_maxima - 75)
+
+
+def test_defesa_entre_fontes_multiplica_e_nunca_chega_a_100(player):
+    aplicar(player, Defesa(0.5), chave='a')
+    aplicar(player, Defesa(0.5), chave='b')
+    assert player.status.mult_dano_recebido == pytest.approx(0.25)
+    for chave in 'cdefgh':
+        aplicar(player, Defesa(0.99), chave=chave)
+    assert player.status.mult_dano_recebido > 0
+
+
+def test_defesa_mesma_fonte_substitui(player):
+    aplicar(player, Defesa(0.5), chave='a')
+    aplicar(player, Defesa(0.9), chave='a')
+    assert player.status.mult_dano_recebido == pytest.approx(0.1)
+
+
+def test_defesa_combina_com_fraqueza_e_buff_de_dano(novo_jogo):
+    grunt = _grunt(novo_jogo)
+    aplicar(grunt, Defesa(0.5))
+    aplicar(grunt, Fraqueza(1.0, 1000))
+    aplicar(novo_jogo.player, BuffDano(0.5))
+    grunt.receber_dano(Dano(100, PROJETIL, novo_jogo.player))
+    assert grunt.vida == pytest.approx(1000 - 100 * 1.5 * 2.0 * 0.5)
+
+
+def test_defesa_com_duracao_acaba_e_sem_fim_so_sai_com_remover(player):
+    aplicar(player, Defesa(0.5, 500), chave='curta')
+    aplicar(player, Defesa(0.5), chave='eterna')
+    assert player.status.mult_dano_recebido == pytest.approx(0.25)
+    _passar(0.6)
+    assert player.status.mult_dano_recebido == pytest.approx(0.5)
+    _passar(10)
+    assert player.status.mult_dano_recebido == pytest.approx(0.5)
+    assert remover(player, Defesa, chave='eterna')
+    assert player.status.mult_dano_recebido == 1.0
+
+
+def test_defesa_tambem_reduz_a_queimadura(novo_jogo):
+    grunt = _grunt(novo_jogo)
+    aplicar(grunt, Defesa(0.5))
+    aplicar(grunt, Queimadura(40, 1000))
+    _passar(1.5)
+    assert grunt.vida == pytest.approx(1000 - 20)
 
 
 # ── Queimadura ──────────────────────────────────────────────────────────────

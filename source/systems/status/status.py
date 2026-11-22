@@ -14,7 +14,7 @@
 from source.systems.dano import Dano, STATUS
 
 from .efeitos import (Atordoamento, BuffCadencia, BuffDano, BuffVelocidade, Cegueira, Cura,
-                      Escudo, Fraqueza, INSTANTANEOS, Lentidao, Queimadura, SO_NO_JOGADOR,
+                      Defesa, Escudo, Fraqueza, INSTANTANEOS, Lentidao, Queimadura, SO_NO_JOGADOR,
                       TEMPORARIOS)
 
 TICK_QUEIMADURA = 0.25   # s: a queimadura acumula o dano e o aplica a cada tick (e no fim)
@@ -55,7 +55,7 @@ class StatusEntidade:
 
     def _recalcular(self):
         buff_vel = buff_dano = fraqueza = lentidao = reducao = 0.0
-        cooldown = 1.0
+        cooldown = defesa = 1.0
         atordoado = False
         raio = None
         for ativo in self._ativos.values():
@@ -71,6 +71,8 @@ class StatusEntidade:
                 fraqueza += e.porcentagem
             elif tipo is BuffCadencia:
                 cooldown *= 1 - e.porcentagem
+            elif tipo is Defesa:
+                defesa *= 1 - e.porcentagem
             elif tipo is Atordoamento:
                 atordoado = True
             elif tipo is Queimadura:
@@ -80,7 +82,7 @@ class StatusEntidade:
         # Sem efeitos, todos os multiplicadores são exatamente 1.0 (x * 1.0 == x: nada muda).
         self.mult_velocidade = (1 + buff_vel) * (1 - lentidao)
         self.mult_dano_causado = 1 + buff_dano
-        self.mult_dano_recebido = 1 + fraqueza
+        self.mult_dano_recebido = (1 + fraqueza) * defesa
         self.mult_cooldown = cooldown
         self.atordoado = atordoado
         self.reducao_cura = reducao

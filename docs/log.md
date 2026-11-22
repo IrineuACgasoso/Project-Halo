@@ -2,6 +2,11 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Sistema de status: buff Defesa (recurso novo, pedido do usuário)
+- `Defesa(porcentagem, duracao_ms=None)`: o alvo recebe `porcentagem` a menos de dano de todas as fontes (inclusive queimadura). Entra em `mult_dano_recebido` junto da fraqueza: `(1 + fraqueza) × Π(1 − defesa)`.
+- **Decisão do usuário:** entre fontes diferentes, multiplica (como a cadência): 2 × 50% = 75%, e nunca chega a 100% (porcentagem < 1). Base da reformulação do Hunter (Defesa de 90% fora das costas).
+- Testes em `test_status.py` (validação, jogador e inimigo, acúmulo, com fraqueza e buff de dano, duração e sem fim, queimadura). **Suíte: 1222 verdes + 1 xfail.** Golden inalterado (ninguém aplica ainda).
+
 ## 2026-11-22 | Balanceamento: todo min_val bate exato no nível máximo (muda o jogo, decisão do usuário)
 - O commit anterior só garantia "alcançável": 7 dos 13 ajustados passavam do piso, e o limite (`max(min_val, ...)`) segurava (ex.: Energy Sword 7000 − 9×225 = 4975 com piso 5000; o último nível dava só 175). As 11 comuns, incomuns e raras passavam muito e travavam por volta do nível 11 (Mjolnir 1500 − 24×100 = −900). O usuário notou.
 - **Decisão do usuário:** todos os 18 exatos, com `increase` redondo e o `min_val` trocado pelo ponto final real. Agora valor + subidas × increase == min_val nos 24 stats com piso (o Assault Rifle chega no nível 24, porque o cooldown só sobe nos níveis pares).
