@@ -314,3 +314,28 @@ def test_nevoa_do_gravemind_passa_pelo_contrato_de_dano(novo_jogo):
     nevoa.update(1 / 60)
     assert player.escudo_atual == 700 and player.vida_atual == player.vida_maxima
     assert recebidos[0]['dano'].tipo == AREA and recebidos[0]['dano'].fonte is boss
+
+
+# ── Cura em jogador morto
+def test_orbe_de_vida_no_frame_da_morte_nao_ressuscita(novo_jogo):
+    """Morrer (contato) e pegar um orbe de vida no mesmo frame devolvia a vida a um jogador já fora
+    dos grupos de sprite: a partida seguia com ele invisível, sem game over."""
+    from source.feats.items import Items
+    from source.systems.dano import Dano, DIRETO
+    from source.systems.estados import GAME_OVER
+
+    player = novo_jogo.player
+    player.receber_dano(Dano(10 ** 6, DIRETO, ignora_iframes=True))
+    Items(player.posicao, 'life_orb', (entity_manager.items_grupo,)).coletar(player)
+    assert player.vida_atual == 0
+    novo_jogo.update(1 / 60)
+    assert novo_jogo.estado_do_jogo == GAME_OVER
+
+
+def test_level_up_no_frame_da_morte_nao_ressuscita(novo_jogo):
+    from source.systems.dano import Dano, DIRETO
+
+    player = novo_jogo.player
+    player.receber_dano(Dano(10 ** 6, DIRETO, ignora_iframes=True))
+    player.ganhar_xp(player.experiencia_level_up)
+    assert player.vida_atual == 0

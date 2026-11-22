@@ -2,6 +2,10 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-21 | Correção: cura não ressuscita o jogador morto no mesmo frame
+- A coleta de itens (passo 4 do `CollisionManager`) vem depois do dano (passos 2 e 3). Morrer e, no mesmo frame, pegar um orbe de vida ou subir de nível com XP devolvia a vida a um jogador que já tinha saído dos grupos de sprite (`kill`): sem game over, a partida seguia com ele invisível. Agora `curar` não age em jogador fora do mundo. Achado ao planejar as migrações do sistema de status; commit próprio (roteiro §2, regra 6).
+- Regressão em `test_regressoes.py` (orbe de vida e level-up; os dois falharam antes da correção). Suíte: **996 verdes + 1 xfail**. Golden inalterado.
+
 ## 2026-11-21 | Sistema de status (S1): núcleo de buffs e debuffs
 **O que foi feito** (recurso novo pedido nesta sessão; decisões no roteiro §8, itens 8–11)
 - `source/systems/status/`: `aplicar(alvo, efeito, fonte=None, chave=None)` é o ponto único, para jogador e inimigos; `remover` tira um buff sem fim.

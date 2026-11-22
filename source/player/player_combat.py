@@ -138,6 +138,9 @@ class PlayerCombat:
         EfeitoFaiscas(posicao=self.posicao, grupos=(grupo,))
                 
     def curar(self, quantidade):
+        # Morto no mesmo frame (a coleta de itens vem depois do dano): curar o "ressuscitava" fora dos grupos
+        if not self.alive():
+            return
         self.vida_atual = min(self.vida_atual + quantidade, self.vida_maxima)
 
     def receber_cura(self, quantidade):
