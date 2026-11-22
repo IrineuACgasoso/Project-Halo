@@ -15,6 +15,7 @@ from source.data.enemy_data import INIMIGOS, PerfilInimigo
 from source.data.manifesto_assets import MANIFESTO, Imagem
 from source.data.weapon_data import COMPANION_DATA, VEHICLES_DATA, WEAPON_DATA, WeaponStats
 from source.enemies.base.enemy_base import BaseEnemy
+from source.feats.weapons.baseweapon import Arma
 from source.systems.levelup.constants import (ARMAS_REGISTRO, NIVEL_MAXIMO_POR_RARIDADE, PALETA_RARIDADE,
                                               PESO_SORTEIO_POR_RARIDADE)
 from source.systems.mapmanager.map_loader import MapLoader
@@ -86,6 +87,27 @@ def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None, n
         nome_asset = getattr(info.classe, 'NOME_ASSET', None)
         if nome_asset not in perfis:
             erros.append(f'{local}: {info.classe.__name__}.NOME_ASSET "{nome_asset}" sem perfil em weapon_data')
+        elif _inteiro(niveis_maximos.get(info.raridade)) and niveis_maximos[info.raridade] >= 1:
+            # máximo inválido já foi acusado acima: sem erros em cascata
+            erros += _pisos_inalcancaveis(nome_asset, perfis[nome_asset], niveis_maximos[info.raridade])
+    return erros
+
+
+def _pisos_inalcancaveis(nome_asset, perfil, nivel_maximo):
+    """Stat que desce até um `min_val` que nunca é alcançado até o nível máximo da raridade:
+    o piso seria um valor de mentira (roteiro E6)."""
+    erros = []
+    for atributo, meta in perfil.stats.items():
+        if not isinstance(meta, WeaponStats) or not meta.label or meta.min_val is None:
+            continue
+        if not _numero(meta.increase) or meta.increase >= 0 or not _numero(meta.value):
+            continue
+        subidas = sum(1 for nivel in range(2, nivel_maximo + 1) if Arma._deve_melhorar(meta.range_val, nivel))
+        final = meta.value + subidas * meta.increase
+        if final > meta.min_val:
+            erros.append(f'dados: {nome_asset}.{atributo}: min_val {meta.min_val} inalcançável (no nível '
+                         f'máximo {nivel_maximo} chega a {final:g}; precisa de increase <= '
+                         f'{(meta.min_val - meta.value) / max(subidas, 1):g})')
     return erros
 
 

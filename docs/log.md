@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-22 | Balanceamento: nenhum min_val de mentira (muda o jogo, decisão do usuário)
+- Com o teto da E6, 13 cooldowns nunca chegavam ao `min_val` (ex.: Spartan Laser parava em 9000 com piso 7500; sniper do Noble, em 9800 com piso 5000). **Decisão do usuário:** manter o piso (o alvo desenhado) e aumentar o `increase` só desses 13, para chegar ao piso no nível máximo da raridade. As comuns e incomuns, que já chegavam ao piso por volta do nível 11, não mudaram.
+- Novos `increase` (piso alcançado no nível máximo): Brick −250, Spartan Laser −625, Light Rifle −625, Machine Gun −1250, Noble rifle −125 e sniper −1250 (nível 5); Energy Sword −225, Sniper −350, Fuel Rod −450, Árbitro −60, Pelican tiro −17 e reuso −1200 (nível 10); Grenade Launcher −150 (nível 15).
+- Regra nova em `validar_armas`: um stat que desce com `min_val` precisa alcançá-lo até o nível máximo da raridade (a mensagem diz o `increase` necessário). Casos em `test_validacao.py`; `test_no_maximo_todo_piso_e_alcancado` sobe cada arma real até o máximo e confere o piso onde ela guarda o stat (arma, companheiro ou veículo). Com os dados antigos: 35 falhas. **Suíte: 1207 verdes + 1 xfail.** Golden inalterado.
+- **Não validado:** a sensação do balanceamento (as lendárias ganham cadência bem mais rápido por nível).
+
 ## 2026-11-22 | Etapa E6: raridade de fato (recurso novo: muda o jogo)
 - `constants.py`: `NIVEL_MAXIMO_POR_RARIDADE` (comum 25, incomum 20, rara 15, épica 10, lendária 5) e `PESO_SORTEIO_POR_RARIDADE` (40/25/20/10/5, por arma). `ArmaInfo.criar(jogador, game)` cria a arma com o `nivel_maximo` (o `Game` e o `EventManager` criam por ele; arma criada fora do registro não tem teto).
 - `Arma.upgrade()` é o único ponto de subida: no máximo devolve `False` e não muda nada. As subclasses implementam o gancho `aplicar_nivel()`; as 14 armas que só aplicavam o perfil perderam o `upgrade` copiado (o padrão da base faz isso).

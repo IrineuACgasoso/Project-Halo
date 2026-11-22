@@ -108,6 +108,29 @@ def test_raridade_invalida(dicionario, troca, trecho):
     um_erro(_armas(**{dicionario: dic}), trecho)
 
 
+def _brick_com_cooldown(**troca):
+    stats = dict(WEAPON_DATA['brick'].stats)
+    stats['cooldown'] = dataclasses.replace(stats['cooldown'], **troca)
+    return {**WEAPON_DATA, 'brick': WeaponProfile(stats=stats)}
+
+
+def test_min_val_inalcancavel_no_nivel_maximo():
+    # Brick é lendária (máximo 5: 4 subidas). Com -100 por nível, 2000 só chega a 1600: o piso 1000 era de mentira.
+    um_erro(_armas(armas=_brick_com_cooldown(increase=-100)),
+            'brick.cooldown: min_val 1000 inalcançável (no nível máximo 5 chega a 1600; precisa de increase <= -250)')
+
+
+def test_min_val_alcancado_exatamente_no_ultimo_nivel_vale():
+    assert _armas(armas=_brick_com_cooldown(increase=-250)) == []          # 2000 - 4 × 250 = 1000
+    assert _armas(armas=_brick_com_cooldown(increase=-300)) == []          # passa do piso: o clamp segura
+
+
+def test_min_val_inalcancavel_depende_do_maximo_da_raridade():
+    # o mesmo dado vale se a raridade tiver mais níveis (lendária com 11: 10 subidas de -100)
+    niveis = {**NIVEL_MAXIMO_POR_RARIDADE, 'lendaria': 11}
+    assert _armas(armas=_brick_com_cooldown(increase=-100), niveis_maximos=niveis) == []
+
+
 def test_arma_registrada_sem_perfil_de_dados():
     sem_perfil = {k: v for k, v in WEAPON_DATA.items() if k != 'assault_rifle'}
     um_erro(_armas(armas=sem_perfil), 'NOME_ASSET "assault_rifle" sem perfil em weapon_data')

@@ -10,7 +10,7 @@ import pytest
 
 from source.data.weapon_data import WEAPON_DATA, WeaponStats
 from source.enemies.standard.grunt import GruntRed
-from source.feats.weapons.baseweapon import Arma, ArmaDeRajada
+from source.feats.weapons.baseweapon import ALL_DATA, Arma, ArmaDeRajada
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.systems.hud import hud_draw
@@ -160,6 +160,18 @@ def test_upgrade_no_maximo_nao_faz_nada(novo_jogo, id_arma):
     antes = _numeros(arma)
     assert arma.upgrade() is False
     assert _numeros(arma) == antes
+
+
+@pytest.mark.parametrize('id_arma', IDS)
+def test_no_maximo_todo_piso_e_alcancado(novo_jogo, id_arma):
+    # Nenhum min_val de mentira: no nível máximo da raridade, o stat (lido onde a arma o guarda:
+    # arma, companheiro ou veículo) está exatamente no piso. A regra de dados está em validar_armas.
+    arma = _criar_no_maximo(novo_jogo, id_arma)
+    stats = ALL_DATA[arma.NOME_ASSET].stats
+    atuais = arma.ver_proximo_upgrade()
+    pisos = {k: m.min_val for k, m in stats.items() if m.min_val is not None and m.label and m.increase < 0}
+    for atributo, piso in pisos.items():
+        assert atuais[atributo]['atual'] == piso, atributo
 
 
 def test_arma_criada_fora_do_registro_nao_tem_teto(novo_jogo):
