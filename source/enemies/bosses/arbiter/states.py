@@ -15,8 +15,7 @@ class ArbiterAI:
 
     def preparar_frame(self, delta_time):
         # a camuflagem é uma máquina da classe base: avança sempre, em qualquer estado
-        if self.invis_phase is not None:
-            self.atualizar_invisibilidade(delta_time * 1000)
+        self.atualizar_invisibilidade(delta_time)
         self._resetar_movimento()
 
     def escolher_habilidade(self, agora):

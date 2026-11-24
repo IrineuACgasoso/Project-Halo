@@ -3,10 +3,7 @@
 class EnemyEffects:
     def trigger_flash(self, duracao=100, bonus_alpha=120):
         """
-        Revela parcialmente o inimigo por um curto período.
+        Revela parcialmente o inimigo camuflado por um curto período (visível, não faz nada).
         """
-        if not self.flash:
-            return
-
-        self.flash_timer = duracao
-        self.flash_alpha_bonus = bonus_alpha
+        if self.invisibilidade is not None:
+            self.invisibilidade.revelar(duracao, bonus_alpha)

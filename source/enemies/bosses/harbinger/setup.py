@@ -17,7 +17,6 @@ class HarbingerSetup:
         self.tp_cooldown = 3000
         self.teleportando = False
         self.tempo_inicio_tp = 0
-        self.duracao_invisivel = 400
         self.is_invulneravel = False
 
         # EMP

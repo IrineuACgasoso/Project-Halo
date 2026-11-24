@@ -17,8 +17,7 @@ class JegaAI:
             return
 
         # Atualiza a máquina de invisibilidade da classe base (fade controlado por fases)
-        if getattr(self, 'invis_phase', None) is not None:
-            self.atualizar_invisibilidade(delta_time * 1000)
+        self.atualizar_invisibilidade(delta_time)
 
         if self.estado == 'perseguindo':
             if distancia_sq > 0:

@@ -2,6 +2,7 @@ import random
 import math
 import pygame
 from source.feats.projetil import Carabin
+from source.feats.skills.invisibilidade import FADE_IN, FADE_OUT, OCULTO
 from source.systems.entitymanager import entity_manager
 from source.enemies.standard.elite import Elite
 from .config import CFG
@@ -32,17 +33,9 @@ class ArbiterAttacks:
                 return True
         return False
 
-    def _revelar(self, duracao=100, bonus_alpha=120):
-        """Revela o Arbiter por um instante mesmo camuflado.
-
-        Substitui `trigger_flash` da base, que retorna cedo quando `self.flash` e False
-        (e o Arbiter sempre camufla com flashing=False), ou seja, nunca fazia nada."""
-        self.flash_timer = duracao
-        self.flash_alpha_bonus = bonus_alpha
-
     def checar_colisao_stealth(self):
-        if self.invis_phase in ('fade_out', 'hold') and self.hitbox.colliderect(self.jogador.hitbox):
-            self._revelar(400, 120)
+        if self.invisibilidade.oculta and self.hitbox.colliderect(self.jogador.hitbox):
+            self.trigger_flash(400, 120)
 
     # ================================================================== carabina
     def atirar_carabina(self, spread=0.03, dano=None, direcao=None):
@@ -54,7 +47,7 @@ class ArbiterAttacks:
         else:
             direcao = direcao.rotate(random.uniform(-1, 1) * math.degrees(spread))
 
-        self._revelar(CFG.revelar_tiro_ms, CFG.revelar_tiro_alpha)
+        self.trigger_flash(CFG.revelar_tiro_ms, CFG.revelar_tiro_alpha)
         Carabin(
             posicao_inicial=self.posicao.copy(),
             grupos=(entity_manager.all_sprites,),
@@ -139,25 +132,23 @@ class ArbiterAttacks:
         """Camuflagem ativa -> teleporte -> sprint invisivel -> EMBOSCADA com a espada de energia.
         O cone azul e visivel mesmo com ele invisivel: o jogador e avisado e pode reagir."""
         self.adicionar_escudo(CFG.furtivo_escudo)
-        self.iniciar_invisibilidade(
-            alpha_alvo=0, fade_out=CFG.furtivo_fade_out, fade_in=CFG.furtivo_fade_in,
-            duracao=CFG.furtivo_duracao, flashing=False)
+        self.iniciar_invisibilidade(CFG.furtivo_preset)
 
         teleportou = False
         emboscou = False
-        while self.invis_phase is not None:
-            fase = self.invis_phase
+        while self.invisibilidade is not None:
+            fase = self.fase_invisibilidade
             self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade * CFG.furtivo_mult_vel
-            self.animador.tocar('reaparecer' if fase == 'fade_in' else 'furtivo')
+            self.animador.tocar('reaparecer' if fase == FADE_IN else 'furtivo')
 
-            if fase in ('fade_out', 'hold'):
+            if fase in (FADE_OUT, OCULTO):
                 self.checar_colisao_stealth()
 
-            if fase == 'hold' and not teleportou:
+            if fase == OCULTO and not teleportou:
                 self.realizar_teleporte()
                 teleportou = True
 
-            if teleportou and not emboscou and fase in ('hold', 'fade_in') \
+            if teleportou and not emboscou and fase in (OCULTO, FADE_IN) \
                     and self.dist_jogador() <= CFG.emboscada_dist:
                 emboscou = True
                 yield from self.rotina_lamina(emboscada=True)
@@ -170,12 +161,12 @@ class ArbiterAttacks:
     # ================================================================ anti-stuck
     def rotina_antistuck(self):
         """Contra-ataque contra quem camperia/prendeu o boss: some, reaparece em outro lugar e despeja o spray."""
-        self.iniciar_invisibilidade(alpha_alvo=0, fade_out=800, fade_in=600, duracao=2500, flashing=False)
+        self.iniciar_invisibilidade(CFG.antistuck_preset)
 
-        while self.invis_phase == 'fade_out':
+        while self.fase_invisibilidade == FADE_OUT:
             self._parar()
             yield
-        if self.invis_phase is not None:
+        if self.invisibilidade is not None:
             self.realizar_teleporte()
 
         yield from self._esperar(500)
@@ -183,7 +174,7 @@ class ArbiterAttacks:
             self.atirar_carabina(spread=CFG.antistuck_spread, dano=CFG.antistuck_dano)
             yield from self._esperar(CFG.antistuck_intervalo)
 
-        while self.invis_phase is not None:
+        while self.invisibilidade is not None:
             self._parar()
             yield
         self.wait = 1200

@@ -22,14 +22,7 @@ class HarbingerAttacks:
         self.teleportando = True
         self.is_invulneravel = True  # Proteção ativada contra qualquer projétil/ataque do jogador
 
-        # Inicializa o motor de invisibilidade nativo do EnemyCombat
-        self.iniciar_invisibilidade(
-            alpha_alvo=0,            # Fica 100% invisível no ápice
-            fade_out=60,             # Tempo sumindo (ms)
-            fade_in=100,             # Tempo reaparecendo (ms)
-            duracao=self.duracao_invisivel, # Tempo total (400ms)
-            flashing=False
-        )
+        self.iniciar_invisibilidade('harbinger_teleporte')   # 400 ms no total
         
         angulo = random.uniform(0, 2 * math.pi)
         distancia_teleporte = random.uniform(a, b)

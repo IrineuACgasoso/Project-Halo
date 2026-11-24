@@ -97,14 +97,13 @@ class ArbiterConfig:
 
     # --- Sprint invisivel ---
     furtivo_escudo: int = 250
-    furtivo_fade_out: int = 1000
-    furtivo_fade_in: int = 600
-    furtivo_duracao: int = 3500
+    furtivo_preset: str = 'arbiter_furtivo'   # feats/skills/invisibilidade
     furtivo_mult_vel: float = 4.0
     emboscada_dist: float = 205          # dist. p/ cortar o sprint e dar o golpe de espada
 
     # --- Anti-stuck: caminho percorrido < 40 px em 1,5 s (livre) e longe do jogador (> 200 px) ---
     antistuck: ConfigTravamento = ConfigTravamento(janela_ms=1500, caminho_min=40, dist_min=200)
+    antistuck_preset: str = 'arbiter_antistuck'
     antistuck_tiros: int = 20
     antistuck_intervalo: int = 45
     antistuck_dano: int = 15

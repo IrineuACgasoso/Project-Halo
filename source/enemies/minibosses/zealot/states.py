@@ -8,11 +8,10 @@ class ZealotAI:
 
     def executar_estados(self, agora, delta_time, dist_sq):
         # Atualiza as outras fases da invisibilidade (fade_out e hold)
-        if getattr(self, 'invis_phase', None) is not None:
-            self.atualizar_invisibilidade(delta_time * 1000)
+        self.atualizar_invisibilidade(delta_time)
 
         # TRAVA CRÍTICA: Se estiver reaparecendo, não processa mais nada e mantém o estado atual
-        if getattr(self, 'invis_phase', None) == 'fade_in':
+        if self.fase_invisibilidade == 'fade_in':
             self.velocidade = self.velocidade_base * self.rage_mult
             self.velocidade_animacao = 80
             return
@@ -46,7 +45,7 @@ class ZealotAI:
             elif dist_sq < 160000 and (agora - getattr(self, 'last_stealth', 0) > self.cooldown_stealth):
                 self.estado_habilidade = 'stealth'
                 self.ja_teleportou = False
-                self.iniciar_invisibilidade(alpha_alvo=0, fade_out=500, fade_in=1500, duracao=4000)
+                self.iniciar_invisibilidade('zealot_reposicao')
 
             # Decisão: Sprint (Longe)
             elif dist_sq >= 250000:

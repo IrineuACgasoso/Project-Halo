@@ -50,21 +50,6 @@ class EnemySetup:
         self.tempo_invencibilidade = 0
     
     def setup_invisibility(self):
-        # Invisibilidade
-        self.invis_phase = None
-
-        self.invis_alpha_base = 255
-        self.invis_alpha_target = 255
-
-        self.invis_fade_out = 0
-        self.invis_fade_in = 0
-        self.invis_duracao = 0
-
-        self.invis_timer = 0
-        self.invis_phase_timer = 0
-        # Flash
-        self.flash = False
-        self.flash_timer = 0
-        # Alpha
+        self.invisibilidade = None     # skill ativa (feats/skills/invisibilidade) ou None
         self.alpha_atual = 255
     

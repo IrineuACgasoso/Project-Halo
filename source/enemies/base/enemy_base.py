@@ -58,10 +58,7 @@ class BaseEnemy(
     @property
     def invisivel(self):
         """Verifica se o inimigo está visualmente indetectável."""
-        alpha = getattr(self, 'alpha_atual', 255)
-        phase = getattr(self, 'invis_phase', 'none')
-        
-        return alpha == 0 or phase in ['fade_out', 'hold']
+        return self.alpha_atual == 0 or (self.invisibilidade is not None and self.invisibilidade.oculta)
 
     @property
     def vivo(self):

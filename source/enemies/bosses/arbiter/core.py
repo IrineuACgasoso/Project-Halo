@@ -37,7 +37,7 @@ class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, Ar
     @property
     def revelado(self):
         """Camuflado, mas denunciado por um flash (atirou / golpeou / encostou no jogador)."""
-        return self.invis_phase is not None and self.flash_timer > 0
+        return self.invisibilidade is not None and self.invisibilidade.revelada
 
     @property
     def invulneravel(self):

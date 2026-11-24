@@ -79,13 +79,7 @@ class EliteBase(BaseEnemy):
             self.vida_critica = True
             self.velocidade_base *= 2
 
-            self.iniciar_invisibilidade(
-                alpha_alvo=0,
-                fade_out=800,
-                fade_in=800,
-                duracao=8000,
-                flashing=True
-            )
+            self.iniciar_invisibilidade('elite')
 
         if direcao.length_squared() >= 122500:
             self.velocidade = self.velocidade_base
@@ -98,7 +92,7 @@ class EliteBase(BaseEnemy):
         
         self.set_sprite_direction(direcao_x)
 
-        self.atualizar_invisibilidade(delta_time * 1000)
+        self.atualizar_invisibilidade(delta_time)
 
         if self.velocidade > 0:
             self.animar()

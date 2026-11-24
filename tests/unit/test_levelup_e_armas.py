@@ -10,6 +10,7 @@ import pytest
 
 from source.data.weapon_data import WEAPON_DATA, WeaponStats
 from source.enemies.standard.grunt import GruntRed
+from source.feats.skills.invisibilidade import FADE_IN, FADE_OUT, OCULTO
 from source.feats.weapons.baseweapon import ALL_DATA, Arma, ArmaDeRajada
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
@@ -293,12 +294,17 @@ def _grunts(game, *deslocamentos):
     return [GruntRed(posicao=game.player.posicao + pygame.Vector2(dx, 0), game=game) for dx in deslocamentos]
 
 
+def _camuflar(inimigo, fase):
+    inimigo.iniciar_invisibilidade('padrao')
+    inimigo.invisibilidade.fase = fase
+
+
 @pytest.mark.parametrize('ajuste, alvejavel', [
     (lambda g: None, True),
     (lambda g: setattr(g, 'alpha_atual', 0), False),
-    (lambda g: setattr(g, 'invis_phase', 'fade_out'), False),
-    (lambda g: setattr(g, 'invis_phase', 'hold'), False),
-    (lambda g: setattr(g, 'invis_phase', 'fade_in'), True),   # reaparecendo: já é alvo
+    (lambda g: _camuflar(g, FADE_OUT), False),
+    (lambda g: _camuflar(g, OCULTO), False),
+    (lambda g: _camuflar(g, FADE_IN), True),   # reaparecendo: já é alvo
     (lambda g: setattr(g, 'vida', 0), False),
 ])
 def test_alvejavel(novo_jogo, ajuste, alvejavel):
@@ -310,7 +316,8 @@ def test_alvejavel(novo_jogo, ajuste, alvejavel):
 
 def test_invisivel_e_morto_nunca_sao_alvo(novo_jogo):
     invisivel, morto, longe = _grunts(novo_jogo, 50, 60, 400)
-    invisivel.invis_phase, morto.vida = 'hold', 0
+    _camuflar(invisivel, OCULTO)
+    morto.vida = 0
     arma = _mira(novo_jogo)
     grupo = [invisivel, morto, longe]
     assert arma.encontrar_inimigo_mais_proximo(grupo) is longe

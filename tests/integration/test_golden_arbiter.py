@@ -50,7 +50,7 @@ def _amostra(game, boss, t):
         'ultima': boss.ultima_habilidade,
         'wait': round(boss.wait, CASAS),
         'cd': {k: round(v, CASAS) for k, v in sorted(boss.cd.items())},
-        'invis': boss.invis_phase,
+        'invis': boss.fase_invisibilidade,
         # animação (F2): o quadro mostrado, o lado e o alpha da imagem (camuflagem)
         'quadro': boss.animador.quadro,
         'lado': boss.animador.lado,

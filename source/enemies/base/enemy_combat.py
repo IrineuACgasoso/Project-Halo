@@ -2,6 +2,7 @@ import pygame
 import random
 
 from source.feats.items import Items
+from source.feats.skills.invisibilidade import Invisibilidade
 from source.systems.eventos import eventos, DANO_CAUSADO
 from source.systems.status import multiplicador_de_dano
 
@@ -77,95 +78,24 @@ class EnemyCombat:
         Items.spawn_drop(self.posicao, grupos, **self.tabela_drop)
         self.kill()
 
-    def iniciar_invisibilidade(
-        self,
-        alpha_alvo,
-        fade_out,
-        fade_in,
-        duracao,
-        flashing=False
-    ):
-        self.invis_phase = "fade_out"
+    # ── Invisibilidade (skill em feats/skills/invisibilidade) ────────────────────
+    def iniciar_invisibilidade(self, preset):
+        self.invisibilidade = Invisibilidade(self, preset)
 
-        self.invis_alpha_base = 255
-        self.invis_alpha_target = max(0, min(255, alpha_alvo))
+    def atualizar_invisibilidade(self, delta_time):
+        """Um passo da camuflagem ativa (sem ela, não faz nada)."""
+        if self.invisibilidade is not None and self.invisibilidade.atualizar(delta_time):
+            self.invisibilidade = None
 
-        self.invis_fade_out = fade_out
-        self.invis_fade_in = fade_in
-        self.invis_duracao = duracao
+    def encerrar_invisibilidade(self):
+        """Corta a camuflagem: começa a reaparecer agora."""
+        if self.invisibilidade is not None:
+            self.invisibilidade.encerrar()
 
-        self.invis_timer = 0
-        self.invis_phase_timer = 0
-
-        # Flashing
-        self.flash = flashing
-        self.flash_timer = 0
-        self.flash_alpha_bonus = 0
-
-        self._aplicar_alpha(self.invis_alpha_base)
-
-    def atualizar_invisibilidade(self, dt):
-        """Atualiza os passos do efeito de camuflagem (dt em milissegundos)."""
-
-        if self.invis_phase is None:
-            return
-
-        self.invis_timer += dt
-        self.invis_phase_timer += dt
-        alpha_final = self.invis_alpha_base
-
-        # ============================================
-        # Fade Out
-        # ============================================
-        if self.invis_phase == "fade_out":
-            t = min(1.0, self.invis_phase_timer / self.invis_fade_out)
-
-            alpha_final = (
-                self.invis_alpha_base +
-                (self.invis_alpha_target - self.invis_alpha_base) * t
-            )
-            if t >= 1.0:
-                self.invis_phase = "hold"
-                self.invis_phase_timer = 0
-
-        # ============================================
-        # Hold
-        # ============================================
-        elif self.invis_phase == "hold":
-            alpha_final = self.invis_alpha_target
-
-            if self.invis_timer >= (
-                self.invis_duracao - self.invis_fade_in
-            ):
-                self.invis_phase = "fade_in"
-                self.invis_phase_timer = 0
-
-        # ============================================
-        # Fade In
-        # ============================================
-        elif self.invis_phase == "fade_in":
-            t = min(1.0, self.invis_phase_timer / self.invis_fade_in)
-
-            alpha_final = (
-                self.invis_alpha_target +
-                (self.invis_alpha_base - self.invis_alpha_target) * t
-            )
-
-            if t >= 1.0:
-                self.invis_phase = None
-                alpha_final = self.invis_alpha_base
-
-        # ============================================
-        # Flash
-        # ============================================
-        if self.flash_timer > 0:
-            self.flash_timer -= dt
-            alpha_final += self.flash_alpha_bonus
-
-        # Clamp final
-        alpha_final = max(0, min(255, alpha_final))
-
-        self._aplicar_alpha(alpha_final)
+    @property
+    def fase_invisibilidade(self):
+        """Fase da camuflagem (`FADE_OUT`, `OCULTO`, `FADE_IN`) ou None."""
+        return None if self.invisibilidade is None else self.invisibilidade.fase
 
     def _aplicar_alpha(self, alpha):
 

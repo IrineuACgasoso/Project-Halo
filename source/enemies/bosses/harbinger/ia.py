@@ -42,7 +42,7 @@ class HarbingerIA:
         direcao = (self.jogador.posicao - self.posicao)
 
         # 1. Motor nativo de camuflagem sempre atualiza (independe de estado)
-        self.atualizar_invisibilidade(delta_time * 1000)
+        self.atualizar_invisibilidade(delta_time)
 
         # 2. Transição para RECHARGING nos marcos de 60% e 25% de vida
         if (not self.recharge_ativado and self.marcos_recarga_pendentes
@@ -56,7 +56,7 @@ class HarbingerIA:
 
         # 4. Gerenciamento do ciclo nativo de teleporte/invulnerabilidade
         if self.teleportando:
-            if self.invis_phase is not None:
+            if self.invisibilidade is not None:
                 return  # ainda no meio do fade nativo
             self.teleportando = False
             self.is_invulneravel = False

@@ -27,13 +27,7 @@ class JegaAttacks:
                                         self.posicao.x - self.jogador.posicao.x)
 
         # Ativa a invisibilidade oficial da classe base durante a órbita inteira
-        self.iniciar_invisibilidade(
-            alpha_alvo=0,
-            fade_out=400,
-            fade_in=400,
-            duracao=self.duracao_orbita,
-            flashing=False
-        )
+        self.iniciar_invisibilidade('jega_orbita')
 
     # ------------------------------------------------------------------
     # Carabina
@@ -41,7 +35,6 @@ class JegaAttacks:
     def carabin(self):
         direcao_tiro = self.calcular_direcao_tiro(0.05)
 
-        self.trigger_flash(duracao=35, bonus_alpha=60)
         Carabin(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites,),
@@ -154,13 +147,7 @@ class JegaAttacks:
 
         self._invocar_clones(direcao_base)
 
-        self.iniciar_invisibilidade(
-            alpha_alvo=0,
-            fade_out=350,
-            fade_in=350,
-            duracao=self.duracao_ilusao,
-            flashing=False
-        )
+        self.iniciar_invisibilidade('jega_ilusao')
 
     def processar_ilusao(self, agora, delta_time):
         """Dispara a Ilusão Sombria periodicamente, só durante a perseguição."""

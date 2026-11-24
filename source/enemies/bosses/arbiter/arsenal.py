@@ -49,7 +49,7 @@ class ArbiterArsenal:
             cfg = self._lancar_cone(CFG.lamina_preset, direcao, CFG.lamina_combo_mult ** i)
 
             if emboscada or self.invisivel:     # golpear o revela: janela de contra-ataque
-                self._revelar(cfg.duracao + 250, 150)
+                self.trigger_flash(cfg.duracao + 250, 150)
 
             yield from self._esperar(cfg.duracao + CFG.lamina_flash)
 

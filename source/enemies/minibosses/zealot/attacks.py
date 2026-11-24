@@ -43,7 +43,7 @@ class ZealotAttacks:
             self.last_dash = agora
 
     def processar_stealth(self, agora):
-        fase_atual = getattr(self, 'invis_phase', None)
+        fase_atual = self.fase_invisibilidade
         
         if fase_atual in ["fade_out", "hold"]:
             self.velocidade = 0
@@ -70,7 +70,7 @@ class ZealotAttacks:
             if dist_movida_sq < 900 and dist_sq > 160000 and self.estado_habilidade in ['idle', 'sprint']:
                 self.estado_habilidade = 'stealth'
                 self.ja_teleportou = False
-                self.iniciar_invisibilidade(alpha_alvo=0, fade_out=500, fade_in=1500, duracao=4000)
+                self.iniciar_invisibilidade('zealot_reposicao')
                 self.last_stealth = agora 
             
             self.ultimo_check_posicao = agora
