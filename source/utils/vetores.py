@@ -25,3 +25,13 @@ def no_cone(origem, eixo, ponto, cos_meio_angulo):
     if cos_meio_angulo >= 0:
         return escalar >= 0 and escalar * escalar >= comparado
     return escalar >= 0 or escalar * escalar <= comparado   # meia-abertura > 90°
+
+
+def no_retangulo(origem, eixo, ponto, comprimento, meia_largura):
+    """`ponto` está no retângulo que sai de `origem` na direção `eixo` (UNITÁRIO), com `comprimento`
+    à frente e `meia_largura` para cada lado? As bordas contam. Só multiplicações."""
+    vx = ponto[0] - origem[0]
+    vy = ponto[1] - origem[1]
+    frente = eixo[0] * vx + eixo[1] * vy
+    lado = eixo[0] * vy - eixo[1] * vx
+    return 0 <= frente <= comprimento and -meia_largura <= lado <= meia_largura

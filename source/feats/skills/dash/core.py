@@ -10,12 +10,15 @@ Uso numa rotina geradora:
     while not dash.atualizar(dt, paredes):
         yield
 """
+import math
+
 import pygame
 
 from source.utils.vetores import direcao_segura
 from .config import DASH_PRESETS
 
 _FOLGA = 1e-9   # s: soma de dt em float não fecha exata
+_PASSO_MAX = 0.6   # fração do raio de colisão com o mapa que um subpasso pode andar
 
 
 class Dash:
@@ -43,11 +46,21 @@ class Dash:
             if falta <= distancia:
                 distancia = max(falta, 0.0)
                 self.terminou = True
-        inimigo.posicao += self.direcao * distancia
-        if paredes:
-            inimigo.aplicar_colisao_mapa(paredes)
+        self._andar(distancia, paredes)
         inimigo.sync_rect()
         self.restante -= delta_time
         if self.restante <= _FOLGA:
             self.terminou = True
         return self.terminou
+
+    def _andar(self, distancia, paredes):
+        """Com paredes, em pedaços menores que o raio de colisão: num passo do tamanho dele, o centro
+        pularia para o outro lado da linha e a parede o empurraria para fora pelo lado errado."""
+        inimigo = self.inimigo
+        if not paredes:
+            inimigo.posicao += self.direcao * distancia
+            return
+        pedacos = max(1, math.ceil(distancia / (inimigo.raio_colisao_mapa * _PASSO_MAX)))
+        for _ in range(pedacos):
+            inimigo.posicao += self.direcao * (distancia / pedacos)
+            inimigo.aplicar_colisao_mapa(paredes)
