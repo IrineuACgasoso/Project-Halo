@@ -22,11 +22,11 @@ PHASE_POOLS = {
     },
     2: {
         "classes": [Infection, FloodElite, FloodMarine, FloodCarry, GruntRed, Jackal, JackalSniper, Elite, Sentinel],
-        "pesos": [20, 8, 8, 4, 20, 19, 1, 10, 10]
+        "pesos": [25, 3, 10, 2, 25, 10, 1, 9, 15]
     },
     3: {
-        "classes": [GruntRed, Jackal, Elite, Brute],
-        "pesos": [40, 20, 20, 20]
+        "classes": [GruntRed, GruntBlue, Jackal, JackalSniper, Elite, Brute],
+        "pesos": [25, 25, 30, 1, 10, 9]
     },
     4: {
         "classes": [Infection, FloodElite, FloodMarine, FloodCarry, GruntRed, Jackal, Elite, Brute],

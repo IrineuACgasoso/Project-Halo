@@ -209,9 +209,9 @@
    "escudo_maximo": 0,
    "velocidade": 50.5,
    "velocidade_base": 50.5,
-   "vida": 88.0,
-   "vida_base": 88.0,
-   "vida_maxima": 88.0
+   "vida": 55.00000000000001,
+   "vida_base": 55.00000000000001,
+   "vida_maxima": 55.00000000000001
   }
  },
  "FloodElite": {
@@ -256,8 +256,8 @@
    "dano": 22.0,
    "dano_base": 22.0,
    "escudo_maximo": 0,
-   "velocidade": 202.0,
-   "velocidade_base": 202.0,
+   "velocidade": 161.6,
+   "velocidade_base": 161.6,
    "vida": 22.0,
    "vida_base": 22.0,
    "vida_maxima": 22.0

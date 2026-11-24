@@ -3,9 +3,7 @@ from source.systems.gameclock import relogio
 import math
 
 from .projetil import ProjetilUniversal
-from source.systems.entitymanager import entity_manager
-from source.feats.assets import *
-from source.feats.assets import ASSETS
+from source.utils.superficies import mascara_de
 
 
 
@@ -16,7 +14,13 @@ class EnergySwordProj(ProjetilUniversal):
     agora é uma rotação de verdade: a cada frame recalculamos o ângulo,
     reposicionamos o eixo cabo->ponta e re-renderizamos a imagem
     rotacionada — em vez de só mover um sprite estático num círculo.
+
+    Dano: um acerto por inimigo a cada volta (`GRAUS_ENTRE_ACERTOS`). A
+    lâmina perfura infinito, então sem esse limite o CollisionManager a
+    faria bater no mesmo alvo a cada frame.
     """
+
+    GRAUS_ENTRE_ACERTOS = 360
 
     # A arte da lâmina vem desenhada apontando ~45° para cima-direita em
     # vez de reto para a direita (0°). Este valor compensa isso na hora
@@ -27,6 +31,7 @@ class EnergySwordProj(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, game, dano, angulo_inicial, duracao, velocidade_rotacao, distancia_orbita):
         self.distancia_orbita = distancia_orbita
         self.angulo = angulo_inicial
+        self._angulo_do_acerto = {}   # inimigo -> ângulo em que esta lâmina o acertou por último
 
         super().__init__(
             posicao_inicial=posicao_inicial, 
@@ -64,7 +69,6 @@ class EnergySwordProj(ProjetilUniversal):
         # Centro do sprite entre o cabo (perto do player) e a ponta (na borda da órbita)
         centro_lamina = direcao_radial * (self.distancia_orbita - self.alcance_lamina)
         self.posicao = self.jogador.posicao + centro_lamina
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
         # Rotaciona a imagem pra acompanhar o ângulo atual, já compensando
         # a inclinação nativa da arte.
@@ -73,6 +77,18 @@ class EnergySwordProj(ProjetilUniversal):
         if angulo_render not in cache:
             cache[angulo_render] = pygame.transform.rotate(self.image_base, angulo_render)
         self.image = cache[angulo_render]
+        # A área de acerto é a da lâmina desenhada neste ângulo (rect e máscara giram juntos)
+        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
+        self.mask = mascara_de(self.image)
+
+    def ao_atingir_alvo(self, alvo):
+        if getattr(alvo, 'invulneravel', False):
+            return   # não gasta o acerto da volta
+        ultimo = self._angulo_do_acerto.get(alvo)
+        if ultimo is not None and self.angulo - ultimo < self.GRAUS_ENTRE_ACERTOS:
+            return
+        self._angulo_do_acerto[alvo] = self.angulo
+        super().ao_atingir_alvo(alvo)
 
     def update(self, delta_time):
         self.angulo += self.velocidade_rotacao * delta_time

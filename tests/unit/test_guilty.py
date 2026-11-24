@@ -30,6 +30,8 @@ from source.systems.status import Lentidao, Queimadura
 V = pygame.math.Vector2
 CENTRO = V(1500, 1500)
 NUNCA = float('inf')
+# Cada acerto da luz tira uma fração fixa: quantos levam do começo da fase 2 ao da fase 3
+ACERTOS_DA_FASE_2 = math.ceil(round((FASES[1].limiar_vida - FASES[2].limiar_vida) / CFG.luz_dano_no_guilty, 6))
 
 
 @pytest.fixture
@@ -267,14 +269,14 @@ def test_artilharia_que_ja_caia_so_estoura_depois_da_queda(guilty):
 def test_um_golpe_nao_pula_fase(guilty):
     _sem_barreira_fase1(guilty)
     guilty.receber_dano(Dano(10 ** 9, PROJETIL))
-    assert guilty.vida / guilty.vida_maxima == pytest.approx(0.6) and guilty.fase == 1
+    assert guilty.vida / guilty.vida_maxima == pytest.approx(FASES[1].limiar_vida) and guilty.fase == 1
     _passo(guilty)
     assert guilty.fase == 2
 
 
 @pytest.mark.parametrize('nivel', [1, 7, 13, 33])
 def test_limiares_valem_em_qualquer_nivel(novo_jogo, nivel):
-    """A vida escala com o nível: a conta em float precisa cruzar 60% e 20% exatos."""
+    """A vida escala com o nível: a conta em float precisa cruzar os limiares exatos das fases."""
     novo_jogo.player.contador_niveis = nivel
     novo_jogo.spawner.spawnar('guilty')
     g = novo_jogo.sessao.boss_atual
@@ -289,7 +291,8 @@ def test_limiares_valem_em_qualquer_nivel(novo_jogo, nivel):
         g.wait = NUNCA
         _passo(g)
         acertos += 1
-    assert acertos == 8 and g.fase == 3 and g.vida / g.vida_maxima == pytest.approx(0.2)
+    assert acertos == ACERTOS_DA_FASE_2 and g.fase == 3
+    assert g.vida / g.vida_maxima == pytest.approx(FASES[2].limiar_vida)
 
 
 def test_fase_2_ergue_a_barreira_desliga_o_spawner_e_corta_o_feixe(guilty):
@@ -793,9 +796,9 @@ def test_uma_cadeia_inteira_em_cima_dele_tira_4_golpes(guilty):
     assert vida - guilty.vida == pytest.approx(guilty.vida_maxima * 0.20)
 
 
-def test_oito_acertos_derrubam_a_barreira_em_20_por_cento(guilty):
+def test_acertos_da_luz_derrubam_a_barreira_no_limiar_da_fase_3(guilty):
     _ir_para_fase(guilty, 2)
-    for i in range(8):
+    for i in range(ACERTOS_DA_FASE_2):
         assert guilty.barreira_ativa and guilty.fase == 2, i
         guilty.atingido_pela_luz(_aviso_da_luz(guilty, 'guilty_luz_4', 0))
         _passo(guilty)

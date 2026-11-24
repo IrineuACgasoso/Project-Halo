@@ -2,6 +2,16 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-24 | Armas: Energy Sword, Fuel Rod, ícones e balanceamento do usuário (muda o jogo)
+- **Energy Sword (bug do dano infinito, corrigido):** a lâmina perfura infinito e não lembrava quem já acertou, então batia no mesmo alvo **a cada frame** (60×/s por lâmina). Agora cada lâmina acerta cada inimigo 1× por volta (`GRAUS_ENTRE_ACERTOS`). Medido num alvo parado, por ativação: nível 1, 350 → 10; nível 5, 11300 → 350; nível 10, 26800 → 1000. Também: o rect e a máscara ficavam na orientação do spawn; agora giram com a arte. Invulnerável não gasta o acerto da volta.
+- **Fuel Rod:** projétil e área próprios (eram os da granada de plasma). `FuelRodGrenade` herda de `GrenadeBase`: gota achatada de plasma que acompanha a curva do voo, halo pulsando e rastro. `PocaDePlasma` (`artilharia/poca_plasma.py`): clarão, respingo e poça fervendo (8 quadros, por baixo dos sprites), vapor e esfriamento; some o projétil quando explode. Preset `fuel_rod`. **Números e mecânica iguais** (raio 150, 1,5 s grudada, arco, quique): só o visual mudou.
+- **Ícones:** toda arma do registro tem um (há teste). `light_rifle.png` já existia e só não estava no manifesto; os outros 9 (tijolo, sniper, pistola, metralhadora, punho, dizimator, fuel rod, jipe e aeronave) são pixel art **original** 64×64, não cópias de imagens do Halo.
+- **Balanceamento do usuário:** armas (`weapon_data.py`), flood elite e carry, pools das fases 2 e 3, Guilty (vida 800, contato 20, fases em 80% e 30%: a fase 2 pede 10 acertos da luz).
+- **Conferência dos dados:** o Assault Rifle (−20) passava do piso 320 e travava: `min_val` 260. O `duracao` da Energy Sword (+200, `range_val=0`) nunca subia: `range_val=1`. Regra nova em `validar_armas`: label + increase com `range_val` vazio é erro.
+- Goldens: `inimigos.json` (só flood elite e carry) e `assets.json` (só entradas novas) regravados; `fase0.json` e `arbiter.json` inalterados. Testes do Guilty leem `FASES`/`CFG`. 1 exceção saiu do `ruff.toml`.
+- Testes: `test_energy_sword.py` (16) e `test_fuel_rod.py` (18). **Suíte: 1750 verdes + 1 xfail.** Catraca inalterada.
+- **Não validado:** a sensação no jogo (a espada ficou ~30× mais fraca: talvez o dano precise subir). A Shotgun chega a 84 projéteis por disparo no nível 20 (+4 por nível); não medi o custo. Conferi o visual por capturas headless.
+
 ## 2026-11-24 | Zealot: balanceamento do usuário (muda o jogo)
 - Vida 100 (era 250), escudo 300 (500), velocidade 120 (130); cooldowns do combo 4–7 s e do furtivo 6,5–9 s; pausa do combo 0,6–0,85 s e recuperação 0,7 s; fuga a 540 e depois 360 px/s, distância ideal 800 e gatilho do contra-ataque 520 px (260). Dash 550 px/s × 700 ms (1300 × 600) e bote 700 × 800 (1600 × 400).
 - **Decisão do usuário:** os números são propositais. O dash alcança no máximo 385 px, então pode parar antes do alvo; parado, ele ainda está no alcance do cone do contra-ataque (480). `VIDA_MINIMA_BOSS['zealot']` 200 → 100 (o mesmo piso do Hunter).

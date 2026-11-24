@@ -10,8 +10,8 @@ from source.enemies.base.boss import Clip, ConfigTravamento, FaseBoss
 # nome, vida em que começa, mult. de cooldown, mult. de velocidade
 FASES = (
     FaseBoss('Ronda', 1.00, 1.0, 1.0),
-    FaseBoss('Protocolo de Contenção', 0.60, 1.0, 2.0),
-    FaseBoss('Monitor Debilitado', 0.20, 1.0, 1.0),
+    FaseBoss('Protocolo de Contenção', 0.80, 1.0, 2.0),
+    FaseBoss('Monitor Debilitado', 0.30, 1.0, 1.0),
 )
 
 # nome da habilidade -> `estado_habilidade`
@@ -47,8 +47,8 @@ class FeixeConfig:
 @dataclass(frozen=True)
 class GuiltyConfig:
     # --- atributos ---
-    vida: float = 2000
-    dano_contato: float = 80
+    vida: float = 800
+    dano_contato: float = 20
     velocidade: float = 130             # fase 1; a fase 2 dobra (FASES)
     mult_sem_barreira: float = 1.9      # fase 1 sem o escudo: mais rápido
     raio_colisao_mapa: int = 45

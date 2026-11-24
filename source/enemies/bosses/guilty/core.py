@@ -16,8 +16,8 @@ class GuiltySpark(GuiltyMovement, GuiltyAI, GuiltyBarreira, GuiltyAttacks, Guilt
     """Invocador atrás de uma barreira. Mixins ANTES de BossBase (MRO).
 
     - Fase 1: ronda e chuva de sentinelas; derrotar 40 derruba a barreira e religa o spawner.
-    - Fase 2 (60% da vida): barreira de novo; só a luz visível dele mesmo o fere (5% por acerto).
-    - Fase 3 (20%): sem barreira; teleporte + laser até morrer."""
+    - Fase 2 (80% da vida): barreira de novo; só a luz visível dele mesmo o fere (5% por acerto).
+    - Fase 3 (30%): sem barreira; teleporte + laser até morrer."""
     FASES = FASES
     COOLDOWNS = CFG.cooldown
     COOLDOWN_INICIAL = CFG.cooldown_inicial

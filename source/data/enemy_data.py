@@ -64,8 +64,8 @@ INIMIGOS = _fixo({
     'brute': _perfil(30, 20, 75, {'dizimadora': (5000, 8000)}, DROP_COVENANT_FORTE),
     # Flood
     'infection': _perfil(1, 5, 120),
-    'flood_elite': _perfil(20, 20, 200, drops=DROP_FLOOD),
-    'flood_carry': _perfil(80, 5, 50, drops=DROP_FLOOD_CARRY),
+    'flood_elite': _perfil(20, 20, 160, drops=DROP_FLOOD),
+    'flood_carry': _perfil(50, 5, 50, drops=DROP_FLOOD_CARRY),
     'flood_marine': _perfil(20, 10, 100, {'rajada': (4000, 9000)}, DROP_FLOOD),
     # Forerunner e Prometheans
     'sentinel': _perfil(15, 10, 90),

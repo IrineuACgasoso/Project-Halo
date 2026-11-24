@@ -15,7 +15,7 @@ Project-Halo/
 ├── assets/                  # ~120 MB, carregados por carregar_assets() (menos os fundos das fases: sob demanda)
 │   ├── data/ranking.json    # ranking em dev (versionado); no .exe vai para %APPDATA%/ProjectHalo
 │   ├── img/map/<n>/         # m<n>.tmj (Tiled) + imagem de fundo; existem as fases 0–8
-│   ├── img/{player,enemies,buddies,projectiles,icons,items,menu}/
+│   ├── img/{player,enemies,buddies,projectiles,effects,icons,items,menu}/
 │   ├── fonts/ sounds/ audio/
 ├── tools/
 │   ├── perf.py              # medição headless de ms/frame por cenário (roteiro A1)
@@ -78,8 +78,9 @@ Project-Halo/
     │   ├── vehicles/        # Vehicle + Warhog, Pelican (tecla V)
     │   ├── items/           # Items (drop/coleta) + draw.py (visual/cache)
     │   ├── skills/          # artilharia, cone_strike, rect_strike (retângulo), invisibilidade (+ distorcao.py), onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
-│   │                    # artilharia, cone, rect e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx)
-    │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (quique)
+│   │                    # artilharia, cone, rect e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx);
+│   │                    # artilharia/poca_plasma.py: PocaDePlasma, a área do Fuel Rod
+    │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (gota de plasma, quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
     │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
     │   └── effects.py       # Portal, poeira, raio de escudo, faíscas
@@ -111,6 +112,7 @@ Project-Halo/
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
+| Visual do Fuel Rod (gota, rastro, poça) | `feats/grenades.py::FuelRodGrenade` e `feats/skills/artilharia/poca_plasma.py` (raio, pavio e cores: preset `fuel_rod`) |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |

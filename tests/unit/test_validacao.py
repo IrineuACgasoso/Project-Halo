@@ -73,6 +73,15 @@ def test_stat_que_diminui_sem_piso():
             'assault_rifle.cooldown diminui a cada nível e não tem min_val')
 
 
+@pytest.mark.parametrize('range_val', [0, None, []])
+def test_upgrade_que_nenhum_nivel_aplica(range_val):
+    """O `duracao` da Energy Sword estava assim: +200 por nível no papel, zero no jogo."""
+    stats = dict(WEAPON_DATA['energy_sword'].stats)
+    stats['duracao'] = dataclasses.replace(stats['duracao'], range_val=range_val)
+    um_erro(validacao.validar_armas(armas={**WEAPON_DATA, 'energy_sword': WeaponProfile(stats=stats)}),
+            'energy_sword.duracao tem label e increase +200, mas o range_val')
+
+
 def test_stat_sem_label_pode_diminuir_sem_piso():
     # Sem label o stat não aparece no level-up: a regra antiga também o ignorava.
     stats = {'x': WeaponStats(value=10, increase=-1, range_val=2)}

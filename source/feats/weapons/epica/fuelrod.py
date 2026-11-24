@@ -19,10 +19,8 @@ class FuelRod(Arma):
         if inimigo_alvo and inimigo_alvo.alive():
             # Stats de upgrade -> config da explosão: impacto (dano) + veneno (dot por `duracao` ms)
             config_escalado = replace(
-                ARTILHARIA_PRESETS['plasma_grenade'],
+                ARTILHARIA_PRESETS['fuel_rod'],
                 dano=self.dano,
-                dot=True,
-                impacto_com_dot=True,
                 dano_por_segundo=self.dot,
                 duracao_dot=self.duracao,
             )

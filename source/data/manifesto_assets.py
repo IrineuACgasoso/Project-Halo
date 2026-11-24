@@ -47,6 +47,7 @@ MANIFESTO = {
         'light_bullet': 'lightrifle.png',
         'dizimator': 'dizimator.png',
         'spike': 'spike.png',
+        'fuel_rod': 'fuel_rod.png',
         'acid_breath': 'acid.gif',
         'red_laser': 'redlaser.png',
         'blue_laser': 'bluelaser.png',
@@ -66,6 +67,16 @@ MANIFESTO = {
         'marine': 'marine.png',
         'energy_sword': 'energy_sword.png',
         'noble': 'noble.png',
+        'light_rifle': 'light_rifle.png',
+        'brick': 'brick.png',
+        'sniper_rifle': 'sniper.png',
+        'sidekick_pistol': 'sidekick.png',
+        'machine_gun': 'machine_gun.png',
+        'mjolnir_punch': 'mjolnir_punch.png',
+        'dizimator': 'dizimator.png',
+        'fuel_rod': 'fuel_rod.png',
+        'warhog': 'warhog.png',
+        'pelican': 'pelican.png',
     }.items()},
 
     'items': {chave: Imagem(f'items/{arquivo}') for chave, arquivo in {
@@ -181,6 +192,7 @@ MANIFESTO = {
     'gameover': {str(n): Imagem(f'map/{n}/over{n}.png', TELA) for n in range(8)},
 
     'effects': {
+        'fuel_rod_area': quadros('effects/fuel_rod', numerados('area', 8), (300, 300)),
         'portal': Imagem('portal.png', (192, 288)),
     },
 }

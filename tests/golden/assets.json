@@ -24,6 +24,16 @@
   ]
  },
  "effects": {
+  "fuel_rod_area": [
+   "300x300 32b alpha 492e72cc",
+   "300x300 32b alpha 72bdf666",
+   "300x300 32b alpha 4c039aba",
+   "300x300 32b alpha 874da9b3",
+   "300x300 32b alpha 450a0518",
+   "300x300 32b alpha af5ac505",
+   "300x300 32b alpha 982a998e",
+   "300x300 32b alpha d3d19238"
+  ],
   "portal": "192x288 32b alpha a2344102"
  },
  "enemies": {
@@ -313,16 +323,26 @@
  "icons": {
   "arbiter": "96x96 32b alpha b56d3ee7",
   "assault_rifle": "87x87 32b alpha 34ac0cbd",
+  "brick": "64x64 32b alpha 85f53001",
   "carabin": "53x53 32b alpha 9fd47695",
   "cortana": "96x96 32b alpha 3e3c28ae",
+  "dizimator": "64x64 32b alpha bdf12265",
   "energy_sword": "64x64 32b alpha cc344a2e",
+  "fuel_rod": "64x64 32b alpha 3969f810",
   "grenade_launcher": "64x64 32b alpha 9e34c206",
+  "light_rifle": "48x48 32b alpha 6010f033",
+  "machine_gun": "64x64 32b alpha 6145ebd3",
   "marine": "64x64 32b alpha 8cfe3bd7",
+  "mjolnir_punch": "64x64 32b alpha ec6cb717",
   "mk2_shield": "96x96 32b alpha f7452575",
   "needler": "84x84 32b alpha 7d1fd81b",
   "noble": "64x64 32b alpha 85d15c14",
+  "pelican": "64x64 32b alpha ae26be46",
   "shotgun": "96x96 32b alpha 859c00eb",
-  "spartan_laser": "96x96 32b alpha c5a1a100"
+  "sidekick_pistol": "64x64 32b alpha cea7019e",
+  "sniper_rifle": "64x64 32b alpha be70455b",
+  "spartan_laser": "96x96 32b alpha c5a1a100",
+  "warhog": "64x64 32b alpha 6b57da30"
  },
  "items": {
   "big_shard": "96x96 32b alpha 96e35853",
@@ -370,6 +390,7 @@
   "carabin": "64x64 32b alpha 2b9bb8b1",
   "dizimator": "36x36 32b alpha d199f3d9",
   "energy_sword": "64x64 32b alpha cc344a2e",
+  "fuel_rod": "60x34 32b alpha 4faee363",
   "green_laser": "96x96 32b alpha 110a937e",
   "light_bullet": "96x96 32b alpha bf0fc111",
   "m50": "16x16 32b alpha 620a0d90",

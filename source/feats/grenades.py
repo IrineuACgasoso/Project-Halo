@@ -1,6 +1,8 @@
 import pygame
 from source.systems.gameclock import relogio
 import math
+import random
+from source.feats.particulas import emitir, imagem_pixel
 from source.feats.projetil import ProjetilUniversal
 from source.systems.entitymanager import entity_manager
 from source.feats.assets import ASSETS
@@ -100,9 +102,25 @@ class GrenadeBase(ProjetilUniversal):
                 return alvo
         return None
 
+    def _criar_aviso(self, posicao, **kwargs):
+        """A artilharia que explode por esta granada. A subclasse troca a classe (o visual da área)."""
+        from source.feats.skills.artilharia import ArtilhariaAviso
+        return self._montar_aviso(ArtilhariaAviso, posicao, **kwargs)
+
+    def _montar_aviso(self, classe, posicao, **kwargs):
+        return classe(
+            posicao=posicao,
+            grupos=(entity_manager.all_sprites,),
+            game=self.game,
+            dono=self.dono,
+            fonte=self.fonte,
+            preset=self.preset,
+            custom_config=self.custom_config,
+            **kwargs
+        )
+
     # Grudou de verdade: artilharia segue o alvo
     def _grudar(self, alvo):
-        from source.feats.skills.artilharia import ArtilhariaAviso
         self.grudado = True
         self.velocidade = 0
         self.alvo = alvo
@@ -110,17 +128,7 @@ class GrenadeBase(ProjetilUniversal):
         self.posicao = pygame.math.Vector2(alvo.posicao)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
 
-        self.aviso = ArtilhariaAviso(
-            posicao=self.posicao,
-            grupos=(entity_manager.all_sprites,),
-            game=self.game,
-            dono=self.dono,
-            fonte=self.fonte,
-            preset=self.preset,
-            custom_config=self.custom_config,
-            grude=True,
-            alvo=alvo
-        )
+        self.aviso = self._criar_aviso(self.posicao, grude=True, alvo=alvo)
 
     def _atualizar_grudado(self):
         self.posicao = pygame.math.Vector2(self.alvo.posicao)
@@ -131,18 +139,7 @@ class GrenadeBase(ProjetilUniversal):
 
     # Não tocou em ninguém: explode estático no ponto onde o arco terminou
     def _explodir_sem_grude(self):
-        from source.feats.skills.artilharia import ArtilhariaAviso
-
-        ArtilhariaAviso(
-            posicao=self.target_pos,
-            grupos=(entity_manager.all_sprites,),
-            game=self.game,
-            dono=self.dono,
-            fonte=self.fonte,
-            preset=self.preset,
-            custom_config=self.custom_config,
-            grude=False
-        )
+        self._criar_aviso(self.target_pos, grude=False)
         self.kill()
 
 class Spike(GrenadeBase):
@@ -280,17 +277,107 @@ class PlasmaGrenade(GrenadeBase):
 
 
 
-class FuelRodGrenade(PlasmaGrenade):
-    """Carga do Fuel Rod. Explode com impacto + nuvem venenosa (config com dot=True e
-    impacto_com_dot=True, montada pela arma). Se cair SEM grudar em ninguém, quica até
-    `quiques` vezes rumo ao inimigo vivo mais próximo do ponto de queda."""
+class FuelRodGrenade(GrenadeBase):
+    """Carga do Fuel Rod: gota achatada de plasma verde que acompanha a curva do voo e deixa rastro.
+    Explode com impacto + poça venenosa (`PocaDePlasma`; a config, com dot=True e impacto_com_dot=True,
+    é montada pela arma). Se cair SEM grudar em ninguém, quica até `quiques` vezes rumo ao inimigo
+    vivo mais próximo do ponto de queda."""
 
     RAIO_BUSCA_QUIQUE = 350
     REDUCAO_ALTURA_QUIQUE = 0.6
 
-    def __init__(self, *args, quiques=0, **kwargs):
-        super().__init__(*args, **kwargs)
+    LADO_COLISAO = 46            # px: o rect que gruda (a imagem é maior, por causa do halo)
+    PASSO_ANGULO = 10            # graus (cache das imagens)
+    ALPHAS_HALO = (110, 150, 190, 230)
+    MS_POR_HALO = 60
+    MS_ENTRE_RASTROS = 22
+    CORES_RASTRO = ((232, 255, 130), (150, 255, 60), (50, 225, 50), (14, 130, 44))
+
+    def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo,
+                 custom_config=None, preset='fuel_rod', quiques=0, fonte=None):
+        super().__init__(
+            posicao_inicial=posicao_inicial,
+            posicao_alvo=posicao_alvo,
+            grupos=grupos,
+            game=game,
+            dono=dono,
+            preset=preset,
+            sprite_key='fuel_rod',
+            tamanho=(60, 34),
+            colisao_alvo=inimigos_grupo,
+            max_height=180,
+            velocidade=700,
+            duracao=3000,
+            raio_contato=30,
+            rotacionar=False,   # a rotação é pela tangente do arco (_animar), não pela direção no chão
+            custom_config=custom_config,
+            fonte=fonte
+        )
         self.quiques = max(0, int(quiques))
+        self.angulo = 0
+        self._proximo_rastro = 0
+        self.rect = pygame.Rect(0, 0, self.LADO_COLISAO, self.LADO_COLISAO)
+        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+        self._animar()
+
+    def _criar_aviso(self, posicao, **kwargs):
+        from source.feats.skills.artilharia import PocaDePlasma
+        return self._montar_aviso(PocaDePlasma, posicao, **kwargs)
+
+    def update(self, delta_time):
+        super().update(delta_time)
+        if self.aviso is not None and self.aviso.explodiu:
+            self.kill()   # virou a poça
+        if not self.alive():
+            return
+        self._animar()
+        if not self.grudado:
+            self._deixar_rastro()
+
+    def _tangente(self):
+        """Direção do voo na tela: a do chão mais a subida ou descida do arco."""
+        if self.total_dist <= 0:
+            return self.direcao
+        progresso = min(1.0, self.start_pos.distance_to(self.posicao) / self.total_dist)
+        subida = math.cos(progresso * math.pi) * math.pi * self.max_height / self.total_dist
+        return self.direcao - pygame.math.Vector2(0, subida)
+
+    def _animar(self):
+        if not self.grudado:   # grudada, fica no ângulo em que bateu
+            t = self._tangente()
+            graus = math.degrees(math.atan2(-t.y, t.x))
+            self.angulo = round(graus / self.PASSO_ANGULO) * self.PASSO_ANGULO % 360
+        ida_e_volta = 2 * len(self.ALPHAS_HALO) - 2
+        nivel = int((relogio.agora() - self.spawn_time) // self.MS_POR_HALO) % ida_e_volta
+        self.image = self._composta(self.angulo, self.ALPHAS_HALO[min(nivel, ida_e_volta - nivel)])
+
+    def _composta(self, angulo, alpha_halo):
+        """Halo quente + gota girada, composta uma vez por ângulo e nível do halo (GLOBAL_CACHE)."""
+        chave = f'fuel_rod_composta_{angulo}_{alpha_halo}'
+        composta = ProjetilUniversal.GLOBAL_CACHE.get(chave)
+        if composta is None:
+            w, h = self.tamanho
+            base = pygame.Surface((w + 32, h + 32), pygame.SRCALPHA)
+            area = base.get_rect()
+            for folga, peso in ((0, 0.16), (10, 0.3), (20, 0.55)):   # de fora para dentro
+                pygame.draw.ellipse(base, (110, 255, 60, round(alpha_halo * peso)), area.inflate(-folga, -folga))
+            base.blit(self.image_base, self.image_base.get_rect(center=area.center))
+            composta = ProjetilUniversal.GLOBAL_CACHE[chave] = pygame.transform.rotate(base, angulo)
+        return composta
+
+    def _deixar_rastro(self):
+        agora = relogio.agora()
+        if agora < self._proximo_rastro:
+            return
+        self._proximo_rastro = agora + self.MS_ENTRE_RASTROS
+        tras = pygame.math.Vector2(-1, 0).rotate(-self.angulo)
+        lado = pygame.math.Vector2(-tras.y, tras.x) * random.uniform(-9, 9)
+        emitir(pygame.math.Vector2(self.rect.center) + tras * 22 + lado,
+               imagem_pixel(random.choice(self.CORES_RASTRO), random.choice((4, 6, 8))),
+               tras * random.uniform(30, 110), random.uniform(180, 380))
+
+    def draw(self, surface, offset):
+        surface.blit(self.image, self.image.get_rect(center=pygame.math.Vector2(self.rect.center) - offset))
 
     def _explodir_sem_grude(self):
         alvo = self._alvo_do_quique() if self.quiques > 0 else None

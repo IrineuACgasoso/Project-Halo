@@ -128,6 +128,20 @@ ARTILHARIA_PRESETS = {
         cor_explosao=(240, 255, 240, 240)
     ),
 
+    # Fuel Rod: plasma verde; a arma troca dano, dano_por_segundo e duracao_dot pelos stats dela
+    'fuel_rod': ArtilhariaConfig(
+        dano=25,
+        raio_explosao=150,
+        duracao=1500,
+        cor_borda=(150, 255, 60, 210),
+        cor_preenchimento=(70, 235, 50, 70),
+        cor_explosao=(190, 255, 90, 230),
+        dot=True,
+        dano_por_segundo=3,
+        duracao_dot=4000,
+        impacto_com_dot=True
+    ),
+
     'jega_decoy_explosion': ArtilhariaConfig(
         dano=100,
         raio_explosao=250,                    # raio pequeno/médio, é uma nuvem localizada

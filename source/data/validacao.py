@@ -77,6 +77,10 @@ def validar_armas(armas=None, companheiros=None, veiculos=None, registro=None, n
                 elif meta.increase and meta.increase < 0 and meta.label and meta.min_val is None:
                     # não há teto de nível: sem piso, um cooldown chega a 0 ou fica negativo
                     erros.append(f'{local} diminui a cada nível e não tem min_val')
+                elif meta.increase and meta.label and not meta.range_val:
+                    # upgrade de mentira: o card mostra o stat, mas nenhum nível aplica o ganho
+                    erros.append(f'{local} tem label e increase {meta.increase:+g}, mas o range_val '
+                                 f'{meta.range_val!r} nunca aplica o ganho')
 
     perfis = {**armas, **companheiros, **veiculos}
     for id_arma, info in registro.items():
