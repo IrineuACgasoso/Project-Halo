@@ -1,80 +1,45 @@
-import pygame
-from source.systems.gameclock import relogio
+from source.enemies.base.boss import BossBase
 from source.feats.items import Items
-from source.enemies.base.enemy_base import BaseEnemy
-from source.utils.superficies import mascara_de
 
+from .attacks import GuiltyAttacks
+from .barreira import GuiltyBarreira
+from .config import CFG, CLIPS, ESTADOS, FASES
+from .invocacoes import GuiltyInvocacoes
+from .movement import GuiltyMovement
 from .setup import GuiltySetup
 from .states import GuiltyAI
-from .attacks import GuiltyAttacks
-from source.systems.status import IMUNIDADES_CHEFE
+from .vfx import GuiltyVFX
 
-class GuiltySpark(BaseEnemy, GuiltySetup, GuiltyAI, GuiltyAttacks):
-    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
+
+class GuiltySpark(GuiltyMovement, GuiltyAI, GuiltyBarreira, GuiltyAttacks, GuiltyInvocacoes, GuiltyVFX,
+                  GuiltySetup, BossBase):
+    """Invocador atrás de uma barreira. Mixins ANTES de BossBase (MRO).
+
+    - Fase 1: ronda e chuva de sentinelas; derrotar 40 derruba a barreira e religa o spawner.
+    - Fase 2 (60% da vida): barreira de novo; só a luz visível dele mesmo o fere (5% por acerto).
+    - Fase 3 (20%): sem barreira; teleporte + laser até morrer."""
+    FASES = FASES
+    COOLDOWNS = CFG.cooldown
+    COOLDOWN_INICIAL = CFG.cooldown_inicial
+    ESTADOS = ESTADOS
+    ANTISTUCK = CFG.antistuck
+    CLIPS = CLIPS
+    CLIP_INICIAL = 'azul'
+
     def __init__(self, posicao, game, grupos=None):
-        super().__init__(posicao, vida_base=2000, dano_base=80, velocidade_base=100, 
-                        game=game, sprite_key='guilty', flip_sprite=True)
-                         
+        super().__init__(posicao, vida_base=CFG.vida, dano_base=CFG.dano_contato, velocidade_base=CFG.velocidade,
+                         game=game, sprite_key='guilty', flip_sprite=True)   # a arte olha para a esquerda
         self.titulo = "343 GUILTY SPARK, Monitor da Instalação 04"
-        self.is_boss = True
-
-        self.setup_animation(estado_inicial='left', velocidade_animacao=300)
-        self.mask = mascara_de(self.image)
-        
         self.inicializar_habilidades()
-
-    def ajustar_dano_recebido(self, valor, dano):
-        self.sentinelas_majors = [s for s in self.sentinelas_majors if s.alive()]
-
-        # INTERCEPTAÇÃO: DEFESA DAS SENTINELAS MAJORS (Fase 2)
-        if self.estado_fase == 'RAGE_F2' and len(self.sentinelas_majors) > 0:
-            valor *= 0.40
-
-        # Na transição (terminais ativos) ou imune, ignora completamente o dano
-        if self.estado_fase == 'TRANSICAO' or self.imune:
-            return None
-        return valor
-
-    def update(self, delta_time, paredes=None):
-        agora = relogio.agora()
-
-        self.executar_estados(agora, delta_time)
-
-        if self.estado_habilidade != 'manutencao':
-            direcao_x = self.jogador.posicao.x - self.posicao.x 
-            self.set_sprite_direction(direcao_x)
-        
-        super().update(delta_time, paredes)
-        self.animar()
-
-    def animar(self):
-        if self.estado_habilidade in ['laser_charge', 'laser_firing']:
-            self.image = self.sprites[self.estado_animacao][1] 
-        elif self.estado_habilidade == 'sentinel':
-            self.image = self.sprites[self.estado_animacao][2] 
-        elif self.estado_habilidade == 'manutencao':
-            self.image = self.sprites[self.estado_animacao][0] 
-        else:
-            self.image = self.sprites[self.estado_animacao][0]
-
-        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
-        self.mask = mascara_de(self.image)
-
-    def draw_laser(self, superficie, deslocamento):
-        """Atualiza a origem com offset dinâmico antes de renderizar"""
-        if self.estado_habilidade == 'laser_firing':
-            # AJUSTE DO OLHO: Desloca o início do laser dependendo para onde ele olha
-            offset_x = 50 if self.estado_animacao == 'right' else -50
-            self.beam_principal.posicao = self.posicao + pygame.math.Vector2(offset_x, -5)
-            
-            self.beam_principal.draw(superficie, deslocamento)
+        self.iniciar_vfx()
+        self.erguer_barreira(efeito=False)
 
     def morrer(self, grupos=None):
         Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            big_shard=((4, 5, 6, 8), (50, 35, 14, 1), 100), 
-            life_orb=(1, 100, 100),              
-            upgrade=((1, 2, 3, 4), (99, 0.9, 0.09, 0.01), 100)       
+            self.posicao,
+            grupos,
+            big_shard=((4, 5, 6, 8), (50, 35, 14, 1), 100),
+            life_orb=(1, 100, 100),
+            upgrade=((1, 2, 3, 4), (99, 0.9, 0.09, 0.01), 100)
         )
         self.kill()

@@ -94,12 +94,8 @@ MANIFESTO = {
             Imagem(f'{COV}/hunter/hunter2.png', (270, 270)),
         ],
         'zealot': quadros(f'{COV}/zealot', numerados('zealot', 4), (200, 200)),
-        'guilty': {
-            'normal': quadros(f'{BOSS}/guilty', ['guilty.png', 'guilty2.png', 'guilty3.png'], (100, 100)),
-            'damaged': quadros(f'{BOSS}/guilty', numerados('guilty', 6, inicio=4), (100, 100)),
-            'teleport': quadros(f'{BOSS}/guilty/teleport', numerados('tp', 11), (128, 160)),
-        },
-        'terminal': [Imagem(f'{BOSS}/guilty/terminal.png', (96, 130))],
+        # azul, vermelha (atacando), azul destruída, vermelha destruída: ver CLIPS em guilty/config.py
+        'guilty': quadros(f'{BOSS}/guilty', ['guilty.png', 'guilty2.png', 'guilty7.png', 'guilty4.png'], (100, 100)),
         'scarab': {
             'default': quadros(f'{COV}/scarab', numerados('scarab', 4), (1024, 1024)),
             'damaged': quadros(f'{COV}/scarab/damaged', numerados('damaged', 4), (1024, 1024)),

@@ -25,34 +25,6 @@ class PurgeConfig:
 PURGE_PRESETS = {
     'padrao': PurgeConfig(),
 
-    'guilty_hell_x': PurgeConfig(
-        modo='eixo_x', 
-        qtd_eixos=6, 
-        artilharias_por_eixo=35, 
-        espacamento=400, 
-        raio_artilharia=150, 
-        dano=100, 
-        intervalo=450, 
-        duracao_aviso=600, 
-        direcao_inicio='west',
-        cor_preenchimento=(255, 0, 0, 80),
-        cor_explosao=(200, 200, 255, 120)
-    ),
-    
-    'guilty_hell_y': PurgeConfig(
-        modo='eixo_y', 
-        qtd_eixos=4, 
-        artilharias_por_eixo=25, 
-        espacamento=500, 
-        raio_artilharia=150, 
-        dano=100, 
-        intervalo=450, 
-        duracao_aviso=600, 
-        direcao_inicio='north',
-        cor_preenchimento=(255, 0, 0, 80),
-        cor_explosao=(200, 200, 255, 120)
-    ),
-
     # Fase 1: (Para Cima, Baixo-Direita, Baixo-Esquerda)
     'tartarus_smash_1': PurgeConfig(
         modo='eixos_inimigo',

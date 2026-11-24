@@ -196,19 +196,16 @@ def _vida_tirada(alvo, dano):
     return antes - alvo.vida
 
 
-@pytest.mark.parametrize('estado_fase, imune, com_sentinelas, esperado', [
-    ('FASE1', False, False, 100),
-    ('RAGE_F2', False, True, 40),      # sentinelas majors seguram 60%
-    ('RAGE_F2', False, False, 100),
-    ('TRANSICAO', False, False, 0),    # terminais ativos: ignora
-    ('FASE1', True, False, 0),         # imune: ignora
+@pytest.mark.parametrize('barreira, do_proprio, esperado', [
+    (False, False, 100),
+    (True, False, 0),      # barreira de pé: ignora
+    (True, True, 100),     # menos o golpe dele mesmo (a luz visível)
 ])
-def test_guilty(novo_jogo, estado_fase, imune, com_sentinelas, esperado):
+def test_guilty(novo_jogo, barreira, do_proprio, esperado):
     guilty = _boss(novo_jogo, 'guilty')
-    guilty.estado_fase, guilty.imune = estado_fase, imune
-    guilty.escudo_atual = 0
-    guilty.sentinelas_majors = [_grunt(novo_jogo)] if com_sentinelas else []
-    assert _vida_tirada(guilty, Dano(100, PROJETIL)) == pytest.approx(esperado)
+    if not barreira:
+        guilty.derrubar_barreira()
+    assert _vida_tirada(guilty, Dano(100, AREA, guilty if do_proprio else None)) == pytest.approx(esperado)
 
 
 def test_scarab_defensivo_so_no_escudo_e_pernas_x5(novo_jogo):

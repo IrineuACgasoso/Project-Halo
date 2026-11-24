@@ -218,17 +218,16 @@ class Game:
             self.stage_manager.iniciar_transicao()
 
     def _atualizar_spawner(self, delta_time):
-        """Timer e spawner só rodam sem boss, portal nem transição."""
+        """Timer e spawner só rodam sem boss, portal nem transição. Um boss pode religar os inimigos
+        comuns (`permitir_spawns_normais`); o timer, que agenda os bosses, continua parado."""
         s = self.sessao
-        jogo_livre = (
-            not self.stage_manager.transicao_ativa
-            and not s.boss_atual
-            and not s.spawnar_portal_em_breve
-            and not s.portal_atual
-        )
-        if jogo_livre:
+        if self.stage_manager.transicao_ativa or s.spawnar_portal_em_breve or s.portal_atual:
+            return
+        if not s.boss_atual:
             s.timer_jogo += delta_time
-            self.spawner.update(delta_time)
+        elif not getattr(s.boss_atual, 'permitir_spawns_normais', False):
+            return
+        self.spawner.update(delta_time)
 
     def _atualizar_status(self, delta_time):
         """Buffs e debuffs (systems/status): antes das entidades, para o atordoamento já valer neste passo."""

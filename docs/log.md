@@ -2,6 +2,20 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-24 | Guilty Spark reformulado (muda o jogo, pedido do usuário)
+- Sobre a `BossBase` (adianta o Guilty da F5): `config.py` (todos os números), `barreira`, `movement` (ronda e teleporte), `states` (fases e decisão), `attacks` (feixes), `invocacoes`, `armadilha`, `luz_visivel`, `vfx`. Vida 2000 (igual).
+- **Barreira:** `EnergyAura` impenetrável + `is_invulneravel` + `ajustar_dano_recebido` (nada entra, nem explosão). `EnergyAura` ganhou `bloqueia_tiros` (tiros morrem na borda; lâmina, tijolo e granada passam) e `empurrao_max` (espremer contra uma parede jogava o jogador para o outro lado). Com a barreira ele **não é alvejável**: as armas miram nas sentinelas (decisão minha, fácil de reverter em `GuiltyBarreira.alvejavel`).
+- **Fase 1:** ronda por caminhos que passam a até 170 px do jogador; chuva de sentinelas (até 900 px do jogador, teto de 18 vivas), armadilha (esferas não são inimigos) e feixe de proximidade (≤ 215 px, 250 de dano em 500 ms). 40 sentinelas derrotadas (qualquer uma, contador no HUD) derrubam a barreira e religam o spawner.
+- **Fase 2 (60%):** pesos passear 6 × luz 2,5 × laser 1,5; super sentinelas em triângulo (430 px), infestação (5 floods, lentidão de 50% por 3 s) e luz visível (4 em cadeia). Cada acerto da luz nele = 5% da vida máxima; **aos 20% de vida** (8 acertos) a barreira cai e começa a fase 3 (foi a leitura do "limite de 20%").
+- **Fase 3:** teleporte → 500 ms parado → laser aprimorado, até morrer. Um golpe nunca pula fase (piso de vida no limiar).
+- **Sprites:** azul; vermelha só nos feixes; destruídas na fase 3. A azul destruída não existia: `guilty7.png` foi gerada da `guilty4.png` (vermelhos → azul). Terminal, `guilty_hell_*` do PurgeGrid e os quadros antigos do teleporte saíram do código e do manifesto (os PNGs continuam na pasta). `assets.json` regravado por isso.
+- **Materialização:** `materializar()` (preset `materializacao`) para quem nasce invisível. Achado e corrigido: o alpha de uma Sentinel valia para todas (quadro do cache compartilhado).
+- **Spawner com boss vivo (correção):** o `Game` nunca lia `permitir_spawns_normais` (só o `Spawner`, que nem era chamado). Agora lê; a recarga do Harbinger passa a religar o spawner como o código dela pretendia (fase 13, sem mapa). O timer continua parado e nunca nasce um 2º boss.
+- Testes: `test_guilty.py` (104) no lugar do caso antigo de `test_dano` (mudança de especificação); 16 mutações conferidas. Golden da fase 0 e do Arbiter e catraca inalterados.
+- Desempenho (A/B alternado com o HEAD, 2 rodadas): boss_guilty 1,61/1,71 × 3,58/3,15 ms/frame (p95 2,2/2,7 × 6,1/5,1: até 18 sentinelas, feixes e distorção); horda 5,65/7,48 × 5,50/5,84.
+- **Balanceamento local do usuário, fora deste commit** (`zealot/config.py`, `dash/config.py`): derruba 3 testes (vida mínima do Zealot em `test_boss_tem_vida_de_boss` e 2 em `test_zealot`, porque o dash do Zealot já não alcança o alvo: 550 px/s × 700 ms = 385 px contra gatilho de 520). Falta decidir: ajustar os testes ou os números.
+- **Não validado:** a luta na tela real (sensação, dificuldade de 40 sentinelas e de acertar a luz). Conferi por capturas headless e bots simples.
+
 ## 2026-11-23 | Zealot reformulado (muda o jogo, pedido do usuário)
 - Sobre a `BossBase` (adianta o Zealot da F5): `config.py` (todos os números), `setup`, `states` (decisão), `movement` (dash, perseguição, fuga), `attacks` (rotinas), `vfx`. Escudo 500 e vida 250 (antes: 750 de vida, sem escudo), escalados juntos pelo nível do jogador. Vida mínima própria (200) em `test_boss_tem_vida_de_boss`.
 - **Com escudo** (pesos por distância): perto (≤ 250 px) só o combo; média (≤ 600) combo 7 × furtivo 2; longe, furtivo 8 × só perseguir 2 (nunca o combo).

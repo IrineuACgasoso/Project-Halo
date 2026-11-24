@@ -82,6 +82,11 @@ class EnemyCombat:
     def iniciar_invisibilidade(self, preset):
         self.invisibilidade = Invisibilidade(self, preset)
 
+    def materializar(self, preset='materializacao'):
+        """Logo depois de criado: nasce invisível (com a distorção) e já começa a aparecer."""
+        self._aplicar_alpha(0)
+        self.iniciar_invisibilidade(preset)
+
     def atualizar_invisibilidade(self, delta_time):
         """Um passo da camuflagem ativa (sem ela, não faz nada)."""
         if self.invisibilidade is not None and self.invisibilidade.atualizar(delta_time):

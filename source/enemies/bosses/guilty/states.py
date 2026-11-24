@@ -1,100 +1,68 @@
-import pygame
-from source.feats.auras import EnergyAura
+"""Fases e decisão do Guilty. Ele passeia o tempo todo; só os feixes o fazem parar.
+
+As invocações (chuva, armadilha, super sentinelas, flood) correm por fora, cada uma no seu tempo
+(`invocacoes.py`). O ciclo (rotinas, cooldowns, anti-stuck) é da BossBase."""
+import random
+
+from .config import CFG
+
 
 class GuiltyAI:
-    def verificar_fases(self, agora):
-        # 1. Gatilho para iniciar a Transição (Apenas uma vez)
-        if self.estado_fase == 'FASE1' and self.vida <= self.vida_base * 0.3:
-            self.iniciar_transicao()
+    def preparar_frame(self, delta_time):
+        # Padrão de todo frame: azul, parado. A ronda e as rotinas sobrescrevem.
+        self._parar()
+        self._cor('azul')
+        self.atualizar_invocacoes()
 
-        # 2. Monitoramento durante a Transição
-        if self.estado_fase == 'TRANSICAO':
-            # Limpa terminais que já foram destruídos do array
-            self.terminais = [t for t in self.terminais if t.alive()]
-            
-            # Gatilho do RAGE: Se todos morreram, desperta a Fase 2!
-            if len(self.terminais) == 0 and not self.enrage:
-                self.rage(agora)
+    def _cor(self, cor):
+        self.animador.tocar(f'{cor}_destruido' if self.fase == 3 else cor)
 
-    def iniciar_transicao(self):
-        """Prepara a arena e trava o boss no centro"""
-        self.estado_fase = 'TRANSICAO'
-        self.imune = True
-        self.estado_habilidade = 'manutencao'
-        self.velocidade = 0
-        
-        EnergyAura(
-            owner=self, 
-            raio=160, 
-            dano_contato=15, 
-            game=self.game, 
-            cor_base=(0, 150, 255),  
-            impenetravel=True        # Mantém a parede física (empurra o jogador)
-        )
-        
-        from .terminal import ForerunnerTerminal
-        from source.systems.entitymanager import entity_manager
-        
-        posicoes_terminais = [
-            self.posicao + pygame.math.Vector2(-250, -200),
-            self.posicao + pygame.math.Vector2(250, -200),
-            self.posicao + pygame.math.Vector2(0, 250)
-        ]
+    # ------------------------------------------------------------ fases
+    def checar_fase(self):
+        anterior = self.fase
+        super().checar_fase()
+        if self.fase != anterior:
+            self.entrar_na_fase()
 
-        self.terminais = []
-        for pos in posicoes_terminais:
-            novo_terminal = ForerunnerTerminal(pos, self.game, self)
-            entity_manager.all_sprites.add(novo_terminal)
-            entity_manager.inimigos_grupo.add(novo_terminal)
-            self.terminais.append(novo_terminal)
+    def entrar_na_fase(self):
+        """Corta o que estiver fazendo. Fase 2: barreira de volta. Fase 3: barreira no chão."""
+        self.transicao_pendente = False
+        self.interromper_rotina()
+        self.encerrar_invocacoes()
+        self.permitir_spawns_normais = False
+        self.wait = 0
+        self.ronda_ate = 0
+        # Os tempos de espera recomeçam (só os da fase nova são lidos)
+        self.cd = {nome: self._agora + ms for nome, ms in CFG.cooldown_inicial.items()}
+        self.proxima_invocacao = {nome: self._agora + ms for nome, ms in CFG.intervalo_inicial.items()}
+        if self.fase == 2:
+            self.erguer_barreira()
+        else:
+            self.derrubar_barreira()
 
-    def executar_estados(self, agora, delta_time):
-        self.verificar_fases(agora)
+    # ------------------------------------------------------------ decisão
+    def movimento_ocioso(self, agora):
+        if self.fase < 3:
+            self.rondar(agora, self._dt)
 
-        # Na transição, ele não ataca, apenas assiste os terminais
-        if self.estado_fase == 'TRANSICAO':
-            return
+    def escolher_habilidade(self, agora):
+        if self.fase == 1:
+            return self._escolher_fase1()
+        if self.fase == 2:
+            return self._escolher_fase2()
+        return 'teleporte'
 
-        # === MÁQUINA DE ESTADOS DO COMBATE ===
-        if self.estado_habilidade == 'idle':
-            self.velocidade = self.velocidade_anterior
+    def _escolher_fase1(self):
+        perto = self.contexto.dist_sq <= CFG.proximidade_dist ** 2
+        return 'proximidade' if perto and self.pronto('proximidade') else None
 
-            # TRAVA GLOBAL: Se o boss ainda está no período de espera, ele apenas flutua e não decide nada novo
-            if agora < self.wait:
-                return
-
-            distancia_sq = self.posicao.distance_squared_to(self.jogador.posicao)
-            
-            # 1. Habilidade Suprema: Purga (Bullet Hell - Fase 2)
-            if self.estado_fase == 'RAGE_F2':
-                purga_rodando = self.ataque_purga is not None and self.ataque_purga.alive()
-                
-                if not purga_rodando and (agora - getattr(self, 'ultimo_purge', 0) >= self.purge_cooldown):
-                    self.purge(agora)
-                    # Dá 2 segundos de respiro pro jogador lidar SÓ com a parede antes do boss atirar
-                    self.wait = agora + 2000 
-                    return # Impede que a checagem desça e dispare um laser no mesmo frame!
-
-            # 2. Prioridade de Ataques Normais
-            if agora - getattr(self, 'ultimo_laser', 0) >= self.cooldown_laser:
-                self.estado_habilidade = 'laser_charge'
-                self.tempo_inicio_laser = agora
-                self.velocidade = 0 
-                # (O reset do self.wait deve acontecer lá no arquivo onde o ataque finaliza)
-                
-            elif agora - getattr(self, 'ultima_invocacao', 0) >= self.cooldown_invocacao:
-                self.estado_habilidade = 'sentinel'
-                self.start_sentinel = agora
-                self.velocidade = 0
-                
-            elif distancia_sq > 810000 and (agora - getattr(self, 'ultimo_tp', 0) >= getattr(self, 'cooldown_tp', 0)):
-                self.estado_habilidade = 'teleporte'
-                self.velocidade = 0
-
-        # === RESOLUÇÃO DO ESTADO ATUAL ===
-        if self.estado_habilidade in ['laser_charge', 'laser_firing']:
-            self.logica_laser_rastreavel(agora, delta_time)
-        elif self.estado_habilidade == 'sentinel':
-            self.invocar_sentinelas(de_elite=(self.estado_fase == 'RAGE_F2'))
-        elif self.estado_habilidade == 'teleporte':
-            self.teleporte()
+    def _escolher_fase2(self):
+        prontos = {'passear': True, 'laser': self.pronto('laser'), 'luz': self.invocacao_pronta('luz')}
+        pesos = {nome: peso for nome, peso in CFG.pesos_fase2.items() if prontos[nome]}
+        escolha = random.choices(list(pesos), weights=list(pesos.values()))[0]
+        if escolha == 'laser':
+            return 'laser'
+        if escolha == 'luz':
+            self.invocar_luz()      # sem parar a ronda: é contra ele mesmo que ela serve
+        self.wait = random.randint(*CFG.passear_ms)
+        return None

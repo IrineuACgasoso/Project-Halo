@@ -31,4 +31,6 @@ INVISIBILIDADE_PRESETS = {
     # Sem fim: a fuga dele decide quando reaparecer (escudo cheio ou jogador perto)
     'zealot_defensiva': InvisibilidadeConfig(fade_out_ms=350, duracao_ms=None, fade_in_ms=300),
     'zealot_reposicao': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=500, fade_in_ms=500),
+    # Quem nasce já invisível (`materializar`): sem fade out, um instante oculto e aparece
+    'materializacao': InvisibilidadeConfig(fade_out_ms=1, duracao_ms=250, fade_in_ms=450),
 }

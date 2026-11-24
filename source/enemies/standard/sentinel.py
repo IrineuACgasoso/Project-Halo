@@ -20,6 +20,7 @@ class Sentinel(BaseEnemy):
         )
 
         self.indice_animacao = 0
+        self._quadros_camuflados = {}   # quadro do cache -> cópia desta instância (materializando)
 
         self.estado_ia = 'chase'
         
@@ -40,11 +41,21 @@ class Sentinel(BaseEnemy):
         self.laser = ContinuousBeam(self, color=(255, 255, 180), largura_base=3, dano_por_segundo=10, suavizacao=0.05)
         self.velocidade_mira = 0.05
 
+    @property
+    def quadro_original(self):
+        return self.sprites[self.estado_animacao][self.indice_animacao]
+
     def animar(self):
-        frame = self.sprites[self.estado_animacao][self.indice_animacao]
-        self.set_image(frame, origem=frame)   # máscara do cache, não recalculada a cada frame
+        origem = frame = self.quadro_original
+        if self.alpha_atual < 255:
+            # O quadro do cache é de todas as sentinelas: o alpha vai numa cópia desta
+            frame = self._quadros_camuflados.get(origem)
+            if frame is None:
+                frame = self._quadros_camuflados[origem] = origem.copy()
+        self.set_image(frame, origem=origem)   # máscara do cache, não recalculada a cada frame
 
     def update(self, delta_time, paredes=None):
+        self.atualizar_invisibilidade(delta_time)
         agora = relogio.agora()
         vetor_player = self.jogador.posicao - self.posicao
         distancia = vetor_player.length()
@@ -127,6 +138,7 @@ class SentinelMajor(Sentinel):
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
+        self.aura.image.set_alpha(self.alpha_atual)   # a aura aparece junto com ela
 
         # 2. Verifica se o escudo quebrou
         if hasattr(self, 'escudo_atual') and self.escudo_atual <= 0:

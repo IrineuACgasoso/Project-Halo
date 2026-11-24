@@ -68,7 +68,7 @@ Project-Halo/
     │   │                    # animador.py: Clip + Animador (clips, hit frames, quadros copiados no spawn: F2)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
     │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), scarab, knight
-    │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
+    │   └── bosses/          # guilty (BossBase; config/barreira/invocacoes/armadilha/luz_visivel), arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
     │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto (chamado pelo main.py; import limpo, D3); MapasSobDemanda (D2)
@@ -101,7 +101,10 @@ Project-Halo/
 | Animação de um boss da `BossBase` (ritmo, quadros de cada estado, hit frame) | `CLIPS`/`CLIP_INICIAL` no `config.py` do boss (`Clip` em `enemies/base/boss/animador.py`); a rotina pede com `self.animador.tocar(nome)` ou espera o golpe com `yield from self._tocar(clip, ate_evento)` |
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
 | Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |
+| Balancear o Guilty Spark (barreira, ronda, pesos, intervalos das invocações, feixes, teleporte) | `enemies/bosses/guilty/config.py` (artilharias: presets `guilty_*` em `feats/skills/artilharia/config.py`) |
 | Balancear o Zealot (escudo, pesos, pausas do combo, fuga, regeneração) | `enemies/minibosses/zealot/config.py` (danos e áreas: presets `zealot_*` das skills) |
+| Inimigo que nasce invisível e aparece | `self.materializar()` logo depois de criar (`enemies/base/enemy_combat.py`) |
+| Boss que religa os inimigos comuns | `permitir_spawns_normais = True` nele (lido por `Game._atualizar_spawner` e `Spawner.update`) |
 | Camuflagem de um inimigo (tempos, distorção) | `feats/skills/invisibilidade/` (preset em `config.py`; `self.iniciar_invisibilidade(preset)` + `atualizar_invisibilidade(dt)` por passo; visual em `distorcao.py`) |
 | Quem pode ser mirado ou atingido | `BaseEnemy.alvejavel` / `invulneravel` (`enemies/base/enemy_base.py`) |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |

@@ -63,10 +63,11 @@ class Spawner(SpawnerUtils):
     def update(self, delta_time):
         # === TRAVA DE SEGURANÇA ===
         # Se existir um boss ativo no jogo com a flag 'is_boss', o spawner congela completamente.
-        # Exceção: a própria boss pode liberar spawns comuns (ex.: Harbinger em 'recharging'),
-        # sinalizando isso via atributo `permitir_spawns_normais`.
-        if self.game.sessao.boss_atual and self.game.sessao.boss_atual.alive() \
-                and not getattr(self.game.sessao.boss_atual, 'permitir_spawns_normais', False):
+        # Exceção: o próprio boss pode liberar spawns comuns (ex.: Guilty sem escudo na fase 1,
+        # Harbinger em 'recharging'), sinalizando isso via atributo `permitir_spawns_normais`.
+        boss = self.game.sessao.boss_atual
+        boss_vivo = boss is not None and boss.alive()
+        if boss_vivo and not getattr(boss, 'permitir_spawns_normais', False):
             return
 
         self.tempo_proximo_spawn += delta_time
@@ -86,8 +87,8 @@ class Spawner(SpawnerUtils):
         # 2. Escala de dificuldade baseada no tempo de horda acumulado
         self.intervalo_spawn_atual = max(0.5, 2.5 - (tempo_atual * 0.002))
 
-        # 3. Bosses Relativos à Fase
-        if fase in PHASE_BOSSES:
+        # 3. Bosses Relativos à Fase (nunca um segundo boss por cima do primeiro)
+        if fase in PHASE_BOSSES and not boss_vivo:
             for boss in PHASE_BOSSES[fase]:
                 tempo_alvo = CRONOGRAMA_BOSSES[boss]
 

@@ -147,5 +147,48 @@ ARTILHARIA_PRESETS = {
         cor_borda=(30, 100, 255, 200),
         cor_preenchimento=(30, 120, 255, 70),
         cor_explosao=(150, 200, 255, 240)
-    )
+    ),
+
+    # ── Guilty Spark ──
+    'guilty_sentinela': ArtilhariaConfig(       # cada uma vira uma sentinela
+        dano=40,
+        raio_explosao=80,
+        duracao=1100,
+        cor_borda=(255, 225, 140, 210),         # prata e âmbar da sentinela
+        cor_preenchimento=(225, 225, 205, 70),
+        cor_explosao=(255, 250, 215, 230)
+    ),
+    'guilty_super_sentinela': ArtilhariaConfig(
+        dano=110,
+        raio_explosao=160,
+        duracao=1400,
+        cor_borda=(255, 190, 0, 230),           # dourado
+        cor_preenchimento=(255, 170, 20, 80),
+        cor_explosao=(255, 225, 110, 245)
+    ),
+    'guilty_flood': ArtilhariaConfig(
+        dano=40,
+        raio_explosao=240,
+        duracao=1500,
+        cor_borda=(95, 85, 35, 230),            # marrom esverdeado
+        cor_preenchimento=(84, 82, 34, 110),
+        cor_explosao=(120, 115, 50, 230)
+    ),
+    # Luz visível: 4 no mesmo centro, cada uma maior e mais forte
+    'guilty_luz_1': ArtilhariaConfig(
+        dano=50, raio_explosao=100, duracao=700,
+        cor_borda=(0, 220, 255, 230), cor_preenchimento=(0, 170, 255, 80), cor_explosao=(190, 245, 255, 170)
+    ),
+    'guilty_luz_2': ArtilhariaConfig(
+        dano=80, raio_explosao=170, duracao=650,
+        cor_borda=(0, 200, 255, 230), cor_preenchimento=(0, 150, 255, 80), cor_explosao=(180, 240, 255, 150)
+    ),
+    'guilty_luz_3': ArtilhariaConfig(
+        dano=110, raio_explosao=250, duracao=650,
+        cor_borda=(0, 180, 255, 235), cor_preenchimento=(0, 130, 255, 85), cor_explosao=(170, 235, 255, 130)
+    ),
+    'guilty_luz_4': ArtilhariaConfig(
+        dano=150, raio_explosao=340, duracao=650,
+        cor_borda=(0, 160, 255, 240), cor_preenchimento=(0, 110, 255, 90), cor_explosao=(160, 230, 255, 115)
+    ),
 }

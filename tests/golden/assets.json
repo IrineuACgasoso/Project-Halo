@@ -118,31 +118,12 @@
   "guardian": [
    "1500x3000 32b alpha 5cb0dddd"
   ],
-  "guilty": {
-   "damaged": [
-    "100x100 32b alpha 43c26421",
-    "100x100 32b alpha 91a50ded",
-    "100x100 32b alpha 9db9931c"
-   ],
-   "normal": [
-    "100x100 32b alpha a5f41c20",
-    "100x100 32b alpha 9fdd9fed",
-    "100x100 32b alpha 7c19200a"
-   ],
-   "teleport": [
-    "128x160 32b alpha 1d42efdd",
-    "128x160 32b alpha a1476900",
-    "128x160 32b alpha cdf29daa",
-    "128x160 32b alpha 7c3a4e5b",
-    "128x160 32b alpha 7de483e3",
-    "128x160 32b alpha 5c950bce",
-    "128x160 32b alpha 58b020cc",
-    "128x160 32b alpha dc6a4b20",
-    "128x160 32b alpha 902503a3",
-    "128x160 32b alpha b2831b72",
-    "128x160 32b alpha c3c7d009"
-   ]
-  },
+  "guilty": [
+   "100x100 32b alpha a5f41c20",
+   "100x100 32b alpha 9fdd9fed",
+   "100x100 32b alpha 7368d1dc",
+   "100x100 32b alpha 43c26421"
+  ],
   "harbinger": {
    "default": [
     "200x300 32b alpha b6247003",
@@ -285,9 +266,6 @@
    "192x288 32b alpha 96ab9a6f",
    "192x288 32b alpha c46b341f",
    "192x288 32b alpha 48533b70"
-  ],
-  "terminal": [
-   "96x130 32b alpha a15a415f"
   ],
   "warden": {
    "clone": [

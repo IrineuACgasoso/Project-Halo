@@ -1,17 +1,25 @@
 import pygame
+from source.feats.particulas import emitir_leque
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.systems.dano import Dano, AURA
 
 class EnergyAura(pygame.sprite.Sprite):
-    def __init__(self, owner, raio, dano_contato, game, cor_base=(0, 150, 255), impenetravel=True):
+    def __init__(self, owner, raio, dano_contato, game, cor_base=(0, 150, 255), impenetravel=True,
+                 bloqueia_tiros=False, empurrao_max=None):
+        """`bloqueia_tiros`: projéteis do jogador morrem na borda (menos os de perfuração infinita e os
+        sem velocidade própria: granada, tijolo e lâmina atravessam).
+        `empurrao_max`: px por passo. Sem limite, espremer o jogador contra uma parede o joga para o
+        outro lado dela assim que a sobreposição passa do raio de colisão dele."""
         super().__init__(entity_manager.all_sprites)
         self.owner = owner
         self.game = game
         self.raio = raio
         self.cor_base = cor_base
         self.impenetravel = impenetravel
-        
+        self.bloqueia_tiros = bloqueia_tiros
+        self.empurrao_max = empurrao_max
+
         self.dano_contato = dano_contato
         self.cooldown_dano = 400 
         self.ultimo_dano = 0
@@ -41,13 +49,11 @@ class EnergyAura(pygame.sprite.Sprite):
             self.kill()
             return
             
-        # Regra específica do Guilty Spark (se for ele e sair da transição, desliga)
-        if hasattr(self.owner, 'estado_fase') and self.owner.estado_fase != 'TRANSICAO':
-            self.kill()
-            return
-        
         self.rect.center = (round(self.owner.posicao.x), round(self.owner.posicao.y))
-        
+
+        if self.bloqueia_tiros:
+            self._parar_tiros()
+
         # Dono atordoado (sistema de status) não causa dano de contato
         if self.owner.status.atordoado:
             return
@@ -66,7 +72,11 @@ class EnergyAura(pygame.sprite.Sprite):
                 else:
                     direcao_empurrao = pygame.math.Vector2(1, 0)
                     
-                player.posicao = self.owner.posicao + direcao_empurrao * raio_colisao
+                empurrao = raio_colisao - distancia_atual
+                if self.empurrao_max is not None and empurrao > self.empurrao_max:
+                    player.posicao = player.posicao + direcao_empurrao * self.empurrao_max
+                else:
+                    player.posicao = self.owner.posicao + direcao_empurrao * raio_colisao
                 player.rect.center = (round(player.posicao.x), round(player.posicao.y))
                 
             # O TICK DE DANO ACONTECE DE QUALQUER FORMA
@@ -74,6 +84,16 @@ class EnergyAura(pygame.sprite.Sprite):
             if agora - self.ultimo_dano >= self.cooldown_dano:
                 self.ultimo_dano = agora
                 player.receber_dano(Dano(self.dano_contato, AURA, self.owner))
+
+    def _parar_tiros(self):
+        centro = self.owner.posicao
+        for tiro in entity_manager.projeteis_jogador_grupo:
+            if tiro.piercing == float('inf') or tiro.velocidade <= 0:
+                continue
+            if centro.distance_squared_to(tiro.posicao) <= self.raio * self.raio:
+                emitir_leque(tiro.posicao, tiro.posicao - centro, 3, (self.cor_base, (255, 255, 255)), (3, 4),
+                             abertura_graus=120, velocidade=(80, 200), duracao_ms=(150, 300))
+                tiro.kill()
 
 
 class PlayerAura(pygame.sprite.Sprite):

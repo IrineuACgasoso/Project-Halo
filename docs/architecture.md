@@ -39,7 +39,7 @@ stateDiagram-v2
 Cada passo é um método nomeado; `test_eventos.py::test_update_roda_os_passos_na_ordem` fixa a ordem.
 1. `relogio.avancar(dt)`: este é o **único** lugar onde o relógio de jogo avança.
 2. `_atualizar_portal`: o portal aparece 2000 ms depois que o boss morre. `_checar_boss_derrotado` → `boss_derrotado()`. `_checar_portal_tocado`: encostar nele chama `StageManager.iniciar_transicao()`.
-3. `_atualizar_spawner`: `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal.
+3. `_atualizar_spawner`: `sessao.timer_jogo` e `Spawner.update` só rodam quando não há boss, transição nem portal. Boss com `permitir_spawns_normais` religa só o spawner (inimigos comuns; o timer continua parado).
 4. `_atualizar_status`: conta o tempo dos buffs e debuffs e aplica a queimadura, só nas entidades com efeito ativo (`systems/status`). Vem antes das entidades para o atordoamento já valer neste passo.
 5. `_atualizar_entidades`: `player.comando = game.entrada.ler()` (um `ComandoJogador` por passo; a fonte é `Teclado`, `Roteiro` ou, na F4, o bot: `systems/entrada.py`), `Player.update(dt, paredes)`, depois cada arma `.update(dt)` (nenhuma, se o jogador estiver atordoado), depois os sprites (os inimigos recebem `paredes`; inimigo atordoado não é atualizado). `paredes` é a `GradeParedes` do mapa: cada entidade consulta a célula **onde ela está** (`sair_das_paredes`), sem alocar.
 6. `CollisionManager.update`, nesta ordem:

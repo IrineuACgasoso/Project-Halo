@@ -17,10 +17,14 @@ class ContinuousBeam:
         # 1.0  = Instantâneo (colado no jogador)
         self.suavizacao = suavizacao
 
+    def mirar(self, alvo_pos):
+        """Só move a ponta em direção a `alvo_pos`, sem dano (quem usa decide o que o feixe atinge)."""
+        self.mira_atual = self.mira_atual.lerp(alvo_pos, self.suavizacao)
+
     def update(self, delta_time, alvo_pos):
         # Persegue a posição do jogador suavemente
-        self.mira_atual = self.mira_atual.lerp(alvo_pos, self.suavizacao)
-        
+        self.mirar(alvo_pos)
+
         # Lógica de Dano (Área de impacto na ponta do laser)
         distancia_ponta = (self.mira_atual - self.game.player.posicao).length()
         if distancia_ponta < 50: # Raio de dano da ponta do feixe
