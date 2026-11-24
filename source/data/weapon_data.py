@@ -61,11 +61,11 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
 
     'energy_sword': WeaponProfile(
         stats={
-            'dano':               WeaponStats(value=5,    label='Dano',              increase=5,   range_val=1),
+            'dano':               WeaponStats(value=15,    label='Dano',              increase=5,   range_val=1),
             'velocidade_rotacao': WeaponStats(value=120,  label='Velocidade Angular',increase=10,  range_val=1),
             'distancia_orbita':   WeaponStats(value=130,  label=None,                increase=0,   range_val=0),
-            'num_listas':         WeaponStats(value=1,    label='Num. Listas',       increase=1,   range_val=[2, 3, 4, 5]),
-            'duracao':            WeaponStats(value=5000, label='Duração',           increase=200, range_val=1),
+            'num_listas':         WeaponStats(value=1,    label='Num. Listas',       increase=1,   range_val=[2, 3, 4]),
+            'duracao':            WeaponStats(value=5100, label='Duração',           increase=100, range_val=1),
             'cooldown':           WeaponStats(value=12700,label='Cooldown',          increase=-300, range_val=1, min_val=10000),
         }
     ),
@@ -107,9 +107,9 @@ WEAPON_DATA: Dict[str, WeaponProfile] = {
         stats={
             'dano':                     WeaponStats(value=1,    label='Dano',              increase=1,      range_val=1),
             'cooldown':                 WeaponStats(value=3000, label='Cooldown',          increase=-50,   range_val=1, min_val=2050),
-            'projeteis_por_disparo':    WeaponStats(value=8,    label='N° de Projéteis',   increase=4,      range_val=1),
+            'projeteis_por_disparo':    WeaponStats(value=8,    label='N° de Projéteis',   increase=2,      range_val=1),
             'velocidade_projetil':      WeaponStats(value=1000, label='Velocidade',        increase=50,     range_val=1),
-            'spread':                   WeaponStats(value=5,    label='Espalhamento',      increase=5,      range_val=2),
+            'spread':                   WeaponStats(value=5,    label='Espalhamento',      increase=3,      range_val=[2, 3, 4, 5, 6]),
             'raio_maximo':              WeaponStats(value=500,  label=None,                increase=0,      range_val=0),
         }
     ),

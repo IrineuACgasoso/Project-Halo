@@ -79,7 +79,7 @@ def test_upgrade_que_nenhum_nivel_aplica(range_val):
     stats = dict(WEAPON_DATA['energy_sword'].stats)
     stats['duracao'] = dataclasses.replace(stats['duracao'], range_val=range_val)
     um_erro(validacao.validar_armas(armas={**WEAPON_DATA, 'energy_sword': WeaponProfile(stats=stats)}),
-            'energy_sword.duracao tem label e increase +200, mas o range_val')
+            f'energy_sword.duracao tem label e increase {stats["duracao"].increase:+}, mas o range_val')
 
 
 def test_stat_sem_label_pode_diminuir_sem_piso():
