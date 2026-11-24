@@ -28,7 +28,7 @@ class ZealotAttacks:
 
     # ------------------------------------------------------------ combo de 3 dashes
     def rotina_combo(self):
-        """Dash puro → dash + estocada → dash + varredura, com 0,5 a 1 s entre um dash e o próximo.
+        """Dash puro → dash + estocada → dash + varredura, com `combo_pausa_ms` entre um dash e o próximo.
         Parado entre eles, não dá dano de contato (ele para em cima de onde o jogador estava)."""
         try:
             yield from self._esperar(CFG.combo_preparo_ms)

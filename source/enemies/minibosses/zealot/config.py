@@ -26,10 +26,10 @@ CLIPS = {
 @dataclass(frozen=True)
 class ZealotConfig:
     # --- atributos (vida e escudo escalam juntos com o nível do jogador) ---
-    vida: float = 250
-    escudo: float = 500
+    vida: float = 100
+    escudo: float = 300
     dano_contato: float = 80
-    velocidade: float = 130
+    velocidade: float = 120
     mult_sprint: float = 2.0            # longe do jogador, sem habilidade
 
     # --- decisão: pesos por faixa de distância (com escudo; sem ele, só a defensiva) ---
@@ -42,20 +42,20 @@ class ZealotConfig:
     perseguir_ms: Tuple[int, int] = (500, 900)
     # cooldowns (min, max) em ms, sorteados no FIM da habilidade
     cooldown: Dict[str, Tuple[int, int]] = field(default_factory=lambda: {
-        'combo': (3000, 5000), 'furtivo': (5000, 8000)})
+        'combo': (4000, 7000), 'furtivo': (6500, 9000)})
     cooldown_inicial: Dict[str, int] = field(default_factory=lambda: {'combo': 1500, 'furtivo': 2000})
 
     # --- combo de 3 dashes: puro → estocada (retângulo) → varredura (cone largo) ---
     combo_dash_preset: str = 'zealot'
     combo_preparo_ms: int = 400         # parado antes do 1º dash
-    combo_pausa_ms: Tuple[int, int] = (500, 1000)   # entre um dash e o próximo
+    combo_pausa_ms: Tuple[int, int] = (600, 850)    # entre um dash e o próximo
     combo_estocada_preset: str = 'zealot_estocada'
     combo_cone_preset: str = 'zealot_varredura'
-    combo_recuperacao_ms: int = 900     # parado depois do último golpe: a janela de punição
+    combo_recuperacao_ms: int = 700     # parado depois do último golpe: a janela de punição
 
     # --- invisibilidade ofensiva ---
     furtivo_preset: str = 'zealot_furtivo'
-    furtivo_buff: float = 2.4           # +240% de velocidade (442 px/s; o jogador começa com 500)
+    furtivo_buff: float = 2.4           # +240% de velocidade (408 px/s; o jogador começa com 500)
     furtivo_dist_bote: float = 200
     contorno_travado_ms: int = 200      # sem sair do lugar por este tempo (parede): contorna de lado...
     contorno_ms: Tuple[int, int] = (400, 900)         # ... por este tempo
@@ -66,9 +66,9 @@ class ZealotConfig:
     # --- invisibilidade defensiva (sem escudo) ---
     fuga_preset: str = 'zealot_defensiva'
     fuga_sprint_ms: int = 1800          # foge em disparada no começo...
-    fuga_sprint_buff: float = 4.0       # ... a 650 px/s (mais rápido que o jogador)
-    fuga_buff: float = 2.2              # depois vagueia a 416 px/s: dá para alcançar
-    fuga_dist_ideal: float = 700        # tenta ficar a esta distância do jogador
+    fuga_sprint_buff: float = 3.5       # ... a 540 px/s (o jogador começa com 500)
+    fuga_buff: float = 2.0              # depois vagueia a 360 px/s: dá para alcançar
+    fuga_dist_ideal: float = 800        # tenta ficar a esta distância do jogador
     fuga_passo: Tuple[float, float] = (250, 550)      # distância do próximo ponto sorteado
     fuga_troca_ms: Tuple[int, int] = (600, 1400)      # muda de rumo ao acaso neste intervalo
     fuga_tentativas: int = 14
@@ -76,7 +76,7 @@ class ZealotConfig:
     fuga_margem_mapa: float = 100
     regen_ms: int = 8000                # do escudo zerado ao cheio
     fuga_min_ms: int = 1500             # antes disso, encostar nele não o faz voltar
-    fuga_dist_limite: float = 260       # jogador a esta distância: dash + cone fino, e volta ao ataque
+    fuga_dist_limite: float = 520       # jogador a esta distância: dash + cone fino, e volta ao ataque
     contra_dash_preset: str = 'zealot'
     contra_cone_preset: str = 'zealot_contra_ataque'
     contra_recuperacao_ms: int = 700

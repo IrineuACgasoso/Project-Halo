@@ -22,6 +22,7 @@ from source.utils.superficies import silhueta_de
 V = pygame.math.Vector2
 CENTRO = V(1500, 1500)
 LONGE, MEDIO, PERTO = V(CFG.dist_medio + 200, 0), V(400, 0), V(150, 0)
+ALCANCE_DASH = DASH_PRESETS['zealot'].velocidade * DASH_PRESETS['zealot'].duracao_ms / 1000
 
 
 @pytest.fixture
@@ -239,14 +240,16 @@ def test_pausa_entre_dashes_fica_entre_meio_e_um_segundo(zealot):
     assert max(pausas) - min(pausas) > 100              # não é robotizado
 
 
-def test_dash_vai_ate_onde_o_jogador_estava(zealot):
-    _jogador_em(zealot, MEDIO)
-    alvo = V(zealot.jogador.posicao)
+@pytest.mark.parametrize('fracao', [0.8, 1.3])
+def test_dash_vai_ate_onde_o_jogador_estava_ou_ate_o_alcance(zealot, fracao):
+    """Dentro do alcance para no ponto travado; fora dele, no fim do alcance e no mesmo rumo."""
+    _jogador_em(zealot, V(ALCANCE_DASH * fracao, 0))
+    chegada = CENTRO + V(ALCANCE_DASH * min(fracao, 1), 0)
     _iniciar(zealot, 'combo')
     _ate(zealot, lambda: zealot.posicao != CENTRO)
     _jogador_em(zealot, V(0, 900))                      # fugiu durante o dash: ele não faz curva
     _ate(zealot, lambda: zealot.velocidade == 0 and zealot.is_inofensivo)
-    assert zealot.posicao.distance_to(alvo) < 1
+    assert zealot.posicao.distance_to(chegada) < 1
 
 
 def test_golpes_saem_no_vetor_do_dash_e_nao_no_jogador(zealot):
@@ -467,15 +470,17 @@ def test_cacado_interrompe_a_regeneracao_com_dash_e_cone_fino(zealot):
     _sem_ia(zealot)
     _passos(zealot, CFG.fuga_min_ms / 1000 + 0.5)
     assert zealot.fase_invisibilidade == OCULTO
-    _jogador_em(zealot, V(0, CFG.fuga_dist_limite - 20))
-    alvo, escudo = V(zealot.jogador.posicao), zealot.escudo_atual
+    distancia = CFG.fuga_dist_limite - 20
+    _jogador_em(zealot, V(0, distancia))
+    chegada, escudo = zealot.posicao + V(0, min(distancia, ALCANCE_DASH)), zealot.escudo_atual
     assert 0 < escudo < zealot.escudo_maximo
     _passos(zealot, 2 * DT)
     assert zealot.alvejavel and zealot.status.mult_velocidade == 1.0 and zealot.animador.clip == 'dash'
     _ate(zealot, lambda: _avisos(ConeStrikeAviso))
     cone, = _avisos(ConeStrikeAviso)
     assert cone.cfg is CONE_STRIKE_PRESETS['zealot_contra_ataque'] and cone.direcao == V(0, 1)
-    assert zealot.posicao.distance_to(alvo) < 1 and zealot.inofensivo
+    assert zealot.posicao.distance_to(chegada) < 1 and zealot.inofensivo
+    assert zealot.dist_jogador() < cone.cfg.raio        # o dash pode não chegar; o golpe alcança quem ficou parado
     _ate(zealot, lambda: zealot.rotina is None)
     assert zealot.escudo_atual == escudo                # parou de regenerar
     assert not zealot.inofensivo

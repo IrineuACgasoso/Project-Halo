@@ -21,8 +21,8 @@ DASH_PRESETS = {
     'padrao': DashConfig(velocidade=600, duracao_ms=800, ate_o_alvo=True),
     # Run do Hunter: a velocidade da corrida antiga (500), um pouco mais curta (era 2500 ms)
     'hunter': DashConfig(velocidade=500, duracao_ms=2000, ate_o_alvo=False),
-    # Zealot: investidas do combo e do contra-ataque (até onde o jogador estava)...
-    'zealot': DashConfig(velocidade=1300, duracao_ms=600, ate_o_alvo=True),
+    # Zealot: investidas do combo e do contra-ataque (até onde o jogador estava, no máximo 385 px)...
+    'zealot': DashConfig(velocidade=550, duracao_ms=700, ate_o_alvo=True),
     # ... e o bote que sai da invisibilidade (passa reto pelo ponto mirado)
-    'zealot_bote': DashConfig(velocidade=1600, duracao_ms=400, ate_o_alvo=False),
+    'zealot_bote': DashConfig(velocidade=700, duracao_ms=800, ate_o_alvo=False),
 }

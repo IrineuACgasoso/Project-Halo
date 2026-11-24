@@ -2,6 +2,12 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-24 | Zealot: balanceamento do usuário (muda o jogo)
+- Vida 100 (era 250), escudo 300 (500), velocidade 120 (130); cooldowns do combo 4–7 s e do furtivo 6,5–9 s; pausa do combo 0,6–0,85 s e recuperação 0,7 s; fuga a 540 e depois 360 px/s, distância ideal 800 e gatilho do contra-ataque 520 px (260). Dash 550 px/s × 700 ms (1300 × 600) e bote 700 × 800 (1600 × 400).
+- **Decisão do usuário:** os números são propositais. O dash alcança no máximo 385 px, então pode parar antes do alvo; parado, ele ainda está no alcance do cone do contra-ataque (480). `VIDA_MINIMA_BOSS['zealot']` 200 → 100 (o mesmo piso do Hunter).
+- Testes: os 2 do dash esperavam chegar sempre ao alvo; agora a chegada sai do preset (dentro e fora do alcance) e o cone do contra-ataque precisa alcançar quem ficou parado. Comentários de velocidade dos `config.py` corrigidos. **Suíte: 1710 verdes + 1 xfail.** Goldens e catraca inalterados.
+- **Não validado:** a luta na tela real. Pela conta (não simulado): quem perseguir o Zealot logo na quebra do escudo fica a menos de 520 px, e o contra-ataque sai no mínimo de 1,5 s, com ~19% do escudo regenerado.
+
 ## 2026-11-24 | Guilty Spark reformulado (muda o jogo, pedido do usuário)
 - Sobre a `BossBase` (adianta o Guilty da F5): `config.py` (todos os números), `barreira`, `movement` (ronda e teleporte), `states` (fases e decisão), `attacks` (feixes), `invocacoes`, `armadilha`, `luz_visivel`, `vfx`. Vida 2000 (igual).
 - **Barreira:** `EnergyAura` impenetrável + `is_invulneravel` + `ajustar_dano_recebido` (nada entra, nem explosão). `EnergyAura` ganhou `bloqueia_tiros` (tiros morrem na borda; lâmina, tijolo e granada passam) e `empurrao_max` (espremer contra uma parede jogava o jogador para o outro lado). Com a barreira ele **não é alvejável**: as armas miram nas sentinelas (decisão minha, fácil de reverter em `GuiltyBarreira.alvejavel`).
@@ -13,7 +19,6 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - **Spawner com boss vivo (correção):** o `Game` nunca lia `permitir_spawns_normais` (só o `Spawner`, que nem era chamado). Agora lê; a recarga do Harbinger passa a religar o spawner como o código dela pretendia (fase 13, sem mapa). O timer continua parado e nunca nasce um 2º boss.
 - Testes: `test_guilty.py` (104) no lugar do caso antigo de `test_dano` (mudança de especificação); 16 mutações conferidas. Golden da fase 0 e do Arbiter e catraca inalterados.
 - Desempenho (A/B alternado com o HEAD, 2 rodadas): boss_guilty 1,61/1,71 × 3,58/3,15 ms/frame (p95 2,2/2,7 × 6,1/5,1: até 18 sentinelas, feixes e distorção); horda 5,65/7,48 × 5,50/5,84.
-- **Balanceamento local do usuário, fora deste commit** (`zealot/config.py`, `dash/config.py`): derruba 3 testes (vida mínima do Zealot em `test_boss_tem_vida_de_boss` e 2 em `test_zealot`, porque o dash do Zealot já não alcança o alvo: 550 px/s × 700 ms = 385 px contra gatilho de 520). Falta decidir: ajustar os testes ou os números.
 - **Não validado:** a luta na tela real (sensação, dificuldade de 40 sentinelas e de acertar a luz). Conferi por capturas headless e bots simples.
 
 ## 2026-11-23 | Zealot reformulado (muda o jogo, pedido do usuário)
