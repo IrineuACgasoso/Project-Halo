@@ -4,6 +4,7 @@ from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.systems.dano import Dano, AREA, fonte_do_dono
+from source.systems.empurrao import empurrar
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
@@ -81,14 +82,17 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
 
         surface.blit(temp_surface, area.topleft, area)
 
-    def _aplicar_dano_em_area(self, dano):
-        """Aplica `dano` a todos os alvos dentro do raio, uma vez."""
+    def _aplicar_dano_em_area(self, dano, impacto=False):
+        """Aplica `dano` a todos os alvos dentro do raio, uma vez. `impacto`: é a explosão (e não um
+        tick), então vale o knockback da configuração."""
         alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
 
         for alvo in alvos:
             distancia = (alvo.posicao - self.posicao).length()
             if distancia <= self.cfg.raio_explosao:
                 alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True))
+                if impacto and self.cfg.knockback:
+                    empurrar(alvo, self.posicao, self.cfg.knockback)
 
     def update(self, delta_time, paredes=None):
         # Se estiver grudada em um alvo (ex: Spike que acertou o jogador),
@@ -110,12 +114,12 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
             if self.cfg.dot:
                 # Por padrão não aplica o `dano` de impacto, só liga o ciclo de ticks
                 if self.cfg.impacto_com_dot:
-                    self._aplicar_dano_em_area(self.cfg.dano)
+                    self._aplicar_dano_em_area(self.cfg.dano, impacto=True)
                 self.dot_ativo = True
                 self.dot_inicio = agora
                 self.dot_ultimo_tick = agora
             else:
-                self._aplicar_dano_em_area(self.cfg.dano)
+                self._aplicar_dano_em_area(self.cfg.dano, impacto=True)
 
         # --- Ciclo de DoT (tick a cada 1s, durante duracao_dot) ---
         elif self.dot_ativo:

@@ -39,7 +39,8 @@ Project-Halo/
     │   └── validacao.py     # validar_tudo(): lista de erros dos dados (armas, pools, bosses, inimigos, manifesto, mapas) (D5)
     ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores (direcao_segura; no_cone e no_retangulo: ponto na área sem trigonometria),
     │                        # collision_utils (empurrão de parede em float),
-    │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
+    │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3),
+    │                        # reducao (o mundo afastado reduzido para a tela)
     ├── systems/
     │   ├── gameclock.py     # relogio (singleton, ms de jogo) + AcumuladorPassoFixo (Game.run, 1/60 s)
     │   ├── entitymanager.py # entity_manager (singleton, grupos de sprite, inclusive particulas_grupo)
@@ -53,7 +54,8 @@ Project-Halo/
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções; culling pela câmera (C4)
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
     │   ├── stagemanager.py  # fade e troca de fase/mapa; fim de campanha
-    │   ├── camera.py        # offset seguindo o player + shake
+    │   ├── camera.py        # offset seguindo o player + shake + zoom (definir_zoom, visao)
+    │   ├── empurrao.py      # knockback: empurrar(alvo, origem, forca), sem atravessar paredes
     │   ├── spawner/         # spawner.py (ritmo/teto), spawner_pools.py (inimigos por fase),
     │   │                    # spawner_bosses.py (PHASE_BOSSES, BOSS_CLASSES, CRONOGRAMA_BOSSES)
     │   ├── mapmanager/      # Mapa = loader(.tmj) + collision(paredes) + utils(navegação) + feats(void)
@@ -67,7 +69,8 @@ Project-Halo/
     │   │   └── boss/        # BossBase (motor: rotinas, cooldowns, fases, anti-stuck), ContextoCombate, FaseBoss, DetectorTravamento (F1);
     │   │                    # animador.py: Clip + Animador (clips, hit frames, quadros copiados no spawn: F2)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
-    │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), scarab, knight
+    │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), knight,
+    │   │                    # scarab (BossBase; config/corpo/recortes/patas/movement/armas/feixe)
     │   └── bosses/          # guilty (BossBase; config/barreira/invocacoes/armadilha/luz_visivel), arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
@@ -108,6 +111,11 @@ Project-Halo/
 | Boss que religa os inimigos comuns | `permitir_spawns_normais = True` nele (lido por `Game._atualizar_spawner` e `Spawner.update`) |
 | Camuflagem de um inimigo (tempos, distorção) | `feats/skills/invisibilidade/` (preset em `config.py`; `self.iniciar_invisibilidade(preset)` + `atualizar_invisibilidade(dt)` por passo; visual em `distorcao.py`) |
 | Quem pode ser mirado ou atingido | `BaseEnemy.alvejavel` / `invulneravel` (`enemies/base/enemy_base.py`) |
+| Balancear o Scarab (patas e ângulos, núcleo, passos, golpes, feixe, guarnição, zoom, tremores) | `enemies/minibosses/scarab/config.py` (artilharias: presets `scarab_*` em `feats/skills/artilharia/config.py`) |
+| Arte do Scarab (recorte novo, pata danificada, pose) | PNG em `scarab/partes/<variante>/`, nome em `PARTES_SCARAB` (`data/manifesto_assets.py`), canto em `scarab/recortes.py`, desenho em `scarab/corpo.py` |
+| Afastar a câmera (boss gigante, cena) | `game.camera.definir_zoom(alvo, ms)`; volte a 1 no `kill` de quem afastou |
+| Sprite desenhado por cima (ou por baixo) do que a posição dele manda | `y_desenho` na classe (lido por `Renderer._profundidade`) |
+| Empurrar alguém (knockback) | `knockback=<px>` no preset da artilharia, ou `empurrar(...)` de `systems/empurrao.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |

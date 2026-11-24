@@ -1,37 +1,46 @@
-import pygame
+"""Decisão do Scarab. As armas e os passos correm por fora (armas.py, movement.py); aqui só entram os
+golpes do corpo, que punem quem se esconde embaixo dele ou acampa numa pata."""
+import random
+
+from .config import CENTRO_CHAO, CFG
+
 
 class ScarabAI:
-    def checar_fases(self):
-        if not self.fase_desestabilizado and self.vida < self.vida_base * 0.6:
-            self.fase_desestabilizado = True
-            self.sprites = self.get_sprites('damaged')
-            self.cooldown_laser = self.novo_cooldown(9000, 11000)
-            
-        if not self.fase_critica and self.vida < self.vida_base * 0.4:
-            self.fase_critica = True
-            self.sprites = self.get_sprites('broken')
-            self.cooldown_plasma = self.novo_cooldown(2000, 5000)
-            self.cooldown_laser = self.novo_cooldown(7000, 9000)
-            self.velocidade *= 2
-            self.velocidade_animacao /= 2
-            self.delay_entre_tiros /= 1.5
-            self.intensidade_shake *= 3
+    def perceber(self, agora, delta_time):
+        super().perceber(agora, delta_time)
+        self.centro_chao = self.no_mundo(CENTRO_CHAO)
+        self.medir_acampamento(delta_time)
 
-    def executar_ia(self, agora, delta_time):
-        # 1. ESTADO DE ATORDOAMENTO (Prioridade Máxima)
-        if getattr(self, 'estado_combate', '') == 'STUNNED':
-            if agora - getattr(self, 'tempo_inicio_stun', 0) >= getattr(self, 'duracao_stun', 6000):
-                # Fim do Stun: Reseta escudo e volta ao combate
-                self.is_inofensivo = False
-                self.estado_combate = 'MOVENDO'
-                self.adicionar_escudo(self.escudo_maximo)
-                
-                # Reseta cooldowns para não dar um "Insta-Kill" logo ao acordar
-                self.ultimo_laser = agora
-                self.ultimo_tiro_plasma = agora
-            return  # Ignora o resto da IA enquanto estiver atordoado!
+    def preparar_frame(self, delta_time):
+        agora = self._agora
+        if not (self.desabado or self.morrendo):
+            self.atualizar_passo(agora)
+        if self.rotina is None:
+            self.andar()
+        else:
+            self.parar()               # as rotinas são golpes parados
+        self.atualizar_armas(agora, delta_time)
+        self.atualizar_vfx(agora)
 
-        # 2. ESTADOS NORMAIS
-        self.checar_fases()
-        self.logica_laser(agora, delta_time)
-        self.gerenciar_rajada(agora)
+    def checar_fase(self):
+        anterior = self.fase
+        super().checar_fase()
+        if self.fase != anterior:
+            self.entrar_na_fase()
+
+    def escolher_habilidade(self, agora):
+        if self.no_passo:              # espera as patas chegarem ao chão
+            return None
+        pesos = {}
+        if self.jogador_sob and self.pronto('stomp'):
+            pesos['stomp'] = CFG.pesos['stomp']
+        if self.pata_acampada is not None and self.pronto('sismica'):
+            pesos['sismica'] = CFG.pesos['sismica']
+        if not pesos:
+            return None
+        pesos['esperar'] = CFG.pesos['esperar']
+        escolha = random.choices(list(pesos), weights=list(pesos.values()))[0]
+        if escolha == 'esperar':
+            self.wait = random.randint(*CFG.esperar_ms)
+            return None
+        return escolha

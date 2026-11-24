@@ -12,6 +12,7 @@ from source.debug import DEBUG
 from source.feats.skills.invisibilidade.distorcao import desenhar_distorcao
 from source.systems.entitymanager import entity_manager
 from source.systems.status.cegueira import desenhar_cegueira
+from source.utils.reducao import reduzir, superficie_do_mundo
 
 
 class Renderer:
@@ -57,17 +58,30 @@ class Renderer:
 
     def _draw_mundo(self):
         """Mapa + sprites + efeitos de inimigos, COM câmera. Compartilhado por jogo, pausa e
-        level-up (antes pausa/level-up desenhavam os sprites sem mapa e sem offset da câmera)."""
+        level-up (antes pausa/level-up desenhavam os sprites sem mapa e sem offset da câmera).
+        Com a câmera afastada, o mundo é desenhado maior, fora da tela, e reduzido."""
+        camera, tela = self.game.camera, self.game.tela
+        if camera.zoom == 1:
+            self._desenhar_mundo_em(tela)
+            return
+        mundo = superficie_do_mundo(camera.visao_maxima, tela)
+        canto = camera.offset + camera.shake_offset
+        if not self.game.mapa.rect_background.contains((canto.x - 1, canto.y - 1, mundo.get_width() + 2,
+                                                        mundo.get_height() + 2)):
+            mundo.fill('black')   # na borda do mapa, o fundo não cobre a superfície toda
+        self._desenhar_mundo_em(mundo)
+        reduzir(mundo, camera.visao, tela)
+
+    def _desenhar_mundo_em(self, tela):
         game = self.game
-        tela = game.tela
         deslocamento = game.camera.offset + game.camera.shake_offset
 
         game.mapa.draw(tela, deslocamento)
         if DEBUG:   # overlay de paredes/spawns estava SEMPRE ligado no jogo final
             game.mapa.draw_debug(tela, deslocamento)
 
-        self._draw_sprites(deslocamento)
-        self._draw_efeitos_inimigos(deslocamento)
+        self._draw_sprites(tela, deslocamento)
+        self._draw_efeitos_inimigos(tela, deslocamento)
 
         # Cegueira (sistema de status): por cima do mundo, embaixo do HUD; vale também na pausa e no level-up
         raio = game.player.status.raio_cegueira
@@ -107,25 +121,31 @@ class Renderer:
     # ------------------------------------------------------------------ #
     # HELPERS DE DESENHO (com blindagem individual por sprite)
     # ------------------------------------------------------------------ #
-    def _draw_sprites(self, deslocamento):
-        """Desenha todos os sprites ordenados por profundidade (centery).
+    @staticmethod
+    def _profundidade(sprite):
+        """Ordem de desenho: quem tem a linha mais baixa sai por cima. O padrão é o centro do rect;
+        um `y_desenho` na classe muda isso (o Scarab cobre quem passa por baixo dele)."""
+        y = getattr(sprite, 'y_desenho', None)
+        if y is not None:
+            return y
+        # `if rect` era falso para Rect de tamanho 0 (bool(Rect) == False) -> y virava 0
+        rect = getattr(sprite, 'rect', None)
+        return rect.centery if rect is not None else 0
+
+    def _draw_sprites(self, tela, deslocamento):
+        """Desenha todos os sprites ordenados por profundidade.
 
         Cada sprite é desenhado isoladamente: se um sprite específico
         falhar (imagem None, rect ausente, etc), pulamos só ele em vez
         de quebrar o frame inteiro.
         """
-        visiveis = self._sprites_visiveis(deslocamento)
+        visiveis = self._sprites_visiveis(tela, deslocamento)
         try:
-            sprites_ordenados = sorted(
-                visiveis,
-                # `if rect` era falso para Rect de tamanho 0 (bool(Rect) == False) -> y virava 0
-                key=lambda s: s.rect.centery if getattr(s, 'rect', None) is not None else 0
-            )
+            sprites_ordenados = sorted(visiveis, key=self._profundidade)
         except Exception as e:
             self._log_erro('ordenacao_sprites', e)
             sprites_ordenados = visiveis
 
-        tela = self.game.tela
         for sprite in sprites_ordenados:
             try:
                 if hasattr(sprite, 'draw'):
@@ -140,12 +160,12 @@ class Renderer:
                 self._log_erro(f'sprite:{sprite.__class__.__name__}', e)
                 continue
 
-    def _sprites_visiveis(self, deslocamento):
+    def _sprites_visiveis(self, tela, deslocamento):
         """Culling pela câmera (roteiro C4), na ordem do grupo: só ordena e desenha o sprite de
         imagem cuja imagem toca a tela (folga de 2 px para o arredondamento do blit). Sprite com
         `draw` próprio sempre entra: o rect dele nem sempre cobre o que desenha (a artilharia
         tem rect 1x1 e desenha o raio todo), e esses efeitos já se recortam sozinhos."""
-        largura, altura = self.game.tela.get_size()
+        largura, altura = tela.get_size()
         tela_no_mundo = pygame.Rect(int(deslocamento.x) - 2, int(deslocamento.y) - 2,
                                     largura + 4, altura + 4)
         visiveis = []
@@ -161,9 +181,8 @@ class Renderer:
             visiveis.append(sprite)
         return visiveis
 
-    def _draw_efeitos_inimigos(self, deslocamento):
+    def _draw_efeitos_inimigos(self, tela, deslocamento):
         """Distorção dos invisíveis, lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""
-        tela = self.game.tela
         for inimigo in entity_manager.inimigos_grupo:
             try:
                 if getattr(inimigo, 'invisibilidade', None) is not None:

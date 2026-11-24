@@ -21,6 +21,7 @@ from source.systems.estados import (ESTADOS, TRANSICOES, Tela, TransicaoInvalida
 from source.systems.sessao import SessaoJogo
 from source.systems.eventos import eventos, BOSS_DERROTADO
 from source.systems.status import atualizar_status, limpar_status
+from source.systems.empurrao import atualizar_empurroes, limpar_empurroes
 from source.systems.entrada import Teclado
 from source.debug import DEBUG
 # FEATS
@@ -138,6 +139,7 @@ class Game:
         relogio.reiniciar()
         eventos.limpar()   # assinaturas valem por partida
         limpar_status()    # buffs e debuffs da partida anterior não contam mais
+        limpar_empurroes()
 
         # 2. Limpa todos os grupos de sprite
         entity_manager.all_sprites.empty()
@@ -239,6 +241,7 @@ class Game:
             return
         # Cada entidade consulta a grade na própria posição (roteiro C1)
         paredes = self.mapa.grade_paredes
+        atualizar_empurroes(delta_time, paredes)
         self.player.comando = self.entrada.ler()   # antes das armas: os veículos leem a tecla V
         self.player.update(delta_time, paredes)
         self.camera.update(self.player.posicao)

@@ -13,8 +13,18 @@ class PlayerMovement:
         sair_das_paredes(self.posicao, self.hitbox.width / 2, grade_paredes, 3)
 
         # 3. Sincroniza Hitbox e Rect visual
+        self.sincronizar_rects()
+
+    def sincronizar_rects(self):
         self.hitbox.center = (round(self.posicao.x), round(self.posicao.y))
         self.rect.center = self.hitbox.center
+
+    def deslocar(self, vetor, grade_paredes):
+        """Deslocamento forçado (systems/empurrao), sem atravessar paredes."""
+        self.posicao += vetor
+        if grade_paredes is not None:
+            sair_das_paredes(self.posicao, self.hitbox.width / 2, grade_paredes, 3)
+        self.sincronizar_rects()
     
     def atualizar_void(self, delta_time):
 

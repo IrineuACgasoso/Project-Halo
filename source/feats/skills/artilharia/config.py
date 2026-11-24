@@ -1,6 +1,8 @@
 # source/feats/skills/artilharia/config.py
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Union
+
+from source.systems.empurrao import forca_valida
 
 @dataclass
 class ArtilhariaConfig:
@@ -14,6 +16,13 @@ class ArtilhariaConfig:
     dano_por_segundo: int = 0
     duracao_dot: int = 3000
     impacto_com_dot: bool = False   # com dot=True: aplica `dano` na explosão ANTES de iniciar os ticks
+    # Empurra quem a explosão atinge (não os ticks) para longe do centro: False = não empurra; um
+    # número = quantos px (`systems/empurrao.py`)
+    knockback: Union[bool, float] = False
+
+    def __post_init__(self):
+        if self.knockback is not False and not forca_valida(self.knockback):
+            raise ValueError(f'knockback {self.knockback!r} (precisa ser False ou um número > 0)')
 
 # === PRESETS DA ARTILHARIA ===
 ARTILHARIA_PRESETS = {
@@ -161,6 +170,44 @@ ARTILHARIA_PRESETS = {
         cor_borda=(30, 100, 255, 200),
         cor_preenchimento=(30, 120, 255, 70),
         cor_explosao=(150, 200, 255, 240)
+    ),
+
+    # ── Scarab ── (avisos cinza, sujos, com preenchimento vermelho e estouro claro)
+    'scarab_passo': ArtilhariaConfig(           # a duração de verdade é a do passo (config do Scarab)
+        dano=130,
+        raio_explosao=115,
+        duracao=700,
+        cor_borda=(112, 106, 98, 220),
+        cor_preenchimento=(205, 28, 24, 95),
+        cor_explosao=(238, 230, 214, 215),
+        knockback=110
+    ),
+    'scarab_sismica': ArtilhariaConfig(         # persegue o jogador
+        dano=190,
+        raio_explosao=200,
+        duracao=1300,
+        cor_borda=(98, 90, 82, 240),
+        cor_preenchimento=(225, 22, 18, 110),
+        cor_explosao=(250, 240, 220, 235),
+        knockback=340
+    ),
+    'scarab_stomp': ArtilhariaConfig(           # a barriga inteira
+        dano=240,
+        raio_explosao=410,
+        duracao=1400,
+        cor_borda=(98, 90, 82, 240),
+        cor_preenchimento=(205, 24, 20, 90),
+        cor_explosao=(250, 240, 220, 225),
+        knockback=380
+    ),
+    'scarab_detonacao': ArtilhariaConfig(       # a explosão final, no fim do colapso
+        dano=350,
+        raio_explosao=820,
+        duracao=2500,
+        cor_borda=(90, 255, 120, 220),
+        cor_preenchimento=(60, 220, 90, 45),
+        cor_explosao=(225, 255, 230, 200),
+        knockback=600
     ),
 
     # ── Guilty Spark ──

@@ -66,10 +66,17 @@ Ainda não há assinantes no jogo: os consumidores previstos são a memória dos
 ## Dano (`systems/dano.py`, roteiro E1)
 Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes))`. Tipos: `projetil`, `contato`, `aura`, `area` (explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte` é a entidade que causou (jogador, inimigo ou `None` para o mapa): projéteis, granadas e habilidades a guardam (`fonte_do_dono`: o que é do jogador é dele; o inimigo passa `fonte=self`, e um teste por AST exige isso).
 - **Jogador:** i-frames (ignorados com `ignora_iframes`, que também não os liga) → veículo → escudo → vida.
-- **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab defensivo sobrescreve: só escudo, quebra = stun). Não há i-frames.
+- **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab sobrescreve: o dano vai para a pata do ângulo em que o jogador está). Não há i-frames.
 - **Hunter:** a armadura é status, não gancho: `Defesa(90%)` sem fim, tirada enquanto o jogador está nas costas (±30° do eixo x, `no_cone`) e posta de volta quando ele sai (`atualizar_vulnerabilidade`, a cada passo; o status só é tocado na troca).
 - **Invisível × invulnerável:** `invisivel` (skill `feats/skills/invisibilidade` em fade out ou oculta, ou `em_teleporte`) só tira o inimigo de `alvejavel`: nenhuma arma, companheiro, veículo ou projétil teleguiado o escolhe, mas tiro perdido, aura e explosão acertam, e ele dá dano de contato. `em_teleporte` (Knight, Warden) é estar fora do mundo: nem mirado, nem atingido. O `Renderer` distorce o cenário na silhueta de todo camuflado (`invisibilidade/distorcao.py`). Jega na órbita/ilusão é `inofensivo`; o teleporte do Harbinger segue com `is_invulneravel`.
 - **Invulnerável** (`invulneravel`: flag manual, teleporte, proteção de spawn) é checado por quem causa o dano, não pelo contrato: projéteis e auras checam; artilharia, cone, companheiro, atropelamento e espinhos não (achado da E1, ver log).
+
+- **Scarab:** dano por ângulo a partir do centro do chão (`patas.py`): 3 cones de pata, o resto é carapaça; caído, o cone do núcleo (atrás). `morrer` adia a saída do mundo até a detonação, como a consciência do Warden.
+- **Knockback** (`systems/empurrao.py`): `empurrar(alvo, origem, forca_px)`, com decaimento exponencial e passos que não pulam paredes; `Game._atualizar_entidades` o aplica antes do jogador. A artilharia o usa com `ArtilhariaConfig.knockback` (padrão False; não vale nos ticks).
+
+## Câmera e ordem de desenho
+- `Camera.definir_zoom(alvo, ms)`: 1 = normal, menor = mostra mais (limitado para o mapa cobrir a tela). Com zoom, `Renderer._draw_mundo` desenha o mundo numa superfície de `camera.visao_maxima` e a reduz para a tela (`utils/reducao.py`); HUD e menus não mudam. "O que está na tela" é `camera.visao`, nunca `largura_tela`.
+- `_draw_sprites` ordena por `rect.centery`, ou por `y_desenho` se o sprite declarar um (o Scarab cobre quem passa por baixo; as faíscas e explosões dele saem por cima).
 
 ## Status: buffs e debuffs (`systems/status/`)
 Ponto único: `aplicar(alvo, efeito, fonte=None, chave=None)`, para jogador e inimigos. Os efeitos (`efeitos.py`) são dataclasses validadas (porcentagem = fração; duração em ms; `None` = sem fim, só nos buffs).

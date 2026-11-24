@@ -1,6 +1,5 @@
 import pygame
 from .projetil import ProjetilUniversal
-from source.windows.settings import largura_tela, altura_tela
 from source.systems.dano import Dano, PROJETIL
 
 class Brick(ProjetilUniversal):
@@ -48,11 +47,12 @@ class Brick(ProjetilUniversal):
         super().update(delta_time)
 
         # Definimos as bordas
+        largura, altura = self.game.camera.visao   # o que aparece na tela, com o zoom da câmera
         margem = 24 # Pequena margem de segurança baseada no tamanho da sprite
-        borda_esq = self.jogador.posicao.x - (largura_tela / 2) + margem
-        borda_dir = self.jogador.posicao.x + (largura_tela / 2) - margem
-        borda_topo = self.jogador.posicao.y - (altura_tela / 2) + margem
-        borda_baixo = self.jogador.posicao.y + (altura_tela / 2) - margem
+        borda_esq = self.jogador.posicao.x - (largura / 2) + margem
+        borda_dir = self.jogador.posicao.x + (largura / 2) - margem
+        borda_topo = self.jogador.posicao.y - (altura / 2) + margem
+        borda_baixo = self.jogador.posicao.y + (altura / 2) - margem
 
         # Checa colisão Eixo X
         if self.posicao.x <= borda_esq:

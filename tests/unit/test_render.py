@@ -59,7 +59,7 @@ def test_sprite_fora_da_tela_nao_e_desenhado(novo_jogo):
     na_borda = _SpriteImagem((1000 - 19, 500 - 19, 20, 20), grupos)   # 1 px de imagem na tela
     fora = [_SpriteImagem(r, grupos) for r in ((1000 - 40, 600, 20, 20), (1000 + largura + 10, 600, 20, 20),
                                                (1100, 500 - 50, 20, 20), (1100, 500 + altura + 5, 20, 20))]
-    visiveis = novo_jogo.renderer._sprites_visiveis(deslocamento)
+    visiveis = novo_jogo.renderer._sprites_visiveis(novo_jogo.tela, deslocamento)
     assert dentro in visiveis and na_borda in visiveis
     assert not any(s in visiveis for s in fora)
 
@@ -68,12 +68,12 @@ def test_imagem_maior_que_o_rect_conta_pela_imagem(novo_jogo):
     sprite = _SpriteImagem((0, 0, 10, 10), (entity_manager.all_sprites,))
     sprite.image = pygame.Surface((400, 400))   # rect pequeno fora, imagem entra na tela
     sprite.rect.topleft = (1000 - 300, 500)
-    assert sprite in novo_jogo.renderer._sprites_visiveis(V(1000, 500))
+    assert sprite in novo_jogo.renderer._sprites_visiveis(novo_jogo.tela, V(1000, 500))
 
 
 def test_sprite_com_draw_proprio_sempre_entra(novo_jogo):
     longe = _SpriteComDraw((99999, 99999), (entity_manager.all_sprites,))
-    novo_jogo.renderer._draw_sprites(V(0, 0))
+    novo_jogo.renderer._draw_sprites(novo_jogo.tela, V(0, 0))
     assert longe.desenhos == 1
 
 
@@ -82,9 +82,9 @@ def test_sprite_sem_imagem_e_ignorado_sem_erro(novo_jogo):
     sem_imagem.image = None
     quebrado = _SpriteImagem((10, 10, 5, 5), (entity_manager.all_sprites,))
     del quebrado.image
-    visiveis = novo_jogo.renderer._sprites_visiveis(V(0, 0))
+    visiveis = novo_jogo.renderer._sprites_visiveis(novo_jogo.tela, V(0, 0))
     assert sem_imagem not in visiveis
-    novo_jogo.renderer._draw_sprites(V(0, 0))
+    novo_jogo.renderer._draw_sprites(novo_jogo.tela, V(0, 0))
     assert novo_jogo.renderer._erros_logados == set()
 
 
@@ -96,7 +96,7 @@ def test_culling_nao_muda_nenhum_pixel(novo_jogo, monkeypatch):
         novo_jogo.spawner.spawnar('normal')
     renderer = novo_jogo.renderer
     com_culling = renderer._sprites_visiveis
-    sem_culling = lambda deslocamento: list(entity_manager.all_sprites)   # noqa: E731
+    sem_culling = lambda tela, deslocamento: list(entity_manager.all_sprites)   # noqa: E731
     cortados = 0
     for i in range(12):
         simular(novo_jogo, 0.25)
@@ -110,7 +110,7 @@ def test_culling_nao_muda_nenhum_pixel(novo_jogo, monkeypatch):
             quadros.append(pygame.image.tobytes(novo_jogo.tela, 'RGB'))
         assert quadros[0] == quadros[1], f'quadro {i} difere'
         deslocamento = novo_jogo.camera.offset + novo_jogo.camera.shake_offset
-        cortados += len(entity_manager.all_sprites) - len(com_culling(deslocamento))
+        cortados += len(entity_manager.all_sprites) - len(com_culling(novo_jogo.tela, deslocamento))
     assert cortados > 100, 'quase nada ficou fora da tela: o teste não provaria nada'
     assert renderer._erros_logados == set()
 

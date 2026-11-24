@@ -3,7 +3,7 @@ from source.systems.entitymanager import entity_manager
 from source.systems.eventos import eventos, INIMIGO_MORREU
 from source.systems.dano import Dano, CONTATO, AURA
 
-# Inimigo com colisão circular (Scarab) é candidato de toda consulta: o círculo do
+# Inimigo com colisão circular (`usar_circulo`) é candidato de toda consulta: o círculo do
 # collide_circle passa da borda do rect, e esses inimigos são raros (bosses).
 _RECT_SEMPRE_CANDIDATO = pygame.Rect(-10 ** 6, -10 ** 6, 2 * 10 ** 6, 2 * 10 ** 6)
 

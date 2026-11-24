@@ -82,6 +82,18 @@ def test_transform_sem_alocacao_nao_conta():
     assert c.total == 0
 
 
+def test_transform_com_destino_nao_conta_e_sem_destino_conta():
+    origem, destino = pygame.Surface((4, 4)), pygame.Surface((2, 2))
+    with contar_alocacoes() as c:
+        pygame.transform.scale(origem, (2, 2), destino)
+        pygame.transform.smoothscale(origem, (2, 2), dest_surface=destino)
+    assert c.total == 0
+    with contar_alocacoes() as c:
+        pygame.transform.scale(origem, (2, 2))
+        pygame.transform.smoothscale(origem, (2, 2))
+    assert c.por_tipo == {'transform.scale': 1, 'transform.smoothscale': 1}
+
+
 def test_trecho_pausado_nao_conta():
     with contar_alocacoes() as c:
         with c.pausado():

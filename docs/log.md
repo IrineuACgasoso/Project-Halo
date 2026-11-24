@@ -2,6 +2,21 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-24 | Scarab reformulado, zoom da câmera e knockback (muda o jogo, pedido do usuário)
+- Sobre a `BossBase` (adianta o Scarab da F5): `config.py` (todos os números), `corpo` (desenho em camadas), `recortes`, `patas` (dano por ângulo), `movement` (passos, virar), `armas` (feixe, torreta, desembarque), `feixe`, `states`, `attacks` (stomp, sísmica, queda, colapso), `vfx`. Vida 5000 (era 15000 + 5000 de escudo, com ×5/×10).
+- **Patas:** 3 ângulos a partir do centro do chão (frente ±38°, central ±26°, traseira ±26°), cada pata com 300 de vida (escala com a dele). Fora deles, 4% passa pela carapaça. Pata zerada → desaba, núcleo aberto por 7 s (dano ×4 de quem está atrás, ±75°; ×1 fora) → se ergue, regenera **só** a pata quebrada. A pata alcançável pulsa em vermelho e cada uma tem barra no pé.
+- **Por baixo:** sem dano de contato; `y_desenho` (novo no `Renderer`) faz ele cobrir o jogador. Com o jogador a ≤ 320 px do centro do chão ele repousa: não anda, não vira, não anima. Passa por cima das paredes (decisão minha: era onde prendia), só não sai do mapa.
+- **Golpes:** passo (2 artilharias presas aos pés, mesma duração da pata no ar: pousa no frame do estouro), body stomp (peso 10 × 2 de esperar, senta no estouro), sísmica (2,2 s colado numa pata; a artilharia persegue a 330 px/s e trava nos últimos 250 ms).
+- **Armas autônomas** (só a queda e a morte desligam): feixe verde em camadas com barreira mínima de 320 px (quem está por baixo não leva dano), torreta igual à antiga, desembarque de 3–5 (teto 12, 18% de orbe de vida). **Decisão minha:** o canhão de cima virou camada própria e gira sozinho para o lado do alvo; o feixe sai da ponta fina do cano.
+- Fase crítica (30%): fumaça, arcos, torreta 2×, feixe mais rápido. Morte: `morrer` adia 2,5 s de explosões em cadeia e detona (artilharia de 820 px com aviso).
+- **Arte:** 93 recortes em `scarab/partes/` derivados dos sprites do usuário (o de pé remonta o original pixel a pixel, há teste): patas danificadas, caído com núcleo e sentado, nas 3 variantes. Os sprites inteiros antigos saíram do manifesto (os PNGs continuam na pasta). `assets.json` regravado por isso.
+- **Câmera:** `definir_zoom(alvo, ms)`, `visao`, `restaurar_zoom` (fase e partida nova). O mundo é desenhado numa superfície maior e reduzido (`utils/reducao.py`, vizinho mais próximo). O tijolo passou a rebater na borda do que aparece. Scarab: 0,5625 (2276×1280).
+- **Artilharia:** `knockback` (False ou px) sobre `systems/empurrao.py` (novo: jogador e comuns, sem atravessar parede; boss não se move).
+- O `contar_alocacoes` deixou de contar `scale`/`smoothscale` com superfície de destino (não criam nada), com teste.
+- Testes: `test_scarab.py` (136), `test_camera.py`, `test_empurrao.py`; 18 mutações conferidas. Saíram 3 casos do Scarab antigo de `test_dano` (mudança de especificação). `test_validacao` lê o `increase` da Energy Sword em vez de +200 (balanceamento do usuário). 4 exceções saíram do `ruff.toml`. **Suíte: 1953 verdes + 1 xfail.** Goldens da fase 0 e do Arbiter e catraca inalterados.
+- Desempenho (na tomada, A/B alternado com o HEAD, 2 rodadas): boss_scarab 2,24/1,83 × 5,13/5,43 ms/frame (p95 3,2/2,7 × 6,4/7,3: é o zoom; `smoothscale` daria ~11); fase 0 1,37/1,47 × 1,31/1,33; arbiter 1,34/1,37 × 1,48/1,30; horda 4,83/4,64 × 7,39/4,87 (a 1ª foi ruído: update sem mudança).
+- **Bots** (3 arsenais de nível 14–20): 70–195 s, 4–8 quedas. **Não validado:** a luta na tela real (sensação, legibilidade com o zoom, tremores). Conferi por capturas headless.
+
 ## 2026-11-24 | Armas: Energy Sword, Fuel Rod, ícones e balanceamento do usuário (muda o jogo)
 - **Energy Sword (bug do dano infinito, corrigido):** a lâmina perfura infinito e não lembrava quem já acertou, então batia no mesmo alvo **a cada frame** (60×/s por lâmina). Agora cada lâmina acerta cada inimigo 1× por volta (`GRAUS_ENTRE_ACERTOS`). Medido num alvo parado, por ativação: nível 1, 350 → 10; nível 5, 11300 → 350; nível 10, 26800 → 1000. Também: o rect e a máscara ficavam na orientação do spawn; agora giram com a arte. Invulnerável não gasta o acerto da volta.
 - **Fuel Rod:** projétil e área próprios (eram os da granada de plasma). `FuelRodGrenade` herda de `GrenadeBase`: gota achatada de plasma que acompanha a curva do voo, halo pulsando e rastro. `PocaDePlasma` (`artilharia/poca_plasma.py`): clarão, respingo e poça fervendo (8 quadros, por baixo dos sprites), vapor e esfriamento; some o projétil quando explode. Preset `fuel_rod`. **Números e mecânica iguais** (raio 150, 1,5 s grudada, arco, quique): só o visual mudou.
@@ -197,95 +212,7 @@ Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300
 - Desempenho: horda 3,5 ms/frame (p95 4,8). Só a horda foi medida (a E2 só mexe na busca de alvo). **Não validado:** a sensação do balanceamento no jogo.
 - Próxima etapa: **E3** (entrada desacoplada). Pendências da sessão anterior continuam (ver abaixo).
 
-## 2026-11-21 | Alcance de todas as armas no weapon_data (refatoração: golden inalterado)
-- As 9 armas que tinham o alcance no código (número solto no `disparar` ou `RAIO_ALVO` na classe) ganharam o stat `raio_maximo` no perfil, com o mesmo valor e sem upgrade (`label=None`, `increase=0`): Assault Rifle 700, Sidekick 600, Shotgun 500, Sniper 1200, Brick 1200, Needler 500, Dizimator 550, Carabin 650, Machine Gun 850. As classes leem `self.raio_maximo`; `RAIO_ALVO` saiu. Para o alcance subir por nível, basta dar `label` e `increase` no perfil.
-- Testes (`test_regressoes.py`): toda arma cujo código procura alvo (13) tem `raio_maximo` no perfil; mudar o stat muda o alcance de verdade (as 13); o upgrade soma o `increase` (as 4 com upgrade). Suíte: 1016 verdes + 1 xfail; as mesmas 3 falhas do Hunter da entrada abaixo (mudança local, fora do commit).
-
-## 2026-11-21 | Correção: upgrade de alcance do Light Rifle não fazia efeito
-- O perfil `light_rifle` tem `raio_maximo` ("Alcance", +50 por nível), mas a classe mirava com a constante `RAIO_ALVO = 1000`: o card mostrava o alcance subindo e no jogo ele ficava em 1000. Agora usa `self.raio_maximo` (nível 1 = 1000: sem mudança até o 1º upgrade). **Muda o jogo:** o alcance cresce com o nível.
-- Regressão em `test_regressoes.py::test_upgrade_de_alcance_muda_o_alcance_de_verdade`, para toda arma com `raio_maximo` no perfil (Fuel Rod, Grenade Launcher, Light Rifle, Spartan Laser; só o Light Rifle falhou antes). As outras armas têm o alcance fixo no código, sem stat (Assault Rifle, Sidekick, Shotgun, Sniper, Brick e o `RAIO_ALVO` de Needler, Dizimator, Carabin e Machine Gun).
-- Suíte: 1003 verdes + 1 xfail; as 3 falhas restantes (`test_hunter_pelas_costas`, `test_fraqueza_e_a_regra_das_costas_do_hunter_se_somam`) vêm de uma mudança local não commitada em `hunter/core.py` (costas ×4 → ×8), fora deste commit. Não validado no jogo real.
-
-## 2026-11-21 | Sistema de status (S3): bônus da Cortana como buff (muda o jogo)
-- Antes: cada upgrade da Cortana fazia `jogador.velocidade += 10`, com o número fixo no código. O stat `jogador_speed_bonus` (+10/nível) só aparecia no card de upgrade e não era lido.
-- Agora o stat manda: `jogador_speed_bonus` em **pontos percentuais** (+2 por nível, label "(%)"), e a Cortana aplica `BuffVelocidade(bonus / 100)` sem fim, com `chave=self` (reaplicar só atualiza). A velocidade-base do jogador não muda mais.
-- **Muda o jogo (declarado):** +2% equivale a +10 na velocidade inicial (500). Como o level-up também soma +10 na velocidade-base, o bônus da Cortana agora cresce junto: no nível 20 do jogador (690), cada +2% vale +13,8.
-- Teste em `test_status.py` (nível 1 sem bônus, +2% por nível, um lugar só, velocidade-base intacta). Suíte: **1001 verdes + 1 xfail**. Golden inalterado (a fase 0 do golden não tem Cortana). **Não validado:** a sensação no jogo.
-
-**Pendências da sessão (E1 + status):**
-- Decisões suas: "invulnerável" centralizado no contrato de dano (ver E1); indicador de status no HUD e feedback visual no alvo (ver S1).
-- Ainda nenhuma arma nem inimigo aplica lentidão, atordoamento, queimadura, fraqueza, cegueira ou buff de dano: o sistema está pronto para o conteúdo.
-- Bug do Hunter preso nas paredes (diagnóstico na E1). Bug do fim de campanha (xfail, B4). Regravar `perf_base.json` na tomada, numa sessão fria.
-- Próxima etapa do roteiro: **E2** (estado de alvo unificado).
-
-## 2026-11-21 | Sistema de status (S2): curas e escudos pelo sistema
-**O que foi feito** (refatoração: golden inalterado)
-- Orbe de vida e cura do level-up → `aplicar(alvo, Cura(...))`; escudo cheio do level-up e regeneração do MK2 → `aplicar(alvo, Escudo(...))`; transferência do Watcher → `aplicar(aliado, Escudo(t), fonte=watcher)`. Agora a queimadura corta essas curas (teste).
-- `curar` saiu (a guarda de "jogador fora do mundo" da correção anterior está no próprio `aplicar`). Nenhuma cura nem ganho de escudo direto sobrou em `source/` (grep).
-- O buff de cooldown antigo saiu: `adicionar_tempo_buff`, `atualizar_buff`, `buff_timer` e `buff_cooldown_ativo` **não tinham chamador** (o item "café" não tem efeito em `_aplicar_efeito`), e ele mexia em `arma.cooldown` com uma flag por arma. A cadência agora é o `BuffCadencia`. Os 2 testes dele viraram testes do `BuffCadencia` (mudança de especificação: o mecanismo foi trocado, não enfraquecido).
-- **Equivalência:** os valores são os mesmos, porque `Escudo`/`Cura` fazem `min(atual + v, máximo)`, igual ao `+=` seguido do clamp de antes. Única diferença possível: o Watcher somava sem clamp e podia passar do máximo por 1 ulp de float; agora para no máximo.
-- Testes: +5 (`test_player`: level-up cura 1/4 e enche o escudo; `test_status`: Watcher pelo sistema, sem passar do máximo, queimadura cortando o orbe de vida). Suíte: **1000 verdes + 1 xfail**. Golden e catraca inalterados.
-
-**Fica para depois (não migrado):** os buffs internos dos bosses (velocidade temporária do Warden, `buff_ofensivo_mult` do Harbinger) e o "derrete escudo" do EMP são mecânicas do próprio boss, com movimento e ataques próprios; entram na F5 (`BossBase`).
-
-## 2026-11-21 | Correção: cura não ressuscita o jogador morto no mesmo frame
-- A coleta de itens (passo 4 do `CollisionManager`) vem depois do dano (passos 2 e 3). Morrer e, no mesmo frame, pegar um orbe de vida ou subir de nível com XP devolvia a vida a um jogador que já tinha saído dos grupos de sprite (`kill`): sem game over, a partida seguia com ele invisível. Agora `curar` não age em jogador fora do mundo. Achado ao planejar as migrações do sistema de status; commit próprio (roteiro §2, regra 6).
-- Regressão em `test_regressoes.py` (orbe de vida e level-up; os dois falharam antes da correção). Suíte: **996 verdes + 1 xfail**. Golden inalterado.
-
-## 2026-11-21 | Sistema de status (S1): núcleo de buffs e debuffs
-**O que foi feito** (recurso novo pedido nesta sessão; decisões no roteiro §8, itens 8–11)
-- `source/systems/status/`: `aplicar(alvo, efeito, fonte=None, chave=None)` é o ponto único, para jogador e inimigos; `remover` tira um buff sem fim.
-  - **Debuffs:** `Lentidao`, `Atordoamento`, `Queimadura` (DPS + `reducao_cura`), `Fraqueza` (+% de dano recebido, pedido nesta sessão) e `Cegueira` (só no jogador).
-  - **Buffs:** `BuffDano`, `BuffVelocidade` (com duração ou sem fim) e `BuffCadencia` (só no jogador).
-  - **Instantâneos:** `Escudo` (até o máximo) e `Cura` (até o máximo, menos o corte da queimadura).
-- **Validação:** dataclasses frozen. Porcentagem é fração (teto de 10 = 1000%, para pegar quem passa 30 querendo dizer 30%). Duração em ms; só os buffs aceitam `None`. Efeito exclusivo do jogador num inimigo, `fonte` que não é entidade e efeito desconhecido lançam exceção.
-- **`fonte` × `chave`:** `fonte` é a entidade que causa (como em `Dano.fonte`: a queimadura dá o dano em nome dela). `chave` é o lugar de acúmulo (padrão: a fonte). Ex.: duas armas do jogador com chaves próprias acumulam queimadura, e o crédito continua sendo do jogador.
-- **Acúmulo (item 9):** o mesmo lugar reaplicando substitui valores e duração. Entre lugares: lentidão = a mais forte; queimadura, fraqueza e buffs de dano/velocidade somam; cadência multiplica; atordoamento e cegueira valem enquanto houver um (cegueira: o menor raio).
-- **Componente `status`** no jogador e em todo inimigo. Os modificadores são recalculados só quando um efeito entra ou sai, e só as entidades com efeito ativo são atualizadas (`Game._atualizar_status`, passo novo antes de `_atualizar_entidades`). A lista é limpa a cada partida.
-- **Onde cada efeito age:** tabela em `docs/architecture.md`.
-  - Atordoamento: o `Game` não chama o `update` do inimigo nem as armas do jogador; o jogador ignora o input; `inofensivo`; espinhos, aura do MK2, veículo e aura de energia do dono param.
-  - Queimadura: dano `STATUS` (tipo novo do `Dano`) a cada 0,25 s, ignorando os i-frames sem ligá-los.
-- **Bosses e minibosses (item 8):** as 19 classes das pastas `bosses/` e `minibosses/` declaram `IMUNIDADES_CHEFE` (sem atordoamento e lentidão de fora); um teste varre as pastas. O stun próprio do Scarab e do Hunter não muda.
-- **Cegueira:** buraco com degradê em cache por raio (no máximo 8 raios) + 4 `fill` pretos; desenhada no `_draw_mundo` (vale na pausa e no level-up), por baixo do HUD. Zero alocação por frame (teste).
-- Testes: `test_status.py` (78); `test_eventos.py` ganhou o passo novo na ordem do update. Suíte: **994 verdes + 1 xfail**. Golden e catraca inalterados (sem efeito, todos os multiplicadores são exatamente 1.0).
-
-**Desempenho** (na bateria): A/B alternado com o commit anterior, 2 rodadas: horda 4,1–6,1 × 4,2–4,3 ms/frame; Warden 3,4 × 3,5. Sem piora. Pior caso medido à parte: 150 inimigos com 4 efeitos cada (2 queimaduras) = **0,27 ms/frame** no `atualizar_status`.
-
-**Não incluído (decisão sua, se quiser):** indicador de status no HUD e feedback visual no alvo (cor de queimadura, estrelas de stun). Buff de velocidade em boss não tem efeito: os bosses movem-se por código próprio (entra na F5, com a `BossBase`).
-
-**Não validado:** a cegueira na tela real (o degradê e a sensação) e a sensação de jogo de cada efeito: ainda não há arma nem inimigo que os aplique (só as migrações dos próximos commits).
-
-## 2026-11-21 | Correção: névoa do Gravemind pelo contrato de dano
-- `MiasmaGas` (fora do raio seguro, 300 por segundo) fazia `vida_atual -= 300` direto: ignorava escudo e veículo, não interrompia a regeneração do escudo e não chamava `kill` (o game over vinha só do `_checar_game_over`). Agora é `receber_dano(Dano(300, AREA, boss, ignora_iframes=True))`: **muda o jogo** (o escudo e o veículo passam a absorver a névoa). Achado na E1; commit próprio (roteiro §2, regra 6).
-- Regressão em `test_regressoes.py::test_nevoa_do_gravemind_passa_pelo_contrato_de_dano` (falhou antes da correção). Suíte: **912 verdes + 1 xfail**. Golden inalterado (a fase 0 não tem Gravemind). Não validado no jogo real.
-
-## 2026-11-21 | Etapa E1: contrato de dano único
-**Decisões do usuário (desta sessão):** as regras "spawn dentro da navegação" e "portal obrigatório" da D5 **não** serão adotadas (pendência fechada). Novo recurso aprovado: o **sistema de status** (buffs e debuffs), logo depois da E1; decisões no roteiro §8 (itens 8–11).
-
-**O que foi feito**
-- `source/systems/dano.py`: `Dano(valor, tipo, fonte, ignora_iframes)` (frozen; valor >= 0, infinito vale, NaN não; tipo conhecido). Tipos: `projetil`, `contato`, `aura`, `area` (novo: explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte_do_dono(dono, fonte)`: sem fonte explícita, o que é do jogador é dele.
-- `receber_dano(dano)` no jogador (mesma ordem de antes: i-frames → veículo → escudo → vida) e nos inimigos, com 2 ganchos: `ajustar_dano_recebido(valor, dano)` (regra do alvo; `None` = ignora o golpe) e `absorver_dano(valor)` (escudo → vida). Os 4 overrides viraram ganchos: Guilty, Hunter, Scarab (que também sobrescreve `absorver_dano`: defensivo = só escudo) e a consciência do Warden.
-- `tomar_dano`, `tomar_dano_direto` e `ignorar_invencibilidade` saíram; os espinhos viraram `contra_atacar_com_espinhos`, chamado pelo `CollisionManager` no contato (antes vinham dentro do `tomar_dano`). Os `hasattr(alvo, 'receber_dano'/'tomar_dano')` dos pontos migrados saíram. Migração completa no mesmo commit: sem shims.
-- **Fonte:** projéteis, granadas, morteiro, artilharia e cone guardam `fonte`; os 39 ataques inimigos passam `fonte=self` (o projétil que vira artilharia repassa a sua). É o que vai permitir o buff de dano de quem ataca e a atribuição da F3.
-- `dano_causado` (`alvo`, `dano`, `valor`) é emitido quando o golpe entra.
-- O `import pygame` morto do `player_combat.py` saiu, e com ele a exceção `F401` do `ruff.toml`.
-- Testes: `test_dano.py` (52): validação do `Dano`, a matriz escudo × i-frames × `ignora_iframes` × transbordo (jogador e inimigo), ganchos, evento, os 4 overrides, a fonte de projéteis e habilidades e **um teste por AST: todo ataque inimigo passa `fonte=`**. `test_player`/`test_sistemas` migrados para a API nova. Suíte: **911 verdes + 1 xfail**. Golden e catraca inalterados.
-
-**Difere do roteiro:** "invulnerável" não entrou no contrato. Hoje quem respeita `invulneravel` (invisível, proteção de spawn) é quem causa o dano: projéteis e auras checam; **artilharia, cone, companheiro corpo a corpo, atropelamento do veículo e espinhos não** (acertam inimigo invisível). Centralizar mudaria o jogo: decisão sua.
-
-**Achados (não corrigidos)**
-- A névoa do Gravemind fazia `vida_atual -= 300` direto (sem escudo, veículo nem `kill`): corrigida no commit seguinte.
-- Granada e morteiro inimigos (dano 0 no voo) que encostam no jogador chamam `receber_dano(0)`: ligam os i-frames (100 ms) e interrompem a regeneração do escudo. Verificado com um Spike.
-- O golpe letal do Tartarus (`inf`) é absorvido pelo veículo (sem transbordo) e bloqueado pelos i-frames, se cair na janela de 100 ms.
-- Loader de mapa: na camada `Colisoes`, elipse vira o retângulo em volta dela (8 no mapa 0) e ponto vira 4 segmentos de comprimento zero (4 no mapa 0).
-
-**Desempenho** (**na bateria**): a rodada completa acusou Knight e Warden (p95) e a troca de fase (esperada desde a D2). A/B alternado com a D5 (worktree), 2 rodadas: Knight 1,65–1,81 × 1,64–2,06 ms/frame (p95 4,0–4,5 × 4,1–4,7; na 2ª rodada, iguais); Warden 3,5–3,6 × 3,6 (p95 8,5–9,0 × 8,8–9,1); horda 4,2–5,5 × **4,0–4,2**. Sem piora.
-
-**Bug do Hunter preso (C1), diagnóstico desta sessão, não reproduzido:** a camada `Colisoes` já tem polígonos fechados, mas o código só usa as arestas (que empurram); o Hunter usa o raio padrão de colisão com o mapa (15 px), apesar do sprite enorme. Se o centro nascer dentro de um polígono, as arestas o empurram para dentro. Correção provável no código, sem editar o Tiled: "dentro do polígono → sai pela aresta mais próxima" + spawn longe das paredes. Fica para depois do sistema de status, com um teste `xfail` primeiro.
-
-**Pendências:** a decisão sobre "invulnerável"; regravar `perf_base.json` (na tomada, sessão fria); o bug do fim de campanha (xfail, B4); o Hunter preso (acima). Próximo: correção da névoa do Gravemind e o **sistema de status**.
-
-## Resumo comprimido (2026-11-21): base, blocos A–D e correções
+## Resumo comprimido (2026-11-21): base, blocos A–D, E1, status e correções
 Detalhes completos no histórico do git (`git log -p docs/log.md`).
 
 **Feito**
@@ -294,6 +221,7 @@ Detalhes completos no histórico do git (`git log -p docs/log.md`).
 - **B** (núcleo): passo fixo 1/60 com teto de 5 passos (B1); estados com tabela `TRANSICOES` e registro único de telas (B2); `SessaoJogo` recriada a cada partida, relógio zerado por partida (B3); passos nomeados do `Game.update` + barramento `eventos` (B4).
 - **C** (desempenho): `GradeParedes` de 128 px, que também corrigiu o bug do inimigo longe do jogador atravessar paredes (C1); broadphase por `collidelistall` (C2); máscaras em cache, `camada_alpha`/`rascunho`, partículas com teto de 2000 (C3); culling e HUD em cache (C4).
 - **D** (dados): `MANIFESTO` de assets com equivalência de pixels (D1); fundos de fase sob demanda, LRU de 2 (D2); import sem efeito colateral, `carregar_assets()` explícito (D3); `INIMIGOS`/`PerfilInimigo` com golden de equivalência por classe (D4); `validar_tudo()` (D5).
+- **E1** (2026-11-21): contrato de dano único (`Dano`, `receber_dano`, ganchos). **Status S1–S3:** `systems/status/`, curas e escudos por ele, bônus da Cortana como `BuffVelocidade`. **Correções:** névoa do Gravemind pelo contrato, cura não ressuscita o morto do mesmo frame, upgrade de alcance do Light Rifle, alcance de toda arma no `weapon_data`.
 - Correções avulsas: HUD usava `get_ticks` (A2); tela de colaboradores (`self.imagem` → `self.image`).
 
 **Base de desempenho da A1 (para a tabela final da H2)**, ms/frame na tomada: horda_150 33,2 (p95 46,5); fase0 5,3; Guardian 11,5 (p95 34,1; custo no draw); Warden 6,8; Gravemind 5,6; outros bosses 2,0–4,8; troca de fase 1,2; import 4,2 s; pico 781 MB. **Depois do bloco C:** horda 4,4–4,6 (p95 6,2–6,6); Guardian 3,4–4,0; fase0 1,6–1,8; alocações da horda 20 → 0,02/frame. **Depois da D2:** import 1,5 s, pico 379 MB, troca de fase 120–140 ms (decodifica o mapa; roda com a tela preta, esperado).
@@ -306,6 +234,8 @@ Detalhes completos no histórico do git (`git log -p docs/log.md`).
 - Catraca: Gravemind com teto 0,7 (máscara por frame da animação de respawn, F2/F5); na suíte completa mede 0,48 e avisa (esperado).
 
 **Achados não corrigidos**
+- E1: granada e morteiro inimigos encostando no jogador dão `receber_dano(0)` (i-frames e regeneração do escudo); golpe letal do Tartarus é absorvido pelo veículo; elipse/ponto em `Colisoes` viram retângulo/degenerado.
+- Pendências: "invulnerável" no contrato de dano (decisão sua), indicador de status no HUD, regravar `perf_base.json` numa sessão fria, Hunter preso em parede (sem `xfail` ainda).
 - `OndaEMP.draw` sem deslocamento chama `camera.aplicar_posicao` (não existe; o ramo não roda).
 - `Sentinel.animar` passa o frame do cache sem copiar: o alpha de um Sentinel vale para todos no mesmo frame.
 - Limite do ruff: exceção por arquivo × regra (um 2º `F401` num arquivo já listado passa).

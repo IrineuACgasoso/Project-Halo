@@ -72,6 +72,7 @@ class StageManager:
         # A câmera guardava o mapa ANTIGO: limites errados na fase nova (jogador saía da tela).
         game.camera.mapa = game.mapa
         game.camera.shake_timer = 0
+        game.camera.restaurar_zoom()   # um boss que afastou a câmera ficou para trás
         
         # Player
         nova_pos = game.mapa.get_player_spawn_pos()

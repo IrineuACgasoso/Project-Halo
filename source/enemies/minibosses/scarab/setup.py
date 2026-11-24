@@ -1,44 +1,51 @@
-import pygame
 from source.systems.gameclock import relogio
-from source.feats.skills.continuousbeam import ContinuousBeam
+
+from .config import CENTRO_CHAO, CFG, PES
+from .feixe import FeixeDeFoco
+from .patas import Pata
+
 
 class ScarabSetup:
-    def inicializar_sistemas(self):
-        # Hitbox Massiva
-        self.usar_circulo = True 
-        self.radius = 250
+    def inicializar_habilidades(self):
+        """Estado só do Scarab (o do motor e os cooldowns são da BossBase)."""
+        agora = relogio.agora()
+        self.is_inofensivo = True          # nenhum dano de contato, nunca: passa-se por baixo dele
+        self.radius = CFG.raio_aura        # `collide_circle` das auras do jogador
 
-        # === SISTEMA DE ESCUDO E STUN ===
-        self.escudo_maximo = 5000  # Ajuste conforme o balanceamento desejado
-        self.adicionar_escudo(self.escudo_maximo)
-        self.duracao_stun = 6000   # Fica 6 segundos vulnerável
-        self.tempo_inicio_stun = 0
+        # Corpo
+        self.pose = 'em_pe'
+        self.impulso_y = 0.0               # o corpo sobe antes do body stomp
+        self.mira_torreta = self.animador.lado
+        self.torreta_recuada = False
 
-        # Estados e Fases
-        self.estado_combate = 'MOVENDO'
-        self.fase_desestabilizado = False
-        self.fase_critica = False 
-        self.intensidade_shake = 1
+        # Patas: a vida delas acompanha a escala de dificuldade da dele
+        vida_pata = CFG.vida_pata * self.vida_maxima / CFG.vida
+        self.patas = {nome: Pata(nome, self, vida_pata) for nome in PES}
+        self.pata_quebrada = None
+        self.desabado = False              # da quebra da pata até estar de pé de novo
+        self.nucleo_exposto = False
+        self.nucleo_ate = 0
+        self.centro_chao = self.no_mundo(CENTRO_CHAO)
 
-        # Armamentos
-        self._setup_laser()
-        self._setup_plasma()
+        # Passos e orientação
+        self.avisos = []                   # artilharias dele que ainda não estouraram
+        self.par_do_passo = 0
+        self.pousa_em = 0
+        self.proximo_passo_em = agora + CFG.apoio_ms[0]
+        self.virar_em = None               # ms em que o timer de virar vence (None = parado)
 
-    def _setup_laser(self):
-        self.tempo_inicio_carga = 0
-        self.duracao_carga = 3000
-        self.duracao_laser = 5000
-        self.cooldown_laser = 12000
-        self.ultimo_laser = relogio.agora()
-        
-        self.beam_principal = ContinuousBeam(
-            self, color=(100, 255, 100), largura_base=40, dano_por_segundo=200, suavizacao=0.08
-        )
+        # Armas
+        self.feixe = FeixeDeFoco(self, CFG.feixe)
+        self.feixe_estado = 'espera'       # 'espera' | 'carga' | 'disparo'
+        self.feixe_fim = 0
+        self.proximo_feixe = agora + self.novo_cooldown(*CFG.feixe.cooldown_ms)
+        self.tiros_restantes = 0
+        self.proximo_tiro = 0
+        self.proxima_rajada = agora + self.novo_cooldown(*CFG.torreta_cooldown_ms)
+        self.guarnicao = []
+        self.desembarque_em_curso = None   # ms em que a escotilha termina de abrir
+        self.proximo_desembarque = agora + CFG.desembarque_inicial_ms
 
-    def _setup_plasma(self):
-        self.cooldown_plasma = self.novo_cooldown(4000, 10000)
-        self.ultimo_tiro_plasma = relogio.agora()
-        self.tiros_restantes_rajada = 0
-        self.pente_rajada = 6
-        self.delay_entre_tiros = 250 
-        self.ultimo_tiro_rajada = 0
+        # Morte
+        self.morrendo = False
+        self.grupos_do_drop = None

@@ -208,43 +208,6 @@ def test_guilty(novo_jogo, barreira, do_proprio, esperado):
     assert _vida_tirada(guilty, Dano(100, AREA, guilty if do_proprio else None)) == pytest.approx(esperado)
 
 
-def test_scarab_defensivo_so_no_escudo_e_pernas_x5(novo_jogo):
-    scarab = _boss(novo_jogo, 'scarab')
-    scarab.estado_combate = 'MOVENDO'
-    escudo, vida = scarab.escudo_atual, scarab.vida
-    novo_jogo.player.posicao.update(scarab.posicao + V(0, -100))   # acima: sem bônus
-    scarab.receber_dano(Dano(100, PROJETIL))
-    assert scarab.escudo_atual == escudo - 100
-    novo_jogo.player.posicao.update(scarab.posicao + V(0, 100))    # abaixo: pernas x5
-    scarab.receber_dano(Dano(100, PROJETIL))
-    assert scarab.escudo_atual == escudo - 600 and scarab.vida == vida
-
-
-def test_scarab_escudo_quebrado_atordoa_sem_transbordar(novo_jogo):
-    scarab = _boss(novo_jogo, 'scarab')
-    scarab.estado_combate = 'MOVENDO'
-    scarab.escudo_atual = 50
-    vida = scarab.vida
-    novo_jogo.player.posicao.update(scarab.posicao + V(0, -100))
-    scarab.receber_dano(Dano(500, PROJETIL))
-    assert scarab.escudo_atual == 0 and scarab.vida == vida
-    assert scarab.estado_combate == 'STUNNED'
-
-
-@pytest.mark.parametrize('olhando, jogador_dx, esperado', [
-    ('right', -100, 1000),   # costas: x10
-    ('left', 100, 1000),
-    ('right', 100, 100),
-])
-def test_scarab_atordoado_pelas_costas(novo_jogo, olhando, jogador_dx, esperado):
-    scarab = _boss(novo_jogo, 'scarab')
-    scarab.iniciar_stun()
-    scarab.estado_animacao = olhando
-    scarab.escudo_atual = 0
-    novo_jogo.player.posicao.update(scarab.posicao + V(jogador_dx, 0))
-    assert _vida_tirada(scarab, Dano(100, PROJETIL)) == esperado
-
-
 def test_consciencia_do_warden_ignora_dano(novo_jogo):
     consciencia = _boss(novo_jogo, 'warden')
     corpos = sum(w.vida for w in consciencia.wardens_vivos)

@@ -60,6 +60,10 @@ _TRANSFORM_SEM_ALOCACAO = {'average_color', 'threshold', 'get_smoothscale_backen
                            'set_smoothscale_backend'}
 
 
+# Com o 3º argumento (`dest_surface`) escrevem numa superfície que já existe (zoom da câmera).
+_TRANSFORM_COM_DESTINO = {'transform.scale', 'transform.smoothscale'}
+
+
 class ContadorDeAlocacoes:
     """Contagem por tipo ('Surface', 'mask.from_surface', 'transform.scale', 'font.Font'...)."""
 
@@ -90,7 +94,8 @@ class ContadorDeAlocacoes:
 def contar_alocacoes():
     """Conta as chamadas que criam Surface/máscara/fonte enquanto o bloco roda (roteiro A2).
 
-    Cobre `pygame.Surface(...)`, `pygame.mask.from_surface`, `pygame.transform.*` e
+    Cobre `pygame.Surface(...)`, `pygame.mask.from_surface`, `pygame.transform.*` (menos as chamadas
+    de `scale`/`smoothscale` com superfície de destino, que não criam nada) e
     `pygame.font.Font`/`SysFont`. Funciona porque o código do jogo só usa a forma `pygame.X`.
     NÃO cobre métodos de tipos em C (`Surface.copy`, `convert_alpha`, `subsurface`,
     `Font.render`): o monkeypatch não alcança método de tipo embutido.
@@ -113,8 +118,11 @@ def contar_alocacoes():
             return issubclass(sub, surface_original)
 
     def _envolver(tipo, funcao):
+        com_destino = tipo in _TRANSFORM_COM_DESTINO
+
         def envolvida(*args, **kwargs):
-            contador._contar(tipo)
+            if not (com_destino and (len(args) > 2 or kwargs.get('dest_surface') is not None)):
+                contador._contar(tipo)
             return funcao(*args, **kwargs)
         return envolvida
 

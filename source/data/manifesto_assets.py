@@ -34,6 +34,15 @@ BOSS = 'enemies/bosses'
 PROM = 'enemies/prometheans'
 FLOOD = 'enemies/flood'
 
+# Recortes do Scarab (casco, canhão e patas), por pose; as posições ficam em minibosses/scarab/recortes.py
+_PATAS_SCARAB = ('frente', 'centro', 'tras')
+PARTES_SCARAB = (
+    'em_pe_corpo', 'em_pe_torreta', 'em_pe_torreta_b', 'em_pe_oculta', 'em_pe_oculta_alta',
+    *(f'em_pe_{p}{s}' for p in _PATAS_SCARAB for s in ('', '_alta', '_dan', '_alta_dan')),
+    *(f'{pose}_{parte}' for pose in ('caido', 'sentado')
+      for parte in ('corpo', *(f'{p}{s}' for p in _PATAS_SCARAB for s in ('', '_dan')))),
+)
+
 MANIFESTO = {
     'projectiles': {chave: Imagem(f'projectiles/{arquivo}') for chave, arquivo in {
         'plasma': 'plasmagun.png',
@@ -107,11 +116,9 @@ MANIFESTO = {
         'zealot': quadros(f'{COV}/zealot', numerados('zealot', 4), (200, 200)),
         # azul, vermelha (atacando), azul destruída, vermelha destruída: ver CLIPS em guilty/config.py
         'guilty': quadros(f'{BOSS}/guilty', ['guilty.png', 'guilty2.png', 'guilty7.png', 'guilty4.png'], (100, 100)),
-        'scarab': {
-            'default': quadros(f'{COV}/scarab', numerados('scarab', 4), (1024, 1024)),
-            'damaged': quadros(f'{COV}/scarab/damaged', numerados('damaged', 4), (1024, 1024)),
-            'broken': quadros(f'{COV}/scarab/broken', numerados('broken', 4), (1024, 1024)),
-        },
+        'scarab': [Imagem(f'{COV}/scarab/scarab1.png', (1024, 1024))],   # o rect; quem aparece são as partes
+        'scarab_partes': {variante: {nome: Imagem(f'{COV}/scarab/partes/{variante}/{nome}.png') for nome in PARTES_SCARAB}
+                          for variante in ('default', 'damaged', 'broken')},
         'arbiter': quadros(f'{BOSS}/arbiter', numerados('boss', 4), (250, 250)),
         'tartarus': quadros(f'{BOSS}/tartarus', numerados('tartarus', 4), (192, 288)),
         'gravemind': {

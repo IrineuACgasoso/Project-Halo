@@ -25,7 +25,7 @@ def _forca_bruta(sprite):
 
 
 def _horda_mista(game, n=250):
-    """Inimigos da fase 0 + os bosses com colisão especial: Scarab (círculo), Didact (hitbox)
+    """Inimigos da fase 0 + os bosses com colisão especial: Scarab (máscara de 1024×1024 própria da pose), Didact (hitbox)
     e Jega (collision_rect calculado)."""
     game.spawner.update = lambda dt: None
     for nome in ('scarab', 'didact', 'jega'):

@@ -58,6 +58,14 @@ def variantes_alpha(base):
     return variantes
 
 
+def preparar(cores, tamanhos):
+    """Cria já as imagens das partículas redondas de `cores` × `tamanhos` (no spawn de um boss, para
+    nenhuma nascer no meio da luta)."""
+    for cor in cores:
+        for tamanho in tamanhos:
+            variantes_alpha(imagem_pixel(cor, tamanho, 'circulo'))
+
+
 def _nivel(alpha):
     return int(max(0.0, min(255.0, alpha)) * (NIVEIS_ALPHA - 1) / 255 + 0.5)
 
@@ -70,8 +78,9 @@ def variante_alpha(base, alpha):
 class Particula(pygame.sprite.Sprite):
     """Anda em linha reta e some com fade linear em `duracao_ms` de jogo."""
 
-    def __init__(self, posicao, imagem, velocidade, duracao_ms, grupos):
+    def __init__(self, posicao, imagem, velocidade, duracao_ms, grupos, y_desenho=None):
         super().__init__(*grupos, entity_manager.particulas_grupo)
+        self.y_desenho = y_desenho      # None: ordem de desenho comum (Renderer)
         self._variantes = variantes_alpha(imagem)   # guardadas: o update não consulta o cache
         self.posicao = pygame.math.Vector2(posicao)
         self.velocidade = pygame.math.Vector2(velocidade)
@@ -90,8 +99,9 @@ class Particula(pygame.sprite.Sprite):
         self.image = self._variantes[int((1 - decorrido / self.duracao_ms) * (NIVEIS_ALPHA - 1) + 0.5)]
 
 
-def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None):
-    """Cria uma partícula, ou devolve None se o teto global foi atingido."""
+def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None, y_desenho=None):
+    """Cria uma partícula, ou devolve None se o teto global foi atingido. `y_desenho`: a linha usada na
+    ordem de desenho (ex.: por cima de um boss que cobre o que está perto dele)."""
     if duracao_ms <= 0:
         raise ValueError(f'duração de partícula inválida: {duracao_ms}')
     if len(entity_manager.particulas_grupo) >= TETO_PARTICULAS:
@@ -100,11 +110,11 @@ def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None):
         grupos = (entity_manager.all_sprites,)
     elif isinstance(grupos, pygame.sprite.AbstractGroup):
         grupos = (grupos,)
-    return Particula(posicao, imagem, velocidade, duracao_ms, grupos)
+    return Particula(posicao, imagem, velocidade, duracao_ms, grupos, y_desenho)
 
 
 def emitir_leque(posicao, direcao, quantidade, cores, tamanhos, abertura_graus=360, velocidade=(60, 160),
-                 duracao_ms=(450, 750)):
+                 duracao_ms=(450, 750), y_desenho=None):
     """`quantidade` partículas redondas saindo de `posicao` em direções sorteadas no leque de
     `abertura_graus` em volta de `direcao` (com 360, para todos os lados)."""
     base = pygame.math.Vector2(direcao)
@@ -118,4 +128,4 @@ def emitir_leque(posicao, direcao, quantidade, cores, tamanhos, abertura_graus=3
         tamanho = random.choice(tamanhos)
         vel = base.rotate(random.uniform(-meia, meia)) * random.uniform(*velocidade)
         duracao = random.uniform(*duracao_ms)
-        emitir(posicao, imagem_pixel(cor, tamanho, 'circulo'), vel, duracao)
+        emitir(posicao, imagem_pixel(cor, tamanho, 'circulo'), vel, duracao, y_desenho=y_desenho)

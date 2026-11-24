@@ -1,0 +1,37 @@
+"""Onde fica cada recorte do Scarab na arte de 1024×1024 (olhando para a esquerda): o canto superior
+esquerdo. Gerado junto com os PNGs de `assets/img/enemies/covenant/scarab/partes/`; o mesmo recorte vale
+para as três variantes (default, damaged, broken). Só dados."""
+
+CANTOS = {
+    'em_pe_corpo': (157, 199),
+    'em_pe_torreta': (425, 90),
+    'em_pe_torreta_b': (423, 88),
+    'em_pe_oculta': (345, 553),
+    'em_pe_oculta_alta': (345, 553),
+    'em_pe_frente': (30, 308),
+    'em_pe_frente_alta': (28, 308),
+    'em_pe_frente_dan': (30, 308),
+    'em_pe_frente_alta_dan': (28, 308),
+    'em_pe_centro': (497, 264),
+    'em_pe_centro_alta': (498, 264),
+    'em_pe_centro_dan': (497, 264),
+    'em_pe_centro_alta_dan': (500, 264),
+    'em_pe_tras': (654, 255),
+    'em_pe_tras_alta': (654, 255),
+    'em_pe_tras_dan': (654, 255),
+    'em_pe_tras_alta_dan': (654, 255),
+    'caido_corpo': (162, 222),
+    'caido_frente': (2, 528),
+    'caido_frente_dan': (2, 528),
+    'caido_tras': (639, 359),
+    'caido_tras_dan': (639, 359),
+    'caido_centro': (481, 393),
+    'caido_centro_dan': (481, 393),
+    'sentado_corpo': (157, 371),
+    'sentado_frente': (6, 535),
+    'sentado_frente_dan': (6, 535),
+    'sentado_tras': (654, 399),
+    'sentado_tras_dan': (654, 399),
+    'sentado_centro': (489, 446),
+    'sentado_centro_dan': (489, 446),
+}
