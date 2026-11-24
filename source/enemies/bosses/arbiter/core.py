@@ -33,21 +33,6 @@ class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, Ar
 
         self.inicializar_habilidades()
 
-    # ------------------------------------------------------------ combate
-    @property
-    def revelado(self):
-        """Camuflado, mas denunciado por um flash (atirou / golpeou / encostou no jogador)."""
-        return self.invisibilidade is not None and self.invisibilidade.revelada
-
-    @property
-    def invulneravel(self):
-        """Igual a base, exceto que revelar-se ao atacar abre uma janela de dano (counterplay ao stealth)."""
-        if getattr(self, 'is_invulneravel', False) or getattr(self, 'invencivel', False):
-            return True
-        if self.invisivel:
-            return not (CFG.vulneravel_ao_revelar and self.revelado)
-        return False
-
     def morrer(self, grupos=None):
         Items.spawn_drop(
             self.posicao,

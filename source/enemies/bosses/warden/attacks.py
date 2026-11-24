@@ -45,6 +45,7 @@ class WardenAttacks:
                 grupos=[entity_manager.all_sprites], game=self.game, velocidade=750
             )
             self.alpha_atual = 0
+            self.em_teleporte = True
             self.estado_habilidade = 'tp_traveling'
             self.hitbox.width = 0 
         else:
@@ -61,7 +62,8 @@ class WardenAttacks:
     def finalizar_tp(self):
         self.posicao = pygame.math.Vector2(self.tp_orb.posicao)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-        self.alpha_atual = 255 
+        self.alpha_atual = 255
+        self.em_teleporte = False
         
         self.hitbox.width = self.rect.width * 0.4
         

@@ -59,8 +59,7 @@ class ArbiterConfig:
     dist_max: float = 480             # acima disso ele avança
     strafe_troca_ms: Tuple[int, int] = (1200, 2600)
 
-    # --- revelar-se (flash) e janela de dano enquanto está camuflado ---
-    vulneravel_ao_revelar: bool = True   # camuflado + revelado (atirou/golpeou) = pode tomar dano
+    # --- revelar-se (clarão) enquanto está camuflado ---
     revelar_tiro_ms: int = 80
     revelar_tiro_alpha: int = 90
 

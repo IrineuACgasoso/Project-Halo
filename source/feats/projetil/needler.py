@@ -23,7 +23,10 @@ class ProjetilNeedler(ProjetilUniversal):
         self.forca_curva = 0.18
 
     def update(self, delta_time):
-        if self.alvo_atual and self.alvo_atual.alive():
+        # Alvo que some (invisível) é perdido de vez: a agulha segue reto
+        if self.alvo_atual and not (self.alvo_atual.alive() and self.alvo_atual.alvejavel):
+            self.alvo_atual = None
+        if self.alvo_atual:
             desejado = direcao_segura(self.posicao, self.alvo_atual.posicao, padrao=self.direcao)
             nova = self.direcao + desejado * self.forca_curva
             if nova.length_squared() > 0:

@@ -306,7 +306,7 @@ class FuelRodGrenade(PlasmaGrenade):
         raio_sq = self.RAIO_BUSCA_QUIQUE ** 2
         melhor, melhor_dist = None, raio_sq
         for inimigo in grupo:
-            if not inimigo.alive() or getattr(inimigo, 'invulneravel', False):
+            if not inimigo.alive() or not inimigo.alvejavel or getattr(inimigo, 'invulneravel', False):
                 continue
             dist = self.target_pos.distance_squared_to(inimigo.posicao)
             if dist <= melhor_dist:

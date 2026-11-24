@@ -101,7 +101,8 @@ class Companheiro(pygame.sprite.Sprite):
         def alvo_e_valido(alvo):
             if alvo is None: return False
             if alvo == self.jogador: return True
-            return hasattr(alvo, 'alive') and alvo.alive()
+            # Inimigo que ficou invisível é largado na hora (item não tem `alvejavel`)
+            return hasattr(alvo, 'alive') and alvo.alive() and getattr(alvo, 'alvejavel', True)
         
         # Usando a distância ao quadrado para evitar o cálculo da raiz
         dist_sq_jogador = self.posicao.distance_squared_to(self.jogador.posicao)
@@ -166,7 +167,7 @@ class Companheiro(pygame.sprite.Sprite):
             dist_prox_sq = self.posicao.distance_squared_to(s.posicao)
             if dist_prox_sq < raio_ao_quadrado and s.alive():
                 if precisa_dano:
-                    if hasattr(s, "receber_dano"): alvos_validos.append(s)
+                    if hasattr(s, "receber_dano") and s.alvejavel: alvos_validos.append(s)
                 else:
                     alvos_validos.append(s)
 

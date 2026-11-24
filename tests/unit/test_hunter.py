@@ -16,6 +16,7 @@ from source.systems.dano import PROJETIL, Dano
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.systems.status import Defesa, Fraqueza, aplicar
+from source.utils import superficies
 
 V = pygame.math.Vector2
 CENTRO = V(1500, 1500)
@@ -390,8 +391,8 @@ def test_alpha_do_brilho_pulsa_entre_os_limites():
 def test_silhuetas_prontas_no_spawn(hunter):
     for frames in hunter.sprites.values():
         for frame in frames:
-            assert frame in vfx._SILHUETAS
-            assert vfx._SILHUETAS[frame].get_size() == frame.get_size()
+            assert CFG.brilho_cor in superficies._SILHUETAS[frame]
+            assert vfx.silhueta(frame).get_size() == frame.get_size()
 
 
 # ── Config ───────────────────────────────────────────────────────────────────

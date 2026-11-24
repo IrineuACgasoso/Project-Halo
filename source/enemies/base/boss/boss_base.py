@@ -111,6 +111,10 @@ class BossBase(BaseEnemy):
         self.mask = self.animador.mascara
         self.rect = imagem.get_rect(center=self.rect.center)
 
+    @property
+    def quadro_original(self):
+        return self.sprites[self.animador.lado][self.animador.quadro]
+
     # ------------------------------------------------------------ fases
     def checar_fase(self):
         nova = fase_pela_vida(self.FASES, self.contexto.razao_vida, self.fase)

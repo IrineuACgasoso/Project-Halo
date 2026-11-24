@@ -95,6 +95,7 @@ class KnightAttacks:
             )
 
             self.alpha_atual = 0
+            self.em_teleporte = True
             self.estado_habilidade = 'tp_traveling'
         else:
             self.cooldown_tp = self.novo_cooldown(1500, 3000)
@@ -109,7 +110,8 @@ class KnightAttacks:
     def finalizar_tp(self):
         self.posicao = pygame.math.Vector2(self.tp_orb.posicao)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
-        self.alpha_atual = 255 
+        self.alpha_atual = 255
+        self.em_teleporte = False
         
         # Restaura cooldown e aplica trava
         agora = relogio.agora()

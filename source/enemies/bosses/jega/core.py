@@ -31,15 +31,13 @@ class Jega(BaseEnemy, JegaSetup, JegaAI, JegaAttacks):
 
     @property
     def collision_rect(self):
-        """Retorna a hitbox de Jega. Fica invulnerável durante a órbita, a
-        ilusão (reposicionamento invisível) ou enquanto invisível."""
-        if self.estado in ('orbitando', 'ilusao') or self.alpha_atual <= 0:
-            return pygame.Rect(-1000, -1000, 0, 0)
         return self.hitbox
 
     @property
-    def invulneravel(self):
-        return self.estado in ('orbitando', 'ilusao')
+    def inofensivo(self):
+        """Na órbita e na ilusão ele atravessa o mapa (e o jogador): sem dano de contato.
+        Invisível, pode ser atingido, só não mirado (regra geral)."""
+        return super().inofensivo or self.estado in ('orbitando', 'ilusao')
 
     def morrer(self, grupos=None):
         Items.spawn_drop(

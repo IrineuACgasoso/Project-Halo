@@ -6,6 +6,7 @@
   desenhados em coordenadas de tela. Substitui a `Surface` temporária criada a cada `draw`.
 - `rascunho(tamanho)`: SRCALPHA local reaproveitada por tamanho, para quem precisa desenhar em
   coordenadas locais (ex.: `draw.polygon`, que muda pixels da aresta quando recortado).
+- `silhueta_de(superficie, cor)`: silhueta de uma cor só, em cache por superfície e cor.
 - `SUPERFICIE_VAZIA`: imagem 1×1 transparente para sprites que se desenham sozinhos (`draw`
   próprio) e só precisam de `image`/`rect`. Compartilhada: não desenhe nela.
 """
@@ -15,6 +16,7 @@ import pygame
 
 # Chave fraca: a superfície que sai de uso some do cache junto com a máscara.
 _MASCARAS = weakref.WeakKeyDictionary()
+_SILHUETAS = weakref.WeakKeyDictionary()   # superfície -> {cor: silhueta}
 _CAMADAS = {}   # tamanho da tela -> buffer SRCALPHA
 _RASCUNHOS = {}  # tamanho -> SRCALPHA
 
@@ -28,6 +30,18 @@ def mascara_de(superficie):
     if mascara is None:
         mascara = _MASCARAS[superficie] = pygame.mask.from_surface(superficie)
     return mascara
+
+
+def silhueta_de(superficie, cor):
+    """Silhueta opaca de `cor` (RGB) com a forma de `superficie`, criada uma vez. É compartilhada:
+    quem precisa de transparência chama `set_alpha` logo antes de cada blit."""
+    por_cor = _SILHUETAS.get(superficie)
+    if por_cor is None:
+        por_cor = _SILHUETAS[superficie] = {}
+    silhueta = por_cor.get(cor)
+    if silhueta is None:
+        silhueta = por_cor[cor] = mascara_de(superficie).to_surface(setcolor=(*cor, 255), unsetcolor=(0, 0, 0, 0))
+    return silhueta
 
 
 def camada_alpha(tela, caixa):

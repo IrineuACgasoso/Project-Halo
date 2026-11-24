@@ -9,6 +9,7 @@ apenas organiza e blinda o código de renderização contra falhas comuns
 import pygame
 
 from source.debug import DEBUG
+from source.feats.skills.invisibilidade.distorcao import desenhar_distorcao
 from source.systems.entitymanager import entity_manager
 from source.systems.status.cegueira import desenhar_cegueira
 
@@ -161,9 +162,15 @@ class Renderer:
         return visiveis
 
     def _draw_efeitos_inimigos(self, deslocamento):
-        """Lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""
+        """Distorção dos invisíveis, lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""
         tela = self.game.tela
         for inimigo in entity_manager.inimigos_grupo:
+            try:
+                if getattr(inimigo, 'invisibilidade', None) is not None:
+                    desenhar_distorcao(tela, inimigo, deslocamento)
+            except Exception as e:
+                self._log_erro(f'distorcao:{inimigo.__class__.__name__}', e)
+
             try:
                 if hasattr(inimigo, 'draw_laser'):
                     inimigo.draw_laser(tela, deslocamento)

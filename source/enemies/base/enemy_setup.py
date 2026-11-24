@@ -51,5 +51,6 @@ class EnemySetup:
     
     def setup_invisibility(self):
         self.invisibilidade = None     # skill ativa (feats/skills/invisibilidade) ou None
+        self.em_teleporte = False      # fora do mundo (viajando): nem mirado, nem atingido
         self.alpha_atual = 255
     

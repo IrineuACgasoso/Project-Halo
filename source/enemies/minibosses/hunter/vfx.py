@@ -8,19 +8,16 @@
 """
 import math
 import random
-import weakref
 
 import pygame
 
 from source.feats import particulas
 from source.systems.gameclock import relogio
-from source.utils.superficies import mascara_de
+from source.utils.superficies import silhueta_de
 
 from .config import CFG
 
 V2 = pygame.math.Vector2
-
-_SILHUETAS = weakref.WeakKeyDictionary()   # frame do sprite -> silhueta vermelha do mesmo tamanho
 
 CORES_POEIRA = ((120, 100, 70), (95, 80, 55), (140, 120, 90), (80, 70, 50))
 TAMANHOS_POEIRA = (4, 6, 8)
@@ -28,11 +25,7 @@ TAMANHOS_POEIRA = (4, 6, 8)
 
 def silhueta(frame):
     """Silhueta vermelha (cor `CFG.brilho_cor`) do `frame`, em cache."""
-    sil = _SILHUETAS.get(frame)
-    if sil is None:
-        sil = mascara_de(frame).to_surface(setcolor=(*CFG.brilho_cor, 255), unsetcolor=(0, 0, 0, 0))
-        _SILHUETAS[frame] = sil
-    return sil
+    return silhueta_de(frame, CFG.brilho_cor)
 
 
 def alpha_do_brilho(agora):

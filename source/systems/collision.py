@@ -53,7 +53,7 @@ class CollisionManager:
     def custom_collision(cls, sprite1, sprite2):
         """Lógica de colisão otimizada com suporte inteligente a Hitboxes Customizadas."""
         
-        # 1. Blindagem Total (Furtividade, Cutscenes, Dash)
+        # 1. Blindagem Total (teleporte, cutscenes, proteção de spawn); invisível pode ser atingido
         if getattr(sprite2, 'invulneravel', False):
             return False
 
@@ -90,7 +90,7 @@ class CollisionManager:
 
     @classmethod
     def aura_collision(cls, sprite_inimigo, sprite_aura):
-        """Colisão customizada para auras não detectarem inimigos invisíveis."""
+        """Colisão das auras: só ignora quem está invulnerável (invisível leva dano)."""
         if getattr(sprite_inimigo, 'invulneravel', False):
             return False
         return pygame.sprite.collide_circle(sprite_inimigo, sprite_aura)
@@ -134,7 +134,7 @@ class CollisionManager:
         for projetil in colisoes_proj_inimigos:
             projetil.ao_atingir_alvo(player)
 
-        # 3. Colisão de Contato: Jogador -> Inimigos (Ignora se estiver oculto)
+        # 3. Colisão de Contato: Jogador -> Inimigos (inclusive invisíveis)
         inimigos_contato = self.colidindo_com_inimigos(player)
         for inimigo in inimigos_contato:
             # Se o inimigo estiver inofensivo (ex: no ar), ignora o dano
@@ -156,7 +156,7 @@ class CollisionManager:
                 entity_manager.inimigos_grupo,
                 entity_manager.auras_grupo,
                 False, False,
-                self.aura_collision # <- Mudado aqui! Agora respeita a invisibilidade
+                self.aura_collision
             )
             for inimigo, auras in colisoes_aura.items():
                 if not getattr(inimigo, 'invulneravel', False):

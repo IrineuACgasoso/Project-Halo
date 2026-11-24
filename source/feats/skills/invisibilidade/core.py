@@ -41,10 +41,6 @@ class Invisibilidade:
         """0 = totalmente visível, 1 = totalmente invisível (força da distorção)."""
         return 1 - self._alpha / 255
 
-    @property
-    def revelada(self):
-        return self._revelado_ms > 0
-
     def revelar(self, duracao_ms=100, alpha=120):
         """Clarão: aparece parcialmente por um instante (ex.: ao atirar). Continua sem poder ser mirado."""
         self._revelado_ms = duracao_ms

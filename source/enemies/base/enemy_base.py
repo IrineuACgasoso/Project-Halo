@@ -57,8 +57,10 @@ class BaseEnemy(
     
     @property
     def invisivel(self):
-        """Verifica se o inimigo está visualmente indetectável."""
-        return self.alpha_atual == 0 or (self.invisibilidade is not None and self.invisibilidade.oculta)
+        """Camuflado (fade out ou oculto) ou fora do mundo: ninguém pode MIRAR nele (`alvejavel`).
+        Continua podendo ser atingido (tiro perdido, aura, explosão): ver `invulneravel`."""
+        return (self.alpha_atual == 0 or self.em_teleporte
+                or (self.invisibilidade is not None and self.invisibilidade.oculta))
 
     @property
     def vivo(self):
@@ -67,19 +69,21 @@ class BaseEnemy(
 
     @property
     def alvejavel(self):
-        """Pode ser escolhido como alvo pelas armas do jogador: vivo e visível."""
+        """Pode ser escolhido como alvo (armas, companheiros, veículos, projéteis teleguiados):
+        vivo e visível. Toda busca de alvo nova passa por aqui."""
         return self.vivo and not self.invisivel
 
     @property
     def invulneravel(self):
         """
         Dita se o inimigo pode tomar dano ou colisões físicas.
-        Se ele tiver uma flag manual ativada OU estiver invisível, ele fica invulnerável.
+        Vale com uma flag manual ativada, no meio de um teleporte ou na proteção de spawn.
+        Invisível NÃO é invulnerável: só não pode ser mirado.
         """
-        flag_manual = getattr(self, 'is_invulneravel', False) 
+        flag_manual = getattr(self, 'is_invulneravel', False)
         protecao_spawn = getattr(self, 'invencivel', False)
-        
-        return flag_manual or self.invisivel or protecao_spawn
+
+        return flag_manual or self.em_teleporte or protecao_spawn
     
     @property
     def inofensivo(self):
@@ -88,6 +92,11 @@ class BaseEnemy(
         Ideal para quando estão no ar (eixo Z falso), atordoados (inclusive pelo sistema de status), etc.
         """
         return getattr(self, 'is_inofensivo', False) or self.status.atordoado
+
+    @property
+    def quadro_original(self):
+        """Quadro mostrado, como está no cache (sem o alpha desta instância): a silhueta da distorção."""
+        return self.sprites[self.estado_animacao][self.frame_atual]
 
     def update(self, delta_time, paredes=None):
         self.mover(delta_time)
