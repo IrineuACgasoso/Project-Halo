@@ -34,4 +34,5 @@ O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as luta
 - **Soco Spartan:** o efeito antigo **nunca aparecia** (lia `game.all_sprites`, que não existe). Agora clarão + 68 faíscas no ponto do impacto. `Particula` ganhou `gravidade`; efeito só visual usa sorteio próprio (goldens inalterados).
 - **Balanceamento do usuário** (shotgun, sniper, Scarab 2800, cura de level-up = metade). O `min_val` do sniper foi de 9775 para 9750 (a conta exata; 28 testes falhavam por isso).
 - **Suíte:** 1953 → 720 testes, 125 → ~40 s na mesma máquina; saíram equivalências, aparência, config inválida, `test_perf_tool`, `test_shims` e os goldens `assets`/`inimigos`. **Contexto por sessão:** CLAUDE.md + docs de ~70 KB para ~5 KB (nada é importado sozinho); `.ignore` para buscas; `BOSS_CREATION.md` apagado.
+- Custo do fogo: 3–4 ms/frame com 150 alvos queimando na tela (pior caso irreal; ~0,03 ms por alvo).
 - **Não validado:** a sensação na tela real (conferi por capturas headless) e o balanceamento da queimadura.

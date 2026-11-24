@@ -23,9 +23,10 @@ PONTOS = ((0.50, 0.30), (0.22, 0.52), (0.78, 0.50), (0.48, 0.68), (0.16, 0.88), 
 CHAMAS_POR_PX = 1 / 20                              # nº de chamas pela largura do corpo
 MINIMO_CHAMAS = 3
 
-CORES_PISQUE = ((255, 110, 20), (255, 215, 60))
-MS_PISQUE = 420                                     # um ciclo laranja → amarelo
-ALPHA_PISQUE = (45, 150)
+# Cores somadas ao corpo (BLEND_RGB_ADD: bem mais barato que um blit com alpha), num vaivém do laranja
+# ao amarelo
+CORES_PISQUE = ((125, 35, 0), (85, 30, 0), (60, 35, 0), (95, 70, 8), (140, 110, 18))
+MS_POR_COR = 55
 
 _QUADROS = {}                                       # largura -> [Surface]
 _BASES = weakref.WeakKeyDictionary()                # quadro do alvo -> (largura da chama, [base de cada uma])
@@ -52,7 +53,7 @@ def quadros_da_chama(largura):
                     esquerda.append((x - largo, y))
                     direita.append((x + largo, y))
                 pygame.draw.polygon(surf, cor, esquerda + direita[::-1])
-            quadros.append(surf)
+            quadros.append(surf.convert_alpha())
     return quadros
 
 
@@ -87,11 +88,10 @@ def desenhar_fogo(tela, alvo, deslocamento):
     if not tela.get_rect().colliderect(x, y, quadro.get_width(), quadro.get_height()):
         return
     agora = relogio.agora()
-    onda = 0.5 + 0.5 * math.sin(2 * math.pi * agora / MS_PISQUE)
-    silhueta = silhueta_de(quadro, CORES_PISQUE[onda > 0.5])
-    minimo, maximo = ALPHA_PISQUE
-    silhueta.set_alpha(round(minimo + (maximo - minimo) * abs(2 * onda - 1)))
-    tela.blit(silhueta, (x, y))
+    volta = 2 * len(CORES_PISQUE) - 2
+    passo = int(agora // MS_POR_COR) % volta
+    silhueta = silhueta_de(quadro, CORES_PISQUE[min(passo, volta - passo)])
+    tela.blit(silhueta, (x, y), special_flags=pygame.BLEND_RGB_ADD)
 
     largura, bases = _bases_das_chamas(quadro)
     chamas = quadros_da_chama(largura)
