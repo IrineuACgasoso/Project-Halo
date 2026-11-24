@@ -49,6 +49,8 @@ class BossBase(BaseEnemy):
         agora = relogio.agora()
         self._agora = agora
         self._dt = 0.0
+        self._paredes = None               # do frame atual: as rotinas passam ao Dash
+        self._dir_mov = None               # direção do movimento; None = perseguir o jogador
 
         self.fase = 1
         self.fase_cfg = self.FASES[0]
@@ -74,6 +76,7 @@ class BossBase(BaseEnemy):
         agora = relogio.agora()
         self._agora = agora
         self._dt = delta_time
+        self._paredes = paredes
 
         self.perceber(agora, delta_time)
         self.checar_fase()
@@ -93,6 +96,17 @@ class BossBase(BaseEnemy):
     def orientar(self):
         """Padrão: olha para o jogador."""
         self.set_sprite_direction(self.jogador.posicao.x - self.posicao.x)
+
+    # ------------------------------------------------------------ movimento
+    def mover(self, delta_time, direcao=None):
+        if direcao is None and self._dir_mov is not None:
+            direcao = self._dir_mov.copy()      # a base faz normalize_ip: não mudar o nosso
+        super().mover(delta_time, direcao)
+
+    def _ir(self, direcao, fator=1.0):
+        """Anda em `direcao` neste frame, a `fator` × a velocidade da fase."""
+        self._dir_mov = direcao
+        self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade * fator
 
     # ------------------------------------------------------------ animação
     def set_sprite_direction(self, direcao_x):

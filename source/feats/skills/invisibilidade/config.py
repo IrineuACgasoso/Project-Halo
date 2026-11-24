@@ -27,5 +27,8 @@ INVISIBILIDADE_PRESETS = {
     'jega_orbita': InvisibilidadeConfig(fade_out_ms=400, duracao_ms=2200, fade_in_ms=400),
     'jega_ilusao': InvisibilidadeConfig(fade_out_ms=350, duracao_ms=1500, fade_in_ms=350),
     'harbinger_teleporte': InvisibilidadeConfig(fade_out_ms=60, duracao_ms=240, fade_in_ms=100),
-    'zealot_reposicao': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=2000, fade_in_ms=1500),
+    'zealot_furtivo': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=4500, fade_in_ms=250),
+    # Sem fim: a fuga dele decide quando reaparecer (escudo cheio ou jogador perto)
+    'zealot_defensiva': InvisibilidadeConfig(fade_out_ms=350, duracao_ms=None, fade_in_ms=300),
+    'zealot_reposicao': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=500, fade_in_ms=500),
 }

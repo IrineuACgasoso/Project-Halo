@@ -6,14 +6,7 @@ from .config import CFG
 class ArbiterMovement:
     """Movimento tático. A percepção comum (contexto, mira antecipada) vem da BossBase.
 
-    ATENÇÃO: este mixin precisa vir ANTES de BossBase na herança da classe,
-    senão o `mover` de EnemyMovement ganha na MRO e o override nunca roda."""
-
-    # ------------------------------------------------------------ override
-    def mover(self, delta_time, direcao=None):
-        if direcao is None and self._dir_mov is not None:
-            direcao = self._dir_mov.copy()          # base faz normalize_ip: não mutar o nosso
-        super().mover(delta_time, direcao)
+    ATENÇÃO: este mixin precisa vir ANTES de BossBase na herança da classe (MRO)."""
 
     def perceber(self, agora, delta_time):
         super().perceber(agora, delta_time)
@@ -27,10 +20,6 @@ class ArbiterMovement:
         self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade
         self.animador.tocar('andar')
         self._dir_mov = None
-
-    def _ir(self, direcao, fator=1.0):
-        self._dir_mov = direcao
-        self.velocidade = self.velocidade_base * self.fase_cfg.mult_velocidade * fator
 
     def _parar(self):
         self.velocidade = 0

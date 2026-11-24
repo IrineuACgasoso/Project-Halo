@@ -200,7 +200,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 | **F2** Animador | clips declarativos, hit frames, cache de máscaras | update de boss com zero alocação (catraca). **Feito (2026-11-22):** o Arbiter migrou; golden dele (com quadro, lado e alpha) inalterado; teste de identidade das imagens no lugar da catraca, que não vê `Surface.copy` |
 | **F3** IA de utilidade + memória | `decisao.py`, alimentada por `dano_causado` (B4) | teste determinístico: contexto X → habilidade Y |
 | **F4** Bot jogador | `FonteEntrada` Bot (E3) que esquiva e kita | métricas por boss no log: tempo para matar, % de acerto, uso de cada habilidade |
-| **F5.x** Migração | um commit por boss: Tartarus (+ Atriox e Escharum, que deixam de ser cópias), Harbinger, Jega, Guilty, Didact, Gravemind, Warden, Guardian; depois Hunter (adiantado em 2026-11-22 sem a `BossBase`: falta só migrar para ela), Zealot, Scarab, Knight | smoke + métricas do bot sem piora + catraca zero no update |
+| **F5.x** Migração | um commit por boss: Tartarus (+ Atriox e Escharum, que deixam de ser cópias), Harbinger, Jega, Guilty, Didact, Gravemind, Warden, Guardian; depois Hunter (adiantado em 2026-11-22 sem a `BossBase`: falta só migrar para ela), ~~Zealot~~ (feito em 2026-11-23, já na `BossBase`), Scarab, Knight | smoke + métricas do bot sem piora + catraca zero no update |
 | **F6** Inimigos comuns no Animador | mesmo motor de animação para `enemies/standard/` | catraca; golden inalterado |
 | **F7** Guia | `docs/bosses.md` + template; apaga `source/docs/BOSS_CREATION.md` | guia validado criando um boss de teste só pelo template |
 

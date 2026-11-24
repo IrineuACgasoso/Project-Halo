@@ -37,18 +37,9 @@ def alpha_do_brilho(agora):
 
 # ── Poeira ───────────────────────────────────────────────────────────────────
 def poeira(posicao, direcao, quantidade, abertura_graus=360, velocidade=(60, 160), duracao_ms=(450, 750)):
-    """`quantidade` grãos saindo de `posicao` em direções sorteadas no leque de `abertura_graus`
-    em volta de `direcao` (com 360, para todos os lados)."""
-    base = V2(direcao) if V2(direcao).length_squared() > 0 else V2(1, 0)
-    base.normalize_ip()
-    meia = abertura_graus / 2
-    for _ in range(quantidade):
-        # Sorteia tudo antes de consultar o teto (a sequência do random não depende do descarte)
-        cor = random.choice(CORES_POEIRA)
-        tamanho = random.choice(TAMANHOS_POEIRA)
-        vel = base.rotate(random.uniform(-meia, meia)) * random.uniform(*velocidade)
-        duracao = random.uniform(*duracao_ms)
-        particulas.emitir(posicao, particulas.imagem_pixel(cor, tamanho, 'circulo'), vel, duracao)
+    """Grãos de poeira saindo de `posicao` no leque de `abertura_graus` em volta de `direcao`."""
+    particulas.emitir_leque(posicao, direcao, quantidade, CORES_POEIRA, TAMANHOS_POEIRA, abertura_graus,
+                            velocidade, duracao_ms)
 
 
 def poeira_na_area_do_cone(origem, direcao, raio, abertura_graus, quantidade):

@@ -2,6 +2,33 @@
 
 Entradas curtas, a mais recente no topo. Quando o arquivo passar de cerca de 300 linhas, comprima as entradas antigas num resumo.
 
+## 2026-11-23 | Zealot reformulado (muda o jogo, pedido do usuário)
+- Sobre a `BossBase` (adianta o Zealot da F5): `config.py` (todos os números), `setup`, `states` (decisão), `movement` (dash, perseguição, fuga), `attacks` (rotinas), `vfx`. Escudo 500 e vida 250 (antes: 750 de vida, sem escudo), escalados juntos pelo nível do jogador. Vida mínima própria (200) em `test_boss_tem_vida_de_boss`.
+- **Com escudo** (pesos por distância): perto (≤ 250 px) só o combo; média (≤ 600) combo 7 × furtivo 2; longe, furtivo 8 × só perseguir 2 (nunca o combo).
+  - **Combo:** dash puro → dash + estocada (retângulo 70×460, 350 ms, 220 de dano) → dash + varredura (cone azul de 150°). Todo golpe sai **no vetor do dash**. Pausa de 0,5–1 s entre um dash e o próximo; 0,9 s de recuperação no fim. Parado entre dashes ele é inofensivo (para em cima do jogador: o contato bateria a cada 100 ms).
+  - **Furtivo:** invisível a 442 px/s (buff de 240%; o jogador começa com 500). A 200 px, reaparece por 150 ms e dá um bote de 1600 px/s que passa reto. Contorna paredes.
+- **Sem escudo:** ao ficar livre (nunca no meio de um golpe), foge invisível: 1,8 s a 650 px/s e depois 416 px/s, sorteando rumos perto da distância ideal (700 px). Regenera tudo em 8 s. Jogador a 260 px (depois de 1,5 s): dash + cone fino e longo, e volta ao ataque com o escudo que tiver; sem escudo no fim do golpe, foge de novo. Escudo cheio: só reaparece.
+- **Achado e corrigido:** a arte do Zealot aponta para a esquerda e ele era espelhado ao contrário (`flip_sprite=True`).
+- `BossBase` ganhou `mover`/`_ir`/`_dir_mov` (vinham do Arbiter) e `_paredes`; `particulas.emitir_leque` (a poeira do Hunter usa). Golden do Arbiter inalterado nesta parte. A exceção do `zealot/__init__.py` saiu do `ruff.toml`.
+- VFX: rastro azul do dash (silhuetas em cache), faíscas nos golpes e na quebra do escudo, camera shake.
+- Testes: `test_zealot.py` (61); 8 mutações conferidas (estocada no jogador, sem fuga, sem regeneração, buff preso...). **Suíte: 1600 verdes + 1 xfail.** Catraca inalterada.
+- Desempenho (na tomada, A/B alternado com a F2, 2 rodadas): boss_zealot 1,05/1,09 × 1,36/1,32 ms/frame (p95 1,37/1,34 × 2,25/2,26: distorção, rastro e cones); arbiter, jega, hunter e horda iguais.
+- **Não validado:** a luta na tela real (sensação da velocidade, se a distorção dá tempo de reagir, balanceamento de escudo × DPS do jogador). Conferi por capturas de tela headless.
+
+## 2026-11-23 | Skills: ataque retangular e dash em subpassos
+- `feats/skills/rect_strike/`: `RectStrikeAviso(posicao, direcao, ..., preset)`; `RectStrikeConfig` (dano, `largura` = espessura, `altura` = alcance, duração do aviso, 4 cores). Fundo claro, borda escura e preenchimento escuro que avança **do dono até a ponta**. Atinge quem tem a posição dentro (como cone e artilharia). `no_retangulo` em `utils/vetores`.
+- `Dash`: com paredes, anda em pedaços de até 60% do raio de colisão. Um passo ≥ 15 px (900 px/s) caía do outro lado da linha. O dash do Hunter (8 px por passo) não muda.
+
+## 2026-11-23 | Invisibilidade: skill única e regra do jogo (muda o jogo, pedido do usuário)
+- **Skill** `feats/skills/invisibilidade/`: `fade_out_ms`, `duracao_ms` (sem contar os fades; `None` = até `encerrar()`), `fade_in_ms`. A máquina `invis_*` da `EnemyCombat` saiu; Elite, Arbiter, Jega e Harbinger migraram para presets com os mesmos tempos. Goldens inalterados nesta parte.
+- **Regra:** invisível (fade out e oculto) **nunca é mirado**. Furos fechados: companheiros (inclusive o alvo que some no meio do ataque), veículos, agulha teleguiada do Needler e quique do Fuel Rod. E **não é invulnerável**: tiro perdido, aura e explosão acertam, e ele dá dano de contato.
+- `em_teleporte` (novo): Knight e Warden viajando usavam `alpha_atual = 0` como "fora do mundo" e ficariam vulneráveis; seguem como antes.
+- Saíram a exceção do Arbiter (`vulneravel_ao_revelar`) e a do Jega (invulnerável na órbita e na ilusão; agora só `inofensivo`, porque atravessa o mapa). O teleporte do Harbinger segue invulnerável (é teleporte, não camuflagem).
+- **Distorção:** o `Renderer` recola o cenário ondulando na silhueta de todo camuflado, com um véu claro (senão some em chão liso). 0,08 ms por Elite, 0,16 no Zealot, zero alocação. `silhueta_de` em `utils/superficies`.
+- **Golden do Arbiter regravado** (declarado): a 1ª divergência é o contato camuflado. Golden da fase 0 inalterado.
+- Testes: `test_invisibilidade.py` (toda arma, companheiro e veículo do registro entra sozinho).
+- **Achado (não corrigido):** o Árbitro companheiro no nível 1 nunca acerta alvo parado: estabiliza orbitando a 64 px e o golpe exige < 60 px.
+
 ## 2026-11-22 | Etapa F2: Animador (refatoração: golden inalterado)
 - `enemies/base/boss/animador.py`:
   - `Clip(ms_por_quadro, quadros=None, loop=True, eventos={})`: frozen e validado; `eventos` = passo do clip -> nome (hit frame);

@@ -7,6 +7,7 @@ com alpha quantizado em `NIVEIS_ALPHA`, também em cache. Todas as partículas v
 Quem emite sorteia os parâmetros ANTES de consultar o teto: o descarte não muda a sequência do
 `random` (a simulação continua determinística com ou sem descarte).
 """
+import random
 import weakref
 
 import pygame
@@ -100,3 +101,21 @@ def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None):
     elif isinstance(grupos, pygame.sprite.AbstractGroup):
         grupos = (grupos,)
     return Particula(posicao, imagem, velocidade, duracao_ms, grupos)
+
+
+def emitir_leque(posicao, direcao, quantidade, cores, tamanhos, abertura_graus=360, velocidade=(60, 160),
+                 duracao_ms=(450, 750)):
+    """`quantidade` partículas redondas saindo de `posicao` em direções sorteadas no leque de
+    `abertura_graus` em volta de `direcao` (com 360, para todos os lados)."""
+    base = pygame.math.Vector2(direcao)
+    if base.length_squared() == 0:
+        base.update(1, 0)
+    base.normalize_ip()
+    meia = abertura_graus / 2
+    for _ in range(quantidade):
+        # Sorteia tudo antes de consultar o teto (a sequência do random não depende do descarte)
+        cor = random.choice(cores)
+        tamanho = random.choice(tamanhos)
+        vel = base.rotate(random.uniform(-meia, meia)) * random.uniform(*velocidade)
+        duracao = random.uniform(*duracao_ms)
+        emitir(posicao, imagem_pixel(cor, tamanho, 'circulo'), vel, duracao)

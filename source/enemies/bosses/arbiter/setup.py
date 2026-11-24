@@ -12,7 +12,6 @@ class ArbiterSetup:
         self.elites_invocados = []
 
         # --- movimento ---
-        self._dir_mov = None               # None = perseguir o jogador (comportamento base)
         self._lado_strafe = random.choice((-1, 1))
         self._troca_lado_em = agora + random.randint(*CFG.strafe_troca_ms)
         self._flip_valido_em = 0

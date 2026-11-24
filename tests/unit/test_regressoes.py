@@ -74,7 +74,8 @@ def test_didact_colide_pela_hitbox(novo_jogo):
 # ── Bosses: vida de debug esquecida (Jega com vida_base=10)
 # Exceções declaradas (decisão do usuário), com piso próprio para ainda pegar valor de debug:
 # o Hunter tem 120 de vida, compensados pela Defesa de 90% fora das costas.
-VIDA_MINIMA_BOSS = {'hunter': 100}
+# O Zealot tem vida baixa de propósito, compensada pelo escudo avantajado que se regenera.
+VIDA_MINIMA_BOSS = {'hunter': 100, 'zealot': 200}
 
 
 @pytest.mark.parametrize('nome', sorted(n for n, c in BOSS_CLASSES.items() if issubclass(c, BaseEnemy)))

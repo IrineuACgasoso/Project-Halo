@@ -25,11 +25,10 @@ class Invisibilidade:
         self.terminou = False
         self._total_ms = 0.0
         self._fase_ms = 0.0
-        self._alpha = 255.0            # sem o clarão de `revelar`
-        self._alpha_inicial = 0.0      # de onde o fade in parte (encerrar no meio do fade out)
+        self._alpha = float(inimigo.alpha_atual)   # sem o clarão de `revelar`
+        self._alpha_inicial = self._alpha          # de onde o fade parte (cortado no meio, não pisca)
         self._revelado_ms = 0.0
         self._revelado_alpha = 0
-        inimigo._aplicar_alpha(255)
 
     @property
     def oculta(self):
@@ -63,7 +62,7 @@ class Invisibilidade:
 
         if self.fase == FADE_OUT:
             t = min(1.0, self._fase_ms / self.cfg.fade_out_ms)
-            self._alpha = 255 - 255 * t
+            self._alpha = self._alpha_inicial - self._alpha_inicial * t
             if t >= 1.0:
                 self.fase = OCULTO
                 self._fase_ms = 0.0

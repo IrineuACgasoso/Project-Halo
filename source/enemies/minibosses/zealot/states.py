@@ -1,71 +1,56 @@
-import pygame
+"""Decisão do Zealot: confia no escudo, teme pela vida.
+
+Com escudo, ataca por pesos conforme a distância. Sem escudo, a primeira coisa que faz ao ficar livre
+(nunca no meio de um golpe) é fugir invisível. O ciclo (rotinas, cooldowns, anti-stuck) é da BossBase."""
+import random
+
+from .config import CFG
+
 
 class ZealotAI:
-    def verificar_fases(self):
-        if self.vida <= self.vida_base / 2 and not getattr(self, 'enrage', False):
-            self.enrage = True
-            self.rage_mult *= 1.2
-
-    def executar_estados(self, agora, delta_time, dist_sq):
-        # Atualiza as outras fases da invisibilidade (fade_out e hold)
+    def preparar_frame(self, delta_time):
         self.atualizar_invisibilidade(delta_time)
+        # Padrão de todo frame: perseguir andando, olhando para o jogador. As rotinas sobrescrevem.
+        self._ir(None)
+        self._olhar_x = None
+        self.animador.tocar('andar')
 
-        # TRAVA CRÍTICA: Se estiver reaparecendo, não processa mais nada e mantém o estado atual
-        if self.fase_invisibilidade == 'fade_in':
-            self.velocidade = self.velocidade_base * self.rage_mult
-            self.velocidade_animacao = 80
+    def orientar(self):
+        if self._olhar_x is not None:
+            self.set_sprite_direction(self._olhar_x)
+        else:
+            super().orientar()
+
+    @property
+    def sem_escudo(self):
+        return self.escudo_atual <= 0
+
+    def faixa_de_distancia(self):
+        dist_sq = self.contexto.dist_sq
+        if dist_sq <= CFG.dist_perto ** 2:
+            return 'perto'
+        return 'medio' if dist_sq <= CFG.dist_medio ** 2 else 'longe'
+
+    def pensar(self, agora, delta_time):
+        """Sem escudo, fugir vem antes de tudo (inclusive da pausa pós-habilidade)."""
+        if self.sem_escudo:
+            self.wait = 0
+            self.iniciar('defensiva')
             return
-        
-        self.checar_anti_stuck(agora, dist_sq)
-        
-        # --------------------------------------------------
-        # 1. PENSADOR (Estado IDLE toma as decisões)
-        # --------------------------------------------------
-        if self.estado_habilidade == 'idle':
-            self.velocidade = self.velocidade_base
-            self.velocidade_animacao = 200
-            
-            # Decisão: Ataque Melee (Colado)
-            if dist_sq < 4000:
-                self.estado_habilidade = 'melee'
-                self.tempo_ataque = agora
+        super().pensar(agora, delta_time)
 
-            # Decisão: Dash (Distância Média)
-            elif 62500 < dist_sq < 250000 and (agora - getattr(self, 'last_dash', 0) > self.cooldown_dash):
-                self.estado_habilidade = 'dash_prep'
-                self.tempo_inicio_dash = agora
-                
-                vetor_alvo = self.jogador.posicao - self.posicao
-                if vetor_alvo.length() > 0:
-                    self.dash_direcao = vetor_alvo.normalize()
-                else:
-                    self.dash_direcao = pygame.math.Vector2(1, 0)
-                    
-            # Decisão: Stealth/Teleporte (Perto, mas não colado)
-            elif dist_sq < 160000 and (agora - getattr(self, 'last_stealth', 0) > self.cooldown_stealth):
-                self.estado_habilidade = 'stealth'
-                self.ja_teleportou = False
-                self.iniciar_invisibilidade('zealot_reposicao')
+    def movimento_ocioso(self, agora):
+        if self.faixa_de_distancia() == 'longe':
+            self._ir(self.dir_jogador(), CFG.mult_sprint)
+            self.animador.tocar('correr')
 
-            # Decisão: Sprint (Longe)
-            elif dist_sq >= 250000:
-                self.estado_habilidade = 'sprint'
-
-        # --------------------------------------------------
-        # 2. EXECUTOR (Chama os ataques do attacks.py)
-        # --------------------------------------------------
-        elif self.estado_habilidade == 'dash_prep':
-            self.velocidade_animacao = 300
-            self.processar_dash_prep(agora)
-            
-        elif self.estado_habilidade == 'dashing':
-            self.velocidade_animacao = 40
-            self.processar_dash(agora, delta_time, dist_sq)
-            
-        elif self.estado_habilidade == 'stealth':
-            self.velocidade_animacao = 200
-            self.processar_stealth(agora)
-            
-        elif self.estado_habilidade == 'sprint':
-            self.velocidade_animacao = 120
-            self.processar_sprint(dist_sq)
+    def escolher_habilidade(self, agora):
+        pesos = {nome: peso for nome, peso in CFG.pesos[self.faixa_de_distancia()].items()
+                 if nome == 'perseguir' or self.pronto(nome)}
+        if not set(pesos) - {'perseguir'}:
+            return None
+        escolha = random.choices(list(pesos), weights=list(pesos.values()))[0]
+        if escolha == 'perseguir':
+            self.wait = random.randint(*CFG.perseguir_ms)
+            return None
+        return escolha

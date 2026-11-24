@@ -1,55 +1,44 @@
 import pygame
-from source.systems.gameclock import relogio
-from source.feats.items import Items
-from source.enemies.base.enemy_base import BaseEnemy
 
+from source.enemies.base.boss import BossBase
+from source.feats.items import Items
+
+from .config import CFG, CLIPS, ESTADOS
 from .setup import ZealotSetup
 from .states import ZealotAI
+from .movement import ZealotMovement
 from .attacks import ZealotAttacks
-from source.systems.status import IMUNIDADES_CHEFE
+from .vfx import ZealotVFX
 
-class Zealot(BaseEnemy, ZealotSetup, ZealotAI, ZealotAttacks):
-    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
+
+class Zealot(ZealotMovement, ZealotAI, ZealotAttacks, ZealotVFX, ZealotSetup, BossBase):
+    """Vida baixa e escudo avantajado. Com escudo, ataca (combo de 3 dashes, invisibilidade ofensiva);
+    sem escudo, foge invisível e o regenera até ser caçado. Mixins ANTES de BossBase (MRO)."""
+    COOLDOWNS = CFG.cooldown
+    COOLDOWN_INICIAL = CFG.cooldown_inicial
+    ESTADOS = ESTADOS
+    ANTISTUCK = CFG.antistuck
+    CLIPS = CLIPS
+    CLIP_INICIAL = 'andar'
+
     def __init__(self, posicao, game, **kwargs):
-        super().__init__(posicao, vida_base=750, dano_base=80, velocidade_base=100, game=game, sprite_key='zealot')
+        super().__init__(posicao, vida_base=CFG.vida, dano_base=CFG.dano_contato, velocidade_base=CFG.velocidade,
+                         game=game, sprite_key='zealot', flip_sprite=True)   # a arte aponta para a esquerda
         self.titulo = "ZEALOT, Soldado de Elite Covenant"
-        self.is_boss = True
 
-        self.setup_animation(estado_inicial='right', velocidade_animacao=200)
-        
-        self.inicializar_habilidades()
-
-        # Hitbox Customizada
+        # Hitbox customizada
         self.hitbox = pygame.Rect(0, 0, self.rect.width / 2, self.rect.height)
         self.hitbox.center = self.rect.center
 
-    def update(self, delta_time, paredes=None):
-        agora = relogio.agora()
-        dist_sq = self.posicao.distance_squared_to(self.jogador.posicao)
-
-        # Inteligência e Estados
-        self.verificar_fases()
-        self.executar_estados(agora, delta_time, dist_sq)
-
-        # Direção da Sprite
-        # Trava a direção da sprite APENAS se não estiver em dash 
-        if self.estado_habilidade not in ['dash_prep', 'dashing']:
-            direcao_x = self.jogador.posicao.x - self.posicao.x
-            self.set_sprite_direction(direcao_x)
-
-        # Movimento Base e Animação
-        super().update(delta_time, paredes)
-        self.animar()
-        
-        self.hitbox.center = self.rect.center
-
+        self.inicializar_habilidades()
+        self.iniciar_vfx()
 
     def morrer(self, grupos=None):
         Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            big_shard=((3, 4), (70, 30), 100), 
-            life_orb=(1, 100, 100),              
-            upgrade=((1, 2), (99, 1), 100)       
+            self.posicao,
+            grupos,
+            big_shard=((3, 4), (70, 30), 100),
+            life_orb=(1, 100, 100),
+            upgrade=((1, 2), (99, 1), 100)
         )
         self.kill()

@@ -57,6 +57,29 @@ CONE_STRIKE_PRESETS = {
         cor_explosao=(200, 255, 170, 240)
     ),
 
+    # === ZEALOT (Covenant) — azul fosforescente ===
+    # Fim do combo de dashes: arco enorme e rápido.
+    'zealot_varredura': ConeStrikeConfig(
+        dano=160,
+        raio=300,
+        angulo_spray=150,
+        duracao=450,
+        cor_borda=(0, 235, 255, 235),
+        cor_preenchimento=(0, 170, 255, 110),
+        cor_explosao=(170, 255, 255, 250)
+    ),
+
+    # Contra-ataque de quem o caça invisível: fino e de longo alcance.
+    'zealot_contra_ataque': ConeStrikeConfig(
+        dano=130,
+        raio=480,
+        angulo_spray=40,
+        duracao=450,
+        cor_borda=(0, 235, 255, 235),
+        cor_preenchimento=(0, 170, 255, 110),
+        cor_explosao=(170, 255, 255, 250)
+    ),
+
     # === ARBITER (Covenant) — energia azul ===
     # Espada de energia: curtissimo alcance, arco aberto, telegraph rapido.
     'arbiter_energy_sword': ConeStrikeConfig(

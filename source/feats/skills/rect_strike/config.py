@@ -28,4 +28,16 @@ class RectStrikeConfig:
 
 RECT_STRIKE_PRESETS = {
     'padrao': RectStrikeConfig(),
+
+    # Estocada da espada de energia do Zealot: fina, curtíssima e de altíssimo dano (esquiva lateral).
+    'zealot_estocada': RectStrikeConfig(
+        dano=220,
+        largura=70,
+        altura=460,
+        duracao=350,
+        cor_fundo=(150, 215, 255, 70),
+        cor_borda=(10, 50, 130, 230),
+        cor_preenchimento=(30, 110, 230, 150),
+        cor_explosao=(210, 245, 255, 240)
+    ),
 }

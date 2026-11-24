@@ -117,11 +117,18 @@ def test_visivel_nada_acontece(grunt):
     assert grunt.invisibilidade is None and grunt.fase_invisibilidade is None and grunt.alpha_atual == 255
 
 
-def test_iniciar_de_novo_recomeca(grunt):
+def test_iniciar_de_novo_recomeca_sem_piscar(grunt):
+    """Camuflar-se ainda reaparecendo parte do alpha em que está (não pula para 255)."""
     grunt.iniciar_invisibilidade('padrao')
     _passar(grunt, 1000)
+    grunt.encerrar_invisibilidade()
+    _passar(grunt, 250)
+    alpha = grunt.alpha_atual
+    assert 0 < alpha < 255
     grunt.iniciar_invisibilidade('padrao')
-    assert grunt.fase_invisibilidade == FADE_OUT and grunt.alpha_atual == 255
+    assert grunt.fase_invisibilidade == FADE_OUT and grunt.alpha_atual == alpha and not grunt.alvejavel
+    _passar(grunt, DT * 1000)
+    assert 0 < grunt.alpha_atual <= alpha
 
 
 # ── Clarão ───────────────────────────────────────────────────────────────────
@@ -425,9 +432,11 @@ def test_distorcao_nao_aloca_por_frame(novo_jogo, grunt):
     desloc = _na_tela(grunt)
     _ocultar(grunt)
     tela = _tela_com_fundo()
-    desenhar_distorcao(tela, grunt, desloc)            # silhuetas e rascunho entram no cache
+    for _ in range(round(6 / DT)):                     # uma pulsação inteira: silhuetas, véus e rascunho no cache
+        relogio.avancar(DT)
+        desenhar_distorcao(tela, grunt, desloc)
     with contar_alocacoes() as c:
-        for _ in range(30):
+        for _ in range(round(6 / DT)):
             relogio.avancar(DT)
             desenhar_distorcao(tela, grunt, desloc)
     assert c.total == 0

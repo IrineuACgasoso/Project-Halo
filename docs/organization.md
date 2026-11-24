@@ -37,7 +37,7 @@ Project-Halo/
     │   ├── enemy_data.py    # BALANCEAMENTO dos inimigos comuns: INIMIGOS (PerfilInimigo: vida, dano, velocidade, cooldowns, drops)
     │   ├── manifesto_assets.py # MANIFESTO: toda imagem (arquivo, escala, alpha, espelhar), no formato de ASSETS
     │   └── validacao.py     # validar_tudo(): lista de erros dos dados (armas, pools, bosses, inimigos, manifesto, mapas) (D5)
-    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores (direcao_segura, no_cone: ponto dentro de um cone sem trigonometria),
+    ├── utils/               # paths.path(), fonts.carregar_fonte (cache), vetores (direcao_segura; no_cone e no_retangulo: ponto na área sem trigonometria),
     │                        # collision_utils (empurrão de parede em float),
     │                        # superficies (máscara em cache, camada alpha e rascunho reaproveitados: C3)
     ├── systems/
@@ -67,7 +67,7 @@ Project-Halo/
     │   │   └── boss/        # BossBase (motor: rotinas, cooldowns, fases, anti-stuck), ContextoCombate, FaseBoss, DetectorTravamento (F1);
     │   │                    # animador.py: Clip + Animador (clips, hit frames, quadros copiados no spawn: F2)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
-    │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: padrão novo, rotinas geradoras), zealot, scarab, knight
+    │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), scarab, knight
     │   └── bosses/          # guilty, arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
     │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
     ├── feats/
@@ -77,8 +77,8 @@ Project-Halo/
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI
     │   ├── vehicles/        # Vehicle + Warhog, Pelican (tecla V)
     │   ├── items/           # Items (drop/coleta) + draw.py (visual/cache)
-    │   ├── skills/          # artilharia, cone_strike, onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
-│   │                    # artilharia, cone e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx)
+    │   ├── skills/          # artilharia, cone_strike, rect_strike (retângulo), invisibilidade (+ distorcao.py), onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
+│   │                    # artilharia, cone, rect e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx)
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
     │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
@@ -101,6 +101,9 @@ Project-Halo/
 | Animação de um boss da `BossBase` (ritmo, quadros de cada estado, hit frame) | `CLIPS`/`CLIP_INICIAL` no `config.py` do boss (`Clip` em `enemies/base/boss/animador.py`); a rotina pede com `self.animador.tocar(nome)` ou espera o golpe com `yield from self._tocar(clip, ate_evento)` |
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
 | Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |
+| Balancear o Zealot (escudo, pesos, pausas do combo, fuga, regeneração) | `enemies/minibosses/zealot/config.py` (danos e áreas: presets `zealot_*` das skills) |
+| Camuflagem de um inimigo (tempos, distorção) | `feats/skills/invisibilidade/` (preset em `config.py`; `self.iniciar_invisibilidade(preset)` + `atualizar_invisibilidade(dt)` por passo; visual em `distorcao.py`) |
+| Quem pode ser mirado ou atingido | `BaseEnemy.alvejavel` / `invulneravel` (`enemies/base/enemy_base.py`) |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
