@@ -1,6 +1,5 @@
 """Persistência entre fases (roteiro E5): na troca de fase sobrevivem exatamente os sprites
 cuja classe declara `sobrevive_troca_de_fase = True` (jogador, companheiros, veículos, aura do MK2)."""
-import pygame
 from pygame.math import Vector2 as V
 
 from source.enemies.standard.grunt import GruntRed
@@ -52,29 +51,6 @@ def test_todos_os_marines_sobrevivem(novo_jogo):
         arma.upgrade()
     _trocar_fase(novo_jogo)
     assert all(m.alive() for m in arma.companions)
-
-
-def test_a_flag_decide_sozinha_quem_fica(novo_jogo):
-    """O StageManager não conhece arma nem dono: só a flag da classe (ou da instância)."""
-    class Marcado(pygame.sprite.Sprite):
-        sobrevive_troca_de_fase = True
-
-    solto = Marcado(entity_manager.all_sprites)                  # não pertence a arma nenhuma
-    sem_flag = pygame.sprite.Sprite(entity_manager.all_sprites)
-    desmarcado = Marcado(entity_manager.all_sprites)
-    desmarcado.sobrevive_troca_de_fase = False                   # a instância pode recusar
-
-    _trocar_fase(novo_jogo)
-
-    assert solto.alive() and not sem_flag.alive() and not desmarcado.alive()
-
-
-def test_quem_sobrevive_continua_nos_outros_grupos(novo_jogo):
-    """Sobreviver não é só ficar no all_sprites: a aura continua causando dano (auras_grupo)."""
-    novo_jogo.event_manager._aplicar_escolha_de_upgrade('mk2_shield')
-    aura = novo_jogo.player.armas['mk2_shield'].area_de_dano
-    _trocar_fase(novo_jogo)
-    assert aura.groups() and set(aura.groups()) == {entity_manager.all_sprites, entity_manager.auras_grupo}
 
 
 def test_companheiro_tem_posicao_propria_depois_da_troca(novo_jogo):

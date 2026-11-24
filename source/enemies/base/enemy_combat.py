@@ -1,6 +1,7 @@
 import pygame
 import random
 
+from source.feats.effects import quebra_de_escudo
 from source.feats.items import Items
 from source.feats.skills.invisibilidade import Invisibilidade
 from source.systems.eventos import eventos, DANO_CAUSADO
@@ -52,14 +53,19 @@ class EnemyCombat:
         """Tira do escudo primeiro e o restante da vida."""
         if self.escudo_atual > 0:
             self.escudo_atual = self.escudo_atual - valor
-            if self.escudo_atual < 0:
+            if self.escudo_atual <= 0:
                 # Se o dano for maior que o escudo, o que sobra vai para a vida
                 dano_restante = abs(self.escudo_atual)
                 self.escudo_atual = 0
                 self.vida = max(0, self.vida - dano_restante)
+                self.ao_quebrar_escudo()
         else:
             # Se não tem escudo, toma dano direto na vida
             self.vida = max(0, self.vida - valor)
+
+    def ao_quebrar_escudo(self):
+        """O escudo chegou a zero: o efeito padrão. Quem tiver algo a mais estende com `super()`."""
+        quebra_de_escudo(self)
 
     def receber_cura(self, quantidade):
         """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura."""

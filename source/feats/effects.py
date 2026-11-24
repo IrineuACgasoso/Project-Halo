@@ -3,6 +3,7 @@ from source.systems.gameclock import relogio
 import random
 from source.feats.assets import *
 from source.feats import particulas
+from source.systems.entitymanager import entity_manager
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 
 DURACAO_POEIRA_MS = 255 / 400 * 1000   # o alpha caía 400/s a partir de 255
@@ -70,51 +71,91 @@ class RaioEscudo(pygame.sprite.Sprite):
             self.atualizar_caixa()
 
 
+SORTEIO = random.Random()   # só visual: não mexe na sequência da simulação
 
-class EfeitoFaiscas(pygame.sprite.Sprite):
-    """
-    Pequeno estouro de faíscas, usado no contra-ataque dos espinhos
-    (e reaproveitável em qualquer outro impacto/reflexo de dano).
-    Não depende de nenhum asset — desenha tudo proceduralmente e some
-    sozinho depois de `duracao` ms.
-    """
 
-    def __init__(self, posicao, grupos, cor=(255, 210, 90), quantidade=10, duracao=280):
+# ── Quebra de escudo (padrão de todo escudo, do jogador e dos inimigos) ──────
+CORES_FAGULHA_AZUL = ((90, 190, 255), (40, 120, 255), (200, 240, 255))
+CORES_FAGULHA_AMARELA = ((255, 235, 120), (255, 200, 50))
+FAGULHAS_POR_PX = 0.45          # quantidade pelo tamanho do corpo
+FAGULHAS_LIMITES = (26, 70)
+MS_ENTRE_QUEBRAS = 400          # escudo que regenera um fio e cai de novo não vira uma chuva
+
+
+def quebra_de_escudo(alvo):
+    """Fagulhas azuis e amarelas que saltam em volta do corpo de `alvo` e caem. Devolve False se a
+    última quebra dele foi há pouco (sem efeito)."""
+    agora = relogio.agora()
+    if agora < getattr(alvo, 'proxima_quebra_escudo', 0):
+        return False
+    alvo.proxima_quebra_escudo = agora + MS_ENTRE_QUEBRAS
+    corpo = getattr(alvo, 'hitbox', alvo.rect)
+    minimo, maximo = FAGULHAS_LIMITES
+    quantidade = max(minimo, min(maximo, round((corpo.width + corpo.height) * FAGULHAS_POR_PX)))
+    centro = pygame.math.Vector2(corpo.center)
+    for i in range(quantidade):
+        direcao = pygame.math.Vector2(1, 0).rotate(SORTEIO.uniform(0, 360))
+        borda = pygame.math.Vector2(direcao.x * corpo.width, direcao.y * corpo.height) * SORTEIO.uniform(0.35, 0.6)
+        velocidade = direcao * SORTEIO.uniform(60, 220) - (0, SORTEIO.uniform(40, 160))
+        cor = SORTEIO.choice(CORES_FAGULHA_AMARELA if i % 3 == 0 else CORES_FAGULHA_AZUL)
+        particulas.emitir(centro + borda, particulas.imagem_pixel(cor, SORTEIO.choice((4, 6, 8))), velocidade,
+                          SORTEIO.uniform(700, 1200), y_desenho=alvo.rect.bottom + 1, gravidade=620)
+    return True
+
+
+# ── Soco Spartan (Mjolnir Punch) ─────────────────────────────────────────────
+CORES_SOCO = ((255, 255, 235), (255, 225, 90), (255, 160, 25), (255, 85, 10))
+
+
+def impacto_do_soco(origem, alvo):
+    """Clarão e chuva de faíscas no ponto em que o punho (em `origem`) encontra o corpo de `alvo`."""
+    direcao = alvo.posicao - origem
+    if direcao.length_squared() == 0:
+        direcao = pygame.math.Vector2(1, 0)
+    ponto = origem + direcao * 0.5
+    ClaraoDoSoco(ponto, direcao, (entity_manager.all_sprites,), y_desenho=alvo.rect.bottom + 2)
+    comum = {'y_desenho': alvo.rect.bottom + 1, 'gravidade': 500, 'sorteio': SORTEIO}
+    particulas.emitir_leque(ponto, direcao, 42, CORES_SOCO, (6, 8, 11), abertura_graus=120,
+                            velocidade=(220, 760), duracao_ms=(400, 850), **comum)
+    particulas.emitir_leque(ponto, direcao, 26, CORES_SOCO, (5, 6, 8), abertura_graus=360,
+                            velocidade=(90, 380), duracao_ms=(350, 700), **comum)
+
+
+class ClaraoDoSoco(pygame.sprite.Sprite):
+    """Estrela branca e amarela com raios e um anel que se abre."""
+
+    DURACAO_MS = 300
+    RAIO = 120
+    RAIOS = 14
+
+    def __init__(self, posicao, direcao, grupos, y_desenho=None):
         super().__init__(grupos)
         self.posicao = pygame.math.Vector2(posicao)
-        self.cor = cor
-        self.duracao = duracao
-        self.criado_em = relogio.agora()
-
-        self.particulas = [
-            {
-                'dir': pygame.math.Vector2(1, 0).rotate(random.uniform(0, 360)),
-                'vel': random.uniform(120, 260),
-                'tam': random.uniform(2, 5),
-            }
-            for _ in range(quantidade)
-        ]
-
-        tam_canvas = 240
-        self.image = pygame.Surface((tam_canvas, tam_canvas), pygame.SRCALPHA)
-        self.rect = self.image.get_rect(center=self.posicao)
-        self._centro_local = pygame.math.Vector2(tam_canvas / 2, tam_canvas / 2)
+        self.direcao = pygame.math.Vector2(direcao).normalize()
+        self.y_desenho = y_desenho
+        self.nascimento = relogio.agora()
+        self.image = SUPERFICIE_VAZIA   # o draw é próprio
+        self.rect = self.image.get_rect(center=(round(self.posicao.x), round(self.posicao.y)))
 
     def update(self, delta_time):
-        agora = relogio.agora()
-        decorrido = agora - self.criado_em
-        if decorrido >= self.duracao:
+        if relogio.agora() - self.nascimento >= self.DURACAO_MS:
             self.kill()
+
+    def draw(self, surface, offset):
+        t = min(1.0, (relogio.agora() - self.nascimento) / self.DURACAO_MS)
+        centro = self.posicao - offset
+        r = self.RAIO
+        camada, area = camada_alpha(surface, (round(centro.x) - r, round(centro.y) - r, r * 2, r * 2))
+        if camada is None:
             return
-
-        progresso = decorrido / self.duracao
-        alpha = max(0, int(255 * (1 - progresso)))
-
-        self.image.fill((0, 0, 0, 0))
-        for p in self.particulas:
-            offset = p['dir'] * p['vel'] * (decorrido / 1000)
-            pos = self._centro_local + offset
-            raio = max(0.5, p['tam'] * (1 - progresso))
-            pygame.draw.circle(self.image, (*self.cor, alpha), pos, raio)
-
-        self.rect.center = self.posicao
+        alpha = round(255 * (1 - t))
+        pygame.draw.circle(camada, (*CORES_SOCO[3], round(150 * (1 - t))), centro, r * (0.5 + 0.2 * t))
+        for i in range(self.RAIOS):   # raios alternados: longos e curtos
+            raio = self.direcao.rotate(i * 360 / self.RAIOS)
+            longo = r * (0.95 if i % 2 == 0 else 0.6)
+            pygame.draw.line(camada, (*CORES_SOCO[1 + i % 2], alpha), centro + raio * longo * t * 0.8,
+                             centro + raio * longo * (0.45 + 0.55 * t), 8 if i % 2 == 0 else 5)
+        pygame.draw.circle(camada, (*CORES_SOCO[2], alpha), centro, r * (0.25 + 0.7 * t), 6)
+        pygame.draw.circle(camada, (*CORES_SOCO[1], alpha), centro, r * 0.42 * (1 - t))
+        pygame.draw.circle(camada, (255, 255, 255, alpha), centro, r * 0.28 * (1 - t))
+        surface.blit(camada, area.topleft, area)

@@ -11,13 +11,13 @@ class FuelRod(Arma):
         super().__init__(jogador=jogador, **kwargs)
         self.game = game
         self.nome = "Fuel-Rod"
-        self.descricao = "Dispara cargas que explodem e deixam uma nuvem venenosa. Se errar, quicam para outro inimigo."
+        self.descricao = "Dispara cargas que explodem numa poça incendiária. Se o alvo morrer antes do impacto, quicam até outro."
         self.inicializar_stats(self.NOME_ASSET)
 
     def disparar(self):
         inimigo_alvo = self.encontrar_inimigo_mais_proximo(self.inimigos_grupo, raio_maximo=self.raio_maximo)
         if inimigo_alvo and inimigo_alvo.alive():
-            # Stats de upgrade -> config da explosão: impacto (dano) + veneno (dot por `duracao` ms)
+            # Stats de upgrade -> config da explosão: impacto (dano) + poça que queima (dot/s, por `duracao` ms)
             config_escalado = replace(
                 ARTILHARIA_PRESETS['fuel_rod'],
                 dano=self.dano,
@@ -32,6 +32,7 @@ class FuelRod(Arma):
                 game            = self.game,
                 dono            = 'PLAYER',
                 inimigos_grupo  = self.inimigos_grupo,
+                alvo            = inimigo_alvo,
                 custom_config   = config_escalado,
                 quiques         = self.quique,
             )

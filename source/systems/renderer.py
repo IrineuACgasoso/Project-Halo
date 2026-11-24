@@ -11,7 +11,9 @@ import pygame
 from source.debug import DEBUG
 from source.feats.skills.invisibilidade.distorcao import desenhar_distorcao
 from source.systems.entitymanager import entity_manager
+from source.systems.status import entidades_queimando
 from source.systems.status.cegueira import desenhar_cegueira
+from source.systems.status.fogo import desenhar_fogo
 from source.utils.reducao import reduzir, superficie_do_mundo
 
 
@@ -81,6 +83,7 @@ class Renderer:
             game.mapa.draw_debug(tela, deslocamento)
 
         self._draw_sprites(tela, deslocamento)
+        self._draw_fogo(tela, deslocamento)
         self._draw_efeitos_inimigos(tela, deslocamento)
 
         # Cegueira (sistema de status): por cima do mundo, embaixo do HUD; vale também na pausa e no level-up
@@ -180,6 +183,14 @@ class Renderer:
                 pass   # sprite quebrado entra: o desenho dele loga o erro, como antes
             visiveis.append(sprite)
         return visiveis
+
+    def _draw_fogo(self, tela, deslocamento):
+        """Pisque e chamas de quem está com queimadura (sistema de status)."""
+        for alvo in entidades_queimando():
+            try:
+                desenhar_fogo(tela, alvo, deslocamento)
+            except Exception as e:
+                self._log_erro(f'fogo:{alvo.__class__.__name__}', e)
 
     def _draw_efeitos_inimigos(self, tela, deslocamento):
         """Distorção dos invisíveis, lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""

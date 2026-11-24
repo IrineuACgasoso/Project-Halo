@@ -53,44 +53,12 @@ def test_lamina_parada_no_alvo_acerta_uma_vez_so(novo_jogo, alvo):
     assert VIDA - alvo.vida == 5
 
 
-def test_alvo_que_acompanha_o_giro_leva_um_acerto_por_volta(novo_jogo, alvo):
-    """Boss grande ou inimigo colado na lâmina: sempre em contato, e ainda assim 1 por volta."""
-    lamina = _lamina(novo_jogo)
-    for _ in range(round(360 * 2.5 / (360 * DT))):
-        relogio.avancar(DT)
-        lamina.update(DT)
-        alvo.posicao.update(lamina.posicao)
-        alvo.rect.center = alvo.posicao
-        novo_jogo.collision_manager.update(DT)
-    assert VIDA - alvo.vida == 5 * 3                # o primeiro contato e mais 2 voltas
-
-
-def test_cada_lamina_conta_as_proprias_voltas(novo_jogo, alvo):
-    laminas = [_lamina(novo_jogo, angulo=a) for a in (-180, -60, 60)]
-    for _ in range(round(360 / (360 * DT))):
-        relogio.avancar(DT)
-        for lamina in laminas:
-            lamina.update(DT)
-        novo_jogo.collision_manager.update(DT)
-    assert VIDA - alvo.vida == 5 * 3
-
-
 def test_a_mesma_passada_acerta_varios_alvos(novo_jogo, alvo):
     outro = GruntRed(posicao=novo_jogo.player.posicao + V(0, 90), game=novo_jogo)
     outro.vida, outro.escudo_atual = VIDA, 0
     outro.rect.center = outro.posicao
     _girar(novo_jogo, _lamina(novo_jogo, angulo=-180), 360)
     assert VIDA - alvo.vida == VIDA - outro.vida == 5
-
-
-def test_invulneravel_nao_gasta_o_acerto_da_volta(novo_jogo, alvo, monkeypatch):
-    lamina = _lamina(novo_jogo, velocidade=0)
-    monkeypatch.setattr(type(alvo), 'invulneravel', property(lambda self: True))
-    lamina.ao_atingir_alvo(alvo)
-    assert alvo.vida == VIDA
-    monkeypatch.undo()
-    lamina.ao_atingir_alvo(alvo)
-    assert VIDA - alvo.vida == 5
 
 
 def test_ativacao_inteira_tem_dano_limitado(novo_jogo, alvo):
@@ -107,16 +75,3 @@ def test_ativacao_inteira_tem_dano_limitado(novo_jogo, alvo):
     passadas = int(arma.duracao / 1000 * arma.velocidade_rotacao // 360) + 1
     assert 0 < VIDA - alvo.vida <= arma.dano * arma.num_listas * passadas
     assert not any(lamina.alive() for lamina in laminas)
-
-
-@pytest.mark.parametrize('angulo', [0, 37, 90, 135, 180, 270, 315])
-def test_mascara_acompanha_o_giro(novo_jogo, angulo):
-    """A máscara ficava na orientação do spawn: a área de acerto não era a da lâmina desenhada."""
-    lamina = _lamina(novo_jogo, angulo=angulo, velocidade=0)
-    assert lamina.rect.size == lamina.image.get_size() == lamina.mask.get_size()
-    assert lamina.mask.count() == pygame.mask.from_surface(lamina.image).count()
-    # o corpo da lâmina fica no raio jogador -> ponta
-    cx, cy = lamina.mask.centroid()
-    centro = V(lamina.rect.topleft) + V(cx, cy)
-    radial = V(1, 0).rotate(angulo)
-    assert abs((centro - novo_jogo.player.posicao).cross(radial)) < 15

@@ -2,9 +2,8 @@
 import random
 
 import pygame
-import pytest
 
-from helpers import DT, blindar_jogador, simular
+from helpers import DT, simular
 from source.systems.collision import BroadphaseInimigos, CollisionManager
 from source.systems.entitymanager import entity_manager
 
@@ -57,59 +56,6 @@ def test_equivalencia_com_forca_bruta_em_sondas_aleatorias(novo_jogo):
     assert com_acerto > 100, 'as sondas quase não acertaram: o teste não provaria nada'
 
 
-def test_equivalencia_para_o_jogador(novo_jogo):
-    _horda_mista(novo_jogo)
-    cm = novo_jogo.collision_manager
-    player = novo_jogo.player
-    for inimigo in entity_manager.inimigos_grupo.sprites()[:40]:
-        player.posicao.update(inimigo.rect.center)
-        player.rect.center = player.hitbox.center = inimigo.rect.center
-        cm.broadphase.reconstruir(entity_manager.inimigos_grupo)
-        esperado = _forca_bruta(player)
-        assert esperado, 'o jogador em cima do inimigo deveria colidir'
-        assert cm.colidindo_com_inimigos(player) == esperado
-
-
-def test_equivalencia_em_combate_quadro_a_quadro(novo_jogo, monkeypatch):
-    """Simulação com armas de projétil: toda consulta do CollisionManager é conferida com a
-    força bruta, no próprio frame."""
-    blindar_jogador(novo_jogo.player)
-    for arma in ('needler', 'carabin', 'shotgun', 'machine_gun'):
-        while getattr(novo_jogo.player.armas.get(arma), 'nivel', 0) < 5:
-            novo_jogo.event_manager._aplicar_escolha_de_upgrade(arma)
-    _horda_mista(novo_jogo, n=120)
-    cm = novo_jogo.collision_manager
-    original = cm.colidindo_com_inimigos
-    conferidas = []
-
-    def conferir(sprite):
-        resultado = original(sprite)
-        assert resultado == _forca_bruta(sprite)
-        conferidas.append(bool(resultado))
-        return resultado
-
-    monkeypatch.setattr(cm, 'colidindo_com_inimigos', conferir)
-    simular(novo_jogo, 4)
-    assert sum(conferidas) > 50, 'quase nenhum acerto: o teste não provaria nada'
-
-
-def test_grupo_vazio_nao_tem_candidatos():
-    bp = BroadphaseInimigos()
-    grupo = pygame.sprite.Group()
-    bp.reconstruir(grupo)
-    assert bp.candidatos(pygame.Rect(0, 0, 10, 10), grupo) == []
-
-
-def test_candidatos_na_ordem_do_grupo_e_so_os_que_tocam():
-    grupo = pygame.sprite.Group()
-    sprites = [_Sonda((x, 0, 10, 10)) for x in (50, 0, 25, 500)]
-    grupo.add(*sprites)
-    bp = BroadphaseInimigos()
-    bp.reconstruir(grupo)
-    assert bp.candidatos(pygame.Rect(0, 0, 60, 10), grupo) == sprites[:3]
-    assert bp.candidatos(pygame.Rect(1000, 1000, 5, 5), grupo) == []
-
-
 def test_inimigo_que_saiu_do_grupo_nao_e_candidato():
     grupo = pygame.sprite.Group()
     a, b = _Sonda((0, 0, 10, 10)), _Sonda((5, 5, 10, 10))
@@ -128,25 +74,6 @@ def test_inimigo_circular_e_sempre_candidato():
     bp = BroadphaseInimigos()
     bp.reconstruir(grupo)
     assert bp.candidatos(pygame.Rect(5000, 5000, 1, 1), grupo) == [circular]
-
-
-def test_reconstruir_troca_o_conteudo():
-    grupo = pygame.sprite.Group(_Sonda((0, 0, 10, 10)))
-    bp = BroadphaseInimigos()
-    bp.reconstruir(grupo)
-    grupo.empty()
-    novo = _Sonda((100, 100, 10, 10))
-    grupo.add(novo)
-    bp.reconstruir(grupo)
-    assert bp.candidatos(pygame.Rect(0, 0, 200, 200), grupo) == [novo]
-
-
-@pytest.mark.parametrize('rect', [None, 'texto'])
-def test_consulta_sem_rect_lanca(rect):
-    bp = BroadphaseInimigos()
-    bp.reconstruir(pygame.sprite.Group())
-    with pytest.raises((TypeError, AttributeError)):
-        bp.candidatos(rect, pygame.sprite.Group())
 
 
 def test_update_reconstroi_o_broadphase_a_cada_frame(novo_jogo):

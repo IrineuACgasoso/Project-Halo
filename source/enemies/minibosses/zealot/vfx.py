@@ -1,19 +1,15 @@
-"""Efeitos visuais do Zealot: rastro azul do dash, faíscas dos golpes e da quebra do escudo.
+"""Efeitos visuais do Zealot: rastro azul do dash, faíscas dos golpes, tremor da quebra do escudo.
 
 A distorção de quando ele está invisível não é daqui: é de todo inimigo camuflado
 (`feats/skills/invisibilidade/distorcao.py`). As funções `impacto_*` recebem o aviso da habilidade
 (gancho `ao_explodir`), não o Zealot: saem mesmo se ele já tiver morrido."""
 from collections import deque
 
-import pygame
-
 from source.feats.particulas import emitir_leque
 from source.systems.gameclock import relogio
 from source.utils.superficies import silhueta_de
 
 from .config import CFG
-
-V2 = pygame.math.Vector2
 
 CORES_FAISCA = (CFG.cor_energia, (150, 235, 255), (20, 130, 255))
 TAMANHOS_FAISCA = (3, 4, 6)
@@ -63,6 +59,6 @@ class ZealotVFX:
             sil.set_alpha(round(CFG.rastro_alpha * (1 - (agora - quando) / CFG.rastro_duracao_ms)))
             tela.blit(sil, (x - deslocamento.x, y - deslocamento.y))
 
-    def quebra_do_escudo(self):
-        faiscas(self.posicao, V2(1, 0), CFG.faiscas_escudo, 360, velocidade=(150, 420), duracao_ms=(300, 650))
+    def ao_quebrar_escudo(self):
+        super().ao_quebrar_escudo()
         self.game.camera.shake(intensidade=CFG.shake_escudo)

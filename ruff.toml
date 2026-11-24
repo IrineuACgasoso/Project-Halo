@@ -6,7 +6,7 @@ select = ["F"]
 
 # Exceções: as violações que já existiam na A4 (arquivo -> regras). A lista SÓ PODE ENCOLHER:
 #  - arquivo novo ou regra nova num arquivo não entra aqui; corrija o código;
-#  - ao corrigir um arquivo, apague a entrada (tests/unit/test_lint.py falha com entrada que sobrou).
+#  - ao corrigir um arquivo, apague a entrada.
 [lint.per-file-ignores]
 "main.py" = ["F403", "F405"]
 "source/data/weapon_data.py" = ["F401"]

@@ -23,7 +23,7 @@ Project-Halo/
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
 │   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), contar_alocacoes(), MapaSemImagem
-│   ├── golden/              # fase0.json: golden master (A3); assets.json: assinatura de cada imagem (D1). Só com --atualizar-golden
+│   ├── golden/              # fase0.json e arbiter.json. Só com --atualizar-golden
 │   ├── perf/                # test_catraca.py: alocações por frame ≤ teto (roteiro A2)
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
 │   │                        # test_regressoes.py = um teste por bug já corrigido
@@ -31,7 +31,6 @@ Project-Halo/
 └── source/
     ├── game.py              # classe Game: estado, criação da sessão, update, fim de partida
     ├── debug.py             # DEBUG = MCE_DEBUG=='1'
-    ├── docs/BOSS_CREATION.md# guia antigo de bosses (BossBase inexistente); será substituído por docs/plano_bosses.md
     ├── data/
     │   ├── weapon_data.py   # BALANCEAMENTO: WEAPON_DATA, COMPANION_DATA, VEHICLES_DATA (WeaponStats)
     │   ├── enemy_data.py    # BALANCEAMENTO dos inimigos comuns: INIMIGOS (PerfilInimigo: vida, dano, velocidade, cooldowns, drops)
@@ -49,7 +48,7 @@ Project-Halo/
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── entrada.py       # ComandoJogador + FonteEntrada (Teclado, Roteiro): o jogador lê o comando, não o teclado (roteiro E3)
     │   ├── dano.py          # Dano (valor, tipo, fonte, ignora_iframes): contrato único de dano (roteiro E1)
-    │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py (desenho)
+    │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py e fogo.py (desenho)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções; culling pela câmera (C4)
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
@@ -82,11 +81,11 @@ Project-Halo/
     │   ├── items/           # Items (drop/coleta) + draw.py (visual/cache)
     │   ├── skills/          # artilharia, cone_strike, rect_strike (retângulo), invisibilidade (+ distorcao.py), onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
 │   │                    # artilharia, cone, rect e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx);
-│   │                    # artilharia/poca_plasma.py: PocaDePlasma, a área do Fuel Rod
+│   │                    # artilharia/poca_plasma.py: PocaDePlasma, a área do Fuel Rod (queimadura: `queimadura_ms`)
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (gota de plasma, quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
     │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
-    │   └── effects.py       # Portal, poeira, raio de escudo, faíscas
+    │   └── effects.py       # Portal, poeira, raio de escudo, quebra de escudo, soco Spartan
     └── windows/             # menu/, ranking/ (ranking_data.py = persistência), settings/ (constantes de tela), colaboradores.py
 ```
 
@@ -120,11 +119,13 @@ Project-Halo/
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
-| Visual do Fuel Rod (gota, rastro, poça) | `feats/grenades.py::FuelRodGrenade` e `feats/skills/artilharia/poca_plasma.py` (raio, pavio e cores: preset `fuel_rod`) |
+| Visual do Fuel Rod (gota, rastro, poça) | `feats/grenades.py::FuelRodGrenade` (gota desenhada no código) e `feats/skills/artilharia/poca_plasma.py` (raio, pavio e cores: preset `fuel_rod`) |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |
 | Cheats L/P/B (ligar/desligar, novo cheat) | Botão em `windows/menu/pause_menu.py`, estado em `Teclado.cheats` (`Game.alternar_cheats`), efeito em `player/player_input.py::executar_hacks` |
+| Fogo de quem está queimando | `systems/status/fogo.py` |
+| Quebra de escudo ou soco Spartan (visual) | `feats/effects.py` (`quebra_de_escudo`, `impacto_do_soco`); ganchos `ao_quebrar_escudo` (inimigo) e `zerar_escudo` (jogador) |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
 | Buff ou debuff (aplicar, novo efeito, imunidade de boss) | `systems/status/` (`aplicar(alvo, efeito, fonte, chave)`); efeito novo = dataclass em `efeitos.py` + o cálculo em `StatusEntidade._recalcular` |
 | Regra de dano própria de um inimigo (costas, imunidade) | `ajustar_dano_recebido` na classe dele (contrato em `systems/dano.py`) |

@@ -1,12 +1,18 @@
 from source.systems.gameclock import relogio
 from source.systems.dano import Dano, CONTATO
 from source.systems.eventos import eventos, DANO_CAUSADO
+from source.feats.effects import impacto_do_soco, quebra_de_escudo
 from source.systems.status import Escudo, aplicar, multiplicador_de_dano
 
 class PlayerCombat:
     def adicionar_escudo(self, valor):
         self.escudo_maximo = valor
         self.escudo_atual = valor
+
+    def zerar_escudo(self):
+        """O escudo acabou (dano ou EMP)."""
+        self.escudo_atual = 0
+        quebra_de_escudo(self)
 
     def atualizar_escudo(self, delta_time):
         # Não possui shield
@@ -80,12 +86,9 @@ class PlayerCombat:
         # ===== ESCUDO =====
         elif self.escudo_atual > 0:
             self.escudo_atual -= valor
-            # Sobrou dano
-            if self.escudo_atual < 0:
-                dano_restante = abs(self.escudo_atual)
-
-                self.escudo_atual = 0
-                self.vida_atual -= dano_restante
+            if self.escudo_atual <= 0:
+                self.vida_atual += self.escudo_atual   # o que sobrou do dano
+                self.zerar_escudo()
         # ===== VIDA =====
         else:
             self.vida_atual -= valor
@@ -119,20 +122,11 @@ class PlayerCombat:
         if self.dano_espinhos <= 0 or not self.espinho_disponivel or self.status.atordoado:
             return
         inimigo.receber_dano(Dano(self.dano_espinhos, CONTATO, self))
-        self._spawnar_faiscas_espinhos()
+        impacto_do_soco(self.posicao, inimigo)
         self.espinho_disponivel = False
         self.ultimo_espinho_carregado = relogio.agora()
 
 
-    def _spawnar_faiscas_espinhos(self):
-        """Efeito visual rápido no momento do contra-ataque. Falha em
-        silêncio se o player não tiver referência ao grupo de sprites."""
-        grupo = getattr(getattr(self, 'game', None), 'all_sprites', None)
-        if grupo is None:
-            return
-        from source.feats.effects import EfeitoFaiscas
-        EfeitoFaiscas(posicao=self.posicao, grupos=(grupo,))
-                
     def receber_cura(self, quantidade):
         """Só pelo sistema de status (`aplicar(alvo, Cura(...))`), que já descontou a queimadura e
         recusa alvo fora do mundo (morto no mesmo frame: a cura o "ressuscitava" fora dos grupos)."""

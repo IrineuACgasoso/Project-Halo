@@ -36,7 +36,7 @@ class _Ativo:
 class StatusEntidade:
     __slots__ = ('dono', 'eh_jogador', 'imunidades', '_ativos',
                  'mult_velocidade', 'mult_dano_causado', 'mult_dano_recebido', 'mult_cooldown',
-                 'atordoado', 'reducao_cura', 'raio_cegueira')
+                 'atordoado', 'queimando', 'reducao_cura', 'raio_cegueira')
 
     def __init__(self, dono, eh_jogador=False, imunidades=frozenset()):
         self.dono = dono
@@ -56,7 +56,7 @@ class StatusEntidade:
     def _recalcular(self):
         buff_vel = buff_dano = fraqueza = lentidao = reducao = 0.0
         cooldown = defesa = 1.0
-        atordoado = False
+        atordoado = queimando = False
         raio = None
         for ativo in self._ativos.values():
             e = ativo.efeito
@@ -76,6 +76,7 @@ class StatusEntidade:
             elif tipo is Atordoamento:
                 atordoado = True
             elif tipo is Queimadura:
+                queimando = True
                 reducao = max(reducao, e.reducao_cura)
             elif tipo is Cegueira:
                 raio = e.raio if raio is None else min(raio, e.raio)
@@ -85,12 +86,15 @@ class StatusEntidade:
         self.mult_dano_recebido = (1 + fraqueza) * defesa
         self.mult_cooldown = cooldown
         self.atordoado = atordoado
+        self.queimando = queimando
         self.reducao_cura = reducao
         self.raio_cegueira = raio
 
     def _adicionar(self, efeito, fonte, lugar):
-        self._ativos.pop((type(efeito), lugar), None)   # reaplicar: volta para o fim da ordem
-        self._ativos[(type(efeito), lugar)] = _Ativo(efeito, fonte)
+        anterior = self._ativos.pop((type(efeito), lugar), None)   # reaplicar: volta para o fim da ordem
+        novo = self._ativos[(type(efeito), lugar)] = _Ativo(efeito, fonte)
+        if anterior is not None:   # senão, renovar antes do tick apagaria o dano já acumulado
+            novo.dano_pendente, novo.desde_tick = anterior.dano_pendente, anterior.desde_tick
         self._recalcular()
 
     def _remover(self, tipo, lugar):
@@ -172,6 +176,11 @@ def atualizar_status(delta_time):
             status.atualizar(delta_time)
         if not status._ativos or not status.dono.alive():
             del _com_efeito[status]
+
+
+def entidades_queimando():
+    """Quem está com queimadura agora (para o desenho do fogo)."""
+    return [status.dono for status in _com_efeito if status.queimando and status.dono.alive()]
 
 
 def limpar_status():

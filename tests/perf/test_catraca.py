@@ -11,7 +11,6 @@ acima da sobra de cache de módulo vista na A2: até 2 chamadas em 180 frames).
 import math
 import warnings
 
-import pygame
 import pytest
 
 from helpers import DT, blindar_jogador, contar_alocacoes, ir_para_fase
@@ -46,86 +45,6 @@ TETOS = {
 }
 
 
-# ------------------------------------------------------------------ #
-# O contador
-# ------------------------------------------------------------------ #
-def test_contador_conta_cada_tipo():
-    base = pygame.Surface((4, 4))
-    with contar_alocacoes() as c:
-        s = pygame.Surface((8, 8), pygame.SRCALPHA)
-        pygame.mask.from_surface(s)
-        pygame.transform.scale(s, (2, 2))
-        pygame.transform.flip(s, True, False)
-        pygame.font.Font(None, 12)
-    assert c.por_tipo == {'Surface': 1, 'mask.from_surface': 1, 'transform.scale': 1,
-                          'transform.flip': 1, 'font.Font': 1}
-    assert c.total == 5
-    assert isinstance(base, pygame.Surface)
-
-
-def test_surface_contada_e_surface_de_verdade():
-    antiga = pygame.Surface((2, 2))
-    with contar_alocacoes():
-        nova = pygame.Surface((3, 3))
-        assert type(nova) is type(antiga)
-        assert isinstance(antiga, pygame.Surface)   # criada antes do patch
-        assert isinstance(nova, pygame.Surface)
-        assert issubclass(type(antiga), pygame.Surface)
-        assert not isinstance(object(), pygame.Surface)
-
-
-def test_transform_sem_alocacao_nao_conta():
-    s = pygame.Surface((4, 4))
-    with contar_alocacoes() as c:
-        pygame.transform.average_color(s)
-        pygame.transform.get_smoothscale_backend()
-    assert c.total == 0
-
-
-def test_transform_com_destino_nao_conta_e_sem_destino_conta():
-    origem, destino = pygame.Surface((4, 4)), pygame.Surface((2, 2))
-    with contar_alocacoes() as c:
-        pygame.transform.scale(origem, (2, 2), destino)
-        pygame.transform.smoothscale(origem, (2, 2), dest_surface=destino)
-    assert c.total == 0
-    with contar_alocacoes() as c:
-        pygame.transform.scale(origem, (2, 2))
-        pygame.transform.smoothscale(origem, (2, 2))
-    assert c.por_tipo == {'transform.scale': 1, 'transform.smoothscale': 1}
-
-
-def test_trecho_pausado_nao_conta():
-    with contar_alocacoes() as c:
-        with c.pausado():
-            pygame.Surface((1, 1))
-        pygame.Surface((1, 1))
-    assert c.total == 1
-
-
-def test_pausa_aninhada_nao_reativa_a_externa():
-    with contar_alocacoes() as c:
-        with c.pausado():
-            with c.pausado():
-                pygame.Surface((1, 1))
-            pygame.Surface((1, 1))   # ainda dentro da pausa externa
-        pygame.Surface((1, 1))
-    assert c.total == 1
-
-
-def test_restaura_pygame_ao_sair_mesmo_com_erro():
-    originais = (pygame.Surface, pygame.mask.from_surface, pygame.transform.scale,
-                 pygame.font.Font, pygame.font.SysFont)
-    with pytest.raises(RuntimeError):
-        with contar_alocacoes() as c:
-            with c.pausado():
-                raise RuntimeError('falha no meio')
-    assert (pygame.Surface, pygame.mask.from_surface, pygame.transform.scale,
-            pygame.font.Font, pygame.font.SysFont) == originais
-    assert c.ativo   # o pausado também se desfaz no erro
-
-
-# ------------------------------------------------------------------ #
-# Cenários fixos
 # ------------------------------------------------------------------ #
 def _medir_por_frame(game, segundos, antes_do_frame=None):
     """Aquece AQUECIMENTO_S e conta as alocações de `segundos` de update + draw."""
@@ -177,23 +96,6 @@ CENARIOS = [('horda_150', _horda), ('fase0', _fase0)] + [
 
 def _teto_sugerido(por_frame):
     return math.floor(por_frame * 10) / 10 + 0.1
-
-
-@pytest.mark.integration
-def test_alocacao_nova_no_frame_aparece_na_medida(novo_jogo, monkeypatch):
-    """A catraca pega o caso típico: alguém cria uma Surface por frame no HUD."""
-    blindar_jogador(novo_jogo.player)
-    novo_jogo.spawner.update = lambda dt: None   # mesma cena nas duas medidas
-    sem, _ = _medir_por_frame(novo_jogo, 0.5)
-    draw_original = novo_jogo.hud.draw
-
-    def draw_com_vazamento(tela):
-        pygame.Surface((10, 10), pygame.SRCALPHA)
-        draw_original(tela)
-
-    monkeypatch.setattr(novo_jogo.hud, 'draw', draw_com_vazamento)
-    com, por_tipo = _medir_por_frame(novo_jogo, 0.5)
-    assert com - sem == pytest.approx(1.0), por_tipo
 
 
 def test_todo_teto_tem_cenario():

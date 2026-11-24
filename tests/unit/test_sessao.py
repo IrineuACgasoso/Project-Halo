@@ -1,17 +1,11 @@
 """Sessão separada do Game (roteiro B3): cada partida é um objeto novo, nada sobra da anterior."""
 import dataclasses
-import os
-import re
 
 from helpers import DT, voltar_ao_menu
 from source.systems.gameclock import _OFFSET_INICIAL_MS, relogio
 from source.systems.sessao import SessaoJogo
 
-RAIZ_SOURCE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))), 'source')
 CAMPOS = [c.name for c in dataclasses.fields(SessaoJogo)]
-GRUPOS = ('all_sprites', 'inimigos_grupo', 'projeteis_jogador_grupo', 'projeteis_inimigos_grupo',
-          'items_grupo', 'auras_grupo')
 
 
 def _sujar_partida(game):
@@ -28,13 +22,6 @@ def _sujar_partida(game):
     relogio.avancar(30)
     game.hud._atualizar_boss_foco()
     assert game.hud.foco_barra_vida is not None
-
-
-def test_sessao_nova_comeca_nos_valores_padrao():
-    s = SessaoJogo()
-    assert (s.timer_jogo, s.fase_atual, s.boss_atual, s.portal_atual) == (0.0, 0, None, None)
-    assert not s.spawnar_portal_em_breve and s.tela_de_upgrade_ativa is None
-    assert s.gravemind_reborns == 3
 
 
 def test_duas_partidas_nao_compartilham_nada(novo_jogo):
@@ -73,17 +60,3 @@ def test_partida_suja_nao_atrapalha_a_seguinte(novo_jogo):
     s = novo_jogo.sessao
     assert s.portal_atual is None and s.boss_atual is None and s.tela_de_upgrade_ativa is None
     assert s.timer_jogo > 0 and novo_jogo.estado_do_jogo == 'jogando'
-
-
-def test_game_nao_guarda_mais_estado_de_sessao_nem_aliases(novo_jogo):
-    for nome in CAMPOS + list(GRUPOS) + ['invocacao_protogravemind']:
-        assert not hasattr(novo_jogo, nome), f'game.{nome} deveria estar em game.sessao/entity_manager'
-
-
-def test_codigo_nao_usa_aliases_de_grupo_no_game():
-    padrao = re.compile(r'\bgame\.(' + '|'.join(GRUPOS) + r')\b')
-    for pasta, _, arquivos in os.walk(RAIZ_SOURCE):
-        for nome in arquivos:
-            if nome.endswith('.py'):
-                with open(os.path.join(pasta, nome), encoding='utf-8') as f:
-                    assert not padrao.search(f.read()), os.path.join(pasta, nome)

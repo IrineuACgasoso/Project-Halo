@@ -5,7 +5,12 @@ from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
 from source.systems.dano import Dano, AREA, fonte_do_dono
 from source.systems.empurrao import empurrar
+from source.systems.status import Queimadura, aplicar
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
+
+MS_ENTRE_TICKS = 1000        # dano contínuo direto
+MS_ENTRE_QUEIMADURAS = 250   # renovação da queimadura de quem está na área
+
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos, game, dono='BOSS', preset='padrao', custom_config: ArtilhariaConfig = None,
@@ -17,6 +22,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         self.posicao = pygame.math.Vector2(posicao)
 
         # Carrega a configuração (A customizada tem prioridade, útil para o PurgeGrid)
+        self.preset = preset
         self.cfg = custom_config if custom_config else ARTILHARIA_PRESETS.get(preset, ARTILHARIA_PRESETS['padrao'])
 
         self.tempo_criacao = relogio.agora()
@@ -82,17 +88,25 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
 
         surface.blit(temp_surface, area.topleft, area)
 
+    def _alvos_na_area(self):
+        alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
+        return [a for a in alvos if (a.posicao - self.posicao).length() <= self.cfg.raio_explosao]
+
+    def _queimar_area(self):
+        """Acende (ou renova) a queimadura de quem está na área. Duas áreas do mesmo preset ocupam o
+        mesmo lugar: não somam."""
+        efeito = Queimadura(self.cfg.dano_por_segundo, self.cfg.queimadura_ms)
+        for alvo in self._alvos_na_area():
+            if not getattr(alvo, 'invulneravel', False):
+                aplicar(alvo, efeito, fonte=self.fonte, chave=self.preset)
+
     def _aplicar_dano_em_area(self, dano, impacto=False):
         """Aplica `dano` a todos os alvos dentro do raio, uma vez. `impacto`: é a explosão (e não um
         tick), então vale o knockback da configuração."""
-        alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
-
-        for alvo in alvos:
-            distancia = (alvo.posicao - self.posicao).length()
-            if distancia <= self.cfg.raio_explosao:
-                alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True))
-                if impacto and self.cfg.knockback:
-                    empurrar(alvo, self.posicao, self.cfg.knockback)
+        for alvo in self._alvos_na_area():
+            alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True))
+            if impacto and self.cfg.knockback:
+                empurrar(alvo, self.posicao, self.cfg.knockback)
 
     def update(self, delta_time, paredes=None):
         # Se estiver grudada em um alvo (ex: Spike que acertou o jogador),
@@ -118,14 +132,20 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
                 self.dot_ativo = True
                 self.dot_inicio = agora
                 self.dot_ultimo_tick = agora
+                if self.cfg.queimadura_ms:   # queima já na explosão
+                    self._queimar_area()
             else:
                 self._aplicar_dano_em_area(self.cfg.dano, impacto=True)
 
-        # --- Ciclo de DoT (tick a cada 1s, durante duracao_dot) ---
+        # --- Ciclo de DoT (dano direto ou queimadura, durante duracao_dot) ---
         elif self.dot_ativo:
-            if agora - self.dot_ultimo_tick >= 1000:
+            queima = self.cfg.queimadura_ms > 0
+            if agora - self.dot_ultimo_tick >= (MS_ENTRE_QUEIMADURAS if queima else MS_ENTRE_TICKS):
                 self.dot_ultimo_tick = agora
-                self._aplicar_dano_em_area(self.cfg.dano_por_segundo)
+                if queima:
+                    self._queimar_area()
+                else:
+                    self._aplicar_dano_em_area(self.cfg.dano_por_segundo)
 
             if agora - self.dot_inicio >= self.cfg.duracao_dot:
                 self.dot_ativo = False

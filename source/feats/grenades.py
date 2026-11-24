@@ -278,12 +278,15 @@ class PlasmaGrenade(GrenadeBase):
 
 
 class FuelRodGrenade(GrenadeBase):
-    """Carga do Fuel Rod: gota achatada de plasma verde que acompanha a curva do voo e deixa rastro.
-    Explode com impacto + poça venenosa (`PocaDePlasma`; a config, com dot=True e impacto_com_dot=True,
-    é montada pela arma). Se cair SEM grudar em ninguém, quica até `quiques` vezes rumo ao inimigo
-    vivo mais próximo do ponto de queda."""
+    """Carga do Fuel Rod: gota de plasma verde que acompanha a curva do voo e deixa rastro. Explode com
+    impacto + poça que queima (`PocaDePlasma`; a config é montada pela arma).
+
+    Quique: se o alvo morrer antes de ela chegar, em vez de explodir no chão ela quica até `quiques`
+    vezes (rumo ao inimigo mais próximo; sem nenhum por perto, segue em frente) até grudar em alguém.
+    Alvo vivo que só saiu do lugar não conta: ela explode onde caiu."""
 
     RAIO_BUSCA_QUIQUE = 350
+    SALTO_SEM_ALVO = 180         # px: quique sem ninguém por perto
     REDUCAO_ALTURA_QUIQUE = 0.6
 
     LADO_COLISAO = 46            # px: o rect que gruda (a imagem é maior, por causa do halo)
@@ -291,10 +294,12 @@ class FuelRodGrenade(GrenadeBase):
     ALPHAS_HALO = (110, 150, 190, 230)
     MS_POR_HALO = 60
     MS_ENTRE_RASTROS = 22
+    CAMADAS_GOTA = (((20, 130, 40), 1.0), ((70, 225, 50), 0.84), ((180, 255, 70), 0.66),
+                    ((255, 255, 240), 0.42))     # (cor, escala), de fora para dentro
     CORES_RASTRO = ((232, 255, 130), (150, 255, 60), (50, 225, 50), (14, 130, 44))
 
     def __init__(self, posicao_inicial, posicao_alvo, grupos, game, dono, inimigos_grupo,
-                 custom_config=None, preset='fuel_rod', quiques=0, fonte=None):
+                 custom_config=None, preset='fuel_rod', quiques=0, alvo=None, fonte=None):
         super().__init__(
             posicao_inicial=posicao_inicial,
             posicao_alvo=posicao_alvo,
@@ -303,7 +308,7 @@ class FuelRodGrenade(GrenadeBase):
             dono=dono,
             preset=preset,
             sprite_key='fuel_rod',
-            tamanho=(60, 34),
+            tamanho=(52, 30),
             colisao_alvo=inimigos_grupo,
             max_height=180,
             velocidade=700,
@@ -314,11 +319,30 @@ class FuelRodGrenade(GrenadeBase):
             fonte=fonte
         )
         self.quiques = max(0, int(quiques))
+        self.alvo_visado = alvo
+        self.quicando = False        # perdeu o alvo: quica até grudar ou acabarem os quiques
         self.angulo = 0
         self._proximo_rastro = 0
         self.rect = pygame.Rect(0, 0, self.LADO_COLISAO, self.LADO_COLISAO)
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         self._animar()
+
+    def obter_imagem_base(self, sprite_key, tamanho):
+        """Gota de plasma desenhada uma vez (GLOBAL_CACHE): círculos que engordam da cauda para a
+        frente, do verde escuro ao núcleo branco."""
+        chave = f'base_{sprite_key}_{tamanho[0]}x{tamanho[1]}'
+        if chave not in ProjetilUniversal.GLOBAL_CACHE:
+            w, h = tamanho
+            surf = pygame.Surface(tamanho, pygame.SRCALPHA)
+            frente = w - h / 2
+            for cor, escala in self.CAMADAS_GOTA:
+                cauda = frente - (w - h * 0.65) * escala
+                for i in range(17):
+                    t = i / 16
+                    raio = h / 2 * escala * (0.25 + 0.75 * t)
+                    pygame.draw.circle(surf, cor, (cauda + (frente - cauda) * t, h / 2), max(1, raio))
+            ProjetilUniversal.GLOBAL_CACHE[chave] = surf
+        return ProjetilUniversal.GLOBAL_CACHE[chave]
 
     def _criar_aviso(self, posicao, **kwargs):
         from source.feats.skills.artilharia import PocaDePlasma
@@ -379,12 +403,19 @@ class FuelRodGrenade(GrenadeBase):
     def draw(self, surface, offset):
         surface.blit(self.image, self.image.get_rect(center=pygame.math.Vector2(self.rect.center) - offset))
 
+    @property
+    def _perdeu_o_alvo(self):
+        alvo = self.alvo_visado
+        return alvo is not None and not (alvo.alive() and alvo.vivo)
+
     def _explodir_sem_grude(self):
-        alvo = self._alvo_do_quique() if self.quiques > 0 else None
-        if alvo is None:
+        if self.quiques <= 0 or not (self.quicando or self._perdeu_o_alvo):
             super()._explodir_sem_grude()
             return
-        self._quicar(alvo.posicao)
+        self.quicando = True
+        self.alvo_visado = self._alvo_do_quique()
+        self._quicar(self.target_pos + self.direcao * self.SALTO_SEM_ALVO if self.alvo_visado is None
+                     else self.alvo_visado.posicao)
 
     def _alvo_do_quique(self):
         grupo = self.colisao_alvo

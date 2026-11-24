@@ -1,74 +1,53 @@
 # Project Halo ("Master Chief Edge")
 
-Shooter top-down 2D com tema Halo, no estilo survivors: hordas por fase, bosses com horário marcado, level-up com escolha de armas e companheiros.
-Stack: **Python 3.13 + pygame 2.6.1**. Não tem servidor nem rede. Persistência: só o ranking (`assets/data/ranking.json` em dev; `%APPDATA%/ProjectHalo/` no executável). O executável é gerado com PyInstaller (Windows).
-O código e os identificadores estão em **português**. Mantenha esse padrão.
+Shooter top-down 2D estilo survivors (hordas por fase, bosses com horário, level-up com armas e companheiros).
+**Python 3.13 + pygame 2.6.1**, sem rede. Código, identificadores e commits em **português**. Executável: PyInstaller (Windows).
 
-## Comandos (sempre a partir da raiz do repo; `path()` resolve relativo ao cwd)
+## Comandos (sempre da raiz do repo)
 ```powershell
-.venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # deps (pygame + pytest)
-.venv\Scripts\python.exe main.py                                  # rodar o jogo
-$env:MCE_DEBUG=1; .venv\Scripts\python.exe main.py                # debug: cheats L/P/B + overlay de paredes (os cheats também ligam na pausa)
-.venv\Scripts\python.exe -m pytest                                # suíte completa (~65 s; na bateria, até o dobro)
-.venv\Scripts\python.exe -m pytest tests/unit                     # só unitários
-.venv\Scripts\python.exe -m pytest -m "not integration"           # pula as simulações longas
-.venv\Scripts\python.exe -m pytest tests/integration/test_golden.py --atualizar-golden  # só em mudança de comportamento declarada
-build.bat                                                         # exe em dist/main/ (usa o pyinstaller global 6.19)
-.venv\Scripts\python.exe tools/perf.py                            # ms/frame por cenário × tools/perf_base.json (~4 min, na tomada; --escala 0.1 = rápido)
-.venv\Scripts\python.exe -m ruff check                            # linter: só regras F (ruff.toml); também roda na suíte (test_lint.py)
+.venv\Scripts\python.exe main.py                         # jogo (MCE_DEBUG=1: cheats L/P/B + overlay de paredes)
+.venv\Scripts\python.exe -m pytest tests/unit/test_X.py  # durante o trabalho: só os arquivos afetados
+.venv\Scripts\python.exe -m pytest                       # suíte completa: 1× no fim (~40 s)
+.venv\Scripts\python.exe -m ruff check                   # só regras F
+.venv\Scripts\python.exe tools/perf.py                   # ms/frame (~4 min, na tomada); só se mexer em laço quente
 ```
-Não há formatter nem typecheck configurados. Não invente um comando para eles. As exceções do linter em `ruff.toml` só podem encolher: código novo não entra na lista.
+Golden (`tests/golden/`): `--atualizar-golden` só em mudança de comportamento declarada. Não há formatter nem typecheck.
 
-## Arquitetura em 6 linhas (detalhes em @docs/architecture.md)
-- `main.py` chama `Game` (`source/game.py`). O loop é `eventos → update(1/60) × n → draw`, com passo fixo (no máximo 5 passos por frame), e o estado fica numa string (`estado_do_jogo`).
-- **Singletons globais:** `entity_manager` (grupos de sprites e `player`) e `relogio` (relógio de jogo em ms, que só avança no estado `'jogando'`).
-- **Classes compostas por mixins:** `Player`, `BaseEnemy`, `Mapa` e os bosses (`core.py` + `setup/states/attacks/vfx`).
-- **Dados de balanceamento:** armas e companheiros ficam em `source/data/weapon_data.py`; vida, dano, velocidade, faixas de cooldown e drops dos inimigos comuns, em `source/data/enemy_data.py` (`INIMIGOS`). O registro do level-up fica em `source/systems/levelup/constants.py` (`ARMAS_REGISTRO`).
-- **Fases:** mapas Tiled em `assets/img/map/<n>/m<n>.tmj`. O pool de inimigos e os bosses de cada fase ficam em `source/systems/spawner/`.
-- **Assets:** o import não carrega nada; `carregar_assets()` (`source/feats/assets.py`, ~1,5 s) preenche `ASSETS` e é chamado pelo `main.py`, pelo `conftest` e pelo `tools/perf.py`. Sem janela aberta, ele faz `pygame.init` e abre uma oculta. Não leia `ASSETS` no nível do módulo nem em corpo de classe. Os fundos das fases são a exceção: `ASSETS['maps']` decodifica no 1º acesso e guarda só os 2 mais recentes. Cada imagem está no manifesto `source/data/manifesto_assets.py` (`MANIFESTO`, mesmo formato de `ASSETS`).
+## Economia de contexto (regra do usuário)
+- Os docs **não** são carregados sozinhos. Leia só a seção que a tarefa pede: `docs/organization.md` ("Onde mexer para..."),
+  topo de `docs/log.md` (pendências e decisões), `docs/architecture.md`, `docs/conventions.md`, `docs/testing.md`,
+  `docs/plano_bosses.md` e `docs/roteiro_reformulacao.md` (só etapas do roteiro).
+- Busque antes de ler; leia o trecho, não o arquivo. Nunca imprima `tests/golden/`, `.tmj`, `perf_base.json` nem saída inteira de pytest (`| tail`).
+- **Testes:** só o que é crítico (dano, status, colisão, progressão, dados, travamento, regressão de bug real). Nada de teste de
+  aparência, de número de balanceamento, de parâmetro inválido de config ou de equivalência com código antigo. Prefira 1 teste
+  parametrizado a vários.
+- **Docs:** log com 3 a 8 linhas por entrega; o histórico longo é o git.
+
+## Arquitetura
+- `main.py` → `Game` (`source/game.py`): `eventos → update(1/60) × n → draw`; estado em `estado_do_jogo`.
+- Singletons: `entity_manager` (grupos, `player`) e `relogio` (ms de jogo; só anda em `'jogando'`).
+- `Player`, `BaseEnemy`, `Mapa` e bosses são compostos por mixins.
+- Balanceamento: `source/data/weapon_data.py`, `source/data/enemy_data.py`, `config.py` de cada boss e skill.
+- Assets: `MANIFESTO` (`source/data/manifesto_assets.py`) → `carregar_assets()` preenche `ASSETS` (não leia `ASSETS` no import).
 
 ## Regras críticas
-- **Tempo:** use sempre `relogio.agora()` (ms). Nunca use `pygame.time.get_ticks()`/`time` em lógica de jogo, porque esses relógios não congelam na pausa nem no level-up.
-- **Velocidades e dano contínuo:** multiplique por `delta_time` (segundos). Nada de valores "por frame".
-- **Dano:** sempre `alvo.receber_dano(Dano(valor, tipo, fonte))` (`source/systems/dano.py`). Nunca mexa em `vida`/`escudo` direto para causar dano. Ataque de inimigo passa `fonte=self` (há teste). Regra própria de um alvo vai em `ajustar_dano_recebido`.
-- **Buffs e debuffs (cura, escudo, velocidade, cadência, stun...):** sempre `aplicar(alvo, efeito, fonte, chave)` (`source/systems/status/`). Não mexa em `velocidade`, `cooldown`, `vida` ou `escudo` para dar bônus ou curar. Boss/miniboss novo declara `imunidades_status = IMUNIDADES_CHEFE`.
-- **Tela:** o que aparece é `game.camera.visao` (a câmera tem zoom), não `largura_tela`/`altura_tela`; desenho do mundo usa a `tela` recebida, nunca `game.tela`.
-- **Invisível:** toda busca de alvo usa `alvejavel` (invisível nunca é mirado, por ninguém), mas invisível **não** é invulnerável. Camuflagem só pela skill (`iniciar_invisibilidade(preset)`); teleporte é `em_teleporte`.
-- **Mixins:** a ordem de herança decide quem vence (MRO). Um método de mixin colocado depois de `BaseEnemy` (ou de `BossBase`) é **silenciosamente ignorado** (já aconteceu, veja @docs/log.md).
-- **Arma nova:** o construtor é `(jogador, game, **kwargs)` e repassa os `kwargs` a `super().__init__` (é por eles que chega o `nivel_maximo`, via `ArmaInfo.criar`); ganho de nível próprio vai em `aplicar_nivel`, nunca em `upgrade`; os grupos vêm das propriedades da `Arma` (`all_sprites`, `inimigos_grupo`, `items_grupo`, `auras_grupo`, lidas do `entity_manager`). Rajada (`burst_count`/`burst_interval`) herda de `ArmaDeRajada` e só implementa `atirar(alvo)`. Ela também precisa de 2 coisas, e `validar_armas` (`source/data/validacao.py`) verifica as duas:
-  - um perfil em `weapon_data.py` com a chave igual a `NOME_ASSET`;
-  - um `ArmaInfo` em `ARMAS_REGISTRO`.
-  - O ícone em `MANIFESTO['icons']` é opcional: sem ele, o HUD desenha um placeholder.
-- **Dados:** `validar_tudo()` (`source/data/validacao.py`) confere armas, pools, bosses, perfis de inimigos, manifesto e mapas; roda em `test_validacao.py` e na abertura com `MCE_DEBUG=1`. Regra de dados nova entra lá, com um caso que falha de propósito.
-- **Boss novo:** precisa de entradas em `PHASE_BOSSES`, `BOSS_CLASSES` e `CRONOGRAMA_BOSSES`, nos três. Todo `while` dentro de uma rotina geradora precisa de `yield`.
-- **Desempenho:** meça com `tools/perf.py` antes de otimizar (depois do bloco C, horda e bosses mais caros ficam em ~4 ms/frame). Não aloque `Surface`/máscara por frame (a catraca está perto de zero e pega): use `utils/superficies.py` (máscara, camada alpha, rascunho) e `feats/particulas.py`.
-- **Fase nova:** precisa de um mapa em `assets/img/map/<n>/` registrado em `MANIFESTO['maps']`, mais um pool e um boss. Sem o mapa, `existe_proxima_fase()` encerra a campanha.
-- **Commits:** mensagens em português (veja @docs/conventions.md). Nunca faça commit de `dist/`, `build/` ou `.venv/`. `assets/data/ranking.json` é versionado; não o altere em testes (use `tmp_path`).
-- **Bugs:** não corrija um bug "de passagem" sem avisar. Bugs conhecidos ficam em @docs/log.md e em testes `xfail(strict=True)`.
+- **Tempo:** `relogio.agora()`; nunca `pygame.time.get_ticks()`/`time`. Velocidade e dano contínuo × `delta_time`.
+- **Dano:** `alvo.receber_dano(Dano(valor, tipo, fonte))`; ataque de inimigo passa `fonte=self`. Regra do alvo: `ajustar_dano_recebido`.
+- **Escudo que acaba:** passa por `ao_quebrar_escudo` (inimigo) ou `zerar_escudo` (jogador): é o efeito padrão. Extra: estenda com `super()`.
+- **Buffs, debuffs e cura:** `aplicar(alvo, efeito, fonte, chave)`. Boss declara `imunidades_status = IMUNIDADES_CHEFE`. Fogo: `status/fogo.py` desenha sozinho quem tem `Queimadura`.
+- **Tela:** o visível é `game.camera.visao`; desenho do mundo usa a `tela` recebida.
+- **Mira:** toda busca de alvo usa `alvejavel`. Invisível não é mirado, mas é atingível. Teleporte é `em_teleporte`.
+- **Mixins:** método de mixin depois de `BaseEnemy`/`BossBase` é ignorado em silêncio (MRO).
+- **Arma nova:** `(jogador, game, **kwargs)` repassando `kwargs`; ganho em `aplicar_nivel`; perfil em `weapon_data.py` (= `NOME_ASSET`) e `ArmaInfo` em `ARMAS_REGISTRO`. Rajada: `ArmaDeRajada`.
+- **Balanceamento:** com `min_val`, `valor + subidas × increase` tem de bater exato no nível máximo da raridade (`validar_armas` mostra a conta).
+- **Boss novo:** `PHASE_BOSSES`, `BOSS_CLASSES` e `CRONOGRAMA_BOSSES`; herda de `BossBase`; todo `while` de rotina tem `yield`.
+- **Fase nova:** mapa em `assets/img/map/<n>/` + `MANIFESTO['maps']` + pool + boss.
+- **VFX:** nada de `Surface`/máscara por frame (`utils/superficies.py`, `feats/particulas.py`). Efeito só visual usa `random.Random()` próprio (o global é da simulação).
+- **Commits:** nunca `dist/`, `build/`, `.venv/`. Testes não tocam `assets/data/ranking.json` (use `tmp_path`).
+- **Bug achado:** avise antes de corrigir "de passagem"; não corrigido vira `xfail(strict=True)` + log.
 
-## Princípios (inegociáveis)
-1. **Senior:** prefira código simples, legível, robusto e eficiente a soluções espertas.
-2. **Padrões:** siga os padrões que já existem. Não adicione dependência, padrão ou abstração sem justificar.
-3. **Segurança:** valide entradas, trate erros, nunca exponha nem faça commit de segredos.
-4. **Nunca invente:** documente só o que foi verificado no código. Na dúvida, escreva `TODO: confirmar`.
-5. **Concisão:** cada linha de doc precisa justificar sua existência.
-
-## Protocolo de trabalho (toda feature ou correção)
-1. **ENTENDER:** leia este arquivo, @docs/organization.md e o topo de @docs/log.md. Se algo for ambíguo e caro de refazer, pergunte.
-2. **PLANEJAR:** para mudanças não triviais, apresente um plano curto antes de codar.
-3. **IMPLEMENTAR:** seguindo as convenções de @docs/conventions.md.
-4. **TESTAR:** crie ou atualize testes em `tests/` (caminho feliz, bordas e erros) e rode a suíte **completa**.
-5. **CORRIGIR:** corrija a causa raiz. Nunca remova, pule ou enfraqueça um teste para ficar verde. Se o bug não for corrigido agora, use `xfail(strict=True)` com o motivo e registre no log.
-6. **SÓ ENTREGUE VERDE:** se algo não pôde ser validado (ex.: visual, áudio, balanceamento), diga explicitamente.
-7. **DOCUMENTAR:** acrescente uma entrada curta em @docs/log.md e atualize @docs/organization.md se a estrutura mudou.
-8. **ENCERRAR:** resuma o que foi feito e peça `/clear` se for seguro, isto é, se tudo relevante estiver no log. Se houver pendência, diga que **não** é seguro limpar e explique o motivo. Caso tudo esteja certo, dê commit + push.
-
-## Docs
-- @docs/organization.md: mapa de pastas e "onde mexer para...". Consulte sempre.
-- @docs/log.md: histórico entre sessões, bugs conhecidos e pendências. Consulte sempre.
-- @docs/architecture.md: loop, estados, fluxo de dano/XP/fases e decisões técnicas.
-- @docs/conventions.md: nomes, mixins, dados, commits.
-- @docs/testing.md: como a suíte funciona, as fixtures e como testar bosses e armas.
-- @docs/roteiro_reformulacao.md: roteiro mestre da reformulação em etapas atômicas (A0…H2), com portão de qualidade. Toda etapa segue as regras da §2 e o portão da §3.
-- @docs/plano_bosses.md: desenho do motor de bosses (IA, animação, desempenho). As etapas dele estão encaixadas no roteiro (C1, F1–F7). Consulte antes de mexer em bosses.
-- `source/docs/BOSS_CREATION.md`: guia antigo. **Não siga**: ele descreve uma `BossBase` que não existe.
+## Protocolo
+1. Entender (pergunte só se for ambíguo **e** caro). 2. Plano curto se não for trivial. 3. Implementar simples, nos padrões
+existentes, sem dependência nova. 4. Testar o crítico; suíte completa verde no fim (nunca enfraqueça um teste para passar).
+5. Dizer o que não foi validado (visual, áudio, balanceamento). 6. Log curto; `organization.md` só se a estrutura mudou.
+7. Verde: commit + push (título em MAIÚSCULAS, itens com `+`) e dizer se é seguro dar `/clear`.

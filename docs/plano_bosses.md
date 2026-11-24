@@ -1,6 +1,6 @@
 # Plano: bosses inteligentes, vistosos e baratos
 
-**Status:** aprovado (2026-11-21). A **ordem** de execução agora é a de `docs/roteiro_reformulacao.md`: a etapa 0 daqui virou C1, e as etapas 1 a 6 viraram F1 a F7. Este arquivo continua sendo o desenho técnico. Este plano substitui `source/docs/BOSS_CREATION.md`. As ideias boas daquele documento entram aqui: rotinas geradoras, fases em dataclass e sorteio por pesos.
+**Status:** aprovado (2026-11-21). A **ordem** de execução agora é a de `docs/roteiro_reformulacao.md`: a etapa 0 daqui virou C1, e as etapas 1 a 6 viraram F1 a F7. Este arquivo continua sendo o desenho técnico.
 
 ## 1. Diagnóstico (medido, não estimado)
 Medição: 20 s de luta headless com update e draw, 5 armas equipadas e o script de perfil da sessão de 2026-11-21. O orçamento é de **16,6 ms/frame** (60 FPS).
@@ -76,7 +76,7 @@ source/feats/skills/  # blocos de habilidade reutilizáveis (cone, artilharia, E
 | 3 | IA de utilidade + memória adaptativa | `decisao.py`; o Arbiter passa a usar notas | Teste determinístico: dado o contexto X, a habilidade escolhida é Y |
 | 4 | Bot jogador para simulação | Um jogador que esquiva e kita no `tests/helpers` | Métricas por boss: tempo para matar, % de acertos e uso de cada habilidade |
 | 5 | Migração boss a boss | Primeiro Atriox e Escharum (hoje cópias do Tartarus: ganham identidade), depois os demais | Cada boss migrado continua nos smoke tests |
-| 6 | Documentação | `docs/bosses.md` (guia final) + `boss_template` | Substitui de vez o `BOSS_CREATION.md` |
+| 6 | Documentação | `docs/bosses.md` (guia final) + `boss_template` | |
 
 **Orçamento por boss depois da etapa 2:** até 1,5 ms/frame de update e até 2 ms de draw, com 20 projéteis/efeitos ativos.
 

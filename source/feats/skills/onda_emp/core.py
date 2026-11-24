@@ -50,8 +50,8 @@ class OndaEMP(pygame.sprite.Sprite):
                 self.atingiu_jogador = True
                 
                 # Efeito mecânico de quebra de escudo
-                if self.cfg.derrete_escudo and hasattr(jogador, 'escudo_atual') and jogador.escudo_atual > 0:
-                    jogador.escudo_atual = 0
+                if self.cfg.derrete_escudo and jogador.escudo_atual > 0:
+                    jogador.zerar_escudo()
                 
                 # Aplicação do dano nativo
                 jogador.receber_dano(Dano(self.cfg.dano, AREA, self.atacante))

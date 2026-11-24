@@ -76,14 +76,15 @@ def variante_alpha(base, alpha):
 
 
 class Particula(pygame.sprite.Sprite):
-    """Anda em linha reta e some com fade linear em `duracao_ms` de jogo."""
+    """Anda em linha reta (ou cai, com `gravidade` em px/s²) e some com fade linear em `duracao_ms` de jogo."""
 
-    def __init__(self, posicao, imagem, velocidade, duracao_ms, grupos, y_desenho=None):
+    def __init__(self, posicao, imagem, velocidade, duracao_ms, grupos, y_desenho=None, gravidade=0):
         super().__init__(*grupos, entity_manager.particulas_grupo)
         self.y_desenho = y_desenho      # None: ordem de desenho comum (Renderer)
         self._variantes = variantes_alpha(imagem)   # guardadas: o update não consulta o cache
         self.posicao = pygame.math.Vector2(posicao)
         self.velocidade = pygame.math.Vector2(velocidade)
+        self.gravidade = gravidade
         self.duracao_ms = duracao_ms
         self.nascimento = relogio.agora()
         self.image = self._variantes[-1]
@@ -94,12 +95,13 @@ class Particula(pygame.sprite.Sprite):
         if decorrido >= self.duracao_ms:
             self.kill()
             return
+        self.velocidade.y += self.gravidade * delta_time
         self.posicao += self.velocidade * delta_time
         self.rect.center = (round(self.posicao.x), round(self.posicao.y))
         self.image = self._variantes[int((1 - decorrido / self.duracao_ms) * (NIVEIS_ALPHA - 1) + 0.5)]
 
 
-def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None, y_desenho=None):
+def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None, y_desenho=None, gravidade=0):
     """Cria uma partícula, ou devolve None se o teto global foi atingido. `y_desenho`: a linha usada na
     ordem de desenho (ex.: por cima de um boss que cobre o que está perto dele)."""
     if duracao_ms <= 0:
@@ -110,13 +112,14 @@ def emitir(posicao, imagem, velocidade, duracao_ms, grupos=None, y_desenho=None)
         grupos = (entity_manager.all_sprites,)
     elif isinstance(grupos, pygame.sprite.AbstractGroup):
         grupos = (grupos,)
-    return Particula(posicao, imagem, velocidade, duracao_ms, grupos, y_desenho)
+    return Particula(posicao, imagem, velocidade, duracao_ms, grupos, y_desenho, gravidade)
 
 
 def emitir_leque(posicao, direcao, quantidade, cores, tamanhos, abertura_graus=360, velocidade=(60, 160),
-                 duracao_ms=(450, 750), y_desenho=None):
+                 duracao_ms=(450, 750), y_desenho=None, gravidade=0, sorteio=random):
     """`quantidade` partículas redondas saindo de `posicao` em direções sorteadas no leque de
-    `abertura_graus` em volta de `direcao` (com 360, para todos os lados)."""
+    `abertura_graus` em volta de `direcao` (com 360, para todos os lados). `sorteio`: um `random.Random`
+    próprio, para o efeito não mexer na sequência da simulação."""
     base = pygame.math.Vector2(direcao)
     if base.length_squared() == 0:
         base.update(1, 0)
@@ -124,8 +127,8 @@ def emitir_leque(posicao, direcao, quantidade, cores, tamanhos, abertura_graus=3
     meia = abertura_graus / 2
     for _ in range(quantidade):
         # Sorteia tudo antes de consultar o teto (a sequência do random não depende do descarte)
-        cor = random.choice(cores)
-        tamanho = random.choice(tamanhos)
-        vel = base.rotate(random.uniform(-meia, meia)) * random.uniform(*velocidade)
-        duracao = random.uniform(*duracao_ms)
-        emitir(posicao, imagem_pixel(cor, tamanho, 'circulo'), vel, duracao, y_desenho=y_desenho)
+        cor = sorteio.choice(cores)
+        tamanho = sorteio.choice(tamanhos)
+        vel = base.rotate(sorteio.uniform(-meia, meia)) * sorteio.uniform(*velocidade)
+        duracao = sorteio.uniform(*duracao_ms)
+        emitir(posicao, imagem_pixel(cor, tamanho, 'circulo'), vel, duracao, y_desenho=y_desenho, gravidade=gravidade)

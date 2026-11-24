@@ -35,6 +35,7 @@ class GuiltyBarreira:
         self.barreira.kill()
         self.barreira = None
         self.efeito_da_barreira()
+        self.ao_quebrar_escudo()
 
     # ------------------------------------------------------------ fase 1: 40 sentinelas
     def contar_sentinela(self, inimigo):

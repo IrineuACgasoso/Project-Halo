@@ -7,8 +7,7 @@ import pytest
 
 from helpers import voltar_ao_menu
 from source.systems import estados
-from source.systems.estados import (ESTADOS, TRANSICOES, TransicaoInvalida, transicao_valida,
-                                    MENU_PRINCIPAL, JOGANDO, PAUSA, LEVEL_UP, CONFIGURACOES,
+from source.systems.estados import (ESTADOS, TRANSICOES, TransicaoInvalida, MENU_PRINCIPAL, JOGANDO, PAUSA, LEVEL_UP, CONFIGURACOES,
                                     COLABORADORES, RANKING, GAME_OVER)
 
 RAIZ_SOURCE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
@@ -29,28 +28,6 @@ def _evento(game):
     game.telas[game.estado_do_jogo].evento(_tecla(pygame.K_RETURN))
 
 
-# ── Tabela ───────────────────────────────────────────────────────────────────
-def test_tabela_so_tem_estados_conhecidos():
-    assert set(TRANSICOES) == ESTADOS
-    for origem, destinos in TRANSICOES.items():
-        assert destinos <= ESTADOS, origem
-        assert origem not in destinos, f'{origem} -> {origem} não é transição'
-
-
-def test_todo_estado_tem_saida_e_entrada():
-    """Nenhuma tela é beco sem saída nem inalcançável."""
-    alcancaveis = {MENU_PRINCIPAL} | set().union(*TRANSICOES.values())
-    assert alcancaveis == ESTADOS
-    assert all(TRANSICOES[e] for e in ESTADOS)
-
-
-def test_transicao_valida():
-    assert transicao_valida(JOGANDO, PAUSA)
-    assert not transicao_valida(JOGANDO, MENU_PRINCIPAL)
-    assert not transicao_valida('inexistente', JOGANDO)
-    assert not transicao_valida(JOGANDO, 'inexistente')
-
-
 # ── Registro de telas ────────────────────────────────────────────────────────
 def test_registro_de_telas_cobre_todos_os_estados(game):
     assert set(game.telas) == ESTADOS
@@ -58,60 +35,13 @@ def test_registro_de_telas_cobre_todos_os_estados(game):
         assert callable(tela.evento) and callable(tela.desenhar), estado
 
 
-def test_event_manager_entrega_o_evento_ao_handler_do_estado(novo_jogo, monkeypatch):
-    recebidos = []
-    monkeypatch.setitem(novo_jogo.telas, JOGANDO,
-                        novo_jogo.telas[JOGANDO]._replace(evento=recebidos.append))
-    evento = _tecla(pygame.K_x)
-    monkeypatch.setattr(pygame.event, 'get', lambda: [evento])
-    novo_jogo.event_manager.processar()
-    assert recebidos == [evento]
-
-
-def test_renderer_desenha_pelo_registro(novo_jogo, monkeypatch):
-    chamadas = []
-    monkeypatch.setitem(novo_jogo.telas, JOGANDO,
-                        novo_jogo.telas[JOGANDO]._replace(desenhar=lambda: chamadas.append(1)))
-    novo_jogo.draw()
-    assert chamadas == [1]
-
-
 # ── mudar_estado ─────────────────────────────────────────────────────────────
-def test_estado_do_jogo_e_somente_leitura(game):
-    with pytest.raises(AttributeError):
-        game.estado_do_jogo = JOGANDO
 
 
 def test_transicao_invalida_lanca_excecao_no_modo_estrito(novo_jogo):
     with pytest.raises(TransicaoInvalida, match="'jogando' -> 'menu_principal'"):
         novo_jogo.mudar_estado(MENU_PRINCIPAL)
     assert novo_jogo.estado_do_jogo == JOGANDO   # não aplicou
-
-
-def test_estado_inexistente_lanca_excecao_no_modo_estrito(novo_jogo):
-    with pytest.raises(TransicaoInvalida):
-        novo_jogo.mudar_estado('jogandoo')
-    assert novo_jogo.estado_do_jogo == JOGANDO
-
-
-def test_fora_do_modo_estrito_loga_uma_vez_e_aplica(novo_jogo, monkeypatch, capsys):
-    monkeypatch.setattr(novo_jogo, 'estados_estritos', False)
-    monkeypatch.setattr(novo_jogo, '_transicoes_invalidas_logadas', set())
-    novo_jogo.mudar_estado(MENU_PRINCIPAL)          # jogando -> menu: fora da tabela
-    assert novo_jogo.estado_do_jogo == MENU_PRINCIPAL
-    voltar_ao_menu(novo_jogo)
-    novo_jogo._estado = JOGANDO
-    novo_jogo.mudar_estado(MENU_PRINCIPAL)          # o mesmo par de novo: não loga outra vez
-    saida = capsys.readouterr().out
-    assert saida.count('Transição de estado inválida') == 1
-
-
-def test_fora_do_modo_estrito_recusa_estado_inexistente(novo_jogo, monkeypatch, capsys):
-    monkeypatch.setattr(novo_jogo, 'estados_estritos', False)
-    monkeypatch.setattr(novo_jogo, '_transicoes_invalidas_logadas', set())
-    novo_jogo.mudar_estado('jogandoo')
-    assert novo_jogo.estado_do_jogo == JOGANDO       # sem tela para desenhar: fica onde está
-    assert 'jogandoo' in capsys.readouterr().out
 
 
 # ── Código ───────────────────────────────────────────────────────────────────

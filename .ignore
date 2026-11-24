@@ -1,0 +1,4 @@
+# Lido pelo ripgrep (busca do editor e do Claude): deixa de fora o que é pesado e não é código
+assets/
+tests/golden/
+tools/perf_base.json

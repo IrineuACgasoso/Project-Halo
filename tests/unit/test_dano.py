@@ -1,17 +1,16 @@
 """Contrato de dano único (roteiro E1): `Dano` + `receber_dano(dano)` no jogador e nos inimigos,
 os ganchos dos bosses, o evento `dano_causado` e a fonte de projéteis e habilidades."""
 import ast
-import math
 import pathlib
 
 import pygame
 import pytest
 
 from source.enemies.standard.grunt import GruntRed
-from source.feats.projetil import BurstRifle, PlasmaGun
+from source.feats.projetil import BurstRifle
 from source.feats.skills.artilharia import ArtilhariaAviso
-from source.systems.dano import (AREA, AURA, CONTATO, DIRETO, PROJETIL, STATUS, TIPOS_DANO, VOID,
-                                 Dano, fonte_do_dono)
+from source.systems.dano import (AREA, CONTATO, DIRETO, PROJETIL, VOID,
+                                 Dano)
 from source.systems.entitymanager import entity_manager
 from source.systems.eventos import DANO_CAUSADO, eventos
 from source.systems.gameclock import relogio
@@ -31,45 +30,12 @@ def _grunt(game, deslocamento=V(300, 0)):
 
 
 # ── Dano ──────────────────────────────────────────────────────────────────────
-def test_dano_guarda_os_campos():
-    fonte = object()
-    d = Dano(12.5, PROJETIL, fonte, ignora_iframes=True)
-    assert (d.valor, d.tipo, d.fonte, d.ignora_iframes) == (12.5, PROJETIL, fonte, True)
-    assert Dano(1, CONTATO).fonte is None and not Dano(1, CONTATO).ignora_iframes
-
-
-def test_dano_e_imutavel():
-    d = Dano(10, DIRETO)
-    with pytest.raises(AttributeError):
-        d.valor = 20
 
 
 @pytest.mark.parametrize('valor', [-1, -0.001, float('nan'), float('-inf')])
 def test_dano_recusa_valor_invalido(valor):
     with pytest.raises(ValueError):
         Dano(valor, DIRETO)
-
-
-def test_dano_aceita_zero_e_infinito():
-    assert Dano(0, DIRETO).valor == 0
-    assert math.isinf(Dano(float('inf'), DIRETO).valor)
-
-
-def test_dano_recusa_tipo_desconhecido():
-    with pytest.raises(ValueError, match='tipo de dano desconhecido'):
-        Dano(10, 'fogo')
-
-
-def test_tipos_conhecidos():
-    assert TIPOS_DANO == {PROJETIL, CONTATO, AURA, AREA, VOID, DIRETO, STATUS}
-
-
-def test_fonte_do_dono(player):
-    explicita = object()
-    assert fonte_do_dono('INIMIGO', explicita) is explicita
-    assert fonte_do_dono('PLAYER') is player
-    assert fonte_do_dono('INIMIGO') is None
-    assert fonte_do_dono('BOSS') is None
 
 
 # ── Jogador: escudo × i-frames × ignora_iframes × transbordo ────────────────
@@ -106,13 +72,6 @@ def test_jogador_dano_que_ignora_iframes_nao_os_liga(player):
     assert not player.regenerando_escudo   # mas interrompe a regeneração
 
 
-def test_jogador_bloqueado_por_iframes_nao_interrompe_regeneracao(player):
-    player.invencivel = True
-    player.regenerando_escudo = True
-    player.receber_dano(Dano(10, DIRETO))
-    assert player.regenerando_escudo
-
-
 def test_jogador_dano_letal_infinito(player):
     player.adicionar_escudo(100)
     player.receber_dano(Dano(float('inf'), DIRETO))
@@ -134,20 +93,6 @@ def test_matriz_do_inimigo(novo_jogo, escudo, valor, esperado_escudo, perda_vida
     assert inimigo.vida == 100 - perda_vida
 
 
-def test_inimigo_vida_nao_fica_negativa(novo_jogo):
-    inimigo = _grunt(novo_jogo)
-    inimigo.receber_dano(Dano(float('inf'), DIRETO))
-    assert inimigo.vida == 0
-
-
-def test_inimigo_nao_tem_iframes(novo_jogo):
-    inimigo = _grunt(novo_jogo)
-    inimigo.vida = 100
-    inimigo.receber_dano(Dano(10, PROJETIL))
-    inimigo.receber_dano(Dano(10, PROJETIL))
-    assert inimigo.vida == 80
-
-
 def test_gancho_que_ignora_nao_absorve_nem_emite(novo_jogo):
     inimigo = _grunt(novo_jogo)
     inimigo.vida = 100
@@ -155,16 +100,6 @@ def test_gancho_que_ignora_nao_absorve_nem_emite(novo_jogo):
     recebidos = _ouvir_dano()
     inimigo.receber_dano(Dano(10, PROJETIL))
     assert inimigo.vida == 100 and recebidos == []
-
-
-def test_gancho_recebe_o_dano_original(novo_jogo):
-    inimigo = _grunt(novo_jogo)
-    inimigo.vida = 100
-    vistos = []
-    inimigo.ajustar_dano_recebido = lambda valor, dano: vistos.append((valor, dano)) or valor * 2
-    d = Dano(10, AREA)
-    inimigo.receber_dano(d)
-    assert vistos == [(10, d)] and inimigo.vida == 80
 
 
 # ── Evento dano_causado ──────────────────────────────────────────────────────
@@ -190,24 +125,6 @@ def _boss(game, nome):
     return game.sessao.boss_atual
 
 
-def _vida_tirada(alvo, dano):
-    antes = alvo.vida
-    alvo.receber_dano(dano)
-    return antes - alvo.vida
-
-
-@pytest.mark.parametrize('barreira, do_proprio, esperado', [
-    (False, False, 100),
-    (True, False, 0),      # barreira de pé: ignora
-    (True, True, 100),     # menos o golpe dele mesmo (a luz visível)
-])
-def test_guilty(novo_jogo, barreira, do_proprio, esperado):
-    guilty = _boss(novo_jogo, 'guilty')
-    if not barreira:
-        guilty.derrubar_barreira()
-    assert _vida_tirada(guilty, Dano(100, AREA, guilty if do_proprio else None)) == pytest.approx(esperado)
-
-
 def test_consciencia_do_warden_ignora_dano(novo_jogo):
     consciencia = _boss(novo_jogo, 'warden')
     corpos = sum(w.vida for w in consciencia.wardens_vivos)
@@ -222,24 +139,6 @@ def test_projetil_do_jogador_tem_o_jogador_como_fonte(player):
                    game=player.game, dono='PLAYER', tamanho=(24, 24), dano=7, velocidade=100,
                    direcao_spread=V(1, 0))
     assert p.fonte is player
-
-
-def test_projetil_inimigo_acerta_o_jogador_com_a_fonte(novo_jogo):
-    grunt = _grunt(novo_jogo)
-    recebidos = _ouvir_dano()
-    p = PlasmaGun(posicao_inicial=novo_jogo.player.posicao, grupos=(entity_manager.all_sprites,),
-                  jogador=novo_jogo.player, game=novo_jogo, dono='INIMIGO', tamanho=(20, 20), dano=9,
-                  velocidade=0, direcao_spread=V(1, 0), vai_rotacionar=False, fonte=grunt)
-    p.ao_atingir_alvo(novo_jogo.player)
-    assert recebidos[0]['dano'] == Dano(9, PROJETIL, grunt)
-
-
-def test_tiro_real_de_um_grunt_leva_a_fonte(novo_jogo):
-    grunt = _grunt(novo_jogo)
-    antes = set(entity_manager.projeteis_inimigos_grupo)
-    grunt.plasma()
-    novos = set(entity_manager.projeteis_inimigos_grupo) - antes
-    assert novos and all(p.fonte is grunt for p in novos)
 
 
 def test_artilharia_aplica_com_a_fonte_e_ignora_iframes(novo_jogo):

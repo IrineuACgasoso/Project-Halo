@@ -25,7 +25,7 @@ def quadros_da_poca(raio):
 
 
 class PocaDePlasma(ArtilhariaAviso):
-    """Área do Fuel Rod. O dano é o da artilharia (impacto + ticks); muda o que se vê: clarão,
+    """Área do Fuel Rod. O efeito é o da artilharia (impacto + queimadura); muda o que se vê: clarão,
     respingo e uma poça de plasma fervendo, que solta vapor e esfria no fim."""
 
     MS_POR_QUADRO = 90

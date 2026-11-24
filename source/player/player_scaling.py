@@ -19,7 +19,7 @@ class PlayerScaling:
         self.vida_maxima += 25
         self.velocidade += 10
         self.pontuacao += 100
-        aplicar(self, Cura(self.vida_maxima / 4))
+        aplicar(self, Cura(self.vida_maxima / 2))
         falta_escudo = self.escudo_maximo - self.escudo_atual
         if falta_escudo > 0:
             aplicar(self, Escudo(falta_escudo))   # enche: o Escudo para no máximo

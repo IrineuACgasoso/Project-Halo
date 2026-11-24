@@ -68,6 +68,7 @@ class Jackal(BaseEnemy):
             self.tipo = f"{self.tipo}_broken"
             self.trocar_variante(self.tipo)
             self.escudo_quebrado = True
+            self.ao_quebrar_escudo()
 
     def update(self, delta_time, paredes=None):
         # Verifica a regra de movimentação específica da classe

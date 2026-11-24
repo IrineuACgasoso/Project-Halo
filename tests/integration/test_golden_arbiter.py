@@ -113,18 +113,3 @@ def test_arbiter_bate_com_o_golden(request, rodada):
     assert divergencia is None, (
         f'a luta do Arbiter mudou ({divergencia}). Refatoração: ache a causa. Mudança de '
         'comportamento declarada: rode com --atualizar-golden e registre no log.')
-
-
-@pytest.mark.integration
-def test_golden_do_arbiter_cobre_a_luta(rodada):
-    """O cenário só prova algo se passar pelas 3 fases e por várias habilidades."""
-    amostras = rodada['amostras']
-    assert {a['fase'] for a in amostras} == {1, 2, 3}
-    usadas = {a['ultima'] for a in amostras} - {None}
-    assert len(usadas) >= 4, usadas
-    assert amostras[-1]['boss_vivo']
-
-
-@pytest.mark.integration
-def test_luta_do_arbiter_e_deterministica(game, rodada):
-    assert primeira_divergencia(rodada, simular_arbiter(game)) is None

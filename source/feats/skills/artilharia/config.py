@@ -15,6 +15,9 @@ class ArtilhariaConfig:
     dot: bool = False
     dano_por_segundo: int = 0
     duracao_dot: int = 3000
+    # com dot=True e > 0: no lugar dos ticks, a área aplica Queimadura(`dano_por_segundo`), que dura isto
+    # depois que o alvo sai dela
+    queimadura_ms: int = 0
     impacto_com_dot: bool = False   # com dot=True: aplica `dano` na explosão ANTES de iniciar os ticks
     # Empurra quem a explosão atinge (não os ticks) para longe do centro: False = não empurra; um
     # número = quantos px (`systems/empurrao.py`)
@@ -148,6 +151,7 @@ ARTILHARIA_PRESETS = {
         dot=True,
         dano_por_segundo=3,
         duracao_dot=4000,
+        queimadura_ms=2500,
         impacto_com_dot=True
     ),
 

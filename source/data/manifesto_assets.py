@@ -56,7 +56,6 @@ MANIFESTO = {
         'light_bullet': 'lightrifle.png',
         'dizimator': 'dizimator.png',
         'spike': 'spike.png',
-        'fuel_rod': 'fuel_rod.png',
         'acid_breath': 'acid.gif',
         'red_laser': 'redlaser.png',
         'blue_laser': 'bluelaser.png',

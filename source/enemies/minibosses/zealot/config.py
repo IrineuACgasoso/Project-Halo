@@ -93,7 +93,6 @@ class ZealotConfig:
     rastro_duracao_ms: int = 220
     rastro_alpha: int = 120
     faiscas_golpe: int = 16
-    faiscas_escudo: int = 36
     shake_golpe: float = 3
     shake_escudo: float = 4
 

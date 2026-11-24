@@ -118,12 +118,6 @@ class ZealotAttacks:
         if ganho > 0:
             aplicar(self, Escudo(ganho))
 
-    def absorver_dano(self, valor):
-        tinha_escudo = not self.sem_escudo
-        super().absorver_dano(valor)
-        if tinha_escudo and self.sem_escudo:
-            self.quebra_do_escudo()
-
     # ------------------------------------------------------------ anti-stuck
     def rotina_antistuck(self):
         """Preso longe do jogador: some, reaparece perto e segue a luta."""

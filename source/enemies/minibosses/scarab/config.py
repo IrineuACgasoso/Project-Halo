@@ -65,7 +65,7 @@ class FeixeConfig:
 @dataclass(frozen=True)
 class ScarabConfig:
     # --- atributos ---
-    vida: float = 5000
+    vida: float = 2800
     velocidade: float = 62
     raio_aura: float = 260              # círculo para as auras do jogador (MK2)
 

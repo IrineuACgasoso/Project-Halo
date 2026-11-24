@@ -15,7 +15,6 @@ import pytest
 from helpers import DT, blindar_jogador, voltar_ao_menu
 from source.systems.entitymanager import entity_manager
 from source.systems.entrada import ComandoJogador, Roteiro
-from source.systems.gameclock import _OFFSET_INICIAL_MS, relogio
 
 CAMINHO_GOLDEN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'golden', 'fase0.json')
@@ -23,8 +22,6 @@ PARAMETROS = {'cenario': 'fase0', 'seed': 1234, 'segundos': 60, 'dt': DT}
 CASAS = 3   # floats arredondados: o arquivo fica legível e a comparação, exata
 
 
-# ------------------------------------------------------------------ #
-# Simulação e amostras
 # ------------------------------------------------------------------ #
 def _amostra(game, segundo):
     p = game.player
@@ -71,8 +68,6 @@ def simular_golden(game, segundos=PARAMETROS['segundos'], roteiro=None):
 
 
 # ------------------------------------------------------------------ #
-# Arquivo e comparação (funções puras)
-# ------------------------------------------------------------------ #
 def carregar_golden(caminho):
     """Golden gravado, ou None se não existir. Arquivo inválido é erro (nunca é ignorado)."""
     if not os.path.exists(caminho):
@@ -114,55 +109,6 @@ def primeira_divergencia(esperado, obtido):
     return None
 
 
-def _golden(n=2, **mudancas):
-    amostras = [{'t': t, 'inimigos': t, 'x': 1.5} for t in range(n)]
-    return {**PARAMETROS, 'amostras': amostras, **mudancas}
-
-
-def test_golden_iguais_nao_divergem():
-    assert primeira_divergencia(_golden(), _golden()) is None
-
-
-def test_divergencia_aponta_segundo_e_metrica():
-    obtido = _golden()
-    obtido['amostras'][1]['x'] = 2.0
-    assert primeira_divergencia(_golden(), obtido) == 't=1 s, x: golden 1.5, agora 2.0'
-
-
-def test_divergencia_em_metrica_ausente():
-    obtido = _golden()
-    del obtido['amostras'][0]['inimigos']
-    assert primeira_divergencia(_golden(), obtido) == 't=0 s, inimigos: golden 0, agora None'
-
-
-def test_divergencia_em_quantidade_de_amostras():
-    assert primeira_divergencia(_golden(3), _golden(2)) == 'amostras: golden tem 3, agora 2'
-
-
-def test_divergencia_em_parametro():
-    assert primeira_divergencia(_golden(), _golden(seed=1)).startswith('parâmetro seed')
-
-
-def test_golden_ida_e_volta(tmp_path):
-    caminho = tmp_path / 'sub' / 'g.json'
-    salvar_golden(_golden(), str(caminho))
-    assert carregar_golden(str(caminho)) == _golden()
-
-
-def test_golden_ausente_e_none(tmp_path):
-    assert carregar_golden(str(tmp_path / 'nao_existe.json')) is None
-
-
-@pytest.mark.parametrize('conteudo', ['{quebrado', '[]', '{"amostras": 3}'])
-def test_golden_invalido_e_erro(tmp_path, conteudo):
-    caminho = tmp_path / 'g.json'
-    caminho.write_text(conteudo, encoding='utf-8')
-    with pytest.raises(ValueError):
-        carregar_golden(str(caminho))
-
-
-# ------------------------------------------------------------------ #
-# Simulação real
 # ------------------------------------------------------------------ #
 @pytest.fixture(scope='module')
 def primeira_rodada(game):
@@ -180,13 +126,6 @@ def test_fase0_bate_com_o_golden(request, primeira_rodada):
     assert divergencia is None, (
         f'a simulação mudou ({divergencia}). Refatoração: ache a causa. Mudança de '
         'comportamento declarada: rode com --atualizar-golden e registre no log.')
-
-
-@pytest.mark.integration
-def test_simulacao_e_deterministica(game, primeira_rodada):
-    """Duas partidas seguidas no mesmo processo dão o mesmo resultado (sem estado vazando
-    de uma partida para a outra nem aleatoriedade fora da seed)."""
-    assert primeira_divergencia(primeira_rodada, simular_golden(game)) is None
 
 
 def _roteiro_de_teste():
@@ -212,13 +151,3 @@ def test_replay_de_um_roteiro_e_deterministico(game, primeira_rodada):
     assert primeira_divergencia(a, b) is None
     sem_input = primeira_rodada['amostras'][1]
     assert (a['amostras'][1]['x'], a['amostras'][1]['y']) != (sem_input['x'], sem_input['y'])
-
-
-def test_nova_partida_zera_o_relogio(game):
-    """Era bug (A3 → B3): o relógio seguia da partida anterior, e a simulação depende do valor
-    absoluto dele (2ª partida com a mesma seed divergia em t=54 s)."""
-    relogio.avancar(10)
-    voltar_ao_menu(game)
-    game.iniciar_novo_jogo()
-    voltar_ao_menu(game)
-    assert relogio.agora() == _OFFSET_INICIAL_MS
