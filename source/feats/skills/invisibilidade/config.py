@@ -21,8 +21,10 @@ class InvisibilidadeConfig:
 INVISIBILIDADE_PRESETS = {
     'padrao': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=3000, fade_in_ms=500),
     'elite': InvisibilidadeConfig(fade_out_ms=800, duracao_ms=6400, fade_in_ms=800),
-    'arbiter_furtivo': InvisibilidadeConfig(fade_out_ms=1000, duracao_ms=1900, fade_in_ms=600),
-    'arbiter_antistuck': InvisibilidadeConfig(fade_out_ms=800, duracao_ms=1100, fade_in_ms=600),
+    # Arbiter: a camuflagem da armadura antiga dura uns 3 s no total
+    'arbiter_furtivo': InvisibilidadeConfig(fade_out_ms=500, duracao_ms=2000, fade_in_ms=500),
+    # Esquiva: some durante o dash, despeja o spray e reaparece (quem encerra é a rotina)
+    'arbiter_esquiva': InvisibilidadeConfig(fade_out_ms=150, duracao_ms=None, fade_in_ms=400),
     # Os fades da órbita (3000 ms) e da ilusão (2200 ms) do Jega cabem dentro do estado dele
     'jega_orbita': InvisibilidadeConfig(fade_out_ms=400, duracao_ms=2200, fade_in_ms=400),
     'jega_ilusao': InvisibilidadeConfig(fade_out_ms=350, duracao_ms=1500, fade_in_ms=350),

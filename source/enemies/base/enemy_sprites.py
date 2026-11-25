@@ -101,7 +101,7 @@ class EnemySprites:
     def sync_rect(self):
         self.rect.center = (
             round(self.posicao.x),
-            round(self.posicao.y)
+            round(self.posicao.y - self.altura_z)
         )
 
     def set_image(self, image, origem=None):

@@ -69,3 +69,18 @@ def generate_directional_pattern(caster_pos, player_pos, artilharias_por_eixo, e
         tempo_spawn = agora + (i * intervalo)
         fila.append((tempo_spawn, pos_artilharia))
     return fila
+
+
+def generate_line_pattern(centro, angulo, artilharias_por_eixo, espacamento, qtd_eixos, raio_artilharia, intervalo, agora):
+    """Linha que passa por `centro` no `angulo` (rad) e explode de uma ponta à outra; com `qtd_eixos` > 1,
+    linhas paralelas lado a lado (encostadas)."""
+    fila = []
+    direcao = pygame.math.Vector2(math.cos(angulo), math.sin(angulo))
+    lateral = pygame.math.Vector2(-direcao.y, direcao.x)
+    inicio = centro - direcao * ((artilharias_por_eixo - 1) / 2 * espacamento)
+    for i in range(artilharias_por_eixo):
+        pos_onda = inicio + direcao * (i * espacamento)
+        for j in range(qtd_eixos):
+            offset = (j - (qtd_eixos - 1) / 2) * (raio_artilharia * 2)
+            fila.append((agora + i * intervalo, pos_onda + lateral * offset))
+    return fila

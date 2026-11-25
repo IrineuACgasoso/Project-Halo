@@ -40,4 +40,28 @@ RECT_STRIKE_PRESETS = {
         cor_preenchimento=(30, 110, 230, 150),
         cor_explosao=(210, 245, 255, 240)
     ),
+
+    # Arbiter: o golpe do pouso do salto curto (largo e comprido, cores da espada de energia).
+    'arbiter_investida_frontal': RectStrikeConfig(
+        dano=150,
+        largura=170,
+        altura=420,
+        duracao=420,
+        cor_fundo=(150, 215, 255, 60),
+        cor_borda=(10, 60, 150, 230),
+        cor_preenchimento=(40, 130, 255, 140),
+        cor_explosao=(210, 245, 255, 240)
+    ),
+
+    # Combo da quebra de escudo: dois cortes finos e compridos para os lados do caminho do dash.
+    'arbiter_combo_corte': RectStrikeConfig(
+        dano=130,
+        largura=55,
+        altura=520,
+        duracao=500,
+        cor_fundo=(150, 215, 255, 60),
+        cor_borda=(10, 60, 150, 230),
+        cor_preenchimento=(40, 130, 255, 140),
+        cor_explosao=(210, 245, 255, 240)
+    ),
 }

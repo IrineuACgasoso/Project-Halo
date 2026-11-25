@@ -52,5 +52,7 @@ class EnemySetup:
     def setup_invisibility(self):
         self.invisibilidade = None     # skill ativa (feats/skills/invisibilidade) ou None
         self.em_teleporte = False      # fora do mundo (viajando): nem mirado, nem atingido
+        self.no_ar = False             # saltando (feats/skills/salto): não é mirado e passa por cima das paredes
+        self.altura_z = 0.0            # px acima do chão: só o desenho sobe (`sync_rect`)
         self.alpha_atual = 255
     

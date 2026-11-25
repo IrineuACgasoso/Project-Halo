@@ -12,6 +12,7 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Sem indicador de status no HUD. `perf_base.json` precisa ser regravado numa sessão fria.
 - Partida com cheats entra no ranking sem marca.
 - `xfail`: o atirador do Warden escolhe um ponto atrás da parede e fica preso em `reposicionando`, sem atirar (`test_sistemas`).
+- O Tartarus ainda tem o salto próprio; a skill `salto` generaliza o dele (migrar na F5).
 - Corpo invulnerável ainda é `alvejavel`: as armas gastam tiros na consciência do Warden e na Harbinger em recarga se for o alvo mais perto.
 
 ## Decisões que valem até hoje
@@ -22,10 +23,18 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Medição: só na tomada e por A/B alternado com o commit anterior (ruído de até 70%). Depois do bloco C: ~4 ms/frame nos piores casos.
 
 ## Estado do roteiro (`docs/roteiro_reformulacao.md`)
-Feitos A–E, F1 (BossBase), F2 (Animador), F3 (IA de utilidade + memória, só o Arbiter usa) e F4 (bot e métricas); Hunter, Zealot, Guilty e Scarab reformulados (adiantam a F5). **Próxima: F5** (migração, um commit por boss; começa por Tartarus).
+Feitos A–E, F1 (BossBase), F2 (Animador), F3 (IA de utilidade + memória, só o Arbiter usa) e F4 (bot e métricas); Hunter, Zealot, Guilty, Scarab e Arbiter reformulados (adiantam a F5). **Próxima: F5** (migração, um commit por boss; começa por Tartarus).
 O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as lutas reformuladas, HUD/culling (C4), o executável (D3) e a pausa da troca de fase (D2).
 
 ---
+
+## 2026-11-25 | Arbiter reformulado e skill de salto
+- **Skill `salto`** (`feats/skills/salto/`): arco com alvo jogador/ponto/aleatório, altura, duração, recuo e invulnerável opcional; no ar é `no_ar` (não alvejável, `alvejavel` lê), inofensivo e passa por cima das paredes; pousa sempre em chão válido. Base: `no_ar`/`altura_z` nos inimigos. `ConeStrikeAviso(seguir=...)` e modo `linha_jogador` no Purge Grid.
+- **Arbiter:** escudo regenerativo (4 s sem dano); 2 fases (40%: sem carabina nem invocação, +20% de velocidade, recua menos, aura). Rotinas: carabina (6 tiros 40 px), granada (`arbiter_plasma_grenade` 120/230), lâmina, investida com cone que viaja junto e costas expostas (×2) no atordoamento, salto + corte frontal (também o anti-stuck), emboscada no flanco. Reações: combo da quebra de escudo (grito + 5 dashes sorteados + Fúria) e esquiva lateral com spray camuflado (45%). Fora da rotina: Phantom (linha roxa no jogador) e 2 Elites camuflados.
+- **IA:** a vida do jogador puxa para a espada e encurta a faixa; sem escudo, a postura avanço/recuo vem de vida dele + jogador longe − jogador fraco (com histerese).
+- **Decisão minha:** os dashes do Arbiter não dão dano de contato (o corpo de 250 px encostava a 150 px: o combo dava 20 golpes por luta); quem fere é a espada.
+- **Golden do Arbiter regravado** (mudança declarada) e sem contar partículas (só visuais, sorteio próprio: deixavam o golden instável). `lutas --boss arbiter`: 24 s, 2,7 vidas/min do bot (era 1,1).
+- **Não validado:** a luta na tela real (só capturas headless), áudio, balanceamento de todos os números novos.
 
 ## 2026-11-25 | F4: bot jogador e métricas das lutas
 - **`tests/bot.py`:** `FonteEntrada` que mantém distância e esquiva; só vê a tela, reage em 200 ms, decide a cada 100 ms, sem sorteio (mesma seed, mesma luta: conferido no Arbiter e no Gravemind). Não esquiva feixe, EMP nem efeito próprio de boss e não planeja caminho.

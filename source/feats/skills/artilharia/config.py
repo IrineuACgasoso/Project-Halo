@@ -141,6 +141,26 @@ ARTILHARIA_PRESETS = {
     ),
 
     # Fuel Rod: plasma verde; a arma troca dano, dano_por_segundo e duracao_dot pelos stats dela
+    # Granada de plasma do Arbiter: maior e mais forte que a do lançador do jogador
+    'arbiter_plasma_grenade': ArtilhariaConfig(
+        dano=120,
+        raio_explosao=230,
+        duracao=1500,
+        cor_borda=(120, 150, 255, 200),
+        cor_preenchimento=(200, 200, 255, 60),
+        cor_explosao=(240, 255, 240, 240)
+    ),
+
+    # Combo da quebra de escudo: explosão onde o dash dele terminou
+    'arbiter_combo_artilharia': ArtilhariaConfig(
+        dano=140,
+        raio_explosao=190,
+        duracao=650,
+        cor_borda=(90, 170, 255, 210),
+        cor_preenchimento=(40, 110, 255, 70),
+        cor_explosao=(190, 235, 255, 240)
+    ),
+
     'fuel_rod': ArtilhariaConfig(
         dano=25,
         raio_explosao=150,

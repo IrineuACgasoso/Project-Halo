@@ -25,4 +25,8 @@ DASH_PRESETS = {
     'zealot': DashConfig(velocidade=550, duracao_ms=700, ate_o_alvo=True),
     # ... e o bote que sai da invisibilidade (passa reto pelo ponto mirado)
     'zealot_bote': DashConfig(velocidade=700, duracao_ms=800, ate_o_alvo=False),
+    # Arbiter: investida da espada (Prophet's Bane), dashes do combo e a esquiva lateral (passa reto)
+    'arbiter_investida': DashConfig(velocidade=900, duracao_ms=650, ate_o_alvo=True),
+    'arbiter_combo': DashConfig(velocidade=950, duracao_ms=600, ate_o_alvo=True),
+    'arbiter_esquiva': DashConfig(velocidade=1100, duracao_ms=260, ate_o_alvo=False),
 }

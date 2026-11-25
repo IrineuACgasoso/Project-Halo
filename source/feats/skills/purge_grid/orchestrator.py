@@ -1,10 +1,14 @@
 # source/feats/skills/purge_grid/orchestrator.py
+import math
+import random
+
 import pygame
 from source.systems.gameclock import relogio
 from source.systems.dano import habilidade_da
 from source.systems.entitymanager import entity_manager
 from source.feats.skills.artilharia import ArtilhariaAviso, ArtilhariaConfig
-from .patterns import generate_grid_pattern, generate_radial_pattern, generate_directional_pattern
+from .patterns import (generate_grid_pattern, generate_radial_pattern, generate_directional_pattern,
+                       generate_line_pattern)
 from .config import PURGE_PRESETS, PurgeConfig
 
 class PurgeGrid(pygame.sprite.Sprite):
@@ -41,6 +45,12 @@ class PurgeGrid(pygame.sprite.Sprite):
                 caster_pos, self.cfg.qtd_eixos, self.cfg.artilharias_por_eixo,
                 self.cfg.espacamento, self.cfg.direcao.lower(), self.cfg.intervalo, agora,
                 self.cfg.offset_angulo
+            )
+        elif modo == 'linha_jogador':
+            angulo = self.cfg.offset_angulo + (random.uniform(0, 2 * math.pi) if self.cfg.angulo_aleatorio else 0.0)
+            self.fila_spawn = generate_line_pattern(
+                player_pos, angulo, self.cfg.artilharias_por_eixo, self.cfg.espacamento,
+                self.cfg.qtd_eixos, self.cfg.raio_artilharia, self.cfg.intervalo, agora
             )
         elif modo == 'inimigo_player':
             self.fila_spawn = generate_directional_pattern(

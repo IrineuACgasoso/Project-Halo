@@ -102,4 +102,26 @@ CONE_STRIKE_PRESETS = {
         cor_preenchimento=(30, 100, 255, 70),
         cor_explosao=(170, 225, 255, 240)
     ),
+
+    # Prophet's Bane: carrega enquanto ele investe (a duração real é a da investida) e estoura na chegada.
+    'arbiter_investida': ConeStrikeConfig(
+        dano=150,
+        raio=240,
+        angulo_spray=110,
+        duracao=450,
+        cor_borda=(90, 190, 255, 225),
+        cor_preenchimento=(40, 120, 255, 90),
+        cor_explosao=(190, 240, 255, 245)
+    ),
+
+    # Combo da quebra de escudo: corte para TRÁS, enorme (pune quem já foi para as costas dele).
+    'arbiter_combo_reverso': ConeStrikeConfig(
+        dano=140,
+        raio=340,
+        angulo_spray=160,
+        duracao=550,
+        cor_borda=(120, 210, 255, 235),
+        cor_preenchimento=(50, 140, 255, 105),
+        cor_explosao=(200, 245, 255, 250)
+    ),
 }

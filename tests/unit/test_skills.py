@@ -1,4 +1,4 @@
-"""Blocos de habilidade reutilizáveis (`source/feats/skills/`): dash, ataque retangular e o gancho `ao_explodir`."""
+"""Blocos de habilidade reutilizáveis (`source/feats/skills/`): dash, salto, ataque retangular e o gancho `ao_explodir`."""
 
 import pygame
 import pytest
@@ -8,6 +8,7 @@ from source.enemies.standard.grunt import GruntRed
 from source.feats.skills.artilharia import ArtilhariaAviso
 from source.feats.skills.dash import Dash, DashConfig
 from source.feats.skills.rect_strike import RectStrikeAviso, RectStrikeConfig
+from source.feats.skills.salto import Salto, SaltoConfig
 from source.systems.dano import AREA, Dano
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
@@ -63,6 +64,56 @@ def test_dash_com_alvo_na_propria_posicao_nao_quebra(novo_jogo):
     dash = Dash(grunt, grunt.posicao, config=DashConfig(velocidade=600, duracao_ms=100, ate_o_alvo=True))
     assert dash.atualizar(DT) is True
     assert tuple(grunt.posicao) == pytest.approx((1000, 1000))
+
+
+# ── Salto ────────────────────────────────────────────────────────────────────
+SALTO_NO_PONTO = SaltoConfig(duracao_ms=500, altura=100, alvo='ponto')
+
+
+def _saltar(salto, segundos=5):
+    for _ in range(round(segundos / DT)):
+        relogio.avancar(DT)
+        if salto.atualizar(DT):
+            return
+    raise AssertionError('o salto não pousou')
+
+
+def test_salto_no_ar_nao_e_mirado_nem_fere_e_pousa_devolvendo_as_flags(novo_jogo):
+    grunt = _grunt(novo_jogo)
+    grunt.verificar_posicao_valida = lambda p: True
+    salto = Salto(grunt, alvo=V(1300, 1000), config=SALTO_NO_PONTO)
+    for _ in range(round(0.25 / DT)):
+        relogio.avancar(DT)
+        salto.atualizar(DT)
+    assert grunt.no_ar and not grunt.alvejavel and grunt.inofensivo and grunt.invulneravel
+    assert grunt.rect.centery < grunt.posicao.y          # só o desenho sobe
+    _saltar(salto)
+    assert tuple(grunt.posicao) == pytest.approx((1300, 1000))
+    assert not grunt.no_ar and grunt.alvejavel and not grunt.inofensivo and not grunt.invulneravel
+    assert grunt.altura_z == 0 and grunt.rect.center == (1300, 1000)
+
+
+@pytest.mark.parametrize('validos_ate_x, pouso_x', [(1200, 1160), (999, 1000)])
+def test_salto_pousa_so_em_chao_valido(novo_jogo, validos_ate_x, pouso_x):
+    """Destino sobre parede: recua pela linha do salto até o chão; sem nenhum, pula no lugar."""
+    grunt = _grunt(novo_jogo)
+    grunt.verificar_posicao_valida = lambda p: p.x <= validos_ate_x
+    salto = Salto(grunt, alvo=V(1400, 1000), config=SALTO_NO_PONTO)
+    _saltar(salto)
+    assert grunt.posicao.x == pytest.approx(pouso_x)
+
+
+def test_salto_cortado_no_ar_pousa_em_chao_valido_e_devolve_as_flags(novo_jogo):
+    grunt = _grunt(novo_jogo)
+    grunt.is_inofensivo = True                            # já estava inofensivo antes: continua
+    grunt.verificar_posicao_valida = lambda p: not 1100 < p.x < 1300
+    salto = Salto(grunt, alvo=V(1400, 1000), config=SALTO_NO_PONTO)
+    for _ in range(round(0.25 / DT)):
+        relogio.avancar(DT)
+        salto.atualizar(DT)
+    salto.cancelar()
+    assert grunt.posicao.x == pytest.approx(1400) and grunt.altura_z == 0
+    assert not grunt.no_ar and grunt.is_inofensivo and not grunt.invulneravel
 
 
 # ── ao_explodir ──────────────────────────────────────────────────────────────

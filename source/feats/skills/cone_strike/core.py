@@ -8,7 +8,7 @@ from .config import CONE_STRIKE_PRESETS, ConeStrikeConfig
 
 class ConeStrikeAviso(pygame.sprite.Sprite):
     def __init__(self, posicao, direcao, grupos, game, dono='BOSS', preset='padrao', custom_config: ConeStrikeConfig = None,
-                 fonte=None, ao_explodir=None):
+                 fonte=None, ao_explodir=None, seguir=None):
         super().__init__(grupos)
         self.game = game
         self.dono = dono
@@ -30,6 +30,7 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
         self.tempo_criacao = relogio.agora()
         self.explodiu = False
         self.ao_explodir = ao_explodir   # chamado 1× com o aviso quando o golpe sai (ex.: poeira do boss)
+        self.seguir = seguir             # alguém com `posicao`: o cone vai junto até o golpe (investida)
 
         # Requisitos do Sprite do Pygame
         self.image = SUPERFICIE_VAZIA   # o draw é próprio
@@ -109,7 +110,10 @@ class ConeStrikeAviso(pygame.sprite.Sprite):
 
     def update(self, delta_time, paredes=None):
         agora = relogio.agora()
-        
+        if self.seguir is not None and not self.explodiu:
+            self.posicao.update(self.seguir.posicao)
+            self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+
         if not self.explodiu and agora - self.tempo_criacao >= self.cfg.duracao:
             self.explodiu = True
             self.tempo_criacao = agora

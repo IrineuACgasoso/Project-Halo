@@ -29,8 +29,7 @@ def _prontas(boss, *nomes):
     (500, ('lamina', 'granada', 'carabina'), {'parado_ms': 3000}, 'granada'),     # acampando
     (500, ('lamina', 'granada', 'carabina'), {'afastamento': 250}, 'carabina'),   # fugindo
     (720, ('lamina', 'granada', 'carabina'), {}, 'carabina'),                     # fora da granada
-    (100, ('lamina', 'granada', 'carabina', 'furtivo', 'invocacao'), {}, 'invocacao'),   # sem escolta
-    (900, ('lamina', 'granada', 'carabina'), {}, None),                           # nada alcança
+    (950, ('lamina', 'granada', 'carabina'), {}, None),                           # nada alcança
 ])
 def test_arbiter_contexto_decide_a_habilidade(arbiter, monkeypatch, dist, prontas, contexto, esperada):
     # sem sorteio: entre finalistas ganha a maior nota
@@ -43,14 +42,14 @@ def test_arbiter_contexto_decide_a_habilidade(arbiter, monkeypatch, dist, pronta
     assert arbiter.decisor.escolher(arbiter, arbiter._agora) == esperada
 
 
-def test_arbiter_com_a_escolta_cheia_nao_invoca(arbiter):
-    class Vivo:
-        def alive(self):
-            return True
-
-    arbiter.elites_invocados = [Vivo() for _ in range(arbiter.fase_cfg.max_elites)]
-    _prontas(arbiter, 'invocacao')
-    assert arbiter.decisor.escolher(arbiter, arbiter._agora) is None
+@pytest.mark.parametrize('vida_jogador, esperada', [(1.0, 'carabina'), (0.1, 'investida')])
+def test_arbiter_vai_para_cima_de_quem_esta_fraco(arbiter, monkeypatch, vida_jogador, esperada):
+    monkeypatch.setattr('source.enemies.base.boss.decisao.random.choices',
+                        lambda nomes, weights: [max(zip(weights, nomes))[1]])
+    _prontas(arbiter, 'investida', 'carabina')
+    arbiter.contexto.dist_sq = 500 ** 2
+    arbiter.jogador.vida_atual = arbiter.jogador.vida_maxima * vida_jogador
+    assert arbiter.decisor.escolher(arbiter, arbiter._agora) == esperada
 
 
 def test_nota_fraca_espera_ate_a_paciencia_acabar(arbiter):

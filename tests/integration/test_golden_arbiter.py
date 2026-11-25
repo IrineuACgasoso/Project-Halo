@@ -17,7 +17,7 @@ CAMINHO_GOLDEN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__
                               'golden', 'arbiter.json')
 PARAMETROS = {'cenario': 'arbiter', 'seed': 4321, 'segundos': 60, 'dt': DT}
 CASAS = 3
-# segundo -> fração da vida máxima imposta ao boss (abaixo dos limiares 0,60 e 0,30)
+# segundo -> fração da vida máxima imposta ao boss (0,55 segue na fase 1; 0,25 passa do limiar 0,40)
 VIDA_FORCADA = {20: 0.55, 40: 0.25}
 
 
@@ -61,7 +61,8 @@ def _amostra(game, boss, t):
         # soma das posições dos ataques do boss na tela: pega mudança de mira, não só de contagem
         'ataques_xy': round(sum(s.posicao.x + s.posicao.y for s in entity_manager.all_sprites
                                 if getattr(s, 'fonte', None) is boss and hasattr(s, 'posicao')), CASAS),
-        'sprites': len(entity_manager.all_sprites),
+        # sem as partículas: são só visuais e sorteiam por conta própria (regra de VFX)
+        'sprites': len(entity_manager.all_sprites) - len(entity_manager.particulas_grupo),
         'jogador_vida': round(p.vida_atual, CASAS),
         'jogador_escudo': round(p.escudo_atual, CASAS),
         'jogador_x': round(p.posicao.x, CASAS),

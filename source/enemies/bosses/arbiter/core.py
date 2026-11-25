@@ -2,16 +2,19 @@ import pygame
 from source.enemies.base.boss import BossBase
 from source.feats.items import Items
 
-from .config import CFG, CLIPS, FASES, HABILIDADES
+from .config import CFG, CLIPS, ESTADOS, FASES, HABILIDADES
 from .setup import ArbiterSetup
-from .states import ESTADOS, ArbiterAI
+from .states import ArbiterAI
 from .attacks import ArbiterAttacks
 from .arsenal import ArbiterArsenal
 from .movement import ArbiterMovement
+from .vfx import ArbiterVFX
 
 
-class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, ArbiterSetup, BossBase):
-    """Mixins ANTES de BossBase: os overrides deles (`mover`, `perceber`, `_esperar`...) precisam vencer na MRO."""
+class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, ArbiterVFX, ArbiterSetup, BossBase):
+    """Guerreiro completo: escudo regenerativo, carabina e granadas de longe, espada de perto, salto,
+    camuflagem curta e um combo quando o escudo quebra. Abaixo de 40%, só espada e granadas.
+    Mixins ANTES de BossBase: os overrides deles (`mover`, `perceber`, `_esperar`...) precisam vencer na MRO."""
     FASES = FASES
     COOLDOWNS = CFG.cooldown
     COOLDOWN_INICIAL = CFG.cooldown_inicial
@@ -22,7 +25,8 @@ class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, Ar
     HABILIDADES = HABILIDADES
 
     def __init__(self, posicao, game, **kwargs):
-        super().__init__(posicao, vida_base=2500, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)
+        super().__init__(posicao, vida_base=CFG.vida, dano_base=CFG.dano_contato, velocidade_base=CFG.velocidade,
+                         game=game, sprite_key='arbiter', flip_sprite=True)
 
         self.titulo = "THEL 'VADAM, O Comandante da Frota Covenant"
 
@@ -33,6 +37,7 @@ class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, Ar
         self.hitbox.center = self.rect.center
 
         self.inicializar_habilidades()
+        self.iniciar_vfx()
 
     def morrer(self, grupos=None):
         Items.spawn_drop(

@@ -16,6 +16,7 @@ class PurgeConfig:
     direcao: str = 'exit'
     duracao_aviso: int = 300
     offset_angulo: float = 0.0      # Permite girar o ataque inteiro
+    angulo_aleatorio: bool = False  # 'linha_jogador': soma um ângulo sorteado ao offset
     cor_borda: Tuple[int, int, int, int] = (255, 50, 0, 150)
     cor_preenchimento: Tuple[int, int, int, int] = (255, 50, 0, 50)
     cor_explosao: Tuple[int, int, int, int] = (255, 100, 50, 220)
@@ -99,5 +100,20 @@ PURGE_PRESETS = {
         cor_borda=(230, 150, 100, 200),     # Roxo Veneno/Sombra
         cor_preenchimento=(255, 210, 0, 80),
         cor_explosao=(218, 190, 214, 250)
+    ),
+
+    # Bombardeio do Phantom (Arbiter): uma linha que varre o mapa passando pelo jogador, em ângulo sorteado
+    'arbiter_phantom': PurgeConfig(
+        modo='linha_jogador',
+        artilharias_por_eixo=15,
+        espacamento=110,
+        raio_artilharia=95,
+        dano=220,
+        intervalo=55,
+        duracao_aviso=750,
+        angulo_aleatorio=True,
+        cor_borda=(170, 110, 255, 210),       # azul-arroxeado do plasma Covenant
+        cor_preenchimento=(110, 70, 255, 70),
+        cor_explosao=(215, 190, 255, 240)
     ),
 }

@@ -70,8 +70,8 @@ class BaseEnemy(
     @property
     def alvejavel(self):
         """Pode ser escolhido como alvo (armas, companheiros, veículos, projéteis teleguiados):
-        vivo e visível. Toda busca de alvo nova passa por aqui."""
-        return self.vivo and not self.invisivel
+        vivo, visível e no chão. Toda busca de alvo nova passa por aqui."""
+        return self.vivo and not self.invisivel and not self.no_ar
 
     @property
     def invulneravel(self):
@@ -101,7 +101,7 @@ class BaseEnemy(
     def update(self, delta_time, paredes=None):
         self.mover(delta_time)
 
-        if paredes:
+        if paredes and not self.no_ar:     # no ar, passa por cima (o salto pousa em chão válido)
             self.aplicar_colisao_mapa(paredes)
 
         self.sync_rect()

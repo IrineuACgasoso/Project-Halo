@@ -109,6 +109,7 @@ Project-Halo/
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
 | Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |
 | Balancear o Guilty Spark (barreira, ronda, pesos, intervalos das invocações, feixes, teleporte) | `enemies/bosses/guilty/config.py` (artilharias: presets `guilty_*` em `feats/skills/artilharia/config.py`) |
+| Balancear o Arbiter (escudo, postura sem escudo, combo, costas, esquiva, fases, bombardeio, invocação) | `enemies/bosses/arbiter/config.py` (danos e áreas: presets `arbiter_*` das skills, inclusive `purge_grid`) |
 | Balancear o Zealot (escudo, pesos, pausas do combo, fuga, regeneração) | `enemies/minibosses/zealot/config.py` (danos e áreas: presets `zealot_*` das skills) |
 | Inimigo que nasce invisível e aparece | `self.materializar()` logo depois de criar (`enemies/base/enemy_combat.py`) |
 | Boss que religa os inimigos comuns | `permitir_spawns_normais = True` nele (lido por `Game._atualizar_spawner` e `Spawner.update`) |
@@ -121,6 +122,7 @@ Project-Halo/
 | Empurrar alguém (knockback) | `knockback=<px>` no preset da artilharia, ou `empurrar(...)` de `systems/empurrao.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
+| Salto (pulo em arco) de inimigo: não mirado, inofensivo, por cima das paredes | `feats/skills/salto/` (`Salto(inimigo, preset, alvo)`; alvo jogador/ponto/aleatório, altura, duração, recuo no preset; `cancelar()` no `finally`; `desenhar_sombra` no `draw_extras`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
 | Visual do Fuel Rod (gota, rastro, poça) | `feats/grenades.py::FuelRodGrenade` (gota desenhada no código) e `feats/skills/artilharia/poca_plasma.py` (raio, pavio e cores: preset `fuel_rod`) |
