@@ -57,7 +57,7 @@ class CanhaoParabolico(ProjetilUniversal):
             grupos=(entity_manager.all_sprites,), 
             game=self.game,
             dono=self.dono,
-            fonte=self.fonte,
+            fonte=self.fonte, habilidade=self.habilidade,
             preset=self.preset_artilharia, # Agora ele usa o preset que você passar!
             ao_explodir=self.ao_explodir
         )

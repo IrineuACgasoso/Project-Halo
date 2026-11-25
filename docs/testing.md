@@ -19,7 +19,7 @@ persistência, regras que definem uma luta (vulnerabilidade, virada de fase, sof
 | `unit/test_dano`, `test_status`, `test_invisibilidade` | contratos de dano, buffs/debuffs e mira |
 | `unit/test_player`, `test_levelup_e_armas`, `test_fuel_rod`, `test_energy_sword` | jogador, armas e level-up |
 | `unit/test_efeitos`, `test_skills`, `test_empurrao`, `test_sem_alocacao` | efeitos, skills, knockback, partículas |
-| `unit/test_boss_base`, `test_animador`, `test_hunter`, `test_zealot`, `test_guilty`, `test_scarab` | motor e lutas |
+| `unit/test_boss_base`, `test_decisao`, `test_animador`, `test_hunter`, `test_zealot`, `test_guilty`, `test_scarab` | motor e lutas |
 | `unit/test_sistemas`, `test_eventos`, `test_estados`, `test_sessao`, `test_troca_de_fase`, `test_entrada` | loop, spawner, telas, entrada |
 | `unit/test_validacao`, `test_dados_inimigos`, `test_assets`, `test_imports`, `test_lint` | dados e saúde do repo |
 | `unit/test_map`, `test_grade_paredes`, `test_broadphase`, `test_camera`, `test_render`, `test_core_utils`, `test_ranking_data` | infraestrutura |

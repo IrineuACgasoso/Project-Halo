@@ -1,5 +1,3 @@
-import random
-
 from .config import CFG
 
 # nomes de estado (mantém os 3 que o código original usava)
@@ -11,36 +9,31 @@ ESTADOS = {
 
 
 class ArbiterAI:
-    """Decisão do Arbiter. O ciclo (rotinas, cooldowns, fases, anti-stuck) é da BossBase."""
+    """O que pesa na decisão do Arbiter. O ciclo e a escolha (`HABILIDADES`) são da BossBase."""
 
     def preparar_frame(self, delta_time):
         # a camuflagem é uma máquina da classe base: avança sempre, em qualquer estado
         self.atualizar_invisibilidade(delta_time)
         self._resetar_movimento()
 
-    def escolher_habilidade(self, agora):
-        dist = self.contexto.dist
+    # ------------------------------------------------ notas (a conta é do Decisor, F3)
+    def pontuar_lamina(self, ctx):
+        return 1.0 if ctx.dist <= self._raio_lamina() * 0.95 else 0.0
+
+    def pontuar_granada(self, ctx):
+        return CFG.bonus_parado if ctx.parado_ms >= CFG.parado_ms else 1.0
+
+    def pontuar_carabina(self, ctx):
+        return CFG.bonus_fuga if ctx.afastamento >= CFG.fuga_vel else 1.0
+
+    def pontuar_furtivo(self, ctx):
+        """Cresce com a fase; caça quem foge."""
+        return (2 + self.fase) / 6 * (CFG.bonus_fuga if ctx.afastamento >= CFG.fuga_vel else 1.0)
+
+    def pontuar_invocacao(self, ctx):
+        """Sem Elites é a prioridade; com a escolta quase cheia, só mais uma opção."""
         self._podar_elites()
-
-        # Invocar reforços tem prioridade absoluta (como no original), respeitando o teto de Elites
-        if self.pronto('invocacao') and len(self.elites_invocados) < self.fase_cfg.max_elites:
-            return 'invocacao'
-
-        pesos = {}
-        if self.pronto('lamina') and dist <= self._raio_lamina() * 0.95:
-            pesos['lamina'] = 6
-        if self.pronto('granada') and CFG.granada_dist_min <= dist <= CFG.granada_dist_max:
-            pesos['granada'] = 4
-        if self.pronto('carabina') and dist <= CFG.carabina_alcance:
-            pesos['carabina'] = 4
-        if self.pronto('furtivo'):
-            pesos['furtivo'] = 2 + self.fase
-
-        if not pesos:
-            return None
-        if self.ultima_habilidade in pesos:         # evita repetir a mesma habilidade em sequência
-            pesos[self.ultima_habilidade] *= 0.3
-        return random.choices(list(pesos), weights=list(pesos.values()))[0]
+        return max(0.0, 1.0 - len(self.elites_invocados) / self.fase_cfg.max_elites)
 
     def _esperar(self, ms, strafe=0.0):
         """Sub-rotina: passa `ms` de tempo de jogo parado (ou circulando se strafe > 0)."""
@@ -51,4 +44,3 @@ class ArbiterAI:
             else:
                 self._parar()
             yield
-

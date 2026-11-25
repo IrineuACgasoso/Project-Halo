@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
-from source.enemies.base.boss import Clip, ConfigTravamento, FaseBoss
+from source.enemies.base.boss import Clip, ConfigTravamento, FaseBoss, Habilidade
 
 
 @dataclass(frozen=True)
@@ -72,7 +72,6 @@ class ArbiterConfig:
     carabina_antecipacao: float = 0.55   # 0 = mira onde o jogador está; 1 = mira perfeita no futuro
     carabina_leque_arco: float = 30.0    # graus (rajada em leque, fases 2+)
     carabina_recuperacao: int = 400
-    carabina_alcance: float = 800
 
     # --- Espada de energia (ConeStrike azul, curto alcance) ---
     lamina_preset: str = 'arbiter_energy_sword'
@@ -88,7 +87,7 @@ class ArbiterConfig:
     granada_preparo: int = 550
     granada_intervalo: int = 380
     granada_recuperacao: int = 600
-    granada_dist_min: float = 150
+    granada_dist_min: float = 150        # queda (o alcance da decisão está em HABILIDADES)
     granada_dist_max: float = 700
     granada_vel: float = 700
     granada_antecipacao: float = 0.8
@@ -113,5 +112,20 @@ class ArbiterConfig:
     spawn_raio: Tuple[int, int] = (50, 110)
     spawn_tentativas: int = 14
 
+    # --- leitura do jogador (multiplicam a nota em `pontuar_*`) ---
+    parado_ms: float = 800               # parado há mais que isto: granada nele
+    bonus_parado: float = 1.4
+    fuga_vel: float = 90                 # fugindo mais rápido que isto (px/s): tiro ou emboscada
+    bonus_fuga: float = 1.3
+
 
 CFG = ArbiterConfig()
+
+# Decisão (F3): notas da IA de utilidade. O alcance da lâmina é o raio do cone (`pontuar_lamina`).
+HABILIDADES = {
+    'lamina':    Habilidade(peso=1.0),
+    'granada':   Habilidade(peso=0.67, alcance=(CFG.granada_dist_min, CFG.granada_dist_max), ideal=(250, 550)),
+    'carabina':  Habilidade(peso=0.67, alcance=(0, 800), ideal=(200, 550)),
+    'furtivo':   Habilidade(peso=1.0),
+    'invocacao': Habilidade(peso=2.0, memoria=False),
+}

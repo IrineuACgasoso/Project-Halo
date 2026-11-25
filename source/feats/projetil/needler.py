@@ -49,7 +49,7 @@ class ProjetilNeedler(ProjetilUniversal):
             alvo.agulhas_presas = 0
         
         alvo.agulhas_presas += 1
-        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte, habilidade=self.habilidade))
 
         if alvo.agulhas_presas >= 7:
             # Efeito de explosão (Dano massivo)
@@ -57,7 +57,7 @@ class ProjetilNeedler(ProjetilUniversal):
                 posicao             = alvo.posicao,
                 grupos              = entity_manager.all_sprites,
                 game                = self.game, 
-                dono                = self.dono, fonte=self.fonte,
+                dono                = self.dono, fonte=self.fonte, habilidade=self.habilidade,
                 preset='needler_supercombine'
                 )
             alvo.agulhas_presas = 0

@@ -20,10 +20,19 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Medição: só na tomada e por A/B alternado com o commit anterior (ruído de até 70%). Depois do bloco C: ~4 ms/frame nos piores casos.
 
 ## Estado do roteiro (`docs/roteiro_reformulacao.md`)
-Feitos A–E, F1 (BossBase) e F2 (Animador); Hunter, Zealot, Guilty e Scarab reformulados (adiantam a F5). **Próxima: F3** (IA de utilidade + memória).
+Feitos A–E, F1 (BossBase), F2 (Animador) e F3 (IA de utilidade + memória, só o Arbiter usa); Hunter, Zealot, Guilty e Scarab reformulados (adiantam a F5). **Próxima: F4** (bot jogador).
 O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as lutas reformuladas, HUD/culling (C4), o executável (D3) e a pausa da troca de fase (D2).
 
 ---
+
+## 2026-11-25 | F3: IA de utilidade e memória adaptativa dos bosses
+- **`base/boss/decisao.py`:** boss com `HABILIDADES` (nome → `Habilidade`) escolhe por nota: peso × distância × `pontuar_<nome>(ctx)` × repetição × memória. Uma claramente melhor vence; entre as próximas, sorteio. Nota fraca espera até 2 s.
+- **Memória:** dano por uso de cada habilidade nesta luta (fator 0,6 a 1,5, com esquecimento). `Dano.habilidade`: tiro e área guardam a da criação, e o que explode depois (granada, morteiro) a herda. Contato não conta.
+- **Contexto:** `parado_ms` e `afastamento`. `eventos.cancelar`: o boss solta o barramento no `kill`.
+- **Arbiter** usa notas: granada em quem para, tiro e emboscada em quem foge, invocação conforme a escolta (antes, prioridade absoluta). Zealot, Guilty e Scarab seguem com os pesos próprios.
+- **Golden do Arbiter regravado** (mudança declarada). Uso em 60 s parecido com o de antes; fases iguais.
+- **Fora desta entrega** (plano §3.1): histograma de esquiva e esquiva reativa, para quando um boss da F5 precisar.
+- **Não validado:** a sensação da luta na tela real e os pesos (do usuário: `HABILIDADES` em `arbiter/config.py`).
 
 ## 2026-11-24 | Fuel Rod incendiário, fogo, quebra de escudo, soco; suíte e docs podados (pedido do usuário)
 - **Fuel Rod:** a poça não dá mais dano direto: aplica `Queimadura` (dps = `dot`, renovada a cada 250 ms, 2,5 s depois de sair; `queimadura_ms` no preset). Poças sobrepostas não somam; invulnerável não pega fogo. O impacto continua.

@@ -4,6 +4,8 @@ Todo dano do jogo é um `Dano` entregue a `alvo.receber_dano(dano)`, seja o alvo
 - `fonte`: a entidade que causou o dano (o jogador, um inimigo ou None para o mapa). Projéteis,
   granadas e habilidades guardam a fonte de quem os criou. É por ela que o buff de dano de quem
   ataca entra na conta e que o evento `dano_causado` diz quem acertou (memória dos bosses, F3).
+- `habilidade`: a habilidade do boss que gerou o golpe (None = nenhuma). O que fere depois de criado
+  (tiro, área) guarda a do momento em que nasceu, com `habilidade_da(fonte)`.
 - `ignora_iframes`: só o jogador tem i-frames; o dano que os ignora também não os liga.
 
 Uso:  from source.systems.dano import Dano, PROJETIL
@@ -30,6 +32,7 @@ class Dano:
     tipo: str
     fonte: object = None
     ignora_iframes: bool = False
+    habilidade: str | None = None
 
     def __post_init__(self):
         if self.tipo not in TIPOS_DANO:
@@ -45,3 +48,8 @@ def fonte_do_dono(dono, fonte=None):
     if fonte is not None:
         return fonte
     return entity_manager.player if dono == 'PLAYER' else None
+
+
+def habilidade_da(fonte):
+    """A habilidade que `fonte` está usando agora (só os bosses da BossBase têm)."""
+    return getattr(fonte, 'habilidade_ativa', None)

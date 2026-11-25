@@ -2,7 +2,7 @@
 
 > 2026-11-24: a suíte foi podada (`docs/testing.md`). Onde uma etapa citar teste de equivalência, golden de assets/inimigos, `test_perf_tool` ou `test_shims`, ele não existe mais.
 
-**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4, a E5, a E6, a F1 e a F2 concluídos; próximo: F3 (IA de utilidade).
+**Status:** aprovado (2026-11-21). Decisões na §8. Etapa atual: blocos A, B, C e D, a E1, o sistema de status (§7.1), a E2, a E3, a E4, a E5, a E6, a F1, a F2 e a F3 concluídos; próximo: F4 (bot jogador).
 Este é o roteiro mestre: ele define a **ordem** e o **critério de pronto** de cada etapa. O desenho detalhado dos bosses continua em `docs/plano_bosses.md`; as etapas dele foram encaixadas aqui (ver §7).
 
 ## 1. Pilares (como cada um é medido)
@@ -200,7 +200,7 @@ Ordem recomendada = ordem da tabela. "Depende de" é o mínimo obrigatório.
 |---|---|---|
 | **F1** BossBase + ContextoCombate | extraídos do Arbiter, sobre o contrato de dano de E1 | Arbiter igual (smoke + regressão); testes do motor (cooldown, fases, interrupção, anti-stuck). **Feito (2026-11-22):** golden próprio do Arbiter (`tests/golden/arbiter.json`, gravado antes) inalterado |
 | **F2** Animador | clips declarativos, hit frames, cache de máscaras | update de boss com zero alocação (catraca). **Feito (2026-11-22):** o Arbiter migrou; golden dele (com quadro, lado e alpha) inalterado; teste de identidade das imagens no lugar da catraca, que não vê `Surface.copy` |
-| **F3** IA de utilidade + memória | `decisao.py`, alimentada por `dano_causado` (B4) | teste determinístico: contexto X → habilidade Y |
+| **F3** IA de utilidade + memória | `decisao.py`, alimentada por `dano_causado` (B4) | teste determinístico: contexto X → habilidade Y. **Feito (2026-11-25):** o Arbiter usa notas; golden dele regravado |
 | **F4** Bot jogador | `FonteEntrada` Bot (E3) que esquiva e kita | métricas por boss no log: tempo para matar, % de acerto, uso de cada habilidade |
 | **F5.x** Migração | um commit por boss: Tartarus (+ Atriox e Escharum, que deixam de ser cópias), Harbinger, Jega, ~~Guilty~~ (feito em 2026-11-24, já na `BossBase`), Didact, Gravemind, Warden, Guardian; depois Hunter (adiantado em 2026-11-22 sem a `BossBase`: falta só migrar para ela), ~~Zealot~~ (feito em 2026-11-23, já na `BossBase`), ~~Scarab~~ (feito em 2026-11-24, já na `BossBase`), Knight | smoke + métricas do bot sem piora + catraca zero no update |
 | **F6** Inimigos comuns no Animador | mesmo motor de animação para `enemies/standard/` | catraca; golden inalterado |

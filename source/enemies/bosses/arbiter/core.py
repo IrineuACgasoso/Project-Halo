@@ -2,7 +2,7 @@ import pygame
 from source.enemies.base.boss import BossBase
 from source.feats.items import Items
 
-from .config import CFG, CLIPS, FASES
+from .config import CFG, CLIPS, FASES, HABILIDADES
 from .setup import ArbiterSetup
 from .states import ESTADOS, ArbiterAI
 from .attacks import ArbiterAttacks
@@ -19,6 +19,7 @@ class BossArbiter(ArbiterMovement, ArbiterAI, ArbiterAttacks, ArbiterArsenal, Ar
     ANTISTUCK = CFG.antistuck
     CLIPS = CLIPS
     CLIP_INICIAL = 'andar'
+    HABILIDADES = HABILIDADES
 
     def __init__(self, posicao, game, **kwargs):
         super().__init__(posicao, vida_base=2500, dano_base=80, velocidade_base=90, game=game, sprite_key='arbiter', flip_sprite=True)

@@ -8,19 +8,23 @@ A IA só decide quando não há rotina ativa. O boss declara, na classe:
   - `ANTISTUCK` (`ConfigTravamento`, ou None = sem detector; com ele, `rotina_antistuck`);
   - `CLIPS` (nome -> `Clip`) e `CLIP_INICIAL`: a animação (F2). Rotinas pedem um clip com
     `self.animador.tocar(nome)` e casam o dano com o quadro usando `_tocar(clip, ate_evento)`;
-e implementa `escolher_habilidade(agora)`. Ganchos opcionais: `perceber`, `preparar_frame`,
-`movimento_ocioso`, `orientar` e `rotina_transicao`.
+  - `HABILIDADES` (nome -> `Habilidade`): a IA de utilidade (F3) escolhe por nota e aprende com o
+    dano. `pontuar_<nome>(ctx)`, opcional, multiplica a nota pelo contexto (0 = não dá para usar).
+Sem `HABILIDADES`, implemente `escolher_habilidade(agora)`. Ganchos opcionais: `perceber`,
+`preparar_frame`, `movimento_ocioso`, `orientar` e `rotina_transicao`.
 
 Mixins do boss vão ANTES de `BossBase` na herança (MRO; há teste).
 """
 import pygame
 
 from source.enemies.base.enemy_base import BaseEnemy
+from source.systems.eventos import DANO_CAUSADO, eventos
 from source.systems.gameclock import relogio
 from source.systems.status import IMUNIDADES_CHEFE
 
 from .animador import Animador, Clip
 from .contexto import ContextoCombate
+from .decisao import Decisor
 from .fases import FASE_UNICA, fase_pela_vida
 from .travamento import DetectorTravamento
 
@@ -35,6 +39,7 @@ class BossBase(BaseEnemy):
     ANTISTUCK = None
     CLIPS = {'padrao': Clip(200)}      # todos os quadros em loop
     CLIP_INICIAL = 'padrao'
+    HABILIDADES = {}                   # vazio = o boss decide sozinho em `escolher_habilidade`
 
     def __init__(self, posicao, vida_base, dano_base, velocidade_base, game, sprite_key,
                  flip_sprite=False, variante=None):
@@ -65,6 +70,10 @@ class BossBase(BaseEnemy):
         self.contexto = ContextoCombate(self.jogador.posicao)
         self.travamento = (DetectorTravamento(self.ANTISTUCK, agora, self.posicao)
                            if self.ANTISTUCK is not None else None)
+        self.decisor = None
+        if self.HABILIDADES:
+            self.decisor = Decisor(self.HABILIDADES)
+            eventos.assinar(DANO_CAUSADO, self._lembrar_dano)
 
     def iniciar_animacao(self):
         """As cópias dos quadros nascem aqui (no spawn): por frame, o boss não aloca imagem."""
@@ -179,12 +188,16 @@ class BossBase(BaseEnemy):
 
     def escolher_habilidade(self, agora):
         """Nome da próxima habilidade (chave de `ESTADOS`), ou None para esperar."""
-        raise NotImplementedError(f'{type(self).__name__} precisa implementar escolher_habilidade')
+        if self.decisor is not None:
+            return self.decisor.escolher(self, agora)
+        raise NotImplementedError(f'{type(self).__name__} precisa de HABILIDADES ou de escolher_habilidade')
 
     def iniciar(self, nome):
         self.rotina = getattr(self, f'rotina_{nome}')()
         self.estado_habilidade = self.ESTADOS[nome]
         self.ultima_habilidade = nome
+        if self.decisor is not None:
+            self.decisor.memoria.registrar_uso(nome)
 
     def finalizar_rotina(self):
         self.rotina = None
@@ -224,6 +237,21 @@ class BossBase(BaseEnemy):
             if self._agora >= fim:
                 return False
             self.animador.tocar(clip)
+
+    # ------------------------------------------------------------ memória de combate
+    @property
+    def habilidade_ativa(self):
+        """A habilidade em curso: o que nasce agora (tiro, área) é dela (`habilidade_da`)."""
+        return self.ultima_habilidade if self.rotina is not None else None
+
+    def _lembrar_dano(self, alvo, dano, valor):
+        if dano.fonte is self and alvo is self.jogador:
+            self.decisor.memoria.registrar_dano(dano.habilidade, valor)
+
+    def kill(self):
+        if self.decisor is not None:
+            eventos.cancelar(DANO_CAUSADO, self._lembrar_dano)
+        super().kill()
 
     # ------------------------------------------------------------ cooldowns
     def pronto(self, nome):

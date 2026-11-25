@@ -188,6 +188,13 @@ def validar_motor_de_bosses(classes_de_boss=None):
                 erros.append(f'{local}: cooldown inicial de "{habilidade}" sem faixa em COOLDOWNS')
             if not _inteiro(ms) or ms < 0:
                 erros.append(f'{local}: cooldown inicial de "{habilidade}" {ms!r} (precisa ser inteiro >= 0)')
+        for habilidade in sorted(classe.HABILIDADES):
+            faltando = [onde for onde, tem in (
+                ('ESTADOS', habilidade in classe.ESTADOS), ('COOLDOWNS', habilidade in classe.COOLDOWNS),
+                ('COOLDOWN_INICIAL', habilidade in classe.COOLDOWN_INICIAL),
+                (f'rotina_{habilidade}', hasattr(classe, f'rotina_{habilidade}'))) if not tem]
+            if faltando:
+                erros.append(f'{local}: habilidade "{habilidade}" sem {", ".join(faltando)}')
         clips = classe.CLIPS
         if not (isinstance(clips, dict) and clips and all(isinstance(c, Clip) for c in clips.values())):
             erros.append(f'{local}: CLIPS precisa ser um dict não vazio de nome -> Clip')

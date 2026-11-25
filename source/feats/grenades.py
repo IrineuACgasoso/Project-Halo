@@ -113,7 +113,7 @@ class GrenadeBase(ProjetilUniversal):
             grupos=(entity_manager.all_sprites,),
             game=self.game,
             dono=self.dono,
-            fonte=self.fonte,
+            fonte=self.fonte, habilidade=self.habilidade,
             preset=self.preset,
             custom_config=self.custom_config,
             **kwargs

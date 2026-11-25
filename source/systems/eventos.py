@@ -34,6 +34,12 @@ class BarramentoEventos:
             raise TypeError(f'assinante de {nome!r} precisa ser chamável, veio {funcao!r}')
         self._lista(nome).append(funcao)
 
+    def cancelar(self, nome, funcao):
+        """Tira o assinante; sem efeito se ele já saiu (ex.: depois de `limpar`)."""
+        lista = self._lista(nome)
+        if funcao in lista:
+            lista.remove(funcao)
+
     def emitir(self, nome, **dados):
         # Cópia: quem assinar durante a emissão só recebe a partir da próxima.
         for funcao in tuple(self._lista(nome)):

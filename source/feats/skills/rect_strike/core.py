@@ -4,7 +4,7 @@ O retângulo começa em `posicao` (o dono) e vai até `altura` px na direção t
 de espessura. Como a artilharia e o cone, atinge quem tem a POSIÇÃO dentro da área no golpe."""
 import pygame
 
-from source.systems.dano import AREA, Dano, fonte_do_dono
+from source.systems.dano import AREA, Dano, fonte_do_dono, habilidade_da
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
@@ -25,6 +25,7 @@ class RectStrikeAviso(pygame.sprite.Sprite):
         self.game = game
         self.dono = dono
         self.fonte = fonte_do_dono(dono, fonte)   # quem causou (contrato de dano, E1)
+        self.habilidade = habilidade_da(self.fonte)
         self.cfg = custom_config if custom_config is not None else RECT_STRIKE_PRESETS[preset]
         self.posicao = pygame.math.Vector2(posicao)
         self.direcao = direcao_segura((0, 0), direcao)
@@ -79,7 +80,7 @@ class RectStrikeAviso(pygame.sprite.Sprite):
         alvos = entity_manager.inimigos_grupo.sprites() if self.dono == 'PLAYER' else [entity_manager.player]
         for alvo in alvos:
             if self.contem(alvo.posicao):
-                alvo.receber_dano(Dano(self.cfg.dano, AREA, self.fonte, ignora_iframes=True))
+                alvo.receber_dano(Dano(self.cfg.dano, AREA, self.fonte, ignora_iframes=True, habilidade=self.habilidade))
 
     # --------------------------------------------------------------- desenho
     def draw(self, surface, offset):

@@ -1,6 +1,7 @@
 # source/feats/skills/purge_grid/orchestrator.py
 import pygame
 from source.systems.gameclock import relogio
+from source.systems.dano import habilidade_da
 from source.systems.entitymanager import entity_manager
 from source.feats.skills.artilharia import ArtilhariaAviso, ArtilhariaConfig
 from .patterns import generate_grid_pattern, generate_radial_pattern, generate_directional_pattern
@@ -12,6 +13,7 @@ class PurgeGrid(pygame.sprite.Sprite):
         
         self.game = game
         self.caster = caster
+        self.habilidade = habilidade_da(caster)
         
         # Injeta a configuração escolhida (Preset ou uma Customizada na hora)
         self.cfg = custom_config if custom_config else PURGE_PRESETS.get(preset, PURGE_PRESETS['padrao'])
@@ -78,7 +80,7 @@ class PurgeGrid(pygame.sprite.Sprite):
                 grupos=(entity_manager.all_sprites,), # <-- Coloque o grupo de perigo real do seu jogo
                 game=self.game,
                 dono='BOSS',
-                fonte=self.caster,
+                fonte=self.caster, habilidade=self.habilidade,
                 custom_config=config_do_purge # Passa os dados sobreescrevendo os presets padrões da artilharia
             )
             spawns_neste_frame += 1

@@ -66,7 +66,8 @@ Project-Halo/
     ├── enemies/
     │   ├── base/            # BaseEnemy + mixins (setup, sprites, animation, movement, collision, combat, scaling, effects)
     │   │   └── boss/        # BossBase (motor: rotinas, cooldowns, fases, anti-stuck), ContextoCombate, FaseBoss, DetectorTravamento (F1);
-    │   │                    # animador.py: Clip + Animador (clips, hit frames, quadros copiados no spawn: F2)
+    │   │                    # animador.py: Clip + Animador (clips, hit frames, quadros copiados no spawn: F2);
+    │   │                    # decisao.py: Habilidade, Decisor, MemoriaDeCombate (notas e memória: F3)
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
     │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), knight,
     │   │                    # scarab (BossBase; config/corpo/recortes/patas/movement/armas/feixe)
@@ -101,6 +102,7 @@ Project-Halo/
 | Balancear inimigo comum (vida, dano, velocidade, cooldowns, drops) | `source/data/enemy_data.py` |
 | Novo boss | Pasta em `enemies/bosses/<nome>/`, registrada em `spawner_bosses.py` nos 3 dicts. Herde de `BossBase` (`enemies/base/boss/`; contrato no docstring de `boss_base.py`; exemplo: o Arbiter). Desenho em `docs/plano_bosses.md` |
 | Motor comum dos bosses (ciclo do frame, cooldowns, fases, anti-stuck, mira antecipada) | `enemies/base/boss/boss_base.py`; percepção em `contexto.py` |
+| Como um boss escolhe a habilidade (pesos, alcances, leitura do jogador) | `HABILIDADES` no `config.py` do boss + `pontuar_<nome>(ctx)` nos `states.py`; a conta em `enemies/base/boss/decisao.py` |
 | Animação de um boss da `BossBase` (ritmo, quadros de cada estado, hit frame) | `CLIPS`/`CLIP_INICIAL` no `config.py` do boss (`Clip` em `enemies/base/boss/animador.py`); a rotina pede com `self.animador.tocar(nome)` ou espera o golpe com `yield from self._tocar(clip, ate_evento)` |
 | Animação ou efeito visual próprio de um boss (brilho, poeira) | `vfx.py` no pacote do boss (ex.: `minibosses/hunter/vfx.py`) |
 | Balancear o Hunter (defesa, ângulo das costas, atrasos, pesos da IA, cooldowns, camera shake) | `enemies/minibosses/hunter/config.py` |

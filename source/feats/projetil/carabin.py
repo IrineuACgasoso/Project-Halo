@@ -47,6 +47,6 @@ class Carabin(ProjetilUniversal):
         if alvo and not getattr(alvo, 'invulneravel', False):
             if hasattr(alvo, 'escudo_atual') and alvo.escudo_atual > 0:
                 qtd *= 3
-            alvo.receber_dano(Dano(qtd, PROJETIL, self.fonte))
+            alvo.receber_dano(Dano(qtd, PROJETIL, self.fonte, habilidade=self.habilidade))
         self.kill()
         

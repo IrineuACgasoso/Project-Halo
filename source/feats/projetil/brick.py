@@ -85,7 +85,7 @@ class Brick(ProjetilUniversal):
 
     def ao_atingir_alvo(self, alvo):
         if alvo and not getattr(alvo, 'invulneravel', False) and alvo not in self.inimigos_atingidos:
-            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte, habilidade=self.habilidade))
             self.inimigos_atingidos.add(alvo)
 
         

@@ -3,7 +3,7 @@ import pygame
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 from source.systems.gameclock import relogio
 from source.systems.entitymanager import entity_manager
-from source.systems.dano import Dano, AREA, fonte_do_dono
+from source.systems.dano import Dano, AREA, fonte_do_dono, habilidade_da
 from source.systems.empurrao import empurrar
 from source.systems.status import Queimadura, aplicar
 from .config import ARTILHARIA_PRESETS, ArtilhariaConfig
@@ -14,11 +14,13 @@ MS_ENTRE_QUEIMADURAS = 250   # renovação da queimadura de quem está na área
 
 class ArtilhariaAviso(pygame.sprite.Sprite):
     def __init__(self, posicao, grupos, game, dono='BOSS', preset='padrao', custom_config: ArtilhariaConfig = None,
-                 grude=False, alvo=None, fonte=None, ao_explodir=None):
+                 grude=False, alvo=None, fonte=None, ao_explodir=None,
+                 habilidade=None):
         super().__init__(grupos)
         self.game = game
         self.dono = dono
         self.fonte = fonte_do_dono(dono, fonte)   # quem causou (contrato de dano, E1)
+        self.habilidade = habilidade_da(self.fonte) if habilidade is None else habilidade
         self.posicao = pygame.math.Vector2(posicao)
 
         # Carrega a configuração (A customizada tem prioridade, útil para o PurgeGrid)
@@ -104,7 +106,7 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
         """Aplica `dano` a todos os alvos dentro do raio, uma vez. `impacto`: é a explosão (e não um
         tick), então vale o knockback da configuração."""
         for alvo in self._alvos_na_area():
-            alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True))
+            alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True, habilidade=self.habilidade))
             if impacto and self.cfg.knockback:
                 empurrar(alvo, self.posicao, self.cfg.knockback)
 

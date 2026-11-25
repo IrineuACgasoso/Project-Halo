@@ -6,7 +6,7 @@ from source.systems.entitymanager import entity_manager
 from source.feats.assets import *
 from source.feats.assets import ASSETS
 from source.utils.superficies import mascara_de
-from source.systems.dano import Dano, PROJETIL, fonte_do_dono
+from source.systems.dano import Dano, PROJETIL, fonte_do_dono, habilidade_da
 
 
 #PROJETIL BASE
@@ -29,6 +29,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         self.game = game
         self.dono = dono # 'PLAYER' ou 'INIMIGO'
         self.fonte = fonte_do_dono(dono, fonte)   # quem disparou (contrato de dano, E1)
+        self.habilidade = habilidade_da(self.fonte)
         self.sprite_key = sprite_key
         self.dano = dano
         self.velocidade = velocidade
@@ -87,7 +88,7 @@ class ProjetilUniversal(pygame.sprite.Sprite):
         """
         # Checa se o alvo existe e se NÃO está invulnerável
         if alvo and not getattr(alvo, 'invulneravel', False):
-            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+            alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte, habilidade=self.habilidade))
 
             # Lógica de Piercing: só reduz se de fato atingiu algo vulnerável
             if self.piercing <= 1:

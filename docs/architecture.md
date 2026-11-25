@@ -61,10 +61,10 @@ Barramento síncrono `eventos`: `assinar(nome, funcao)`, `emitir(nome, **dados)`
 | `fase_trocada` | `fase` (a nova) | `StageManager._trocar_dados_fase` |
 | `dano_causado` | `alvo`, `dano` (o `Dano`), `valor` (final, depois da regra do alvo) | `receber_dano` do jogador e dos inimigos, só quando o golpe entra (i-frames e golpe ignorado pelo alvo não emitem) |
 
-Ainda não há assinantes no jogo: os consumidores previstos são a memória dos bosses (F3), o áudio (G4) e a pontuação.
+Assinantes: a memória dos bosses (`dano_causado`, F3) e o Guilty (`inimigo_morreu`). Previstos: o áudio (G4) e a pontuação.
 
 ## Dano (`systems/dano.py`, roteiro E1)
-Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes))`. Tipos: `projetil`, `contato`, `aura`, `area` (explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte` é a entidade que causou (jogador, inimigo ou `None` para o mapa): projéteis, granadas e habilidades a guardam (`fonte_do_dono`: o que é do jogador é dele; o inimigo passa `fonte=self`, e um teste por AST exige isso).
+Todo dano é `alvo.receber_dano(Dano(valor, tipo, fonte, ignora_iframes, habilidade))`. Tipos: `projetil`, `contato`, `aura`, `area` (explosão, cone, onda, puxão, feixe), `void`, `direto`. `fonte` é a entidade que causou (jogador, inimigo ou `None` para o mapa): projéteis, granadas e habilidades a guardam (`fonte_do_dono`: o que é do jogador é dele; o inimigo passa `fonte=self`, e um teste por AST exige isso).
 - **Jogador:** i-frames (ignorados com `ignora_iframes`, que também não os liga) → veículo → escudo → vida.
 - **Inimigo:** `ajustar_dano_recebido(valor, dano)` é o gancho da regra do alvo (devolve o valor final, ou `None` para ignorar: Guilty, Scarab, consciência do Warden) e `absorver_dano(valor)` tira do escudo e da vida (o Scarab sobrescreve: o dano vai para a pata do ângulo em que o jogador está). Não há i-frames.
 - **Hunter:** a armadura é status, não gancho: `Defesa(90%)` sem fim, tirada enquanto o jogador está nas costas (±30° do eixo x, `no_cone`) e posta de volta quando ele sai (`atualizar_vulnerabilidade`, a cada passo; o status só é tocado na troca).

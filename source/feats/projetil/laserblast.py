@@ -76,13 +76,13 @@ class LaserBlast(ProjetilUniversal):
         if getattr(alvo, 'invulneravel', False):
             return
 
-        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte))
+        alvo.receber_dano(Dano(self.dano, PROJETIL, self.fonte, habilidade=self.habilidade))
 
         ArtilhariaAviso(
             posicao=alvo.posicao,
             grupos=(entity_manager.all_sprites,),
             game=self.game,
-            dono=self.dono, fonte=self.fonte,
+            dono=self.dono, fonte=self.fonte, habilidade=self.habilidade,
             preset='spartan_laser'
         )
 
