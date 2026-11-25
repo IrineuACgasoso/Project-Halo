@@ -4,6 +4,7 @@ import random
 import pygame
 import pytest
 
+from helpers import blindar_jogador
 from source.enemies.standard.grunt import GruntRed
 from source.feats.assets import ASSETS
 from source.feats.grenades import Spike
@@ -272,3 +273,24 @@ def test_fim_de_campanha_e_morte_no_mesmo_update_pontua_uma_vez(novo_jogo, monke
     novo_jogo.update(1 / 60)
     assert novo_jogo.estado_do_jogo == 'game_over'
     assert p.pontuacao == pontos_antes + 7
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=(
+    'BUG conhecido (achado na F4): o ponto de reposicionamento do atirador do Warden não olha as paredes; '
+    'com uma no caminho ele nunca chega, fica em "reposicionando" para sempre e para de atirar.'))
+def test_atirador_do_warden_desiste_do_ponto_que_nao_alcanca(novo_jogo):
+    blindar_jogador(novo_jogo.player)
+    novo_jogo.player.armas.clear()
+    novo_jogo.spawner.spawnar('warden')
+    atirador = next(i for i in entity_manager.inimigos_grupo if getattr(i, 'funcao_atual', '') == 'ATIRADOR')
+    # a parede mais comprida longe do jogador: o corpo de um lado, o ponto do outro
+    paredes = [(V(x1, y1), V(x2, y2)) for _, x1, y1, x2, y2 in novo_jogo.mapa.grade_paredes.segmentos]
+    a, b = max((p for p in paredes if ((p[0] + p[1]) / 2).distance_to(novo_jogo.player.posicao) > 500),
+               key=lambda p: p[0].distance_to(p[1]))
+    normal = (b - a).rotate(90).normalize()
+    atirador.posicao.update((a + b) / 2 + normal * 80)
+    atirador.alvo_reposicionamento = (a + b) / 2 - normal * 80
+    atirador.estado_habilidade = 'reposicionando'
+    for _ in range(15 * 60):
+        novo_jogo.update(1 / 60)
+    assert atirador.estado_habilidade != 'reposicionando'

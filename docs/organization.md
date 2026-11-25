@@ -19,10 +19,12 @@ Project-Halo/
 │   ├── fonts/ sounds/ audio/
 ├── tools/
 │   ├── perf.py              # medição headless de ms/frame por cenário (roteiro A1)
+│   ├── lutas.py             # métricas das lutas de boss com o bot jogador (roteiro F4)
 │   └── perf_base.json       # última base medida (comparada pelo perf.py; ±10% = portão)
 ├── tests/                   # pytest — ver docs/testing.md
 │   ├── conftest.py          # SDL dummy, cwd=raiz, fixtures game/novo_jogo/player
 │   ├── helpers.py           # simular(), blindar_jogador(), ir_para_fase(), contar_alocacoes(), MapaSemImagem
+│   ├── bot.py               # Bot (FonteEntrada): mantém distância e esquiva; usado por tools/lutas.py
 │   ├── golden/              # fase0.json e arbiter.json. Só com --atualizar-golden
 │   ├── perf/                # test_catraca.py: alocações por frame ≤ teto (roteiro A2)
 │   ├── unit/                # lógica isolada: player, mapa, ranking, level-up, spawner, colisão...
@@ -139,3 +141,4 @@ Project-Halo/
 | Regra de integridade de dados | `source/data/validacao.py` + um caso que falha em `tests/unit/test_validacao.py` |
 | Testes | `tests/unit/` (lógica) ou `tests/integration/` (loop real) |
 | Medir desempenho | `tools/perf.py` (cenários em `listar_cenarios()`) |
+| Medir uma luta de boss (tempo, acerto, uso de habilidades) | `tools/lutas.py --boss <nome>` (régua fixa: `ARSENAL`, `NIVEL_INICIAL`); o jeito de jogar está em `tests/bot.py` |

@@ -11,6 +11,8 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Veículo é atualizado 2× por passo (hoje inofensivo). `shake` é "o último ganha".
 - Sem indicador de status no HUD. `perf_base.json` precisa ser regravado numa sessão fria.
 - Partida com cheats entra no ranking sem marca.
+- `xfail`: o atirador do Warden escolhe um ponto atrás da parede e fica preso em `reposicionando`, sem atirar (`test_sistemas`).
+- Corpo invulnerável ainda é `alvejavel`: as armas gastam tiros na consciência do Warden e na Harbinger em recarga se for o alvo mais perto.
 
 ## Decisões que valem até hoje
 - Balanceamento é do usuário: números "estranhos" são propositais (Hunter 120 de vida, Zealot 100, Guilty, Scarab, Energy Sword).
@@ -20,10 +22,18 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Medição: só na tomada e por A/B alternado com o commit anterior (ruído de até 70%). Depois do bloco C: ~4 ms/frame nos piores casos.
 
 ## Estado do roteiro (`docs/roteiro_reformulacao.md`)
-Feitos A–E, F1 (BossBase), F2 (Animador) e F3 (IA de utilidade + memória, só o Arbiter usa); Hunter, Zealot, Guilty e Scarab reformulados (adiantam a F5). **Próxima: F4** (bot jogador).
+Feitos A–E, F1 (BossBase), F2 (Animador), F3 (IA de utilidade + memória, só o Arbiter usa) e F4 (bot e métricas); Hunter, Zealot, Guilty e Scarab reformulados (adiantam a F5). **Próxima: F5** (migração, um commit por boss; começa por Tartarus).
 O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as lutas reformuladas, HUD/culling (C4), o executável (D3) e a pausa da troca de fase (D2).
 
 ---
+
+## 2026-11-25 | F4: bot jogador e métricas das lutas
+- **`tests/bot.py`:** `FonteEntrada` que mantém distância e esquiva; só vê a tela, reage em 200 ms, decide a cada 100 ms, sem sorteio (mesma seed, mesma luta: conferido no Arbiter e no Gravemind). Não esquiva feixe, EMP nem efeito próprio de boss e não planeja caminho.
+- **`tools/lutas.py`:** arsenal e nível fixos por fase, jogador blindado; golpe letal encerra a luta. `--boss` dá o uso das habilidades; `--parado` é a referência. Fora da BossBase, "uso" = entrada num estado.
+- **Base (3 seeds; tempo · vidas de 500/min do bot × parado · tiros que acertam o bot):** hunter 42 s · 2,7×6,9 · 4% | zealot 44 · 7,3×16,8 | guilty 152 · 5,8×12,6 · 18% | scarab 31 · 1,7×4,0 · 18% | arbiter 24 · 1,1×34,9 · 0% | tartarus 26 · 4,8×68 · 90% | gravemind 67 · 2,3×29 (parado morre) · 0% | knight 2 · 0×0 | didact 42 · 10,8 (parado morre no void) · 100% | warden 14 · 5,4×55 · 33% | guardian 2 · 2,6×1,7 | jega 13 · 1,1×13 · 0% | escharum 11 · 0×55 | harbinger 55 (2 de 3) · 0,9×0,5 · 0% | atriox 10 · 4,1×63 · 33%.
+- **Uso de habilidades (por luta):** arbiter granada 2 (83% ferem), carabina 1,7, furtivo 1, invocação 1; tartarus hammer_run 3,7, salto 3, brutes 2; hunter burst 5,3, cannon 4, run 3; didact laser 9, crypt 1; os demais: rode a ferramenta.
+- **Achados (para o usuário):** Knight e Guardian caem em 2 s, o Knight sem atacar; Jega, Escharum e Atriox em 10 a 13 s: a vida deles não acompanha o arsenal da fase na régua. O laser do Didact acerta sempre. Harbinger: grunts da recarga presos atrás de parede travam o fim da recarga (o bot não vai buscá-los). Bug do atirador do Warden: ver pendências.
+- **Não validado:** se a régua parece uma partida real; nenhum código do jogo mudou.
 
 ## 2026-11-25 | F3: IA de utilidade e memória adaptativa dos bosses
 - **`base/boss/decisao.py`:** boss com `HABILIDADES` (nome → `Habilidade`) escolhe por nota: peso × distância × `pontuar_<nome>(ctx)` × repetição × memória. Uma claramente melhor vence; entre as próximas, sorteio. Nota fraca espera até 2 s.
