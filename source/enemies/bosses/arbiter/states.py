@@ -4,8 +4,8 @@
   investida e salto de média/curta, lâmina colado, emboscada de longe) e a vida do jogador o puxa
   para cima (quanto menos vida o jogador tem, mais perto ele luta e mais valem os golpes de espada).
 - Quebrou o escudo: grito + combo de 5 dashes (reação, `pensar`). Depois, até o escudo voltar a
-  encher, três vontades brigam a cada frame: a vida dele e o jogador longe pedem recuo; o jogador
-  fraco pede avanço (`_avaliar_postura`).
+  encher, as vontades brigam a cada frame: a vida dele, o jogador longe e a escolta de Elites viva
+  pedem recuo; o jogador fraco pede avanço (`_avaliar_postura`).
 - Muito dano em pouco tempo: esquiva lateral (reação), às vezes com spray camuflado.
 - Fora da rotina, sem parar o que está fazendo: bombardeio do Phantom e invocação de Elites.
 O ciclo (rotinas, cooldowns, anti-stuck, nota da IA) é da BossBase."""
@@ -54,7 +54,9 @@ class ArbiterAI:
             return
         perto, longe = CFG.dist_afastou
         afastou = max(0.0, min(1.0, (self.contexto.dist - perto) / (longe - perto)))
-        nota = ((CFG.peso_vida_propria * (1.0 - self.contexto.razao_vida) + CFG.peso_distancia * afastou)
+        escolta = min(1.0, len(self.escoltas_vivas) / CFG.escolta_cheia)
+        nota = ((CFG.peso_vida_propria * (1.0 - self.contexto.razao_vida) + CFG.peso_distancia * afastou
+                 + CFG.peso_escolta * escolta)
                 * self.fase_cfg.mult_recuo - CFG.peso_vida_jogador * self.agressividade)
         if nota >= CFG.limiar_recuo:
             self.postura = 'recuo'
@@ -64,14 +66,23 @@ class ArbiterAI:
 
     # ------------------------------------------------------------ escudo
     def _regenerar_escudo(self, agora, delta_time):
+        """Volta sozinho depois de `escudo_atraso_ms` sem tomar dano (qualquer dano recomeça a conta)."""
         if self.escudo_atual >= self.escudo_maximo:
             if self.sem_escudo:
                 self.sem_escudo = False
+            if self._recarregando:
+                self._recarregando = False
+                self.escudo_cheio_vfx()
             return
         if agora - self._ultimo_dano >= CFG.escudo_atraso_ms:
+            if not self._recarregando:
+                self._recarregando = True
+                self.recarga_vfx()
             ganho = self.escudo_maximo * delta_time * 1000 / CFG.escudo_regen_ms
             if ganho > 0:
                 aplicar(self, Escudo(ganho))
+        else:
+            self._recarregando = False
 
     def absorver_dano(self, valor):
         super().absorver_dano(valor)

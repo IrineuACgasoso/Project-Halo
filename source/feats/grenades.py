@@ -237,6 +237,11 @@ class PlasmaGrenade(GrenadeBase):
             ProjetilUniversal.GLOBAL_CACHE[glow_key] = glow
         return ProjetilUniversal.GLOBAL_CACHE[glow_key]
 
+    def _criar_aviso(self, posicao, **kwargs):
+        """Explosão de plasma em camadas, com plasma estourando (`artilharia/plasma.py`)."""
+        from source.feats.skills.artilharia import AvisoPlasma
+        return self._montar_aviso(AvisoPlasma, posicao, **kwargs)
+
     def update(self, delta_time):
         super().update(delta_time)
 

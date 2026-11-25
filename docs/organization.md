@@ -85,6 +85,8 @@ Project-Halo/
     │   ├── skills/          # artilharia, cone_strike, rect_strike (retângulo), invisibilidade (+ distorcao.py), onda_emp, purge_grid, dash (config.py + core), beam, mortar, tp...
 │   │                    # artilharia, cone, rect e mortar aceitam ao_explodir (callback 1× na explosão: poeira, vfx);
 │   │                    # artilharia/poca_plasma.py: PocaDePlasma, a área do Fuel Rod (queimadura: `queimadura_ms`)
+│   │                    # artilharia/plasma.py: AvisoPlasma + ExplosaoPlasma (granada de plasma; EXPLOSAO_PLASMA_PRESETS)
+│   │                    # purge_grid/disparo.py: DisparoCaindo, o tiro do céu em cada ponto (PurgeConfig.disparo)
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (gota de plasma, quique)
     │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
     │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
@@ -125,6 +127,7 @@ Project-Halo/
 | Salto (pulo em arco) de inimigo: não mirado, inofensivo, por cima das paredes | `feats/skills/salto/` (`Salto(inimigo, preset, alvo)`; alvo jogador/ponto/aleatório, altura, duração, recuo no preset; `cancelar()` no `finally`; `desenhar_sombra` no `draw_extras`) |
 | Nova fase | `assets/img/map/<n>/m<n>.tmj` + registro em `MANIFESTO['maps']`, `PHASE_POOLS[n]` e `PHASE_BOSSES[n]` |
 | Sprite que sobrevive à troca de fase | `sobrevive_troca_de_fase = True` na classe (lido por `systems/stagemanager.py`) |
+| Visual da granada de plasma (aviso, explosão, partículas) | `feats/skills/artilharia/plasma.py` (`EXPLOSAO_PLASMA_PRESETS`, mesmo nome do preset da artilharia) |
 | Visual do Fuel Rod (gota, rastro, poça) | `feats/grenades.py::FuelRodGrenade` (gota desenhada no código) e `feats/skills/artilharia/poca_plasma.py` (raio, pavio e cores: preset `fuel_rod`) |
 | Drops de inimigo | `morrer()` do inimigo/boss → `Items.spawn_drop(...)` |
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |

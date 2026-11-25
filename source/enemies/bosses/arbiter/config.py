@@ -50,7 +50,7 @@ class ArbiterConfig:
     velocidade: float = 90
     # Escudo de energia (escala com a vida): volta sozinho depois de um tempo sem tomar dano
     escudo: float = 600
-    escudo_atraso_ms: int = 4000         # sem tomar dano por isto...
+    escudo_atraso_ms: int = 3500         # sem tomar dano por isto...
     escudo_regen_ms: int = 2500          # ...e enche de zero ao máximo neste tempo
 
     # --- a quem as habilidades "pertencem" (define quem leva o dano) ---
@@ -83,10 +83,12 @@ class ArbiterConfig:
     aproximacao_jogador_fraco: float = 160   # a faixa chega até tanto mais perto com o jogador sem vida
     dist_recuo: float = 720              # recuando: até esta distância (depois circula)
     strafe_troca_ms: Tuple[int, int] = (1200, 2600)
-    # Sem escudo, três vontades brigam (nota de recuo = vida dele + jogador longe - jogador fraco):
+    # Sem escudo, as vontades brigam (nota de recuo = vida dele + jogador longe + escolta - jogador fraco):
     peso_vida_propria: float = 1.0       # vida dele baixa -> recua para o escudo voltar
     peso_distancia: float = 0.6          # jogador se afastou -> recua também
     dist_afastou: Tuple[float, float] = (300, 650)   # 0 em 300 px, cheio em 650 px
+    peso_escolta: float = 0.6            # Elites vivos cobrem o recuo -> recua bem mais...
+    escolta_cheia: int = 2               # ...cheio a partir de tantos Elites
     peso_vida_jogador: float = 1.1       # jogador com pouca vida -> ignora o recuo e avança
     limiar_recuo: float = 0.55           # nota >= isto: recua
     limiar_avanco: float = 0.25          # nota <= isto: avança (entre os dois, mantém a postura)
@@ -96,6 +98,13 @@ class ArbiterConfig:
         'recuo':  {'carabina': 1.5, 'granada': 1.5, 'lamina': 0.6, 'investida': 0.3, 'salto': 0.3, 'emboscada': 0.4},
     })
     agressividade_melee: float = 0.8     # golpes de perto valem até +80% com o jogador sem vida
+    # Recuo: rumo com chão que mais se afasta do jogador (leque em volta do "para trás"), puxado para a escolta
+    recuo_mult_vel: float = 1.3
+    recuo_leque: Tuple[float, ...] = (0, 35, -35, 70, -70, 105, -105)   # graus a partir do "para trás"
+    recuo_sonda: float = 140             # px: o rumo precisa de chão até aqui
+    recuo_rumo_ms: int = 350             # recalcula o rumo a cada tanto
+    recuo_puxa_escolta: float = 0.5      # quanto a direção da escolta pesa no rumo
+    recuo_esquiva_graus: float = 40      # sem escudo e recuando, a esquiva sai na diagonal para trás
 
     # --- revelar-se (clarão) enquanto está camuflado ---
     revelar_tiro_ms: int = 80
@@ -155,7 +164,7 @@ class ArbiterConfig:
     emboscada_preset: str = 'arbiter_furtivo'
     emboscada_mult_vel: float = 4.0
     emboscada_dist: float = 205          # dist. p/ cortar o sprint e dar o golpe de espada
-    flanco_raio: Tuple[float, float] = (280, 420)
+    flanco_raio: Tuple[float, float] = (420, 600)
     flanco_angulo: Tuple[float, float] = (100, 160)   # graus a partir da direção jogador -> Arbiter
     flanco_tentativas: int = 30
 
@@ -176,11 +185,14 @@ class ArbiterConfig:
     grito_ms: int = 750
     combo_dashes: int = 5
     combo_dash: str = 'arbiter_combo'
-    combo_tipos: Tuple[str, ...] = ('simples', 'cruz', 'artilharia', 'reverso')
-    combo_pausa_ms: Tuple[int, int] = (260, 420)
+    combo_tipos: Tuple[str, ...] = ('cruz', 'artilharia', 'reverso', 'frontal')
+    combo_preparo_ms: Tuple[int, int] = (220, 320)   # parado, encarando, antes de cada dash
+    combo_pausa_ms: Tuple[int, int] = (120, 220)     # depois que o golpe do dash estoura
+    combo_cruz_no_caminho: float = 0.5   # a cruz sai quando ele passa por esta fração do caminho
     combo_corte: str = 'arbiter_combo_corte'
     combo_artilharia: str = 'arbiter_combo_artilharia'
-    combo_reverso: str = 'arbiter_combo_reverso'
+    combo_reverso: str = 'arbiter_investida'          # cone da investida, para trás
+    combo_frontal: str = 'arbiter_investida_frontal'  # corte do salto, para a frente
     combo_recuperacao_ms: int = 500
     furia_buff: float = 0.45             # Fúria Honorável: +45% de velocidade do grito até...
     furia_ms: int = 2500                 # ...tanto depois do fim do combo
@@ -216,6 +228,10 @@ class ArbiterConfig:
     faiscas_grito: int = 40
     shake_grito: float = 6
     shake_golpe: float = 3
+    recarga_alpha: Tuple[int, int] = (40, 140)   # escudo voltando: o corpo pisca em azul
+    recarga_periodo_ms: int = 260
+    recarga_faiscas: int = 18
+    escudo_cheio_ms: int = 350           # clarão quando o escudo termina de encher
 
     def __post_init__(self):
         if (set(self.cooldown) != set(self.cooldown_inicial)
@@ -223,7 +239,7 @@ class ArbiterConfig:
             raise ValueError('ArbiterConfig: cada cooldown precisa do seu primeiro uso (e vice-versa)')
         if not self.limiar_avanco < self.limiar_recuo:
             raise ValueError('ArbiterConfig: limiar_avanco precisa ser menor que limiar_recuo')
-        if not set(self.combo_tipos) <= {'simples', 'cruz', 'artilharia', 'reverso'}:
+        if len(self.combo_tipos) < 2 or not set(self.combo_tipos) <= {'cruz', 'artilharia', 'reverso', 'frontal'}:
             raise ValueError(f'ArbiterConfig: combo_tipos desconhecidos: {self.combo_tipos!r}')
 
     @property

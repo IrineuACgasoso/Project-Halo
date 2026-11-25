@@ -45,6 +45,12 @@ class ArbiterAttacks:
     def _podar_elites(self):
         self.elites_invocados = [e for e in self.elites_invocados if e.alive()]
 
+    @property
+    def escoltas_vivas(self):
+        """Elites invocados ainda vivos (a escolta que cobre o recuo)."""
+        self._podar_elites()
+        return self.elites_invocados
+
     def _posicoes_spawn(self, quantidade):
         posicoes = []
         for _ in range(quantidade):
@@ -148,8 +154,11 @@ class ArbiterAttacks:
 
     # ================================================================ esquiva
     def _lado_da_esquiva(self):
+        """De lado (sai da linha dos tiros); sem escudo e recuando, na diagonal para trás."""
         to = self.dir_jogador()
         lados = [V2(-to.y, to.x), V2(to.y, -to.x)]
+        if self.postura == 'recuo':
+            lados = [lados[0].rotate(CFG.recuo_esquiva_graus), lados[1].rotate(-CFG.recuo_esquiva_graus)]
         random.shuffle(lados)
         for lado in lados:
             if self.verificar_posicao_valida(self.posicao + lado * CFG.esquiva_dist_teste):

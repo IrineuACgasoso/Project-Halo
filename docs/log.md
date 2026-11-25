@@ -28,6 +28,14 @@ O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as luta
 
 ---
 
+## 2026-11-25 | Arbiter: combo cadenciado, recuo com escolta e VFX de plasma
+- **Combo:** sem o dash "simples"; os 4 golpes são artilharia, cone para trás (agora o da investida, `arbiter_combo_reverso` saiu), cruz e o corte frontal do salto, sem repetir o anterior. Cada dash prepara (220–320 ms), a cruz sai quando ele passa pelo meio do caminho e ele fica na pose até o golpe estourar.
+- **Dashes mais lentos** (alcance mantido): combo 600 (~870 com a Fúria), investida 720, esquiva 900.
+- **Escudo:** volta após 3,5 s sem dano, com faíscas, pisque azul enquanto enche e clarão ao encher. **Recuo:** melhor rumo com chão num leque, puxado para os Elites, ×1,3; esquiva na diagonal para trás. **IA:** escolta viva soma até 0,6 à nota de recuo.
+- **VFX:** tiros do Phantom caindo em cada ponto do bombardeio (`purge_grid/disparo.py`); explosão da granada de plasma em camadas com plasma estourando, para jogador e inimigos (`artilharia/plasma.py`); carabina como gota girada (acerto continua o círculo antigo). Tudo visual no grupo das partículas.
+- Balanceamento do usuário mantido (Phantom, cruz 90 px, frontal 180×450, flanco). Golden do Arbiter regravado (mudança declarada). `lutas --boss arbiter`: 25 s, 2,3 vidas/min.
+- **Não validado:** a luta e os VFX na tela real (só capturas headless), áudio, balanceamento.
+
 ## 2026-11-25 | Arbiter reformulado e skill de salto
 - **Skill `salto`** (`feats/skills/salto/`): arco com alvo jogador/ponto/aleatório, altura, duração, recuo e invulnerável opcional; no ar é `no_ar` (não alvejável, `alvejavel` lê), inofensivo e passa por cima das paredes; pousa sempre em chão válido. Base: `no_ar`/`altura_z` nos inimigos. `ConeStrikeAviso(seguir=...)` e modo `linha_jogador` no Purge Grid.
 - **Arbiter:** escudo regenerativo (4 s sem dano); 2 fases (40%: sem carabina nem invocação, +20% de velocidade, recua menos, aura). Rotinas: carabina (6 tiros 40 px), granada (`arbiter_plasma_grenade` 120/230), lâmina, investida com cone que viaja junto e costas expostas (×2) no atordoamento, salto + corte frontal (também o anti-stuck), emboscada no flanco. Reações: combo da quebra de escudo (grito + 5 dashes sorteados + Fúria) e esquiva lateral com spray camuflado (45%). Fora da rotina: Phantom (linha roxa no jogador) e 2 Elites camuflados.

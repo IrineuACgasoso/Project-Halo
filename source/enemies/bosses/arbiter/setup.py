@@ -15,6 +15,8 @@ class ArbiterSetup:
         self._escudo_quebrou = False       # pede o combo na próxima decisão livre
         self._ultimo_dano = agora
         self._dano_recente = 0.0           # média que esquece (esquiva tática)
+        self._recarregando = False         # escudo voltando (vfx)
+        self._escudo_cheio_ate = 0         # clarão do escudo cheio (vfx)
 
         # --- postura: 'neutra' (com escudo), 'avanco' ou 'recuo' (sem escudo) ---
         self.postura = 'neutra'
@@ -35,3 +37,5 @@ class ArbiterSetup:
         self._lado_strafe = random.choice((-1, 1))
         self._troca_lado_em = agora + random.randint(*CFG.strafe_troca_ms)
         self._flip_valido_em = 0
+        self._rumo_recuo = None            # rumo do recuo guardado até `_rumo_recuo_ate`
+        self._rumo_recuo_ate = 0

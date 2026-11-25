@@ -1,5 +1,7 @@
 """Arbiter reformulado: escudo e combo da quebra, postura sem escudo, costas expostas depois da
 investida, esquiva, anti-stuck por salto, fase 2 e o que corre fora da rotina."""
+from types import SimpleNamespace
+
 import pygame
 import pytest
 
@@ -75,16 +77,18 @@ def test_quebra_do_escudo_vira_combo_mesmo_exausto_e_o_escudo_volta_sozinho(arbi
     assert not b.sem_escudo and b.postura == 'neutra'
 
 
-@pytest.mark.parametrize('razao_vida, dist, vida_jogador, fase, esperada', [
-    (1.0, 200, 1.0, 1, 'avanco'),    # recém-quebrado, inteiro e colado: segue no ataque
-    (0.45, 700, 1.0, 1, 'recuo'),    # ferido e o jogador fugiu: recua para o escudo voltar
-    (0.45, 700, 0.1, 1, 'avanco'),   # ...mas o jogador está quase morto: vai para cima
-    (0.30, 500, 1.0, 1, 'recuo'),
-    (0.30, 500, 1.0, 2, 'avanco'),   # fase 2 recua menos
+@pytest.mark.parametrize('razao_vida, dist, vida_jogador, fase, escolta, esperada', [
+    (1.0, 200, 1.0, 1, 0, 'avanco'),    # recém-quebrado, inteiro e colado: segue no ataque
+    (1.0, 200, 1.0, 1, 2, 'recuo'),     # ...mas com a escolta de Elites viva, recua para trás dela
+    (0.45, 700, 1.0, 1, 0, 'recuo'),    # ferido e o jogador fugiu: recua para o escudo voltar
+    (0.45, 700, 0.1, 1, 0, 'avanco'),   # ...mas o jogador está quase morto: vai para cima
+    (0.30, 500, 1.0, 1, 0, 'recuo'),
+    (0.30, 500, 1.0, 2, 0, 'avanco'),   # fase 2 recua menos
 ])
-def test_postura_sem_escudo(arbiter, razao_vida, dist, vida_jogador, fase, esperada):
+def test_postura_sem_escudo(arbiter, razao_vida, dist, vida_jogador, fase, escolta, esperada):
     b = arbiter
     b.sem_escudo, b.postura, b._furia_ate = True, 'neutra', None
+    b.elites_invocados = [SimpleNamespace(alive=lambda: True)] * escolta
     b.fase, b.fase_cfg = fase, b.FASES[fase - 1]
     b.contexto.razao_vida, b.contexto.dist_sq = razao_vida, dist ** 2
     b.jogador.vida_atual = b.jogador.vida_maxima * vida_jogador

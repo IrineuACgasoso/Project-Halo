@@ -10,6 +10,7 @@ from source.feats.skills.artilharia import ArtilhariaAviso, ArtilhariaConfig
 from .patterns import (generate_grid_pattern, generate_radial_pattern, generate_directional_pattern,
                        generate_line_pattern)
 from .config import PURGE_PRESETS, PurgeConfig
+from .disparo import DisparoCaindo
 
 class PurgeGrid(pygame.sprite.Sprite):
     def __init__(self, game, caster, preset='padrao', custom_config: PurgeConfig = None):
@@ -93,6 +94,8 @@ class PurgeGrid(pygame.sprite.Sprite):
                 fonte=self.caster, habilidade=self.habilidade,
                 custom_config=config_do_purge # Passa os dados sobreescrevendo os presets padrões da artilharia
             )
+            if self.cfg.disparo:
+                DisparoCaindo(pos, agora + self.cfg.duracao_aviso, self.cfg.disparo)
             spawns_neste_frame += 1
 
         if not self.fila_spawn:

@@ -193,33 +193,50 @@ class ArbiterArsenal:
             self._furia_ate = None
             remover(self, BuffVelocidade, chave=self)
 
+    def _golpe_do_combo(self, tipo, posicao, direcao):
+        """Solta o golpe de um dash do combo em `posicao`. Devolve quando ele estoura (ms de jogo)."""
+        if tipo == 'cruz':
+            lado = V2(-direcao.y, direcao.x)
+            self._corte(posicao, lado, CFG.combo_corte)
+            duracao = self._corte(posicao, -lado, CFG.combo_corte)
+        elif tipo == 'artilharia':
+            duracao = ArtilhariaAviso(posicao=V2(posicao), grupos=(entity_manager.all_sprites,),
+                                      game=self.game, dono=CFG.dono_skills, fonte=self,
+                                      preset=CFG.combo_artilharia).cfg.duracao
+        elif tipo == 'reverso':
+            duracao = self._lancar_cone(CFG.combo_reverso, -direcao, posicao=posicao).duracao
+        else:   # 'frontal'
+            duracao = self._corte(posicao, direcao, CFG.combo_frontal)
+        return self._agora + duracao
+
     def rotina_combo(self):
-        """Grito, Fúria Honorável e 5 dashes até o jogador, cada um com um final sorteado:
-        - simples: só o dash;
-        - cruz: dois cortes finos para os lados, saindo do meio do caminho (pune quem desviou de lado);
+        """Grito, Fúria Honorável e 5 dashes até o jogador. Cada um: prepara (parado, encarando),
+        investe e solta um golpe sorteado (nunca o mesmo duas vezes seguidas), e fica na pose até o
+        golpe estourar antes de preparar o próximo:
+        - cruz: dois cortes para os lados, saindo do meio do caminho quando ele passa por lá;
         - artilharia: explosão onde ele parou;
-        - reverso: cone enorme para trás (pune quem já foi para as costas).
+        - reverso: o cone da investida para trás (pune quem já foi para as costas);
+        - frontal: o corte do salto para a frente (pune quem recuou em linha reta).
         Não fica vulnerável em nenhum deles."""
         yield from self._grito()
         self._iniciar_furia()
         self.is_inofensivo = True           # o corpo não fere no combo: os golpes de cada dash, sim
+        anterior = None
         try:
             for _ in range(CFG.combo_dashes):
-                tipo = random.choice(CFG.combo_tipos)
-                inicio = V2(self.posicao)
-                direcao = yield from self._dash(CFG.combo_dash)
+                tipo = random.choice([t for t in CFG.combo_tipos if t != anterior])
+                anterior = tipo
+                yield from self._esperar(random.randint(*CFG.combo_preparo_ms), olhar_x=self.dir_jogador().x)
+                estouro = []
+                gatilho = None
                 if tipo == 'cruz':
-                    meio = inicio.lerp(self.posicao, 0.5)
-                    lado = V2(-direcao.y, direcao.x)
-                    self._corte(meio, lado, CFG.combo_corte)
-                    self._corte(meio, -lado, CFG.combo_corte)
-                elif tipo == 'artilharia':
-                    ArtilhariaAviso(posicao=self.posicao.copy(), grupos=(entity_manager.all_sprites,),
-                                    game=self.game, dono=CFG.dono_skills, fonte=self,
-                                    preset=CFG.combo_artilharia)
-                elif tipo == 'reverso':
-                    self._lancar_cone(CFG.combo_reverso, -direcao)
-                yield from self._esperar(random.randint(*CFG.combo_pausa_ms), olhar_x=direcao.x)
+                    gatilho = (CFG.combo_cruz_no_caminho,
+                               lambda pos, d: estouro.append(self._golpe_do_combo('cruz', pos, d)))
+                direcao = yield from self._dash(CFG.combo_dash, gatilho=gatilho)
+                if not estouro:
+                    estouro.append(self._golpe_do_combo(tipo, self.posicao, direcao))
+                espera = max(0, estouro[0] - self._agora) + random.randint(*CFG.combo_pausa_ms)
+                yield from self._esperar(espera, olhar_x=direcao.x)
             yield from self._esperar(CFG.combo_recuperacao_ms)
         finally:
             self.is_inofensivo = False

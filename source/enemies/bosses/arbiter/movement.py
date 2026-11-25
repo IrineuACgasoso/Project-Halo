@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -35,12 +36,44 @@ class ArbiterMovement:
         self._ir(self.dir_jogador(), fator)
 
     def _recuar(self, fator=0.9):
-        """Afasta-se do jogador; com parede atrás, circula."""
-        para_tras = -self.dir_jogador()
-        if self.verificar_posicao_valida(self.posicao + para_tras * 70):
-            self._ir(para_tras, fator)
+        """Afasta-se do jogador pelo melhor rumo com chão (`_rumo_de_recuo`); encurralado, circula."""
+        rumo = self._rumo_de_recuo()
+        if rumo is not None:
+            self._ir(rumo, fator)
         else:
             self._strafe(fator)
+
+    def _rumo_de_recuo(self):
+        """Rumo do recuo, guardado por `recuo_rumo_ms` (sem tremer a cada frame): entre os ângulos do
+        leque em volta do "para trás", o que tem chão a `recuo_sonda` px e mais se afasta do jogador,
+        puxado para a escolta viva (os Elites cobrem o recuo). None: encurralado."""
+        agora = self._agora
+        rumo = self._rumo_recuo
+        if (rumo is not None and agora < self._rumo_recuo_ate
+                and self.verificar_posicao_valida(self.posicao + rumo * 70)):
+            return rumo
+        para_tras = -self.dir_jogador()
+        escolta = self._direcao_da_escolta()
+        melhor, melhor_nota = None, -math.inf
+        for graus in CFG.recuo_leque:
+            candidato = para_tras.rotate(graus)
+            if not self.verificar_posicao_valida(self.posicao + candidato * CFG.recuo_sonda):
+                continue
+            nota = candidato.dot(para_tras)
+            if escolta is not None:
+                nota += CFG.recuo_puxa_escolta * candidato.dot(escolta)
+            if nota > melhor_nota:
+                melhor, melhor_nota = candidato, nota
+        self._rumo_recuo, self._rumo_recuo_ate = melhor, agora + CFG.recuo_rumo_ms
+        return melhor
+
+    def _direcao_da_escolta(self):
+        """Direção (unitária) até o meio dos Elites vivos; None sem escolta ou em cima dela."""
+        vivos = self.escoltas_vivas
+        if not vivos:
+            return None
+        meio = sum((e.posicao for e in vivos), V2()) / len(vivos) - self.posicao
+        return meio.normalize() if meio.length_squared() > 1e-6 else None
 
     def _strafe(self, fator=0.7):
         """Circula o jogador; inverte o lado se for bater na parede."""
@@ -53,14 +86,24 @@ class ArbiterMovement:
             perp = -perp
         self._ir(perp, fator)
 
-    def _dash(self, preset, alvo=None):
+    def _dash(self, preset, alvo=None, gatilho=None):
         """Sub-rotina: investida até `alvo` (padrão: onde o jogador está agora). Devolve a direção.
         Inofensivo no caminho: quem fere é a espada que vem junto ou no fim (o corpo de 250 px
-        encostaria em quem desviou por pouco)."""
+        encostaria em quem desviou por pouco). `gatilho` = (fração, função): chama `função(posição,
+        direção)` uma vez, quando ele passa por essa fração do caminho (ou no fim, se parou antes)."""
         dash = Dash(self, self.jogador.posicao if alvo is None else alvo, preset=preset)
+        inicio = V2(self.posicao)
+        caminho = (dash.alvo - inicio).dot(dash.direcao)
         antes, self.is_inofensivo = self.is_inofensivo, True
         try:
-            while not dash.atualizar(self._dt, self._paredes):
+            while True:
+                acabou = dash.atualizar(self._dt, self._paredes)
+                if gatilho is not None and (acabou or (self.posicao - inicio).dot(dash.direcao)
+                                            >= gatilho[0] * caminho):
+                    gatilho[1](V2(self.posicao), V2(dash.direcao))
+                    gatilho = None
+                if acabou:
+                    break
                 self.velocidade = 0
                 self._olhar_x = dash.direcao.x
                 self.animador.tocar('investida')
@@ -77,7 +120,7 @@ class ArbiterMovement:
         raio_lamina = self._raio_lamina()
         if self.postura == 'recuo':
             if dist < CFG.dist_recuo:
-                self._recuar(1.1)
+                self._recuar(CFG.recuo_mult_vel)
             else:
                 self._strafe(0.7)
             return

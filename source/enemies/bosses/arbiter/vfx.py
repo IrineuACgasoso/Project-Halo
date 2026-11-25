@@ -1,4 +1,5 @@
-"""Efeitos visuais do Arbiter: faíscas da espada, grito, aura da fase 2, costas expostas e sombra do salto.
+"""Efeitos visuais do Arbiter: faíscas da espada, grito, escudo voltando, aura da fase 2, costas expostas
+e sombra do salto.
 
 Silhuetas em cache por quadro (`silhueta_de`, aquecidas no spawn); por frame, só `set_alpha` e blit.
 Sorteio próprio (`_SORTEIO`): o efeito não mexe na sequência da simulação. `impacto_da_espada`
@@ -53,6 +54,15 @@ class ArbiterVFX:
         faiscas(self.posicao, V2(1, 0), CFG.faiscas_grito, 360, velocidade=(200, 520), duracao_ms=(350, 700))
         self.game.camera.shake(intensidade=CFG.shake_grito)
 
+    def recarga_vfx(self):
+        """O escudo começou a voltar: faíscas azuis subindo do corpo."""
+        pes = V2(self.posicao.x, self.rect.bottom - 30)
+        faiscas(pes, V2(0, -1), CFG.recarga_faiscas, 120, velocidade=(80, 220), duracao_ms=(350, 650))
+
+    def escudo_cheio_vfx(self):
+        self._escudo_cheio_ate = self._agora + CFG.escudo_cheio_ms
+        faiscas(self.posicao, V2(1, 0), CFG.recarga_faiscas, 360, velocidade=(140, 320), duracao_ms=(250, 450))
+
     def _sobrepor(self, tela, deslocamento, cor, alpha):
         sil = silhueta_de(self.quadro_original, cor)
         sil.set_alpha(alpha)
@@ -68,6 +78,12 @@ class ArbiterVFX:
         if agora < self._grito_ate:
             fracao = (self._grito_ate - agora) / CFG.grito_ms
             self._sobrepor(tela, deslocamento, COR_GRITO, round(200 * fracao))
+        if agora < self._escudo_cheio_ate:
+            fracao = (self._escudo_cheio_ate - agora) / CFG.escudo_cheio_ms
+            self._sobrepor(tela, deslocamento, COR_GRITO, round(170 * fracao))
+        elif self._recarregando:
+            self._sobrepor(tela, deslocamento, CFG.cor_energia,
+                           _pulso(agora, CFG.recarga_periodo_ms, CFG.recarga_alpha))
         if self.costas_expostas:
             self._sobrepor(tela, deslocamento, CFG.cor_costas, _pulso(agora, CFG.brilho_periodo_ms, CFG.brilho_alpha))
         elif self.fase >= 2:

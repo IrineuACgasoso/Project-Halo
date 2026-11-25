@@ -1,6 +1,6 @@
 # source/feats/skills/purge_grid/config.py
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Optional, Tuple
 import math
 
 @dataclass
@@ -20,6 +20,7 @@ class PurgeConfig:
     cor_borda: Tuple[int, int, int, int] = (255, 50, 0, 150)
     cor_preenchimento: Tuple[int, int, int, int] = (255, 50, 0, 50)
     cor_explosao: Tuple[int, int, int, int] = (255, 100, 50, 220)
+    disparo: Optional[str] = None   # preset de `disparo.py`: um tiro cai do céu em cada ponto (só visual)
 
 
 # === CARDÁPIO DE ATAQUES ===
@@ -105,15 +106,16 @@ PURGE_PRESETS = {
     # Bombardeio do Phantom (Arbiter): uma linha que varre o mapa passando pelo jogador, em ângulo sorteado
     'arbiter_phantom': PurgeConfig(
         modo='linha_jogador',
-        artilharias_por_eixo=15,
-        espacamento=110,
-        raio_artilharia=95,
-        dano=220,
-        intervalo=55,
-        duracao_aviso=750,
+        artilharias_por_eixo=10,
+        espacamento=140,
+        raio_artilharia=130,
+        dano=150,
+        intervalo=150,
+        duracao_aviso=1500,
         angulo_aleatorio=True,
         cor_borda=(170, 110, 255, 210),       # azul-arroxeado do plasma Covenant
         cor_preenchimento=(110, 70, 255, 70),
-        cor_explosao=(215, 190, 255, 240)
+        cor_explosao=(215, 190, 255, 240),
+        disparo='phantom'                     # o canhão do Phantom acerta cada ponto
     ),
 }
