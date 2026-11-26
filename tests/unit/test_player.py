@@ -180,3 +180,18 @@ def test_upgrade_forcado_na_fila_revalida_a_arma(player):
 
 def _enter():
     return pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0)
+
+
+# ── Escudo de fábrica e MK-2 ─────────────────────────────────────────────────
+def test_escudo_de_fabrica_fixo_e_o_mk2_o_melhora(novo_jogo):
+    p = novo_jogo.player
+    base = (p.escudo_maximo, p.shield_regen, p.velocidade_regen_escudo)
+    assert p.escudo_atual == p.escudo_maximo > 0 and min(base) > 0   # nasce com escudo regenerativo
+    p.level_up()
+    assert (p.escudo_maximo, p.shield_regen, p.velocidade_regen_escudo) == base   # o nível do jogador não mexe
+    mk2 = ARMAS_REGISTRO['mk2_shield'].criar(p, novo_jogo)
+    p.armas['mk2_shield'] = mk2
+    mk2.equipar()
+    assert p.escudo_maximo == base[0]                 # MK-2 nível 1 = o de fábrica
+    mk2.upgrade()
+    assert p.escudo_maximo > base[0] and p.velocidade_regen_escudo > base[2]

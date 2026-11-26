@@ -156,6 +156,10 @@ class GuiltyConfig:
     brilho_cor: Tuple[int, int, int] = (40, 150, 255)
     brilho_raio: int = 120
     brilho_periodo_ms: int = 1800
+    acerto_pisca_ms: int = 480          # a luz o feriu: pisca em vermelho este tanto...
+    acerto_pisca_periodo_ms: int = 120  # ...aceso metade de cada período
+    acerto_pisca_cor: Tuple[int, int, int] = (255, 35, 35)
+    acerto_pisca_alpha: int = 175
     shake_barreira: float = 6
 
     # --- anti-stuck: teleporta para perto do jogador ---

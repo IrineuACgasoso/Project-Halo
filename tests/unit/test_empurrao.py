@@ -93,7 +93,7 @@ def test_explosao_empurra_para_longe_do_centro(novo_jogo):
     assert vel.length() == pytest.approx(90 * empurrao.DECAIMENTO)
 
 
-def test_tick_de_dot_nao_empurra(novo_jogo):
+def test_tick_de_dot_nao_empurra(novo_jogo, player):
     aviso = _explodir(novo_jogo, novo_jogo.player.posicao + V(60, 0), knockback=90, dot=True,
                       dano_por_segundo=5, impacto_com_dot=True)
     assert empurrao_ativo(novo_jogo.player).length() > 0

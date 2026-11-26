@@ -245,12 +245,11 @@ def test_fraqueza_soma_entre_fontes_e_multiplica_com_o_buff(novo_jogo):
     assert grunt.vida == pytest.approx(1000 - 100 * 1.5 * 2.0)
 
 
-def test_defesa_reduz_o_dano_do_inimigo_e_do_jogador(novo_jogo):
+def test_defesa_reduz_o_dano_do_inimigo_e_do_jogador(novo_jogo, player):
     grunt = _grunt(novo_jogo)
     aplicar(grunt, Defesa(0.9))
     grunt.receber_dano(Dano(100, PROJETIL, novo_jogo.player))
     assert grunt.vida == pytest.approx(1000 - 10)
-    player = novo_jogo.player
     aplicar(player, Defesa(0.25, 1000))
     player.receber_dano(Dano(100, DIRETO))
     assert player.vida_atual == pytest.approx(player.vida_maxima - 75)
@@ -312,8 +311,7 @@ def test_cura_vai_ate_o_maximo(novo_jogo):
     assert grunt.vida == 50
 
 
-def test_escudo_vai_ate_o_maximo_e_sem_maximo_nao_faz_nada(novo_jogo):
-    player = novo_jogo.player
+def test_escudo_vai_ate_o_maximo_e_sem_maximo_nao_faz_nada(novo_jogo, player):
     aplicar(player, Escudo(50))
     assert player.escudo_atual == 0                  # sem escudo máximo
     player.adicionar_escudo(100)

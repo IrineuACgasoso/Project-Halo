@@ -28,6 +28,14 @@ O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as luta
 
 ---
 
+## 2026-11-25 | Correções: escudo de fábrica, Elites, anti-stuck do Arbiter e VFX de tiros
+- **Escudo:** o jogador nasce com o escudo regenerativo do MK-2 nível 1, fixo; só o MK-2 o melhora (escudo +80/nível, era +50). Fixture `player` dos testes parte sem escudo. A carabina inimiga (×3 contra escudo) agora vale contra o jogador desde o início.
+- **Elites:** metade da vida vira escudo; a camuflagem (e o ×2 de velocidade) liga em `ao_quebrar_escudo`.
+- **Arbiter:** anti-stuck por tempo livre somado entre rotinas (`ConfigTravamento.janela_livre`, 0,8 s; antes a janela zerava a cada rotina e nunca fechava) e salto que pousa exatamente no jogador.
+- **Jackal sniper:** bug real — a direção do M50 não era normalizada (velocidade × distância). Tiro agora 1050 px/s.
+- **VFX em código:** `projetil/desenhado.py` (corpo girado em cache + brilho aditivo que cintila) para plasma, Dizimator (jogador e Brute) e M50; acerto = círculo do `tamanho`. Canhão do Hunter com bola de plasma, sombra e rastro (`hunter/canhao.py`), aviso com anéis e explosão verde de `AvisoPlasma` com plasma lento; tremor 12 por 450 ms. Guilty pisca em vermelho e solta fagulhas quando a luz o fere. Caches pré-aquecidos no spawn de quem atira e as fagulhas da quebra de escudo no início da partida (catraca).
+- Goldens da fase 0 e do Arbiter regravados (escudo do jogador). 759 verdes + 2 xfail. Não validado na tela real: visual, sensação do tremor e o anti-stuck no mapa.
+
 ## 2026-11-25 | Arbiter: combo só para a frente e invocação mais frequente
 - **Combo:** golpes `artilharia`, `frontal` (corte largo do salto), `cone` (o da investida, agora para a frente) e `linha` (`arbiter_combo_linha`, 60×800 px, para a frente). Cone para trás e cruz saíram; todos saem onde o dash termina (o `gatilho` de meio de caminho do `_dash` foi removido).
 - **Invocação de Elites:** cooldown 16–22 s → 9–13 s, primeira aos 5 s (era 9 s).

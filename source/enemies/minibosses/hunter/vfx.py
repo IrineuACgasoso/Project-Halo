@@ -12,9 +12,11 @@ import random
 import pygame
 
 from source.feats import particulas
+from source.feats.projetil import PlasmaGun
 from source.systems.gameclock import relogio
 from source.utils.superficies import silhueta_de
 
+from .canhao import preparar_canhao
 from .config import CFG
 
 V2 = pygame.math.Vector2
@@ -58,9 +60,10 @@ def poeira_na_area_do_cone(origem, direcao, raio, abertura_graus, quantidade):
 
 
 def impacto_do_canhao(aviso):
-    """Gancho `ao_explodir` do morteiro: anel de poeira na borda da explosão e tremor forte."""
+    """Gancho `ao_explodir` do morteiro (a explosão de plasma é do `AvisoPlasma`): anel de poeira na borda
+    e tremor forte e longo."""
     poeira(aviso.posicao, V2(1, 0), CFG.poeira_explosao, 360, velocidade=(80, 200))
-    aviso.game.camera.shake(intensidade=CFG.shake_canhao)
+    aviso.game.camera.shake(intensidade=CFG.shake_canhao, duracao=CFG.shake_canhao_ms)
 
 
 def impacto_do_slam(cone):
@@ -75,6 +78,8 @@ class HunterVFX:
         for frames in self.sprites.values():          # silhuetas prontas no spawn, não no 1º brilho
             for frame in frames:
                 silhueta(frame)
+        PlasmaGun.preparar(CFG.burst_tamanho)          # tiros e explosão do canhão também
+        preparar_canhao(CFG.canhao_preset)
 
     def draw_extras(self, tela, deslocamento):
         """Chamado pelo renderer depois dos sprites: o brilho vermelho enquanto vulnerável."""

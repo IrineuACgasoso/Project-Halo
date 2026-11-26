@@ -100,7 +100,7 @@ class BossBase(BaseEnemy):
         """1× por frame, antes de qualquer decisão. Sobrescreva chamando `super()`."""
         self.contexto.atualizar(self, delta_time)
         if self.travamento is not None:
-            self.travamento.registrar(self.posicao, livre=self.rotina is None)
+            self.travamento.registrar(self.posicao, livre=self.rotina is None, delta_ms=delta_time * 1000)
 
     def orientar(self):
         """Padrão: olha para o jogador."""
@@ -203,7 +203,7 @@ class BossBase(BaseEnemy):
         self.rotina = None
         self.estado_habilidade = 'idle'
         if self.travamento is not None:
-            self.travamento.resetar(self._agora)
+            self.travamento.fim_de_rotina(self._agora)
 
     def interromper_rotina(self):
         """Corta a rotina ativa (fecha o gerador: os `finally` dela rodam) e volta a idle.

@@ -4,6 +4,7 @@ from ...projetil import DizimatorBullet
 
 class Dizimator(ArmaDeRajada):
     NOME_ASSET = 'dizimator'
+    TAMANHO_TIRO = (32, 32)
 
     def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs)
@@ -11,6 +12,7 @@ class Dizimator(ArmaDeRajada):
         self.nome = 'Dizimator'
         self.descricao = """Arma de alto calibre que atira rajadas poderosas a curtas distâncias."""
         self.inicializar_stats(self.NOME_ASSET)
+        DizimatorBullet.preparar(self.TAMANHO_TIRO)
 
     def atirar(self, alvo):
         DizimatorBullet(
@@ -19,7 +21,7 @@ class Dizimator(ArmaDeRajada):
             jogador         = self.jogador,
             game            = self.game,
             dono            = 'PLAYER',
-            tamanho         = (32, 32),
+            tamanho         = self.TAMANHO_TIRO,
             dano            = self.dano,
             velocidade      = self.velocidade_projetil,
             direcao_spread  = self.direcao_para(alvo),

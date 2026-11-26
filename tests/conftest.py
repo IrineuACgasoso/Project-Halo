@@ -61,4 +61,6 @@ def novo_jogo(game):
 
 @pytest.fixture
 def player(novo_jogo):
+    """O jogador sem o escudo de fábrica: os testes de dano leem a vida direto (quem testa escudo o põe)."""
+    novo_jogo.player.adicionar_escudo(0)
     return novo_jogo.player

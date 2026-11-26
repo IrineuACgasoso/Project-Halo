@@ -9,6 +9,8 @@ from source.data.enemy_data import INIMIGOS
 
 
 class GruntBase(BaseEnemy):
+    TAMANHO_PLASMA = (24, 24)
+
     def __init__(self, posicao, game, perfil, variante, vel_animacao=150):
         super().__init__(
             posicao=posicao,
@@ -26,6 +28,7 @@ class GruntBase(BaseEnemy):
         # Plasma
         self.plasma_cooldown = self.novo_cooldown(*perfil.cooldowns['plasma'])
         self.ultimo_tiro = relogio.agora()
+        PlasmaGun.preparar_imagens(self.TAMANHO_PLASMA)   # o 1º tiro não pinta no meio da horda
 
     def update(self, delta_time, paredes=None):
         super().update(delta_time, paredes)
@@ -48,7 +51,7 @@ class GruntBase(BaseEnemy):
             jogador=self.jogador,
             game=self.game,
             dono = 'INIMIGO', fonte=self,
-            tamanho=(24, 24),
+            tamanho=self.TAMANHO_PLASMA,
             dano=5,
             velocidade=450,
             direcao_spread=direcao_tiro,

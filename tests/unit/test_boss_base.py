@@ -166,6 +166,16 @@ def test_parado_e_longe_trava_so_depois_da_janela():
     assert d.travou(1001, LONGE_SQ) is True
 
 
+def test_janela_livre_soma_o_tempo_livre_entre_rotinas():
+    """Arbiter: emenda rotinas sem parar; a janela conta só o tempo livre e o fim de rotina não a zera."""
+    d = DetectorTravamento(ConfigTravamento(janela_ms=800, caminho_min=40, dist_min=200, janela_livre=True), 0, V(0, 0))
+    for _ in range(2):
+        d.registrar(V(0, 0), livre=True, delta_ms=450)    # parado, livre
+        d.registrar(V(0, 0), livre=False, delta_ms=5000)  # rotina longa: não conta
+        d.fim_de_rotina(10_000)
+    assert d.travou(10_000, LONGE_SQ) is True
+
+
 def test_boss_parado_e_longe_dispara_a_rotina_antistuck(boss):
     boss.habilidades_ligadas = False
     _ate_o_estado(boss, 'antistuck_combat', limite_ms=1200)

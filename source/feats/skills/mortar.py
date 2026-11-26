@@ -1,5 +1,6 @@
-import pygame
 import math
+
+import pygame
 from source.feats.projetil import ProjetilUniversal
 from source.feats.skills.artilharia import ArtilhariaAviso 
 from source.systems.entitymanager import entity_manager
@@ -7,6 +8,7 @@ from source.systems.entitymanager import entity_manager
 
 class CanhaoParabolico(ProjetilUniversal):
     """Projétil que faz um arco no ar antes de aterrissar e detonar uma Artilharia."""
+    CLASSE_AVISO = ArtilhariaAviso   # subclasse troca pelo aviso com o visual dela (ex.: AvisoPlasma)
     def __init__(self, start_pos, target_pos, game, dono, 
                  sprite_key='green_laser', tamanho=(96, 96), 
                  velocidade=400, altura_maxima=250, 
@@ -52,7 +54,7 @@ class CanhaoParabolico(ProjetilUniversal):
         self.rect.center = (round(self.posicao.x), round(self.posicao.y - altura))
 
     def detonar_artilharia(self):
-        aviso = ArtilhariaAviso(
+        aviso = self.CLASSE_AVISO(
             posicao=self.target_pos, 
             grupos=(entity_manager.all_sprites,), 
             game=self.game,

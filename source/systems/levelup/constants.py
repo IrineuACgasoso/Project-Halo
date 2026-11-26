@@ -84,7 +84,7 @@ ARMAS_REGISTRO = _registro(
     ),
     ArmaInfo(
         id='mk2_shield', nome='Escudo MK-2', classe=MK2_Shield,
-        descricao='Gera um escudo e causa dano por segundo ao redor do jogador.', raridade='comum'
+        descricao='Melhora o escudo a cada nível e causa dano por segundo ao redor do jogador.', raridade='comum'
     ),
     ArmaInfo(
         id='arbiter', nome='Árbitro', classe=Arbitro,

@@ -43,3 +43,23 @@ def test_classe_usa_o_seu_perfil(novo_jogo, classe):
     perfil = INIMIGOS[PERFIL_DA_CLASSE[classe]]
     assert inimigo.perfil is perfil
     assert inimigo.tabela_drop is perfil.drops
+
+
+def test_elite_tem_metade_da_vida_em_escudo_e_camufla_quando_ele_quebra(novo_jogo):
+    elite = Elite(novo_jogo.player.posicao + pygame.math.Vector2(300, 0), novo_jogo)
+    total = elite.vida_base                           # o perfil já escalado pela dificuldade
+    assert elite.vida == elite.vida_maxima == elite.escudo_atual == elite.escudo_maximo == total / 2
+    elite.absorver_dano(total / 2 - 1)
+    assert elite.invisibilidade is None               # escudo de pé: sem camuflagem
+    elite.absorver_dano(1)
+    assert elite.escudo_atual == 0 and elite.vida == total / 2 and elite.invisibilidade is not None
+
+
+def test_tiro_do_jackal_sniper_tem_velocidade_fixa_em_qualquer_distancia(novo_jogo):
+    """Regressão: a direção não era normalizada e o tiro saía com velocidade × distância."""
+    from source.systems.entitymanager import entity_manager
+    sniper = JackalSniper(novo_jogo.player.posicao + pygame.math.Vector2(600, 0), novo_jogo)
+    antes = set(entity_manager.projeteis_inimigos_grupo)
+    sniper.executar_ataque()
+    tiro, = set(entity_manager.projeteis_inimigos_grupo) - antes
+    assert tiro.direcao.length() == pytest.approx(1)

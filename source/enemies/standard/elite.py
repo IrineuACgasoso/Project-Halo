@@ -37,8 +37,19 @@ class EliteBase(BaseEnemy):
         self.carabina_restante = 0
         self.contagem_carabina = 5
 
-        # Invisi
+        # Metade da vida vira escudo; quando ele quebra, a camuflagem liga (ao_quebrar_escudo)
+        metade = self.vida_base / 2
+        self.vida_maxima = self.vida = self.vida_base - metade
+        self.adicionar_escudo(metade)
         self.vida_critica = False
+
+    def ao_quebrar_escudo(self):
+        """Escudo quebrado: camuflagem ativa e o dobro da velocidade (uma vez só)."""
+        super().ao_quebrar_escudo()
+        if not self.vida_critica:
+            self.vida_critica = True
+            self.velocidade_base *= 2
+            self.iniciar_invisibilidade('elite')
 
     def carabin(self):
         # Calculamos a direção para o jogador
@@ -73,13 +84,6 @@ class EliteBase(BaseEnemy):
                 self.cronometro_carabina = 0
                 self.carabina_restante -= 1
                 self.carabin()
-
-        # Ativa invisibilidade
-        if self.vida <= self.vida_base / 2 and not self.vida_critica:
-            self.vida_critica = True
-            self.velocidade_base *= 2
-
-            self.iniciar_invisibilidade('elite')
 
         if direcao.length_squared() >= 122500:
             self.velocidade = self.velocidade_base

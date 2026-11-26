@@ -12,6 +12,8 @@ from source.data.enemy_data import INIMIGOS
 
 
 class Brute(BaseEnemy):
+    TAMANHO_DIZIMADORA = (48, 48)
+
     def __init__(self, posicao, game):
         perfil = INIMIGOS['brute']
         super().__init__(posicao, vida_base=perfil.vida, dano_base=perfil.dano,
@@ -29,7 +31,8 @@ class Brute(BaseEnemy):
 
         #Dizimadora
         self.cooldown_shot = 3000
-        self.ultimo_shot= 0 
+        self.ultimo_shot= 0
+        DizimatorBullet.preparar_imagens(self.TAMANHO_DIZIMADORA)   # o 1º tiro não pinta no meio da horda 
 
     def dizim(self):
         direcao_tiro = self.calcular_direcao_tiro(0.1)
@@ -40,7 +43,7 @@ class Brute(BaseEnemy):
             jogador             = self.jogador,
             game                = self.game,
             dono                = 'INIMIGO', fonte=self,
-            tamanho             = (48,48),
+            tamanho             = self.TAMANHO_DIZIMADORA,
             dano                = 15,
             velocidade          = 800,
             direcao_spread      = direcao_tiro

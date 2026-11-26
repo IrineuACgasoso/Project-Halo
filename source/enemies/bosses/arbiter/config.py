@@ -203,8 +203,9 @@ class ArbiterConfig:
     spawn_raio: Tuple[int, int] = (60, 120)
     spawn_tentativas: int = 14
 
-    # --- Anti-stuck: caminho < 40 px em 1,5 s (livre) e longe do jogador -> salto com golpe ---
-    antistuck: ConfigTravamento = ConfigTravamento(janela_ms=1500, caminho_min=40, dist_min=200)
+    # --- Anti-stuck: caminho < 40 px em 0,8 s de tempo livre (somado entre as rotinas) e longe do
+    # jogador -> salto em cima dele com golpe ---
+    antistuck: ConfigTravamento = ConfigTravamento(janela_ms=800, caminho_min=40, dist_min=200, janela_livre=True)
     antistuck_salto: str = 'arbiter_antistuck'
 
     # --- transição (fase 2): grito + onda + escudo cheio ---

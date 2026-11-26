@@ -9,11 +9,11 @@ from functools import lru_cache
 
 import pygame
 
-from source.feats.particulas import emitir_leque
+from source.feats.particulas import emitir_leque, preparar
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.utils.fonts import carregar_fonte
-from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
+from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha, silhueta_de
 
 from .config import CFG
 
@@ -25,6 +25,9 @@ FAISCAS_SUPER = ((255, 200, 40), (255, 225, 110), (255, 160, 0))
 FAISCAS_LUZ = ((60, 190, 255), (160, 235, 255), (20, 110, 255), (255, 255, 255))
 FAISCAS_BARREIRA = (CFG.barreira_cor, (150, 220, 255), (255, 255, 255))
 FAISCAS_TELEPORTE = ((255, 235, 120), (255, 200, 60), (255, 255, 220))
+FAGULHAS_ACERTO = ((255, 90, 40), (255, 160, 60), (255, 230, 150), (220, 30, 30))
+TAMANHOS_FAGULHA = (2, 3, 4)
+_SORTEIO_VFX = random.Random()      # só visual: não mexe na sequência da simulação
 POEIRA_FLOOD = ((84, 82, 34), (110, 95, 45), (70, 60, 30), (60, 78, 34), (130, 115, 60))
 
 
@@ -233,7 +236,12 @@ class GuiltyVFX:
         quadros_do_teleporte()
         for azul in (False, True):
             imagem_da_esfera(azul)
+        for quadros in self.sprites.values():   # pisque vermelho do acerto da luz
+            for quadro in quadros:
+                silhueta_de(quadro, CFG.acerto_pisca_cor)
+        preparar(FAGULHAS_ACERTO, TAMANHOS_FAGULHA)
         self._contador = (None, None, None)     # (quantidade, sombra, texto)
+        self._acerto_em = None                  # quando a luz o feriu pela última vez (pisque vermelho)
 
     @property
     def flutuacao(self):
@@ -251,6 +259,7 @@ class GuiltyVFX:
             nivel = round(pulso * self.alpha_atual / 255 * (NIVEIS_BRILHO - 1))
             tela.blit(imagens_do_brilho()[nivel], (x - raio, y - raio), special_flags=pygame.BLEND_RGB_ADD)
         tela.blit(self.image, (x - self.rect.width / 2, y - self.rect.height / 2))
+        self._desenhar_pisque_do_acerto(tela, x, y)
         if self.barreira_ativa:
             # No centro do corpo, sem flutuar: é o círculo que barra de verdade
             tela.blit(imagem_da_barreira(), (self.rect.centerx - deslocamento.x - CFG.barreira_raio,
@@ -265,8 +274,26 @@ class GuiltyVFX:
         self.game.camera.shake(intensidade=CFG.shake_barreira, duracao=350)
 
     def efeito_do_acerto(self):
-        """A própria luz o feriu: faíscas fortes saindo dele."""
+        """A própria luz o feriu: faíscas fortes saindo dele, fagulhas quentes caindo e o pisque vermelho."""
         faiscas(self.posicao, 40, FAISCAS_LUZ, velocidade=(160, 520), duracao_ms=(300, 700), tamanhos=(3, 5, 7))
+        centro = V2(self.posicao.x, self.posicao.y + self.flutuacao)
+        emitir_leque(centro, V2(0, -1), 22, FAGULHAS_ACERTO, TAMANHOS_FAGULHA, 300, (90, 260), (380, 800),
+                     gravidade=420, sorteio=_SORTEIO_VFX)
+        self._acerto_em = relogio.agora()
+
+    def _desenhar_pisque_do_acerto(self, tela, x, y):
+        """Silhueta vermelha por cima do corpo, acesa metade de cada período, enquanto dura o pisque."""
+        if self._acerto_em is None:
+            return
+        idade = relogio.agora() - self._acerto_em
+        if idade >= CFG.acerto_pisca_ms:
+            self._acerto_em = None
+            return
+        if (idade // (CFG.acerto_pisca_periodo_ms / 2)) % 2:
+            return
+        silhueta = silhueta_de(self.image, CFG.acerto_pisca_cor)
+        silhueta.set_alpha(round(CFG.acerto_pisca_alpha * (1 - 0.5 * idade / CFG.acerto_pisca_ms)))
+        tela.blit(silhueta, (x - self.rect.width / 2, y - self.rect.height / 2))
 
     # ------------------------------------------------------------ HUD
     def hud_draw(self, tela):

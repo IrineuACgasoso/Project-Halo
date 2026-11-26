@@ -187,8 +187,8 @@ def test_aura_do_jogador_acerta_o_invisivel(novo_jogo, grunt):
     assert grunt.vida < 1000
 
 
-def test_encostar_no_invisivel_machuca(novo_jogo, grunt):
-    p = novo_jogo.player
+def test_encostar_no_invisivel_machuca(novo_jogo, grunt, player):
+    p = player
     _ocultar(grunt)
     grunt.posicao.update(p.posicao)
     grunt.sync_rect()

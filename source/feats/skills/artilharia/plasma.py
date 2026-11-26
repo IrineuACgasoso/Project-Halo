@@ -40,6 +40,13 @@ class ExplosaoPlasmaConfig:
     piscar_ms: Tuple[int, int] = (220, 60)              # núcleo do aviso: do início ao estouro
     raio_piscar: int = 9
     shake: float = 0
+    ondas_aviso: int = 0                                # anéis fechando para o centro durante o aviso
+    onda_aviso_ms: int = 420                            # quanto cada anel leva da borda ao centro
+    lentas: int = 0                                     # plasma que se espalha devagar e fica no ar
+    cores_lenta: Tuple[Cor, ...] = ()
+    tamanhos_lenta: Tuple[int, ...] = (5, 7, 9)
+    velocidade_lenta: Tuple[float, float] = (0.12, 0.45)   # × raio, por segundo
+    duracao_lenta_ms: Tuple[int, int] = (1000, 1800)
 
 
 EXPLOSAO_PLASMA_PRESETS = {
@@ -52,6 +59,26 @@ EXPLOSAO_PLASMA_PRESETS = {
         gotas=11,
         raio_piscar=12,
         shake=4,
+    ),
+    # Canhão do Hunter: plasma verde, maior, com anéis no aviso e plasma lento que fica no ar.
+    # O tremor é do gancho do Hunter (`impacto_do_canhao`).
+    'hunter_cannon': ExplosaoPlasmaConfig(
+        duracao_ms=560,
+        cor_nucleo=(235, 255, 215),
+        cor_brilho=(110, 255, 90, 190),
+        cor_onda=(40, 215, 60, 240),
+        cor_onda_interna=(190, 255, 150, 225),
+        faiscas=40,
+        cores_faisca=((70, 255, 70), (165, 255, 120), (230, 255, 210)),
+        tamanhos_faisca=(4, 6, 8),
+        gotas=14,
+        cores_gota=((30, 190, 50), (90, 240, 80), (160, 255, 60)),
+        tamanhos_gota=(9, 12, 14),
+        piscar_ms=(200, 50),
+        raio_piscar=16,
+        ondas_aviso=2,
+        lentas=26,
+        cores_lenta=((60, 230, 80), (120, 255, 110), (30, 170, 60), (185, 255, 150)),
     ),
 }
 
@@ -85,6 +112,12 @@ class AvisoPlasma(ArtilhariaAviso):
         pygame.draw.circle(camada, cfg.cor_borda, (x, y), raio, 4)
         if progresso > 0:
             pygame.draw.circle(camada, cfg.cor_preenchimento, (x, y), max(1, int(raio * progresso)))
+        if vfx.ondas_aviso:
+            r, g, b, _ = vfx.cor_onda
+            pygame.draw.circle(camada, (r, g, b, round(40 + 50 * progresso)), (x, y), raio, 12)   # brilho da borda
+            for k in range(vfx.ondas_aviso):
+                fase = (idade / vfx.onda_aviso_ms + k / vfx.ondas_aviso) % 1.0
+                pygame.draw.circle(camada, (r, g, b, round(200 * fase)), (x, y), max(2, round(raio * (1 - fase))), 3)
         inicio, fim = vfx.piscar_ms
         periodo = inicio + (fim - inicio) * progresso
         aceso = int(idade // periodo) % 2 == 0
@@ -112,6 +145,11 @@ class ExplosaoPlasma(pygame.sprite.Sprite):
         emitir_leque(self.posicao, (1, 0), round(vfx.gotas * escala), vfx.cores_gota, vfx.tamanhos_gota,
                      velocidade=(raio * 0.5, raio * 1.4), duracao_ms=(450, 800), gravidade=-90,
                      sorteio=_SORTEIO)
+        if vfx.lentas:
+            lenta_min, lenta_max = vfx.velocidade_lenta
+            emitir_leque(self.posicao, (1, 0), round(vfx.lentas * escala), vfx.cores_lenta, vfx.tamanhos_lenta,
+                         velocidade=(raio * lenta_min, raio * lenta_max), duracao_ms=vfx.duracao_lenta_ms,
+                         gravidade=-25, sorteio=_SORTEIO)
 
     def update(self, delta_time, paredes=None):
         if relogio.agora() - self.nascimento >= self.vfx.duracao_ms:

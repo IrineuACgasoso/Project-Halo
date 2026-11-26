@@ -70,7 +70,8 @@ class HunterConfig:
     # camera shake (intensidade em px): burst durante toda a rajada; slam e canhão no golpe
     shake_burst: float = 1
     shake_slam: float = 3
-    shake_canhao: float = 5
+    shake_canhao: float = 12
+    shake_canhao_ms: int = 450
 
     def __post_init__(self):
         if set(self.pesos_longe) != set(self.cooldown) or set(self.pesos_perto) != set(self.cooldown) \

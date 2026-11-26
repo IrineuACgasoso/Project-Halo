@@ -36,6 +36,6 @@ SALTO_PRESETS = {
     'padrao': SaltoConfig(duracao_ms=1200, altura=300),
     # Arbiter: salto curto e baixo que pousa antes do jogador e golpeia à frente
     'arbiter_investida': SaltoConfig(duracao_ms=520, altura=90, distancia=(120, 460), recuo=170),
-    # Arbiter preso: o mesmo golpe, mais alto e longo (passa por cima da parede)
-    'arbiter_antistuck': SaltoConfig(duracao_ms=750, altura=150, distancia=(150, 650), recuo=200),
+    # Arbiter preso: mais alto, por cima da parede, e pousa exatamente onde o jogador está
+    'arbiter_antistuck': SaltoConfig(duracao_ms=750, altura=150),
 }

@@ -186,7 +186,7 @@ class ArbiterAttacks:
 
     # ================================================================ anti-stuck
     def rotina_antistuck(self):
-        """Preso longe do jogador: salto curto por cima do que o prende, com o golpe frontal no pouso."""
+        """Preso longe do jogador: salta por cima do que o prende e pousa onde o jogador está, com o golpe frontal."""
         yield from self.rotina_salto(preset=CFG.antistuck_salto, agendar=False)
 
     # ================================================================ transição

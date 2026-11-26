@@ -80,6 +80,14 @@ CORES_FAGULHA_AMARELA = ((255, 235, 120), (255, 200, 50))
 FAGULHAS_POR_PX = 0.45          # quantidade pelo tamanho do corpo
 FAGULHAS_LIMITES = (26, 70)
 MS_ENTRE_QUEBRAS = 400          # escudo que regenera um fio e cai de novo não vira uma chuva
+TAMANHOS_FAGULHA = (4, 6, 8)
+
+
+def preparar_quebra_de_escudo():
+    """Pinta já as fagulhas (no início da partida): jogador e Elites quebram escudo no meio da horda."""
+    for cor in CORES_FAGULHA_AMARELA + CORES_FAGULHA_AZUL:
+        for tamanho in TAMANHOS_FAGULHA:
+            particulas.variantes_alpha(particulas.imagem_pixel(cor, tamanho))
 
 
 def quebra_de_escudo(alvo):
@@ -98,7 +106,7 @@ def quebra_de_escudo(alvo):
         borda = pygame.math.Vector2(direcao.x * corpo.width, direcao.y * corpo.height) * SORTEIO.uniform(0.35, 0.6)
         velocidade = direcao * SORTEIO.uniform(60, 220) - (0, SORTEIO.uniform(40, 160))
         cor = SORTEIO.choice(CORES_FAGULHA_AMARELA if i % 3 == 0 else CORES_FAGULHA_AZUL)
-        particulas.emitir(centro + borda, particulas.imagem_pixel(cor, SORTEIO.choice((4, 6, 8))), velocidade,
+        particulas.emitir(centro + borda, particulas.imagem_pixel(cor, SORTEIO.choice(TAMANHOS_FAGULHA)), velocidade,
                           SORTEIO.uniform(700, 1200), y_desenho=alvo.rect.bottom + 1, gravidade=620)
     return True
 

@@ -8,7 +8,9 @@ from source.systems.entitymanager import entity_manager
 from source.data.enemy_data import INIMIGOS
 
 
-class Jackal(BaseEnemy): 
+class Jackal(BaseEnemy):
+    TAMANHO_PLASMA = (28, 28)
+
     def __init__(self, posicao, game, tipo=None):
         # Se um tipo não for forçado pela subclasse, sorteia os padrões
         self.tipo = tipo if tipo else random.choice(['blue', 'red'])
@@ -36,6 +38,11 @@ class Jackal(BaseEnemy):
         self.plasma_cooldown = self.novo_cooldown(*perfil.cooldowns['tiro_inicial'])
         self.escudo_quebrado = False
         self.ultimo_tiro = relogio.agora()
+        self.preparar_tiro()
+
+    def preparar_tiro(self):
+        """Pinta já o tiro (o 1º não pinta no meio da horda)."""
+        PlasmaGun.preparar_imagens(self.TAMANHO_PLASMA)
 
     def deve_mover(self):
         direcao = self.jogador.posicao - self.posicao
@@ -55,7 +62,7 @@ class Jackal(BaseEnemy):
             jogador=self.jogador,
             game=self.game,
             dono='INIMIGO', fonte=self,
-            tamanho=(28, 28),
+            tamanho=self.TAMANHO_PLASMA,
             dano=5,
             velocidade=500,
             direcao_spread=direcao_tiro,
@@ -94,6 +101,8 @@ class Jackal(BaseEnemy):
 
 
 class JackalSniper(Jackal):
+    TAMANHO_M50 = (45, 45)
+
     def __init__(self, posicao, game):
         # Inicia a classe mãe já fixando a variante 'sniper'
         super().__init__(posicao, game, tipo='sniper')
@@ -103,18 +112,22 @@ class JackalSniper(Jackal):
         direcao = self.jogador.posicao - self.posicao
         return direcao.length() > 400
 
+    def preparar_tiro(self):
+        M50.preparar_imagens(self.TAMANHO_M50)
+
     def executar_ataque(self):
         """Sobrescreve o ataque: Dispara o rifle M50 em vez da pistola de plasma."""
-        direcao_tiro = self.jogador.posicao - self.posicao
-        
+        # A direção precisa ser unitária: sem normalizar, o tiro saía com velocidade × distância (sumia num frame)
+        direcao_tiro = self.calcular_direcao_tiro()
+
         M50(
             posicao_inicial=self.posicao,
             grupos=(entity_manager.all_sprites,),
             jogador=self.jogador,
             game=self.game,
             dono='INIMIGO', fonte=self,
-            tamanho=(45, 45),
+            tamanho=self.TAMANHO_M50,
             dano=50,
-            velocidade=750,
+            velocidade=1050,
             direcao_spread=direcao_tiro
         )

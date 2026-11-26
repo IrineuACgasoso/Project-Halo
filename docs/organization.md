@@ -78,7 +78,7 @@ Project-Halo/
     ├── feats/
     │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto (chamado pelo main.py; import limpo, D3); MapasSobDemanda (D2)
     │   ├── weapons/         # baseweapon.py (Arma: grupos via entity_manager; ArmaDeRajada) + pastas por raridade: comum/incomum/rara/epica/lendaria
-    │   ├── projetil/        # ProjetilUniversal + subclasses (brick, carabin, needler, laserblast...)
+    │   ├── projetil/        # ProjetilUniversal + subclasses (brick, carabin, needler, laserblast...); desenhado.py = base dos tiros pintados em código (plasma, dizimator, m50)
     │   ├── buddies/         # Companheiro (IA) + wrappers Arbitro, Cortana, Marine, NobleVI
     │   ├── vehicles/        # Vehicle + Warhog, Pelican (tecla V)
     │   ├── items/           # Items (drop/coleta) + draw.py (visual/cache)

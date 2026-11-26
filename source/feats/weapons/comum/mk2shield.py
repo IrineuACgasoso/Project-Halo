@@ -7,7 +7,7 @@ class MK2_Shield(Arma):
     def __init__(self, jogador, game, **kwargs):
         super().__init__(jogador=jogador, **kwargs) 
         self.nome = "Escudo MK-2"
-        self.descricao = "Gera um escudo e causa dano por segundo ao redor do jogador."
+        self.descricao = "Melhora o escudo a cada nível e causa dano por segundo ao redor do jogador."
         self.area_de_dano = None
         self.inicializar_stats(self.NOME_ASSET)
 

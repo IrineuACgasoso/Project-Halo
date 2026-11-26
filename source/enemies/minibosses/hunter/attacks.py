@@ -7,9 +7,9 @@ import pygame
 from source.feats.projetil import PlasmaGun
 from source.feats.skills.cone_strike import ConeStrikeAviso
 from source.feats.skills.dash import Dash
-from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.entitymanager import entity_manager
 
+from .canhao import CanhaoDoHunter
 from .config import CFG
 from .vfx import impacto_do_canhao, impacto_do_slam
 
@@ -22,7 +22,7 @@ class HunterAttacks:
 
     # ------------------------------------------------------------- longe
     def rotina_canhao(self):
-        CanhaoParabolico(
+        CanhaoDoHunter(
             start_pos=self.posicao.copy(),
             target_pos=self.jogador.posicao.copy(),
             game=self.game,

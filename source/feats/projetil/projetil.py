@@ -108,39 +108,6 @@ class ProjetilUniversal(pygame.sprite.Sprite):
 # --- CLASSES FILHAS SIMPLIFICADAS ---
 
         
-class M50(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
-        super().__init__(posicao_inicial=posicao_inicial, 
-            grupos=grupos, 
-            game=game, 
-            dono=dono,
-            fonte=fonte,
-            sprite_key='m50', 
-            tamanho=tamanho, 
-            dano=dano, 
-            velocidade=velocidade, 
-            duracao=2500, 
-            direcao_custom=direcao_spread, 
-            rotacionar=False)
-        
-class DizimatorBullet(ProjetilUniversal):
-    def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
-        # O Dizimator geralmente é uma esfera de energia pesada
-        super().__init__(
-            posicao_inicial=posicao_inicial, 
-            grupos=grupos, 
-            game=game, 
-            dono=dono,
-            fonte=fonte,
-            sprite_key='dizimator', 
-            tamanho=tamanho, 
-            dano=dano, 
-            velocidade=velocidade, 
-            duracao=1500, 
-            direcao_custom=direcao_spread, 
-            rotacionar=True
-        )
-
 class BurstRifle(ProjetilUniversal):
     def __init__(self, posicao_inicial, grupos, jogador, game, dono, tamanho, dano, velocidade, direcao_spread, fonte=None):
         super().__init__(posicao_inicial=posicao_inicial, 

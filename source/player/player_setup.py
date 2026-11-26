@@ -3,6 +3,8 @@ from source.systems.gameclock import relogio
 from source.feats.assets import ASSETS
 from source.systems.status import StatusEntidade
 from source.systems.entrada import PARADO
+from source.data.weapon_data import WEAPON_DATA
+from source.feats.effects import preparar_quebra_de_escudo
 
 # Seta todo o init do Player
 class PlayerSetup:
@@ -40,11 +42,13 @@ class PlayerSetup:
 
     def setup_shield(self):
         # --- SISTEMA DE ESCUDO ---
-        self.escudo_maximo = 0
-        self.escudo_atual = 0
+        # Escudo regenerativo de fábrica: os valores do MK-2 no nível 1, fixos. Só o MK-2 os melhora.
+        base = WEAPON_DATA['mk2_shield'].stats
+        self.escudo_maximo = self.escudo_atual = base['escudo'].value
         # Regeneração
-        self.shield_regen = 0
-        self.velocidade_regen_escudo = 0
+        self.shield_regen = base['shield_regen'].value
+        self.velocidade_regen_escudo = base['velocidade_regen_escudo'].value
+        preparar_quebra_de_escudo()   # agora todo mundo tem escudo para quebrar no meio da horda
         # Controle
         self.ultimo_dano_sofrido = 0
         self.regenerando_escudo = False

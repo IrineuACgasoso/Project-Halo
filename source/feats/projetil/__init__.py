@@ -7,3 +7,5 @@ from .shotgun import ProjetilShotgun
 from .heavyburst import HeavyBurst
 from .brick import Brick
 from .energyswordproj import EnergySwordProj
+from .m50 import M50
+from .dizimator import DizimatorBullet
