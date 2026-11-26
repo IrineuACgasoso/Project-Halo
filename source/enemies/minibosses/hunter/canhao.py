@@ -1,7 +1,8 @@
-"""O tiro do canhão do Hunter, desenhado em código: uma bola de plasma verde (halo que pulsa, núcleo
-branco) em arco, com a sombra no chão encolhendo enquanto ela sobe e um rastro de plasma que fica no ar.
-Ao cair vira um `AvisoPlasma` com o preset `hunter_cannon` (anéis no aviso, explosão em camadas verde e
-plasma lento). Acerto, arco e dano continuam os do `CanhaoParabolico`.
+"""O tiro do canhão do Hunter, desenhado em código na paleta da `PlasmaGun` (verde-limão): uma bola de
+energia em camadas com núcleo branco, fios de plasma girando em volta e um halo somado na tela que pulsa.
+Voa em arco, com a sombra no chão encolhendo enquanto sobe e um rastro de plasma que fica no ar. Ao cair
+vira um `AvisoPlasma` com o preset `hunter_cannon` (mesma paleta). Acerto, arco e dano continuam os do
+`CanhaoParabolico`.
 
 Só visual: o rastro usa sorteio próprio e as imagens são pintadas 1× (cache)."""
 import math
@@ -11,17 +12,19 @@ from functools import lru_cache
 import pygame
 
 from source.feats.particulas import emitir_leque, preparar
+from source.feats.projetil import PlasmaGun
+from source.feats.projetil.desenhado import brilho_aditivo
 from source.feats.skills.artilharia import AvisoPlasma
 from source.feats.skills.artilharia.plasma import EXPLOSAO_PLASMA_PRESETS
 from source.feats.skills.mortar import CanhaoParabolico
 from source.systems.gameclock import relogio
 from source.utils.superficies import camada_alpha
 
-QUADROS_ORBE = 4
-QUADRO_MS = 60
-CORES_RASTRO = ((60, 230, 80), (130, 255, 110), (200, 255, 170), (30, 170, 60))
-# (cor, escala do raio), de fora para dentro
-CAMADAS_ORBE = (((35, 190, 45), 1.0), ((100, 250, 80), 0.8), ((190, 255, 160), 0.55), ((255, 255, 240), 0.3))
+QUADROS_ORBE = 8
+QUADRO_MS = 45
+FIOS = 3                  # fios de plasma girando em volta da bola
+COR_FIO = (215, 255, 120)
+CORES_RASTRO = ((110, 255, 30), (170, 255, 0), (215, 255, 120), (250, 255, 230))
 TAMANHOS_RASTRO = (4, 6, 8)
 _SORTEIO = random.Random()
 
@@ -36,30 +39,59 @@ def preparar_canhao(preset):
         preparar(cores, tamanhos)
 
 
-def _pintar_halo(surf, centro, raio, cor, alpha_max, degraus=7):
-    """Brilho redondo com alpha: de quase nada na borda a `alpha_max` no centro (de fora para dentro)."""
-    for i in range(degraus, 0, -1):
-        fracao = i / degraus
-        alpha = round(alpha_max * ((1 - fracao) ** 1.6 + 0.12))
-        pygame.draw.circle(surf, (*cor, min(255, alpha)), centro, max(1.0, raio * fracao))
+def _degrade(camadas, passos=5):
+    """As camadas `(cor, alpha, escala)` da `PlasmaGun` com `passos` degraus entre cada par (bola lisa)."""
+    saida = []
+    for (c0, a0, e0), (c1, a1, e1) in zip(camadas, camadas[1:]):
+        for i in range(passos):
+            t = i / passos
+            saida.append((tuple(round(x + (y - x) * t) for x, y in zip(c0, c1)), round(a0 + (a1 - a0) * t),
+                          e0 + (e1 - e0) * t))
+    saida.append(camadas[-1])
+    return saida
+
+
+def _fios(surf, cx, cy, raio, fase, cor, alpha, espessura):
+    """FIOS cometas de plasma girando em volta da bola: cabeça forte, cauda que afina."""
+    for k in range(FIOS):
+        inicio = (fase + k / FIOS) * 2 * math.pi
+        distancia = raio * (1.1 + 0.15 * math.sin(inicio * 3))
+        for i in range(11, -1, -1):                                 # da cauda para a cabeça
+            t = i / 11
+            ang = inicio - t * 1.4
+            ponto = (cx + math.cos(ang) * distancia, cy + math.sin(ang) * distancia)
+            if alpha is None:
+                pygame.draw.circle(surf, [round(c * (1 - t)) for c in cor], ponto, max(1.0, espessura * (1 - t * 0.6)))
+            else:
+                pygame.draw.circle(surf, (*cor, round(alpha * (1 - t) ** 1.2)), ponto, max(1.0, espessura * (1 - t * 0.6)))
 
 
 @lru_cache(maxsize=None)
 def quadros_do_orbe(raio):
-    """A bola de plasma em QUADROS_ORBE pulsos (halo e núcleo crescem e voltam)."""
+    """QUADROS_ORBE pares (corpo SRCALPHA, brilho sem alpha para somar): as camadas da `PlasmaGun` em bola
+    lisa, núcleo que pulsa, fios de plasma que giram uma volta por ciclo e halo que respira."""
+    camadas = _degrade(PlasmaGun.CAMADAS)
     quadros = []
     for q in range(QUADROS_ORBE):
-        pulso = 1 + 0.14 * math.sin(q * 2 * math.pi / QUADROS_ORBE)
-        halo = raio * 2.1 * pulso
-        lado = round(halo * 2) + 4
-        surf = pygame.Surface((lado, lado), pygame.SRCALPHA)
-        centro = (lado / 2, lado / 2)
-        _pintar_halo(surf, centro, halo, (90, 255, 70), 140)
-        for cor, escala in CAMADAS_ORBE:
-            fator = pulso if escala < 0.6 else 1.0
-            pygame.draw.circle(surf, (*cor, 255), centro, raio * escala * fator)
-        pygame.draw.circle(surf, (255, 255, 255, 230), (centro[0] - raio * 0.3, centro[1] - raio * 0.32), raio * 0.17)
-        quadros.append(surf)
+        fase = q / QUADROS_ORBE
+        onda = math.sin(fase * 2 * math.pi * 2)                    # dois pulsos por volta dos fios
+        pulso = 1 + 0.12 * onda
+        lado = round(raio * 1.7 * 2) + 4
+        corpo = pygame.Surface((lado, lado), pygame.SRCALPHA)
+        cx = cy = lado / 2
+        for cor, alpha, escala in camadas:
+            fator = pulso if escala < 0.75 else 1.0
+            pygame.draw.circle(corpo, (*cor, alpha), (cx, cy), raio * escala * fator)
+        pygame.draw.circle(corpo, (255, 255, 255, 255), (cx, cy), raio * 0.24 * pulso)
+        fios = pygame.Surface((lado, lado), pygame.SRCALPHA)        # à parte: o alpha da cauda mistura
+        _fios(fios, cx, cy, raio, fase, COR_FIO, 255, 4.0)
+        corpo.blit(fios, (0, 0))
+        halo = raio * 2.6 * pulso
+        lado_brilho = round(raio * 2.6 * 1.12 * 2) + 2
+        brilho = brilho_aditivo(halo, PlasmaGun.COR_HALO, forca=0.8 + 0.2 * onda, lado=lado_brilho)
+        c = lado_brilho / 2
+        _fios(brilho, c, c, raio, fase, (120, 200, 40), None, 6.0)    # os fios também acendem a tela
+        quadros.append((corpo, brilho))
     return tuple(quadros)
 
 
@@ -94,8 +126,10 @@ class CanhaoDoHunter(CanhaoParabolico):
         caixa = pygame.Rect(x - largura, y - altura, largura * 2, altura * 2)
         camada, area = camada_alpha(surface, caixa)
         if camada is not None:
-            pygame.draw.ellipse(camada, (5, 35, 10, round(150 - 80 * subida)), caixa)
-            pygame.draw.ellipse(camada, (60, 230, 80, round(70 - 40 * subida)), caixa.inflate(-largura, -altura))
+            pygame.draw.ellipse(camada, (10, 35, 0, round(150 - 80 * subida)), caixa)
+            pygame.draw.ellipse(camada, (*PlasmaGun.COR_HALO, round(80 - 45 * subida)), caixa.inflate(-largura, -altura))
             surface.blit(camada, area.topleft, area)
-        quadro = self._quadros[int(relogio.agora() // QUADRO_MS) % QUADROS_ORBE]
-        surface.blit(quadro, quadro.get_rect(center=(self.rect.centerx - offset.x, self.rect.centery - offset.y)))
+        corpo, brilho = self._quadros[int(relogio.agora() // QUADRO_MS) % QUADROS_ORBE]
+        centro = (self.rect.centerx - offset.x, self.rect.centery - offset.y)
+        surface.blit(corpo, corpo.get_rect(center=centro))
+        surface.blit(brilho, brilho.get_rect(center=centro), special_flags=pygame.BLEND_RGB_ADD)

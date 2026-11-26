@@ -28,6 +28,11 @@ O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as luta
 
 ---
 
+## 2026-11-26 | Canhão do Hunter na paleta da Plasma Gun
+- Bola (`hunter/canhao.py`): as `PlasmaGun.CAMADAS` em degradê liso, núcleo branco que pulsa, 3 fios de plasma girando e halo aditivo (`COR_HALO`) que respira; 8 quadros pré-pintados. Rastro e sombra na mesma paleta.
+- Aviso (`ARTILHARIA_PRESETS['hunter_cannon']`) e explosão (`EXPLOSAO_PLASMA_PRESETS['hunter_cannon']`) em verde-limão. Sem mudança de dano, raio ou quantidade de partículas.
+- Suíte verde. Não validado na tela real: o visual em movimento.
+
 ## 2026-11-25 | Correções: escudo de fábrica, Elites, anti-stuck do Arbiter e VFX de tiros
 - **Escudo:** o jogador nasce com o escudo regenerativo do MK-2 nível 1, fixo; só o MK-2 o melhora (escudo +80/nível, era +50). Fixture `player` dos testes parte sem escudo. A carabina inimiga (×3 contra escudo) agora vale contra o jogador desde o início.
 - **Elites:** metade da vida vira escudo; a camuflagem (e o ×2 de velocidade) liga em `ao_quebrar_escudo`.

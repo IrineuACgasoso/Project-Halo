@@ -35,9 +35,9 @@ ARTILHARIA_PRESETS = {
         dano=250, 
         raio_explosao=270, 
         duracao=600,
-        cor_borda=(20, 255, 20, 150), 
-        cor_preenchimento=(50, 255, 50, 50), 
-        cor_explosao=(100, 255, 100, 220)
+        cor_borda=(110, 255, 30, 160),
+        cor_preenchimento=(170, 255, 0, 45),
+        cor_explosao=(215, 255, 120, 220)
     ),
     
     # Exemplo: A explosão rosa rápida da Needler (Supercombine)

@@ -60,25 +60,25 @@ EXPLOSAO_PLASMA_PRESETS = {
         raio_piscar=12,
         shake=4,
     ),
-    # Canhão do Hunter: plasma verde, maior, com anéis no aviso e plasma lento que fica no ar.
-    # O tremor é do gancho do Hunter (`impacto_do_canhao`).
+    # Canhão do Hunter: paleta da PlasmaGun (verde-limão), maior, com anéis no aviso e plasma lento que
+    # fica no ar. O tremor é do gancho do Hunter (`impacto_do_canhao`).
     'hunter_cannon': ExplosaoPlasmaConfig(
         duracao_ms=560,
-        cor_nucleo=(235, 255, 215),
-        cor_brilho=(110, 255, 90, 190),
-        cor_onda=(40, 215, 60, 240),
-        cor_onda_interna=(190, 255, 150, 225),
+        cor_nucleo=(250, 255, 230),
+        cor_brilho=(170, 255, 0, 190),
+        cor_onda=(110, 255, 30, 240),
+        cor_onda_interna=(215, 255, 120, 225),
         faiscas=40,
-        cores_faisca=((70, 255, 70), (165, 255, 120), (230, 255, 210)),
+        cores_faisca=((170, 255, 0), (215, 255, 120), (250, 255, 230)),
         tamanhos_faisca=(4, 6, 8),
         gotas=14,
-        cores_gota=((30, 190, 50), (90, 240, 80), (160, 255, 60)),
+        cores_gota=((95, 210, 20), (110, 255, 30), (170, 255, 0)),
         tamanhos_gota=(9, 12, 14),
         piscar_ms=(200, 50),
         raio_piscar=16,
         ondas_aviso=2,
         lentas=26,
-        cores_lenta=((60, 230, 80), (120, 255, 110), (30, 170, 60), (185, 255, 150)),
+        cores_lenta=((110, 255, 30), (170, 255, 0), (95, 210, 20), (215, 255, 120)),
     ),
 }
 
