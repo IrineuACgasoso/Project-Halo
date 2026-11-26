@@ -1,7 +1,11 @@
 """Presets do ataque retangular (ver `core.py`)."""
 import math
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Union
+
+from source.feats.skills.artilharia.config import validar_efeitos
+from source.systems.empurrao import forca_valida
+from source.systems.status import Lentidao
 
 Cor = Tuple[int, int, int, int]
 
@@ -16,8 +20,15 @@ class RectStrikeConfig:
     cor_borda: Cor = (120, 30, 0, 220)              # contorno escuro
     cor_preenchimento: Cor = (190, 60, 0, 130)      # avança do dono até a ponta
     cor_explosao: Cor = (255, 200, 120, 230)        # clarão do golpe
+    # Quem o golpe atinge é empurrado na direção do golpe (False = não; um número = quantos px)...
+    knockback: Union[bool, float] = False
+    # ...e leva estes buffs/debuffs do sistema de status (ex.: (Lentidao(0.5, 2000),))
+    efeitos: tuple = ()
 
     def __post_init__(self):
+        if self.knockback is not False and not forca_valida(self.knockback):
+            raise ValueError(f'RectStrikeConfig: knockback {self.knockback!r} (precisa ser False ou um número > 0)')
+        validar_efeitos(self.efeitos, 'RectStrikeConfig')
         for campo in ('largura', 'altura', 'duracao'):
             valor = getattr(self, campo)
             if not (math.isfinite(valor) and valor > 0):
@@ -63,5 +74,19 @@ RECT_STRIKE_PRESETS = {
         cor_borda=(10, 60, 150, 230),
         cor_preenchimento=(40, 130, 255, 140),
         cor_explosao=(210, 245, 255, 240)
+    ),
+
+    # Tartarus: Esmagamento Sísmico. Fissura gravitacional larga e comprida; arremessa e deixa lento.
+    'tartarus_onda': RectStrikeConfig(
+        dano=170,
+        largura=240,
+        altura=950,
+        duracao=750,
+        cor_fundo=(140, 180, 255, 50),
+        cor_borda=(40, 70, 200, 220),
+        cor_preenchimento=(70, 120, 255, 110),
+        cor_explosao=(200, 225, 255, 230),
+        knockback=420,
+        efeitos=(Lentidao(0.45, 2500),)
     ),
 }

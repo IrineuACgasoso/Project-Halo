@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple, Union
 
 from source.systems.empurrao import forca_valida
+from source.systems.status import INSTANTANEOS, TEMPORARIOS
 
 @dataclass
 class ArtilhariaConfig:
@@ -22,10 +23,19 @@ class ArtilhariaConfig:
     # Empurra quem a explosão atinge (não os ticks) para longe do centro: False = não empurra; um
     # número = quantos px (`systems/empurrao.py`)
     knockback: Union[bool, float] = False
+    # Buffs/debuffs do sistema de status aplicados em quem a explosão atinge (ex.: (Lentidao(0.5, 2000),))
+    efeitos: tuple = ()
 
     def __post_init__(self):
         if self.knockback is not False and not forca_valida(self.knockback):
             raise ValueError(f'knockback {self.knockback!r} (precisa ser False ou um número > 0)')
+        validar_efeitos(self.efeitos, 'ArtilhariaConfig')
+
+
+def validar_efeitos(efeitos, quem):
+    """Os `efeitos` de acerto de um preset precisam ser efeitos do sistema de status (tupla)."""
+    if not isinstance(efeitos, tuple) or any(type(e) not in TEMPORARIOS | INSTANTANEOS for e in efeitos):
+        raise ValueError(f'{quem}: efeitos precisa ser uma tupla de efeitos de status (veio {efeitos!r})')
 
 # === PRESETS DA ARTILHARIA ===
 ARTILHARIA_PRESETS = {
@@ -76,6 +86,48 @@ ARTILHARIA_PRESETS = {
         cor_preenchimento=(255, 50, 0, 80),
         cor_explosao=(255, 255, 255, 250) # Clarão branco
         ),
+
+    # Tartarus reformulado (o Atriox e o Escharum ainda usam 'tartarus_run' e 'tartarus_leap', acima)
+    # Vórtice: o círculo cresce durante a atração inteira e estoura na martelada (duração = vórtice + golpe)
+    'tartarus_vortice': ArtilhariaConfig(
+        dano=180,
+        raio_explosao=240,
+        duracao=1750,
+        cor_borda=(170, 90, 255, 210),
+        cor_preenchimento=(130, 50, 255, 60),
+        cor_explosao=(225, 200, 255, 235),
+        knockback=260
+    ),
+    # Salto meteoro: aparece no ponto de pouso na decolagem e estoura no pouso (duração = salto)
+    'tartarus_meteoro': ArtilhariaConfig(
+        dano=200,
+        raio_explosao=290,
+        duracao=1100,
+        cor_borda=(90, 150, 255, 210),
+        cor_preenchimento=(60, 110, 255, 55),
+        cor_explosao=(210, 235, 255, 235),
+        knockback=380
+    ),
+    # Chieftain Rampage: a explosão no fim de cada uma das 3 corridas curtas
+    'tartarus_rampage': ArtilhariaConfig(
+        dano=160,
+        raio_explosao=190,
+        duracao=380,
+        cor_borda=(255, 120, 30, 220),
+        cor_preenchimento=(255, 80, 0, 70),
+        cor_explosao=(255, 230, 170, 240),
+        knockback=220
+    ),
+    # Hammer Run (Fúria): a mega explosão no fim da corrida
+    'tartarus_corrida': ArtilhariaConfig(
+        dano=260,
+        raio_explosao=380,
+        duracao=550,
+        cor_borda=(255, 70, 30, 230),
+        cor_preenchimento=(255, 40, 0, 70),
+        cor_explosao=(255, 220, 160, 245),
+        knockback=320
+    ),
 
     'flood_warning': ArtilhariaConfig(
         dano=150,

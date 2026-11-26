@@ -4,11 +4,11 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.systems.entitymanager import entity_manager
 from source.feats.items import Items
 
-# Atriox reutiliza 100% do kit do Tartarus (os 4 arquivos locais eram cópias byte a byte).
-from source.enemies.bosses.tartarus.setup import TartarusSetup
-from source.enemies.bosses.tartarus.states import TartarusAI
-from source.enemies.bosses.tartarus.attacks import TartarusAttacks
-from source.enemies.bosses.tartarus.vfx import ProtocoloHalo
+# O kit antigo do Tartarus (antes da reformulação na BossBase) ficou aqui; o Halo é o do Tartarus.
+from .setup import TartarusSetup
+from .states import TartarusAI
+from .attacks import TartarusAttacks
+from source.enemies.bosses.tartarus.halo import ProtocoloHalo
 from source.systems.status import IMUNIDADES_CHEFE
 
 class Atriox(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):

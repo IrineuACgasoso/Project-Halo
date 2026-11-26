@@ -7,7 +7,7 @@ from source.feats.items import Items
 from .setup import TartarusSetup
 from .ia import TartarusAI
 from .attacks import TartarusAttacks
-from source.enemies.bosses.tartarus.vfx import ProtocoloHalo
+from source.enemies.bosses.tartarus.halo import ProtocoloHalo
 from source.systems.status import IMUNIDADES_CHEFE
 
 class Escharum(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):

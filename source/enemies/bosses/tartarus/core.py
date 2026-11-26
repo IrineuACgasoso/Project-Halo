@@ -1,63 +1,50 @@
 import pygame
-from source.systems.gameclock import relogio
-from source.enemies.base.enemy_base import BaseEnemy
-from source.systems.entitymanager import entity_manager
+
+from source.enemies.base.boss import BossBase
 from source.feats.items import Items
 
+from .attacks import TartarusAttacks
+from .config import CFG, CLIPS, ESTADOS, FASES, HABILIDADES
+from .halo import ProtocoloHalo
+from .movement import TartarusMovement
 from .setup import TartarusSetup
 from .states import TartarusAI
-from .attacks import TartarusAttacks
-from .vfx import ProtocoloHalo
-from source.systems.status import IMUNIDADES_CHEFE
+from .vfx import TartarusVFX
 
-class Tartarus(BaseEnemy, TartarusSetup, TartarusAI, TartarusAttacks):
-    """Classe principal do Boss Tartarus (Halo 2)."""
-    imunidades_status = IMUNIDADES_CHEFE   # sem stun nem lentidão de fora (roteiro §8, item 8)
+
+class Tartarus(TartarusMovement, TartarusAI, TartarusAttacks, TartarusVFX, TartarusSetup, BossBase):
+    """Chefe dos Brutes: força bruta e caos gravitacional. Avança sempre, nunca recua; a Barreira do Punho
+    de Rukt corta 90% do dano até ele errar golpes pesados (sobrecarga) ou a barra de esquivas encher.
+    A luta tem hora para acabar (Ativação do Halo). Abaixo de 35%, Fúria Jiralhanae.
+    Mixins ANTES de BossBase: os overrides deles (`orientar`, `pensar`, `iniciar`...) precisam vencer na MRO."""
+    FASES = FASES
+    COOLDOWNS = CFG.cooldown
+    COOLDOWN_INICIAL = CFG.cooldown_inicial
+    ESTADOS = ESTADOS
+    ANTISTUCK = CFG.antistuck
+    CLIPS = CLIPS
+    CLIP_INICIAL = 'andar'
+    HABILIDADES = HABILIDADES
+
     def __init__(self, posicao, game, ativar_halo=True, **kwargs):
-        super().__init__(posicao, vida_base=4000, dano_base=60, velocidade_base=120, 
+        super().__init__(posicao, vida_base=CFG.vida, dano_base=CFG.dano_contato, velocidade_base=CFG.velocidade,
                          game=game, sprite_key='tartarus')
-        
         self.titulo = "TARTARUS, O Punho de Rukt"
-        self.is_boss = True 
 
-        self.velocidade_original = 120
+        largura, altura = CFG.hitbox_fracao
+        self.hitbox = pygame.Rect(0, 0, self.rect.width * largura, self.rect.height * altura)
+        self.hitbox.center = self.rect.center
 
-        if ativar_halo:
-            ProtocoloHalo(game=self.game, boss=self, tempo_limite_ms=120000)
-        
-        # Executa as preparações dos Mixins
-        self.setup_animation(estado_inicial='left', velocidade_animacao=400)
         self.inicializar_habilidades()
+        self.iniciar_vfx()
+        self.halo = ProtocoloHalo(game=self.game, boss=self, tempo_limite_ms=CFG.halo_ms) if ativar_halo else None
 
     def morrer(self, grupos=None):
         Items.spawn_drop(
-            self.posicao, 
-            grupos, 
-            big_shard=((6, 8, 10), (70, 28, 2), 100), 
-            life_orb=(1, 100, 100),              
-            upgrade=((1, 2), (99, 1), 100)       
+            self.posicao,
+            grupos,
+            big_shard=((6, 8, 10), (70, 28, 2), 100),
+            life_orb=(1, 100, 100),
+            upgrade=((1, 2), (99, 1), 100)
         )
         self.kill()
-
-    def update(self, delta_time, paredes=None):
-        agora = relogio.agora()
-        
-        # 1. Executa a IA (decide o estado)
-        self.executar_estados(agora, delta_time)
-        
-        # Processamento dos estados em movimento
-        if self.estado_habilidade == 'leaping_takeoff':
-            self.processar_salto(agora, delta_time)
-        elif self.estado_habilidade == 'hammer_run':
-            self.processar_hammer_run(agora, delta_time, paredes)
-        elif self.estado_habilidade == 'energy_smash':
-            self.processar_smash_energia(agora)
-        elif self.estado_habilidade == 'summon_brutes':
-            self.processar_invocacao(agora)
-        else:
-            super().update(delta_time, paredes)
-
-            direcao_x = self.jogador.posicao.x - self.posicao.x 
-            self.set_sprite_direction(direcao_x)
-            
-        self.animar()

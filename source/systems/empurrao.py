@@ -1,6 +1,7 @@
 """Empurrão (knockback): desloca uma entidade por alguns instantes, respeitando as paredes.
 
-`empurrar(alvo, origem, forca)`: para longe de `origem`; `forca` é quanto ele anda ao todo, em px (a
+`empurrar(alvo, origem, forca)`: para longe de `origem` (explosão, aura); `empurrar_na_direcao(alvo,
+direcao, forca)`: numa direção fixa (golpe em linha, onda de choque, corrida). `forca` é quanto ele anda ao todo, em px (a
 velocidade começa alta e cai, então o tranco é quase todo nos primeiros 200 ms). Vale para o jogador e
 para os inimigos comuns; bosses (`is_boss`) não se movem.
 
@@ -25,11 +26,20 @@ def forca_valida(forca):
 
 def empurrar(alvo, origem, forca):
     """Empurra `alvo` para longe de `origem`. Com outro empurrão ativo, vale o mais forte dos dois."""
+    _registrar(alvo, lambda: direcao_segura(origem, alvo.posicao), forca)
+
+
+def empurrar_na_direcao(alvo, direcao, forca):
+    """Empurra `alvo` na `direcao` (não precisa ser unitária). Com outro ativo, vale o mais forte."""
+    _registrar(alvo, lambda: direcao_segura((0, 0), direcao), forca)
+
+
+def _registrar(alvo, direcao, forca):
     if not forca_valida(forca):
         raise ValueError(f'força de empurrão {forca!r} (precisa ser um número > 0)')
     if getattr(alvo, 'is_boss', False) or not alvo.alive():
         return
-    velocidade = direcao_segura(origem, alvo.posicao) * (forca * DECAIMENTO)
+    velocidade = direcao() * (forca * DECAIMENTO)
     atual = _ativos.get(alvo)
     if atual is None or atual.length_squared() < velocidade.length_squared():
         _ativos[alvo] = velocidade

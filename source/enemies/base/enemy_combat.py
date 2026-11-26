@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from source.feats.effects import quebra_de_escudo
+from source.feats.particulas.quebra_escudo import quebra_de_escudo
 from source.feats.items import Items
 from source.feats.skills.invisibilidade import Invisibilidade
 from source.systems.eventos import eventos, DANO_CAUSADO

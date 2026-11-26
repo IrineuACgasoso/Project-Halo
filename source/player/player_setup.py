@@ -4,7 +4,7 @@ from source.feats.assets import ASSETS
 from source.systems.status import StatusEntidade
 from source.systems.entrada import PARADO
 from source.data.weapon_data import WEAPON_DATA
-from source.feats.effects import preparar_quebra_de_escudo
+from source.feats.particulas.quebra_escudo import preparar_quebra_de_escudo
 
 # Seta todo o init do Player
 class PlayerSetup:

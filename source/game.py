@@ -264,6 +264,11 @@ class Game:
             self._encerrar_partida()
 
 
+    def perder_partida(self):
+        """Derrota que não passa pela vida do jogador (ex.: o Halo disparou)."""
+        if self._estado == JOGANDO:
+            self._encerrar_partida()
+
     def _encerrar_partida(self):
         """Fecha a sessão (derrota ou fim da campanha) e vai para a tela final."""
         self._calcular_pontuacao_final()

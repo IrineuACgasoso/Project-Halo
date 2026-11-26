@@ -1,4 +1,4 @@
-"""Partículas sem alocação por partícula nem por frame (roteiro C3).
+"""Motor das partículas: sem alocação por partícula nem por frame (roteiro C3).
 
 A imagem base de cada (cor, tamanho, forma) é criada uma vez; o fade usa variantes da base
 com alpha quantizado em `NIVEIS_ALPHA`, também em cache. Todas as partículas vivas ficam em

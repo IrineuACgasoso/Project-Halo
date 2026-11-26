@@ -1,7 +1,8 @@
 from source.systems.gameclock import relogio
 from source.systems.dano import Dano, CONTATO
 from source.systems.eventos import eventos, DANO_CAUSADO
-from source.feats.effects import impacto_do_soco, quebra_de_escudo
+from source.feats.effects import impacto_do_soco
+from source.feats.particulas.quebra_escudo import quebra_de_escudo
 from source.systems.status import Escudo, aplicar, multiplicador_de_dano
 
 class PlayerCombat:

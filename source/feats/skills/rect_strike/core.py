@@ -5,6 +5,8 @@ de espessura. Como a artilharia e o cone, atinge quem tem a POSIÇÃO dentro da 
 import pygame
 
 from source.systems.dano import AREA, Dano, fonte_do_dono, habilidade_da
+from source.systems.empurrao import empurrar_na_direcao
+from source.systems.status import aplicar
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
@@ -27,6 +29,7 @@ class RectStrikeAviso(pygame.sprite.Sprite):
         self.fonte = fonte_do_dono(dono, fonte)   # quem causou (contrato de dano, E1)
         self.habilidade = habilidade_da(self.fonte)
         self.cfg = custom_config if custom_config is not None else RECT_STRIKE_PRESETS[preset]
+        self.preset = preset
         self.posicao = pygame.math.Vector2(posicao)
         self.direcao = direcao_segura((0, 0), direcao)
         self.tempo_criacao = relogio.agora()
@@ -81,6 +84,10 @@ class RectStrikeAviso(pygame.sprite.Sprite):
         for alvo in alvos:
             if self.contem(alvo.posicao):
                 alvo.receber_dano(Dano(self.cfg.dano, AREA, self.fonte, ignora_iframes=True, habilidade=self.habilidade))
+                if self.cfg.knockback:
+                    empurrar_na_direcao(alvo, self.direcao, self.cfg.knockback)
+                for efeito in self.cfg.efeitos:
+                    aplicar(alvo, efeito, fonte=self.fonte, chave=self.preset)
 
     # --------------------------------------------------------------- desenho
     def draw(self, surface, offset):

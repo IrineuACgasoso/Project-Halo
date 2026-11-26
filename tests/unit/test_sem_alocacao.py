@@ -5,8 +5,8 @@ import pygame
 import pytest
 
 from helpers import DT, blindar_jogador, contar_alocacoes, simular
-from source.feats import particulas
-from source.feats.effects import emitir_poeira
+from source.feats.particulas import motor as particulas
+from source.feats.particulas.poeira import emitir_poeira
 from source.systems.entitymanager import entity_manager
 from source.systems.gameclock import relogio
 from source.utils.superficies import camada_alpha

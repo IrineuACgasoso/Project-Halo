@@ -11,9 +11,10 @@ import pygame
 from source.debug import DEBUG
 from source.feats.skills.invisibilidade.distorcao import desenhar_distorcao
 from source.systems.entitymanager import entity_manager
-from source.systems.status import entidades_queimando
+from source.systems.status import entidades_lentas, entidades_queimando
 from source.systems.status.cegueira import desenhar_cegueira
-from source.systems.status.fogo import desenhar_fogo
+from source.feats.particulas.fogo import desenhar_fogo
+from source.feats.particulas.lentidao import desenhar_lentidao
 from source.utils.reducao import reduzir, superficie_do_mundo
 
 
@@ -84,6 +85,7 @@ class Renderer:
 
         self._draw_sprites(tela, deslocamento)
         self._draw_fogo(tela, deslocamento)
+        self._draw_lentidao(tela, deslocamento)
         self._draw_efeitos_inimigos(tela, deslocamento)
 
         # Cegueira (sistema de status): por cima do mundo, embaixo do HUD; vale também na pausa e no level-up
@@ -191,6 +193,14 @@ class Renderer:
                 desenhar_fogo(tela, alvo, deslocamento)
             except Exception as e:
                 self._log_erro(f'fogo:{alvo.__class__.__name__}', e)
+
+    def _draw_lentidao(self, tela, deslocamento):
+        """Corpo azulado e pés em câmera lenta de quem está com lentidão (sistema de status)."""
+        for alvo in entidades_lentas():
+            try:
+                desenhar_lentidao(tela, alvo, deslocamento)
+            except Exception as e:
+                self._log_erro(f'lentidao:{alvo.__class__.__name__}', e)
 
     def _draw_efeitos_inimigos(self, tela, deslocamento):
         """Distorção dos invisíveis, lasers e extras de inimigos (Sentinel, Scarab, Boss...)."""

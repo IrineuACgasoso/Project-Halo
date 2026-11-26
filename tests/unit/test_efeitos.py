@@ -116,3 +116,21 @@ def test_soco_solta_faiscas_e_desenha_sem_erro(novo_jogo):
     assert _particulas() > 50
     simular(novo_jogo, 0.5, desenhar_a_cada=1)
     assert not novo_jogo.renderer._erros_logados
+
+
+# ── Lentidão ─────────────────────────────────────────────────────────────────
+def test_lento_desenha_sem_mexer_na_simulacao_nem_alocar(novo_jogo):
+    from source.feats.particulas.lentidao import preparar_lentidao
+    from source.systems.status import Lentidao
+    p = novo_jogo.player
+    preparar_lentidao(q for lado in p.sprites.values() for q in lado)
+    relogio.avancar(0.1)
+    sem = _tela_com(novo_jogo)
+    aplicar(p, Lentidao(0.5, 5000))
+    estado = random.getstate()
+    assert _tela_com(novo_jogo) != sem and random.getstate() == estado
+    with contar_alocacoes() as c:
+        novo_jogo.renderer._draw_lentidao(novo_jogo.tela, novo_jogo.camera.offset)
+    assert c.total == 0, dict(c.por_tipo)
+    remover(p, Lentidao)
+    assert _tela_com(novo_jogo) == sem and not novo_jogo.renderer._erros_logados

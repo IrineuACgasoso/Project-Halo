@@ -50,13 +50,13 @@ Project-Halo/
     │   ├── eventos.py       # barramento síncrono de eventos de jogo (roteiro B4)
     │   ├── entrada.py       # ComandoJogador + FonteEntrada (Teclado, Roteiro): o jogador lê o comando, não o teclado (roteiro E3)
     │   ├── dano.py          # Dano (valor, tipo, fonte, ignora_iframes): contrato único de dano (roteiro E1)
-    │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py e fogo.py (desenho)
+    │   ├── status/          # buffs e debuffs: efeitos.py (dados validados), status.py (aplicar, StatusEntidade), cegueira.py (desenho)
     │   ├── eventmanager.py  # handlers tratar_<estado> + aplicação da escolha de upgrade
     │   ├── renderer.py      # desenhar_<estado>, blindado contra exceções; culling pela câmera (C4)
     │   ├── collision.py     # CollisionManager: projéteis, contato, itens, auras, mortes; BroadphaseInimigos (C2)
     │   ├── stagemanager.py  # fade e troca de fase/mapa; fim de campanha
     │   ├── camera.py        # offset seguindo o player + shake + zoom (definir_zoom, visao)
-    │   ├── empurrao.py      # knockback: empurrar(alvo, origem, forca), sem atravessar paredes
+    │   ├── empurrao.py      # knockback: empurrar(alvo, origem, forca) e empurrar_na_direcao(alvo, direcao, forca), sem atravessar paredes
     │   ├── spawner/         # spawner.py (ritmo/teto), spawner_pools.py (inimigos por fase),
     │   │                    # spawner_bosses.py (PHASE_BOSSES, BOSS_CLASSES, CRONOGRAMA_BOSSES)
     │   ├── mapmanager/      # Mapa = loader(.tmj) + collision(paredes) + utils(navegação) + feats(void)
@@ -73,8 +73,9 @@ Project-Halo/
     │   ├── standard/        # grunt, jackal, elite, brute, infection(flood), sentinel, crawler, soldier, watcher
     │   ├── minibosses/      # hunter (config/setup/states/attacks/vfx: rotinas geradoras), zealot (idem + movement, sobre a BossBase), knight,
     │   │                    # scarab (BossBase; config/corpo/recortes/patas/movement/armas/feixe)
-    │   └── bosses/          # guilty (BossBase; config/barreira/invocacoes/armadilha/luz_visivel), arbiter*, tartarus, gravemind, didact, warden, guardian, jega, escharum,
-    │                        # harbinger, atriox  (*arbiter: reescrita em andamento com config.py + rotinas)
+    │   └── bosses/          # guilty (BossBase; config/barreira/invocacoes/armadilha/luz_visivel), arbiter e tartarus (BossBase; config + rotinas;
+    │                        # tartarus/halo.py: Ativação do Halo), gravemind, didact, warden, guardian, jega, escharum, harbinger,
+    │                        # atriox (kit antigo do Tartarus)
     ├── feats/
     │   ├── assets.py        # ASSETS + carregar_assets(): monta as imagens do manifesto (chamado pelo main.py; import limpo, D3); MapasSobDemanda (D2)
     │   ├── weapons/         # baseweapon.py (Arma: grupos via entity_manager; ArmaDeRajada) + pastas por raridade: comum/incomum/rara/epica/lendaria
@@ -88,9 +89,10 @@ Project-Halo/
 │   │                    # artilharia/plasma.py: AvisoPlasma + ExplosaoPlasma (granada de plasma; EXPLOSAO_PLASMA_PRESETS)
 │   │                    # purge_grid/disparo.py: DisparoCaindo, o tiro do céu em cada ponto (PurgeConfig.disparo)
     │   ├── grenades.py      # GrenadeBase, Spike, PlasmaGrenade, FuelRodGrenade (gota de plasma, quique)
-    │   ├── auras.py         # EnergyAura (boss), PlayerAura (MK2)
-    │   ├── particulas.py    # Particula + emitir (teto global em entity_manager.particulas_grupo, C3)
-    │   └── effects.py       # Portal, poeira, raio de escudo, quebra de escudo, soco Spartan
+    │   ├── auras.py         # EnergyAura (boss; dano, empurrão, buffs/debuffs em quem está dentro, duração), PlayerAura (MK2)
+    │   ├── particulas/      # efeitos reaproveitados: motor (Particula, emitir, teto global, C3), poeira, quebra_escudo, fogo e lentidao
+    │   │                    # (desenho de status), energia (energia do chão, vórtice), explosao (clarão + faíscas + poeira)
+    │   └── effects.py       # Portal, raio de escudo, soco Spartan
     └── windows/             # menu/, ranking/ (ranking_data.py = persistência), settings/ (constantes de tela), colaboradores.py
 ```
 
@@ -121,7 +123,7 @@ Project-Halo/
 | Arte do Scarab (recorte novo, pata danificada, pose) | PNG em `scarab/partes/<variante>/`, nome em `PARTES_SCARAB` (`data/manifesto_assets.py`), canto em `scarab/recortes.py`, desenho em `scarab/corpo.py` |
 | Afastar a câmera (boss gigante, cena) | `game.camera.definir_zoom(alvo, ms)`; volte a 1 no `kill` de quem afastou |
 | Sprite desenhado por cima (ou por baixo) do que a posição dele manda | `y_desenho` na classe (lido por `Renderer._profundidade`) |
-| Empurrar alguém (knockback) | `knockback=<px>` no preset da artilharia, ou `empurrar(...)` de `systems/empurrao.py` |
+| Empurrar alguém (knockback) ou aplicar status no acerto | `knockback=<px>` e `efeitos=(...)` no preset da artilharia ou do rect strike, ou `empurrar`/`empurrar_na_direcao` de `systems/empurrao.py` |
 | Nova habilidade de área ou telegraph | Preset em `feats/skills/<skill>/config.py` |
 | Investida (dash) de inimigo | `feats/skills/dash/` (`Dash(inimigo, alvo, preset)`; preset em `config.py`) |
 | Salto (pulo em arco) de inimigo: não mirado, inofensivo, por cima das paredes | `feats/skills/salto/` (`Salto(inimigo, preset, alvo)`; alvo jogador/ponto/aleatório, altura, duração, recuo no preset; `cancelar()` no `finally`; `desenhar_sombra` no `draw_extras`) |
@@ -133,8 +135,11 @@ Project-Halo/
 | Efeito de item coletado | `feats/items/items.py::_aplicar_efeito` |
 | Teclas do jogador, replay ou bot | `systems/entrada.py` (`Teclado`, `Roteiro`; a fonte fica em `Game.entrada`) |
 | Cheats L/P/B (ligar/desligar, novo cheat) | Botão em `windows/menu/pause_menu.py`, estado em `Teclado.cheats` (`Game.alternar_cheats`), efeito em `player/player_input.py::executar_hacks` |
-| Fogo de quem está queimando | `systems/status/fogo.py` |
-| Quebra de escudo ou soco Spartan (visual) | `feats/effects.py` (`quebra_de_escudo`, `impacto_do_soco`); ganchos `ao_quebrar_escudo` (inimigo) e `zerar_escudo` (jogador) |
+| Fogo de quem está queimando / visual de quem está lento | `feats/particulas/fogo.py` / `feats/particulas/lentidao.py` |
+| Efeito visual reaproveitável (poeira, explosão, energia do chão, vórtice, quebra de escudo) | `feats/particulas/<efeito>.py` (motor em `motor.py`) |
+| Aura que aplica buff/debuff em quem está dentro | `EnergyAura(efeitos=(...), alvos_efeitos='jogador'|'aliados'|'todos', duracao_ms=)` (`feats/auras.py`) |
+| Balancear o Tartarus (barreira, barra de esquivas, alcances, Rampage, Fúria, Halo) | `enemies/bosses/tartarus/config.py` (danos e áreas: presets `tartarus_*` das skills) |
+| Quebra de escudo ou soco Spartan (visual) | `feats/particulas/quebra_escudo.py` e `feats/effects.py` (`impacto_do_soco`); ganchos `ao_quebrar_escudo` (inimigo) e `zerar_escudo` (jogador) |
 | Regras de dano do jogador | `player/player_combat.py::receber_dano` |
 | Buff ou debuff (aplicar, novo efeito, imunidade de boss) | `systems/status/` (`aplicar(alvo, efeito, fonte, chave)`); efeito novo = dataclass em `efeitos.py` + o cálculo em `StatusEntidade._recalcular` |
 | Regra de dano própria de um inimigo (costas, imunidade) | `ajustar_dano_recebido` na classe dele (contrato em `systems/dano.py`) |

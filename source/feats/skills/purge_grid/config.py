@@ -60,6 +60,37 @@ PURGE_PRESETS = {
     ),
 
     
+    # Tartarus (Fúria): Punho de Rukt no meio da arena. Primeiro a cruz...
+    'tartarus_rukt_cruz': PurgeConfig(
+        modo='eixos_inimigo',
+        qtd_eixos=4,
+        artilharias_por_eixo=10,
+        espacamento=150,
+        raio_artilharia=110,
+        dano=150,
+        intervalo=70,
+        duracao_aviso=650,
+        offset_angulo=0.0,
+        cor_borda=(90, 150, 255, 190),
+        cor_preenchimento=(60, 110, 255, 60),
+        cor_explosao=(210, 235, 255, 230)
+    ),
+    # ... depois as diagonais
+    'tartarus_rukt_diagonal': PurgeConfig(
+        modo='eixos_inimigo',
+        qtd_eixos=4,
+        artilharias_por_eixo=10,
+        espacamento=150,
+        raio_artilharia=110,
+        dano=150,
+        intervalo=70,
+        duracao_aviso=650,
+        offset_angulo=math.pi / 4,
+        cor_borda=(90, 150, 255, 190),
+        cor_preenchimento=(60, 110, 255, 60),
+        cor_explosao=(210, 235, 255, 230)
+    ),
+
     'grid_fechado_rapido': PurgeConfig(
         modo='grid',
         artilharias_por_eixo=8,

@@ -6,20 +6,6 @@ from source.feats import particulas
 from source.systems.entitymanager import entity_manager
 from source.utils.superficies import SUPERFICIE_VAZIA, camada_alpha
 
-DURACAO_POEIRA_MS = 255 / 400 * 1000   # o alpha caía 400/s a partir de 255
-
-
-def emitir_poeira(posicao, grupos=None):
-    """Partícula de terra/lodo que explode para os lados e para cima e some com fade.
-    Mesma sequência de sorteios da antiga DustParticle (roteiro C3: agora sem Surface própria)."""
-    tamanho = random.randint(4, 8)   # tamanho aleatório para variação visual
-    cor = random.choice([(70, 50, 30), (40, 60, 30), (100, 80, 50)])   # marrom esverdeado
-    direcao = pygame.math.Vector2(random.uniform(-1, 1), random.uniform(-2, -0.5))
-    velocidade = random.uniform(50, 150)
-    return particulas.emitir(posicao, particulas.imagem_pixel(cor, tamanho, 'circulo'),
-                             direcao * velocidade, DURACAO_POEIRA_MS, grupos)
-
-
 class Portal(pygame.sprite.Sprite):
     def __init__(self, pos, grupos):
         super().__init__(grupos)
@@ -72,43 +58,6 @@ class RaioEscudo(pygame.sprite.Sprite):
 
 
 SORTEIO = random.Random()   # só visual: não mexe na sequência da simulação
-
-
-# ── Quebra de escudo (padrão de todo escudo, do jogador e dos inimigos) ──────
-CORES_FAGULHA_AZUL = ((90, 190, 255), (40, 120, 255), (200, 240, 255))
-CORES_FAGULHA_AMARELA = ((255, 235, 120), (255, 200, 50))
-FAGULHAS_POR_PX = 0.45          # quantidade pelo tamanho do corpo
-FAGULHAS_LIMITES = (26, 70)
-MS_ENTRE_QUEBRAS = 400          # escudo que regenera um fio e cai de novo não vira uma chuva
-TAMANHOS_FAGULHA = (4, 6, 8)
-
-
-def preparar_quebra_de_escudo():
-    """Pinta já as fagulhas (no início da partida): jogador e Elites quebram escudo no meio da horda."""
-    for cor in CORES_FAGULHA_AMARELA + CORES_FAGULHA_AZUL:
-        for tamanho in TAMANHOS_FAGULHA:
-            particulas.variantes_alpha(particulas.imagem_pixel(cor, tamanho))
-
-
-def quebra_de_escudo(alvo):
-    """Fagulhas azuis e amarelas que saltam em volta do corpo de `alvo` e caem. Devolve False se a
-    última quebra dele foi há pouco (sem efeito)."""
-    agora = relogio.agora()
-    if agora < getattr(alvo, 'proxima_quebra_escudo', 0):
-        return False
-    alvo.proxima_quebra_escudo = agora + MS_ENTRE_QUEBRAS
-    corpo = getattr(alvo, 'hitbox', alvo.rect)
-    minimo, maximo = FAGULHAS_LIMITES
-    quantidade = max(minimo, min(maximo, round((corpo.width + corpo.height) * FAGULHAS_POR_PX)))
-    centro = pygame.math.Vector2(corpo.center)
-    for i in range(quantidade):
-        direcao = pygame.math.Vector2(1, 0).rotate(SORTEIO.uniform(0, 360))
-        borda = pygame.math.Vector2(direcao.x * corpo.width, direcao.y * corpo.height) * SORTEIO.uniform(0.35, 0.6)
-        velocidade = direcao * SORTEIO.uniform(60, 220) - (0, SORTEIO.uniform(40, 160))
-        cor = SORTEIO.choice(CORES_FAGULHA_AMARELA if i % 3 == 0 else CORES_FAGULHA_AZUL)
-        particulas.emitir(centro + borda, particulas.imagem_pixel(cor, SORTEIO.choice(TAMANHOS_FAGULHA)), velocidade,
-                          SORTEIO.uniform(700, 1200), y_desenho=alvo.rect.bottom + 1, gravidade=620)
-    return True
 
 
 # ── Soco Spartan (Mjolnir Punch) ─────────────────────────────────────────────

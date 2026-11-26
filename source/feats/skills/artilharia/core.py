@@ -104,11 +104,14 @@ class ArtilhariaAviso(pygame.sprite.Sprite):
 
     def _aplicar_dano_em_area(self, dano, impacto=False):
         """Aplica `dano` a todos os alvos dentro do raio, uma vez. `impacto`: é a explosão (e não um
-        tick), então vale o knockback da configuração."""
+        tick), então valem o knockback e os efeitos da configuração."""
         for alvo in self._alvos_na_area():
             alvo.receber_dano(Dano(dano, AREA, self.fonte, ignora_iframes=True, habilidade=self.habilidade))
             if impacto and self.cfg.knockback:
                 empurrar(alvo, self.posicao, self.cfg.knockback)
+            if impacto:
+                for efeito in self.cfg.efeitos:
+                    aplicar(alvo, efeito, fonte=self.fonte, chave=self.preset)
 
     def update(self, delta_time, paredes=None):
         # Se estiver grudada em um alvo (ex: Spike que acertou o jogador),

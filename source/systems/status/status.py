@@ -36,7 +36,7 @@ class _Ativo:
 class StatusEntidade:
     __slots__ = ('dono', 'eh_jogador', 'imunidades', '_ativos',
                  'mult_velocidade', 'mult_dano_causado', 'mult_dano_recebido', 'mult_cooldown',
-                 'atordoado', 'queimando', 'reducao_cura', 'raio_cegueira')
+                 'atordoado', 'queimando', 'lento', 'reducao_cura', 'raio_cegueira')
 
     def __init__(self, dono, eh_jogador=False, imunidades=frozenset()):
         self.dono = dono
@@ -87,6 +87,7 @@ class StatusEntidade:
         self.mult_cooldown = cooldown
         self.atordoado = atordoado
         self.queimando = queimando
+        self.lento = lentidao > 0
         self.reducao_cura = reducao
         self.raio_cegueira = raio
 
@@ -181,6 +182,11 @@ def atualizar_status(delta_time):
 def entidades_queimando():
     """Quem está com queimadura agora (para o desenho do fogo)."""
     return [status.dono for status in _com_efeito if status.queimando and status.dono.alive()]
+
+
+def entidades_lentas():
+    """Quem está com lentidão agora (para o desenho da lentidão)."""
+    return [status.dono for status in _com_efeito if status.lento and status.dono.alive()]
 
 
 def limpar_status():

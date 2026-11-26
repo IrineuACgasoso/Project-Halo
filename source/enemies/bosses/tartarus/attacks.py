@@ -1,158 +1,221 @@
+"""Rotinas do Tartarus (geradores: `yield` = 1 frame; todo `while` tem `yield`).
+
+Os golpes pesados do martelo terminam em `_resolver_golpe` (errou: sobrecarga e +1 na barra)."""
+from dataclasses import replace
+
 import pygame
-import math
-from source.systems.entitymanager import entity_manager
-from source.feats.skills.artilharia.core import ArtilhariaAviso
+
+from source.feats.auras import EnergyAura
+from source.feats.particulas.energia import energia_no_circulo, energia_no_retangulo, sugar_para_o_centro
+from source.feats.particulas.explosao import explosao_de_impacto, gancho_explosao
+from source.feats.skills.artilharia import ArtilhariaAviso
+from source.feats.skills.artilharia.config import ARTILHARIA_PRESETS
+from source.feats.skills.dash import DASH_PRESETS
 from source.feats.skills.purge_grid import PurgeGrid
-from source.enemies.standard.brute import Brute
+from source.feats.skills.purge_grid.config import PURGE_PRESETS
+from source.feats.skills.rect_strike import RectStrikeAviso
+from source.feats.skills.rect_strike.config import RECT_STRIKE_PRESETS
+from source.feats.skills.salto import SALTO_PRESETS, Salto
+from source.systems.entitymanager import entity_manager
+from source.systems.status import BuffVelocidade, Lentidao, aplicar
+from source.utils.vetores import direcao_segura
+
+from .config import CFG
+from .vfx import COR_VORTICE, onda_estourou, ponto_do_punho_estourou
+
+V2 = pygame.math.Vector2
+
 
 class TartarusAttacks:
-    def processar_hammer_run(self, agora, delta_time, paredes=None):
-        # 1. Move o boss baseado no vetor já calculado
-        self.posicao += self.direcao * self.velocidade * delta_time
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y))
+    # ------------------------------------------------------------------ peças
+    def _artilharia(self, preset, posicao, ao_explodir=None, duracao=None):
+        cfg = ARTILHARIA_PRESETS[preset]
+        custom = replace(cfg, duracao=int(duracao)) if duracao is not None else None
+        return ArtilhariaAviso(posicao=V2(posicao), grupos=(entity_manager.all_sprites,), game=self.game,
+                               dono=CFG.dono_skills, fonte=self, preset=preset, custom_config=custom,
+                               ao_explodir=ao_explodir)
 
-        # 2. Colisão (opcional, se quiser que ele pare em paredes)
-        if paredes:
-            self.aplicar_colisao_mapa(paredes)
+    def _grito(self, ms=None):
+        """Sub-rotina: o rugido (parado, o corpo treme, faíscas e tremor)."""
+        ms = CFG.grito_ms if ms is None else ms
+        self.grito_vfx(ms)
+        fim = self._agora + ms
+        while self._agora < fim:
+            self._parar(clip='grito')
+            yield
 
-        # 3. Checa fim da corrida
-        dist_sq = self.posicao.distance_squared_to(self.hammer_target)
-        if dist_sq <= 400 or (agora - self.hammer_start_time > self.hammer_duration_max):
-            # Finaliza o ataque
-            self.velocidade = self.velocidade_anterior
-            self.ultimo_hammer = agora
-            self.estado_habilidade = 'idle'
-            self.cooldown_hammer = self.novo_cooldown(4000, 8000)
-            self.wait = agora + 1000
-            
-            # Invoca impacto
-            ArtilhariaAviso(
-                posicao=self.posicao, 
-                grupos=(entity_manager.all_sprites,), 
-                game=self.game,
-                dono='BOSS', fonte=self,
-                preset='tartarus_run'
-            )
+    def _saltar(self, salto):
+        """Sub-rotina: o arco do salto até pousar (no ar não é mirado nem atingido)."""
+        self._salto = salto
+        try:
+            while not salto.atualizar(self._dt):
+                self._parar(salto.direcao.x, 'corrida')
+                yield
+        finally:
+            salto.cancelar()
+            self._salto = None
 
-    def checar_se_travou(self, agora, dist_sq):
-        """Verifica se o boss está preso numa parede. Se sim, força um Leaping Strike."""
-        if agora - getattr(self, 'ultimo_check_posicao', 0) > 1500:
-            pos_anterior = getattr(self, 'posicao_anterior', self.posicao)
-            dist_movida_sq = self.posicao.distance_squared_to(pos_anterior)
-            
-            # Se moveu menos de 30 pixels (900 sq) em 1.5s e NÃO está colado no player
-            if dist_movida_sq < 900 and dist_sq > 40000 and self.estado_habilidade == 'idle':
-                
-                self.iniciar_pulo(agora) # Força o salto imediatamente
-                
-                # Atualiza os trackers para não repetir o check no frame que ele pousar
-                self.ultimo_check_posicao = agora
-                self.posicao_anterior = pygame.math.Vector2(self.posicao.x, self.posicao.y)
-                return True
-            
-            # Atualiza o tracker pro próximo ciclo de 1.5s
-            self.ultimo_check_posicao = agora
-            self.posicao_anterior = pygame.math.Vector2(self.posicao.x, self.posicao.y)
-            
-        return False
-
-    def iniciar_pulo(self, agora):
-        self.estado_habilidade = 'leaping_takeoff'
-        self.tempo_pulo = agora
-        self.pulo_start_pos = self.posicao.copy()
-        self.pulo_target = self.jogador.posicao.copy()
-        self.duracao_pulo = 1200 # 1.2 segundos no ar
-        # --- DESLIGA O DANO DE CONTATO ---
-        self.is_inofensivo = True 
-        self.is_invulneravel = True
-
-    def processar_salto(self, agora, delta_time):
-        progresso = (agora - self.tempo_pulo) / self.duracao_pulo
-        
-        if progresso >= 1.0:
-            # Lógica de Pouso
-            self.estado_habilidade = 'idle'
-            self.ultimo_pulo = agora
-            self.cooldown_pulo = self.novo_cooldown(4000, 6000)
-            self.wait = agora + 800 # Tempo de recuperação do impacto
-
-            # --- LIGA O DANO DE CONTATO NOVAMENTE ---
-            self.is_inofensivo = False 
-            self.is_invulneravel = False
-            
-            # Dano no impacto
-            ArtilhariaAviso(
-                posicao=self.posicao, 
-                grupos=(entity_manager.all_sprites,), 
-                game=self.game,
-                dono='BOSS', fonte=self,
-                preset='tartarus_leap'
-                )
+    # ------------------------------------------------------------------ 1. Vórtice Gravitacional
+    def _puxar(self):
+        """Puxa o jogador que está na aura para perto dele, devagar (sem vencer a corrida dele)."""
+        para_mim = self.posicao - self.jogador.posicao
+        dist = para_mim.length()
+        if dist > CFG.vortice_raio or dist <= CFG.vortice_puxao_min:
             return
+        passo = min(CFG.vortice_puxao * self._dt, dist - CFG.vortice_puxao_min)
+        self.jogador.deslocar(para_mim / dist * passo, self._paredes)
 
-        # Movimento parabólico (interpolação)
-        self.posicao = self.pulo_start_pos.lerp(self.pulo_target, progresso)
-        
-        # Efeito visual de subida (similar ao Hunter)
-        altura = math.sin(progresso * math.pi) * 300
-        self.rect.center = (round(self.posicao.x), round(self.posicao.y - altura))
+    def rotina_vortice(self):
+        """Ergue o martelo e abre um campo roxo: lentidão alta em quem está dentro (a aura) e um puxão
+        fraco para o alcance do martelo; o círculo do golpe cresce o tempo todo e estoura no fim."""
+        yield from self._esperar(CFG.vortice_preparo_ms, clip='grito')
+        EnergyAura(owner=self, raio=CFG.vortice_raio, dano_contato=0, game=self.game, cor_base=COR_VORTICE,
+                   impenetravel=False, efeitos=(Lentidao(CFG.vortice_lentidao, CFG.vortice_lentidao_ms),),
+                   duracao_ms=CFG.vortice_ms)
+        aviso = self._artilharia(CFG.vortice_artilharia, self.posicao,
+                                 ao_explodir=gancho_explosao('vortice', shake=(9, 380)))
+        self.game.camera.shake(*CFG.vortice_shake)
+        fim = self._agora + CFG.vortice_ms
+        proximas = self._agora
+        while self._agora < fim:
+            self._parar(clip='grito')
+            self._puxar()
+            if self._agora >= proximas:
+                proximas = self._agora + CFG.vortice_particulas_ms
+                sugar_para_o_centro(self.posicao, CFG.vortice_raio, CFG.vortice_particulas)
+            yield
+        yield from self._ate_explodir(aviso)
+        self._resolver_golpe()
+        yield from self._esperar(CFG.vortice_recuperacao_ms)
+        self._fim('vortice')
 
-    def iniciar_smash_energia(self, agora):
-        self.estado_habilidade = 'energy_smash'
-        self.velocidade = 0 # Fica parado enquanto bate o martelo no chão
-        self.fase_smash = 0
-        self.tempo_proximo_smash = agora + 1000 # 0.6s de atraso para o segundo golpe
-        
-    def processar_smash_energia(self, agora):
-        if self.fase_smash == 0 and agora >= self.tempo_proximo_smash:
-            self.fase_smash = 1
-            self.tempo_proximo_smash = agora + 800 # 0.6s de atraso para a segunda onda
-            
-            # Dispara o ataque padrão
-            purge = PurgeGrid(self.game, self, preset='tartarus_smash_1')
-            purge.iniciar(agora)
+    # ------------------------------------------------------------------ 2. Esmagamento Sísmico
+    def rotina_onda(self):
+        """Martelada no chão: uma fissura gravitacional em linha (larga e comprida) por onde a energia
+        azul vaza durante o aviso e é liberada no golpe (arremessa, deixa lento, poeira, tremor)."""
+        yield from self._esperar(CFG.onda_preparo_ms, clip='grito')
+        alvo = self.ponto_antecipado(1200, CFG.onda_antecipacao)
+        direcao = direcao_segura(self.posicao, alvo, self.dir_jogador())
+        cfg = RECT_STRIKE_PRESETS[CFG.onda_preset]
+        RectStrikeAviso(V2(self.posicao), direcao, (entity_manager.all_sprites,), self.game,
+                        dono=CFG.dono_skills, preset=CFG.onda_preset, fonte=self, ao_explodir=onda_estourou)
+        energia_no_retangulo(self.posicao, direcao, cfg.altura, cfg.largura, cfg.duracao, 'gravidade')
+        yield from self._esperar(cfg.duracao + 60, olhar_x=direcao.x)
+        self._resolver_golpe()
+        yield from self._esperar(CFG.onda_recuperacao_ms, olhar_x=direcao.x)
+        self._fim('onda')
 
-        # 2. Acabou o delay da primeira onda: Dispara a SEGUNDA onda
-        elif self.fase_smash == 1 and agora >= self.tempo_proximo_smash:
-            self.fase_smash = 2
-            self.tempo_proximo_smash = agora + 800 # Tempo de recuperação antes de andar de novo
-            
-            # Dispara o ataque invertido
-            purge = PurgeGrid(self.game, self, preset='tartarus_smash_2')
-            purge.iniciar(agora)
-            
-        # 3. Finaliza o ataque e volta ao normal (IDLE)
-        elif self.fase_smash == 2 and agora >= self.tempo_proximo_smash:
-            self.ultimo_smash = agora
-            self.estado_habilidade = 'idle'
-            self.cooldown_smash = self.novo_cooldown(8000, 12000)
-            self.wait = agora + 500
+    # ------------------------------------------------------------------ 3. Salto Meteoro
+    def rotina_salto(self, preset=None, agendar=True):
+        """Salto descomunal que pousa onde o jogador VAI estar; o círculo do impacto aparece no pouso
+        na decolagem. Recuperação lenta: a melhor janela para puni-lo. Também é o anti-stuck."""
+        preset = preset or CFG.salto_preset
+        yield from self._esperar(CFG.salto_preparo_ms, clip='grito')
+        cfg = SALTO_PRESETS[preset]
+        if cfg.alvo == 'ponto':
+            velocidade = max(1.0, self.dist_jogador() / (cfg.duracao_ms / 1000))
+            salto = Salto(self, preset, alvo=self.ponto_antecipado(velocidade, CFG.salto_antecipacao, 400))
+        else:
+            salto = Salto(self, preset)
+        aviso = self._artilharia(CFG.salto_artilharia, salto.destino, duracao=cfg.duracao_ms,
+                                 ao_explodir=gancho_explosao('gravidade', shake=CFG.salto_shake))
+        yield from self._saltar(salto)
+        yield from self._ate_explodir(aviso, salto.direcao.x)
+        self._resolver_golpe()
+        yield from self._esperar(CFG.salto_recuperacao_ms, olhar_x=salto.direcao.x, clip='ofegante')
+        if agendar:
+            self._fim('salto')
 
-    def iniciar_invocacao(self, agora):
-        """Ativa o estado de invocação e imobiliza o boss."""
-        self.estado_habilidade = 'summon_brutes'
-        self.velocidade = 0  # Trava o movimento durante o rugido/canalização
-        self.tempo_inicio_summon = agora
+    def rotina_antistuck(self):
+        """Preso longe do jogador: salta por cima do que o prende e pousa em cima dele."""
+        yield from self.rotina_salto(preset=CFG.antistuck_salto, agendar=False)
+        self.wait = 200
 
-    def processar_invocacao(self, agora):
-        """Aguarda 1 segundo canalizando e spawna os Brutes nas laterais se o mapa permitir."""
-        # Checa se já passou 1 segundo de canalização
-        if agora - self.tempo_inicio_summon >= self.duracao_summon:
-            # Define os offsets (60 pixels para a direita e 60 para a esquerda)
-            offsets = [pygame.math.Vector2(60, 0), pygame.math.Vector2(-60, 0)]
-            
-            for offset in offsets:
-                pos_spawn = self.posicao + offset
-                
-                # Só spawna se a posição for válida (não estiver dentro de paredes)
-                if self.verificar_posicao_valida(pos_spawn):
-                    novo_brute = Brute(pos_spawn, game=self.game)
+    # ------------------------------------------------------------------ 4. Chieftain Rampage
+    def rotina_rampage(self):
+        """A barreira caiu: rugido e 3 marteladas avançando passo a passo (cada passo termina numa
+        explosão). Esquivou das 3: fica ofegante, parado e tomando mais dano (a maior janela da luta)."""
+        yield from self._grito()
+        acertou_algum = False
+        self.is_inofensivo = True            # o corpo não fere: quem fere são as explosões
+        try:
+            for _ in range(CFG.rampage_golpes):
+                self._acertou = False
+                yield from self._esperar(CFG.rampage_preparo_ms)
+                direcao = yield from self._dash(CFG.rampage_dash, rastro=True)
+                aviso = self._artilharia(CFG.rampage_artilharia, self.posicao,
+                                         ao_explodir=gancho_explosao('fogo', shake=CFG.rampage_shake))
+                yield from self._ate_explodir(aviso, direcao.x)
+                acertou_algum = acertou_algum or self._acertou
+                yield from self._esperar(CFG.rampage_pausa_ms, olhar_x=direcao.x)
+            self._acertou = False
+            if not acertou_algum:
+                self._ofegante_ate = self._agora + CFG.ofegante_ms
+                yield from self._esperar(CFG.ofegante_ms, clip='ofegante')
+        finally:
+            self.is_inofensivo = False
+            self._ofegante_ate = min(self._ofegante_ate, self._agora)
+        self._fim('rampage')
 
-                    entity_manager.all_sprites.add(novo_brute)
-                    entity_manager.inimigos_grupo.add(novo_brute)
+    # ------------------------------------------------------------------ Fúria (transição)
+    def rotina_transicao(self):
+        """Fúria Jiralhanae: descarta o capacete, ruge e corre muito mais (aura vermelha até o fim)."""
+        self.descartar_capacete_vfx()
+        yield from self._grito(CFG.transicao_ms)
+        aplicar(self, BuffVelocidade(CFG.furia_buff), chave=self)
+        self._furia = True
+        self.cd_brutes = self._agora + CFG.brutes_primeira_ms
+        self.wait = 200
 
-            # Finaliza a habilidade e coloca o boss em recuperação
-            self.ultimo_summon = agora
-            self.estado_habilidade = 'idle'
-            self.cooldown_invocacao = self.novo_cooldown(12000, 18000)
-            self.wait = agora + 1200  # 1.2s parado se recuperando após o esforço de invocar
+    # ------------------------------------------------------------------ 6. Punho de Rukt (Fúria)
+    def _centro_da_arena(self):
+        """O chão válido mais perto do meio do mapa."""
+        centro = V2(self.game.mapa.rect_background.center)
+        for raio in CFG.punho_raio_busca:
+            for graus in range(0, 360, 45 if raio else 360):
+                ponto = centro + V2(raio, 0).rotate(graus)
+                if self.verificar_posicao_valida(ponto):
+                    return ponto
+        return V2(self.posicao)
+
+    def _energia_do_ponto(self, posicao, cfg):
+        energia_no_circulo(posicao, cfg.raio_explosao, cfg.duracao, 'gravidade', CFG.punho_energia_densidade)
+
+    def _onda_do_punho(self, preset):
+        """Uma onda do Purge Grid com a energia vazando de cada ponto. Devolve quanto ela dura (ms)."""
+        purge = PurgeGrid(self.game, self, preset=preset, ao_criar=self._energia_do_ponto,
+                          ao_explodir=ponto_do_punho_estourou)
+        purge.iniciar(self._agora)
+        cfg = PURGE_PRESETS[preset]
+        self.game.camera.shake(*CFG.punho_shake)
+        return cfg.intervalo * (cfg.artilharias_por_eixo - 1) + 25 * (cfg.qtd_eixos - 1) + cfg.duracao_aviso
+
+    def rotina_punho(self):
+        """Salta ao meio da arena e soca o chão: a cruz e, em seguida, as diagonais."""
+        centro = self._centro_da_arena()
+        yield from self._esperar(CFG.salto_preparo_ms, clip='grito')
+        yield from self._saltar(Salto(self, CFG.punho_salto, alvo=centro))
+        explosao_de_impacto(self.posicao, 260, 'gravidade', self.game, CFG.punho_shake, faiscas=1.4)
+        self._onda_do_punho(CFG.punho_cruz)
+        yield from self._esperar(CFG.punho_intervalo_ms, clip='grito')
+        duracao = self._onda_do_punho(CFG.punho_diagonal)
+        yield from self._esperar(duracao + 80)
+        self._resolver_golpe()
+        yield from self._esperar(CFG.punho_recuperacao_ms, clip='ofegante')
+        self._fim('punho')
+
+    # ------------------------------------------------------------------ 7. Hammer Run (Fúria)
+    def rotina_corrida(self):
+        """Encara, firma os pés e dispara reto (sem corrigir a rota) até o fim do dash, com o corpo
+        ferindo; termina numa mega explosão."""
+        yield from self._esperar(CFG.corrida_preparo_ms, clip='grito')
+        direcao = self.dir_jogador()
+        cfg = DASH_PRESETS[CFG.corrida_dash]
+        alvo = self.posicao + direcao * (cfg.velocidade * cfg.duracao_ms / 1000 * 2)
+        direcao = yield from self._dash(CFG.corrida_dash, alvo=alvo, inofensivo=False, rastro=True)
+        aviso = self._artilharia(CFG.corrida_artilharia, self.posicao,
+                                 ao_explodir=gancho_explosao('furia', shake=CFG.corrida_shake, faiscas=1.6))
+        yield from self._ate_explodir(aviso, direcao.x)
+        self._resolver_golpe()
+        yield from self._esperar(CFG.corrida_recuperacao_ms, olhar_x=direcao.x)
+        self._fim('corrida')

@@ -30,4 +30,8 @@ DASH_PRESETS = {
     'arbiter_investida': DashConfig(velocidade=720, duracao_ms=800, ate_o_alvo=True),
     'arbiter_combo': DashConfig(velocidade=600, duracao_ms=750, ate_o_alvo=True),
     'arbiter_esquiva': DashConfig(velocidade=900, duracao_ms=320, ate_o_alvo=False),
+    # Tartarus: os 3 passos curtos e não muito rápidos do Chieftain Rampage...
+    'tartarus_rampage': DashConfig(velocidade=430, duracao_ms=520, ate_o_alvo=True),
+    # ... e a Hammer Run da Fúria: longa e "devagar", reta até o fim (sem trava no jogador)
+    'tartarus_corrida': DashConfig(velocidade=520, duracao_ms=1700, ate_o_alvo=False),
 }

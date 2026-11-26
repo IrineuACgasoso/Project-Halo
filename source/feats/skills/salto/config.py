@@ -38,4 +38,10 @@ SALTO_PRESETS = {
     'arbiter_investida': SaltoConfig(duracao_ms=520, altura=90, distancia=(120, 460), recuo=170),
     # Arbiter preso: mais alto, por cima da parede, e pousa exatamente onde o jogador está
     'arbiter_antistuck': SaltoConfig(duracao_ms=750, altura=150),
+    # Tartarus reformulado: o meteoro pousa onde o jogador VAI estar (o ponto é dado pela rotina)...
+    'tartarus_meteoro': SaltoConfig(duracao_ms=1100, altura=320, alvo='ponto'),
+    # ... o Punho de Rukt vai ao meio da arena...
+    'tartarus_punho': SaltoConfig(duracao_ms=1000, altura=380, alvo='ponto'),
+    # ... e o anti-stuck pula em cima do jogador
+    'tartarus_antistuck': SaltoConfig(duracao_ms=900, altura=260),
 }

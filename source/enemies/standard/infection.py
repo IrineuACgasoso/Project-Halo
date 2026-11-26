@@ -6,7 +6,7 @@ from source.enemies.base.enemy_base import BaseEnemy
 from source.windows.settings import *
 from source.feats.items import *
 from source.feats.projetil import BurstRifle
-from source.feats.effects import emitir_poeira
+from source.feats.particulas.poeira import emitir_poeira
 from source.systems.entitymanager import entity_manager
 from source.data.enemy_data import INIMIGOS
 

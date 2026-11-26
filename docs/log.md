@@ -5,14 +5,14 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 ## Pendências e bugs conhecidos
 - `xfail`: fim de campanha e morte no mesmo update pontuam em dobro (`test_sistemas`).
 - Granada e morteiro inimigos encostando no jogador dão `receber_dano(0)` (i-frames e regeneração do escudo).
-- Golpe letal do Tartarus é absorvido pelo veículo. "Invulnerável" ainda não faz parte do contrato de dano (decisão do usuário).
+- "Invulnerável" ainda não faz parte do contrato de dano (decisão do usuário). O Halo agora encerra a partida direto (`Game.perder_partida`), sem passar pelo veículo.
 - Elipse/ponto em `Colisoes` viram retângulo/degenerado. Hunter pode prender em parede. `OndaEMP.draw` sem deslocamento chama método que não existe (ramo morto).
 - Árbitro companheiro no nível 1 nunca acerta alvo parado (orbita a 64 px, golpe exige < 60).
 - Veículo é atualizado 2× por passo (hoje inofensivo). `shake` é "o último ganha".
 - Sem indicador de status no HUD. `perf_base.json` precisa ser regravado numa sessão fria.
 - Partida com cheats entra no ranking sem marca.
 - `xfail`: o atirador do Warden escolhe um ponto atrás da parede e fica preso em `reposicionando`, sem atirar (`test_sistemas`).
-- O Tartarus ainda tem o salto próprio; a skill `salto` generaliza o dele (migrar na F5).
+- Atriox e Escharum ainda usam o kit antigo do Tartarus (`atriox/setup|states|attacks.py`), fora da `BossBase`.
 - Corpo invulnerável ainda é `alvejavel`: as armas gastam tiros na consciência do Warden e na Harbinger em recarga se for o alvo mais perto.
 
 ## Decisões que valem até hoje
@@ -23,10 +23,17 @@ Entradas curtas (3 a 8 linhas), a mais recente no topo. O detalhe de cada entreg
 - Medição: só na tomada e por A/B alternado com o commit anterior (ruído de até 70%). Depois do bloco C: ~4 ms/frame nos piores casos.
 
 ## Estado do roteiro (`docs/roteiro_reformulacao.md`)
-Feitos A–E, F1 (BossBase), F2 (Animador), F3 (IA de utilidade + memória, só o Arbiter usa) e F4 (bot e métricas); Hunter, Zealot, Guilty, Scarab e Arbiter reformulados (adiantam a F5). **Próxima: F5** (migração, um commit por boss; começa por Tartarus).
+Feitos A–E, F1 (BossBase), F2 (Animador), F3 (IA de utilidade + memória, só o Arbiter usa) e F4 (bot e métricas); Hunter, Zealot, Guilty, Scarab e Arbiter reformulados (adiantam a F5). **F5 em andamento:** Tartarus migrado; próximos, um commit por boss.
 O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as lutas reformuladas, HUD/culling (C4), o executável (D3) e a pausa da troca de fase (D2).
 
 ---
+
+## 2026-11-26 | Tartarus reformulado e efeitos reaproveitáveis
+- **Tartarus na `BossBase`** (`bosses/tartarus/`, números em `config.py`): Barreira do Punho de Rukt (-90%); golpe pesado que erra sobrecarrega 3 s e soma na barra de esquivas do topo do HUD; barra cheia derruba a barreira por 9 s e dispara o Chieftain Rampage (3 dashes + explosões; esquivou dos 3: ofegante, ×1,5 de dano). IA ofensiva por alcance: vórtice (aura roxa com lentidão + puxão fraco), onda sísmica (rect largo, knockback + lentidão), salto meteoro (pouso previsto). Fúria (35%): +35% de velocidade, aura vermelha, Punho de Rukt (cruz + diagonais com energia do chão), Hammer Run e 3 Brutes fora da rotina. Nunca recua; preso, salta.
+- **Halo** (`tartarus/halo.py`): cronômetro no topo (180 s, era 120), fade branco e game over direto (`Game.perder_partida`). O kit antigo foi para o Atriox (Escharum continua com a cópia dele).
+- **Reaproveitáveis:** `feats/particulas/` virou pacote (motor, poeira, quebra_escudo, fogo, lentidão, energia do chão, explosão); lentidão desenhada para todo alvo (azulado + pés em câmera lenta); `EnergyAura(efeitos=, alvos_efeitos=, duracao_ms=)`; `empurrar_na_direcao`; `knockback`/`efeitos` em `RectStrikeConfig` e `efeitos` em `ArtilhariaConfig`; `PurgeGrid(ao_criar=, ao_explodir=)`.
+- `lutas --boss tartarus`: 37 s, 2,0 vidas/min. Desenho ~2,3 ms/frame headless, pico de 845 partículas. Suíte verde (+ test_tartarus).
+- **Não validado:** a luta na tela real (só capturas headless), áudio e balanceamento (barreira, meta 5, tempos do Halo).
 
 ## 2026-11-26 | Canhão do Hunter na paleta da Plasma Gun
 - Bola (`hunter/canhao.py`): as `PlasmaGun.CAMADAS` em degradê liso, núcleo branco que pulsa, 3 fios de plasma girando e halo aditivo (`COR_HALO`) que respira; 8 quadros pré-pintados. Rastro e sombra na mesma paleta.

@@ -1,7 +1,7 @@
 import pygame
 from source.systems.gameclock import relogio
 import random
-from source.feats.effects import emitir_poeira
+from source.feats.particulas.poeira import emitir_poeira
 from source.systems.entitymanager import entity_manager
 
 

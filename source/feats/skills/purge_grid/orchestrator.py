@@ -13,8 +13,13 @@ from .config import PURGE_PRESETS, PurgeConfig
 from .disparo import DisparoCaindo
 
 class PurgeGrid(pygame.sprite.Sprite):
-    def __init__(self, game, caster, preset='padrao', custom_config: PurgeConfig = None):
+    def __init__(self, game, caster, preset='padrao', custom_config: PurgeConfig = None,
+                 ao_criar=None, ao_explodir=None):
+        """`ao_criar(posicao, config_da_artilharia)`: chamado a cada ponto que nasce (ex.: o vfx do aviso);
+        `ao_explodir(aviso)`: repassado a cada artilharia (ex.: a explosão)."""
         super().__init__(entity_manager.all_sprites)
+        self.ao_criar = ao_criar
+        self.ao_explodir = ao_explodir
         
         self.game = game
         self.caster = caster
@@ -92,8 +97,11 @@ class PurgeGrid(pygame.sprite.Sprite):
                 game=self.game,
                 dono='BOSS',
                 fonte=self.caster, habilidade=self.habilidade,
-                custom_config=config_do_purge # Passa os dados sobreescrevendo os presets padrões da artilharia
+                custom_config=config_do_purge, # Passa os dados sobreescrevendo os presets padrões da artilharia
+                ao_explodir=self.ao_explodir,
             )
+            if self.ao_criar is not None:
+                self.ao_criar(pos, config_do_purge)
             if self.cfg.disparo:
                 DisparoCaindo(pos, agora + self.cfg.duracao_aviso, self.cfg.disparo)
             spawns_neste_frame += 1
