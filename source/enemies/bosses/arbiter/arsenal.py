@@ -195,16 +195,14 @@ class ArbiterArsenal:
 
     def _golpe_do_combo(self, tipo, posicao, direcao):
         """Solta o golpe de um dash do combo em `posicao`. Devolve quando ele estoura (ms de jogo)."""
-        if tipo == 'cruz':
-            lado = V2(-direcao.y, direcao.x)
-            self._corte(posicao, lado, CFG.combo_corte)
-            duracao = self._corte(posicao, -lado, CFG.combo_corte)
-        elif tipo == 'artilharia':
+        if tipo == 'artilharia':
             duracao = ArtilhariaAviso(posicao=V2(posicao), grupos=(entity_manager.all_sprites,),
                                       game=self.game, dono=CFG.dono_skills, fonte=self,
                                       preset=CFG.combo_artilharia).cfg.duracao
-        elif tipo == 'reverso':
-            duracao = self._lancar_cone(CFG.combo_reverso, -direcao, posicao=posicao).duracao
+        elif tipo == 'cone':
+            duracao = self._lancar_cone(CFG.combo_cone, direcao, posicao=posicao).duracao
+        elif tipo == 'linha':
+            duracao = self._corte(posicao, direcao, CFG.combo_linha)
         else:   # 'frontal'
             duracao = self._corte(posicao, direcao, CFG.combo_frontal)
         return self._agora + duracao
@@ -213,10 +211,10 @@ class ArbiterArsenal:
         """Grito, Fúria Honorável e 5 dashes até o jogador. Cada um: prepara (parado, encarando),
         investe e solta um golpe sorteado (nunca o mesmo duas vezes seguidas), e fica na pose até o
         golpe estourar antes de preparar o próximo:
-        - cruz: dois cortes para os lados, saindo do meio do caminho quando ele passa por lá;
         - artilharia: explosão onde ele parou;
-        - reverso: o cone da investida para trás (pune quem já foi para as costas);
-        - frontal: o corte do salto para a frente (pune quem recuou em linha reta).
+        - frontal: o corte largo do salto para a frente;
+        - cone: o cone da investida para a frente;
+        - linha: um corte fino e bem comprido para a frente (pune quem recuou em linha reta).
         Não fica vulnerável em nenhum deles."""
         yield from self._grito()
         self._iniciar_furia()
@@ -227,15 +225,9 @@ class ArbiterArsenal:
                 tipo = random.choice([t for t in CFG.combo_tipos if t != anterior])
                 anterior = tipo
                 yield from self._esperar(random.randint(*CFG.combo_preparo_ms), olhar_x=self.dir_jogador().x)
-                estouro = []
-                gatilho = None
-                if tipo == 'cruz':
-                    gatilho = (CFG.combo_cruz_no_caminho,
-                               lambda pos, d: estouro.append(self._golpe_do_combo('cruz', pos, d)))
-                direcao = yield from self._dash(CFG.combo_dash, gatilho=gatilho)
-                if not estouro:
-                    estouro.append(self._golpe_do_combo(tipo, self.posicao, direcao))
-                espera = max(0, estouro[0] - self._agora) + random.randint(*CFG.combo_pausa_ms)
+                direcao = yield from self._dash(CFG.combo_dash)
+                estouro = self._golpe_do_combo(tipo, self.posicao, direcao)
+                espera = max(0, estouro - self._agora) + random.randint(*CFG.combo_pausa_ms)
                 yield from self._esperar(espera, olhar_x=direcao.x)
             yield from self._esperar(CFG.combo_recuperacao_ms)
         finally:

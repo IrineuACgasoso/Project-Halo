@@ -74,8 +74,8 @@ class ArbiterConfig:
     })
     # fora da rotina (ordens dadas sem parar): (min, max) e o primeiro uso, como acima
     cooldown_fora: Dict[str, Tuple[int, int]] = field(default_factory=lambda: {
-        'bombardeio': (15000, 21000), 'invocacao': (16000, 22000)})
-    cooldown_fora_inicial: Dict[str, int] = field(default_factory=lambda: {'bombardeio': 12000, 'invocacao': 9000})
+        'bombardeio': (15000, 21000), 'invocacao': (9000, 13000)})
+    cooldown_fora_inicial: Dict[str, int] = field(default_factory=lambda: {'bombardeio': 12000, 'invocacao': 5000})
 
     # --- movimento / postura ---
     dist_min: float = 260                # neutro: abaixo disso ele recua...
@@ -116,7 +116,7 @@ class ArbiterConfig:
     carabina_intervalo: int = 85
     carabina_dano: int = 15
     carabina_vel_proj: int = 560
-    carabina_tamanho: int = 40           # px (o Elite usa 32)
+    carabina_tamanho: int = 56           # px (o Elite usa 32)
     carabina_spread: float = 0.03
     carabina_antecipacao: float = 0.55
     carabina_rastreio: float = 0.15      # 0..1: quanto a rajada "puxa" pro jogador a cada tiro
@@ -151,8 +151,8 @@ class ArbiterConfig:
     investida_cone_min_ms: int = 320     # o cone nunca carrega mais rápido que isto
     investida_cone_folga_ms: int = 60    # estoura um instante depois de ele chegar
     investida_stun_ms: int = 1300        # atordoado depois do golpe...
-    costas_graus: float = 65             # ...com as costas (meia-abertura em volta de -direção) expostas
-    costas_mult: float = 2.0             # dano pelas costas enquanto atordoado
+    costas_graus: float = 75             # ...com as costas (meia-abertura em volta de -direção) expostas
+    costas_mult: float = 2.5             # dano pelas costas enquanto atordoado
 
     # --- Salto curto com investida frontal (também o anti-stuck) ---
     salto_preparo_ms: int = 220
@@ -162,9 +162,9 @@ class ArbiterConfig:
 
     # --- Golpe fantasma (emboscada camuflada) ---
     emboscada_preset: str = 'arbiter_furtivo'
-    emboscada_mult_vel: float = 4.0
+    emboscada_mult_vel: float = 3.0
     emboscada_dist: float = 205          # dist. p/ cortar o sprint e dar o golpe de espada
-    flanco_raio: Tuple[float, float] = (420, 600)
+    flanco_raio: Tuple[float, float] = (580, 720)
     flanco_angulo: Tuple[float, float] = (100, 160)   # graus a partir da direção jogador -> Arbiter
     flanco_tentativas: int = 30
 
@@ -176,7 +176,7 @@ class ArbiterConfig:
     esquiva_spray_chance: float = 0.45
     esquiva_preset: str = 'arbiter_esquiva'
     spray_tiros: int = 14
-    spray_intervalo: int = 45
+    spray_intervalo: int = 50
     spray_dano: int = 15
     spray_spread: float = 0.1
     spray_saida_ms: int = 350            # ainda invisível depois do spray
@@ -185,16 +185,15 @@ class ArbiterConfig:
     grito_ms: int = 750
     combo_dashes: int = 5
     combo_dash: str = 'arbiter_combo'
-    combo_tipos: Tuple[str, ...] = ('cruz', 'artilharia', 'reverso', 'frontal')
+    combo_tipos: Tuple[str, ...] = ('artilharia', 'frontal', 'cone', 'linha')
     combo_preparo_ms: Tuple[int, int] = (220, 320)   # parado, encarando, antes de cada dash
     combo_pausa_ms: Tuple[int, int] = (120, 220)     # depois que o golpe do dash estoura
-    combo_cruz_no_caminho: float = 0.5   # a cruz sai quando ele passa por esta fração do caminho
-    combo_corte: str = 'arbiter_combo_corte'
     combo_artilharia: str = 'arbiter_combo_artilharia'
-    combo_reverso: str = 'arbiter_investida'          # cone da investida, para trás
     combo_frontal: str = 'arbiter_investida_frontal'  # corte do salto, para a frente
+    combo_cone: str = 'arbiter_investida'             # cone da investida, para a frente
+    combo_linha: str = 'arbiter_combo_linha'          # corte fino e comprido, para a frente
     combo_recuperacao_ms: int = 500
-    furia_buff: float = 0.45             # Fúria Honorável: +45% de velocidade do grito até...
+    furia_buff: float = 0.30             # Fúria Honorável: +30% de velocidade do grito até...
     furia_ms: int = 2500                 # ...tanto depois do fim do combo
 
     # --- Fora da rotina ---
@@ -239,7 +238,7 @@ class ArbiterConfig:
             raise ValueError('ArbiterConfig: cada cooldown precisa do seu primeiro uso (e vice-versa)')
         if not self.limiar_avanco < self.limiar_recuo:
             raise ValueError('ArbiterConfig: limiar_avanco precisa ser menor que limiar_recuo')
-        if len(self.combo_tipos) < 2 or not set(self.combo_tipos) <= {'cruz', 'artilharia', 'reverso', 'frontal'}:
+        if len(self.combo_tipos) < 2 or not set(self.combo_tipos) <= {'artilharia', 'frontal', 'cone', 'linha'}:
             raise ValueError(f'ArbiterConfig: combo_tipos desconhecidos: {self.combo_tipos!r}')
 
     @property

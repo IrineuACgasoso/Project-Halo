@@ -86,23 +86,15 @@ class ArbiterMovement:
             perp = -perp
         self._ir(perp, fator)
 
-    def _dash(self, preset, alvo=None, gatilho=None):
+    def _dash(self, preset, alvo=None):
         """Sub-rotina: investida até `alvo` (padrão: onde o jogador está agora). Devolve a direção.
         Inofensivo no caminho: quem fere é a espada que vem junto ou no fim (o corpo de 250 px
-        encostaria em quem desviou por pouco). `gatilho` = (fração, função): chama `função(posição,
-        direção)` uma vez, quando ele passa por essa fração do caminho (ou no fim, se parou antes)."""
+        encostaria em quem desviou por pouco)."""
         dash = Dash(self, self.jogador.posicao if alvo is None else alvo, preset=preset)
-        inicio = V2(self.posicao)
-        caminho = (dash.alvo - inicio).dot(dash.direcao)
         antes, self.is_inofensivo = self.is_inofensivo, True
         try:
             while True:
-                acabou = dash.atualizar(self._dt, self._paredes)
-                if gatilho is not None and (acabou or (self.posicao - inicio).dot(dash.direcao)
-                                            >= gatilho[0] * caminho):
-                    gatilho[1](V2(self.posicao), V2(dash.direcao))
-                    gatilho = None
-                if acabou:
+                if dash.atualizar(self._dt, self._paredes):
                     break
                 self.velocidade = 0
                 self._olhar_x = dash.direcao.x

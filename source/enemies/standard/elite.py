@@ -52,7 +52,7 @@ class EliteBase(BaseEnemy):
             jogador=self.jogador,
             game=self.game,
             dono = 'INIMIGO', fonte=self,
-            tamanho=(32, 32), 
+            tamanho=(42, 42), 
             dano=10,
             velocidade=600,
             direcao_spread=direcao_tiro

@@ -84,8 +84,8 @@ CONE_STRIKE_PRESETS = {
     # Espada de energia: curtissimo alcance, arco aberto, telegraph rapido.
     'arbiter_energy_sword': ConeStrikeConfig(
         dano=120,
-        raio=230,
-        angulo_spray=100,
+        raio=250,
+        angulo_spray=120,
         duracao=450,
         cor_borda=(90, 190, 255, 225),
         cor_preenchimento=(40, 120, 255, 90),
@@ -107,8 +107,8 @@ CONE_STRIKE_PRESETS = {
     # Também o cone para trás de um dos dashes do combo da quebra de escudo (aí com esta duração).
     'arbiter_investida': ConeStrikeConfig(
         dano=150,
-        raio=240,
-        angulo_spray=110,
+        raio=260,
+        angulo_spray=150,
         duracao=450,
         cor_borda=(90, 190, 255, 225),
         cor_preenchimento=(40, 120, 255, 90),

@@ -28,6 +28,11 @@ O Hunter ainda não está na `BossBase`. **Não validado na tela real:** as luta
 
 ---
 
+## 2026-11-25 | Arbiter: combo só para a frente e invocação mais frequente
+- **Combo:** golpes `artilharia`, `frontal` (corte largo do salto), `cone` (o da investida, agora para a frente) e `linha` (`arbiter_combo_linha`, 60×800 px, para a frente). Cone para trás e cruz saíram; todos saem onde o dash termina (o `gatilho` de meio de caminho do `_dash` foi removido).
+- **Invocação de Elites:** cooldown 16–22 s → 9–13 s, primeira aos 5 s (era 9 s).
+- Balanceamento do usuário mantido (espada 250/120°, cone da investida 260/150°, costas 75°/2,5×, emboscada, flanco, spray, Fúria +30%, tiro do Elite 42 px). Goldens do Arbiter e da fase 0 regravados (o tiro maior do Elite muda as colisões). 749 verdes + 2 xfail.
+
 ## 2026-11-25 | Arbiter: combo cadenciado, recuo com escolta e VFX de plasma
 - **Combo:** sem o dash "simples"; os 4 golpes são artilharia, cone para trás (agora o da investida, `arbiter_combo_reverso` saiu), cruz e o corte frontal do salto, sem repetir o anterior. Cada dash prepara (220–320 ms), a cruz sai quando ele passa pelo meio do caminho e ele fica na pose até o golpe estourar.
 - **Dashes mais lentos** (alcance mantido): combo 600 (~870 com a Fúria), investida 720, esquiva 900.

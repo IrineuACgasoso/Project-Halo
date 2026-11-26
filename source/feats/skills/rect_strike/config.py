@@ -53,11 +53,11 @@ RECT_STRIKE_PRESETS = {
         cor_explosao=(210, 245, 255, 240)
     ),
 
-    # Combo da quebra de escudo: dois cortes finos e compridos para os lados do caminho do dash.
-    'arbiter_combo_corte': RectStrikeConfig(
+    # Combo da quebra de escudo: um corte fino e bem comprido para a frente do dash.
+    'arbiter_combo_linha': RectStrikeConfig(
         dano=130,
-        largura=90,
-        altura=480,
+        largura=60,
+        altura=800,
         duracao=450,
         cor_fundo=(150, 215, 255, 60),
         cor_borda=(10, 60, 150, 230),
